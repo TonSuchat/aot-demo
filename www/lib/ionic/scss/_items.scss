@@ -516,6 +516,23 @@ button.item.item-button-right {
 }
 
 
+.item-avatar-newline,
+.item-avatar-newline .item-content {
+  min-height: $item-avatar-width + ($item-padding * 2);
+
+  > img:first-child,
+  .item-image {
+    position: relative;
+    display: block;
+    max-width: $item-avatar-width * 2;
+    max-height: $item-avatar-height * 2;
+    width: 100%;
+    height: 100%;
+    border-radius: $item-avatar-border-radius;
+  }
+}
+
+
 
 
 

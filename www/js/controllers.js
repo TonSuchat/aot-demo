@@ -75,6 +75,8 @@ angular.module('starter')
 })
 .controller('InfoCtrl', function($scope, $stateParams) {
 })
+.controller('ProfileCtrl', function($scope, $stateParams) {
+})
 .controller('FinanceCtrl', function($scope, $stateParams) {
 })
 .controller('HrCtrl', function($scope, $stateParams) {

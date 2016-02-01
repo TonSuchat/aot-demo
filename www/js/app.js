@@ -114,10 +114,28 @@ angular.module('starter', ['ionic'])
               }
             }
           })
+          .state('app.info.medical', {
+            url: '/medical',
+            views: {
+              'hr': {
+                templateUrl: 'templates/medical.html',
+                controller: 'MedicalCtrl'
+              }
+            }
+          })
+          .state('app.info.fuel', {
+            url: '/fuel',
+            views: {
+              'hr': {
+                templateUrl: 'templates/fuel.html',
+                controller: 'FuelCtrl'
+              }
+            }
+          })
           .state('app.profile', {
             url: '/profile',
             views: {
-              'hr': {
+              'menuContent': {
                 templateUrl: 'templates/profile.html',
                 controller: 'ProfileCtrl'
               }
