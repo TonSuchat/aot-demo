@@ -49,6 +49,7 @@ angular.module('starter', ['ionic'])
 
           .state('app.home', {
             url: '/home',
+              abstract: true,
             views: {
               'menuContent': {
                 templateUrl: 'templates/home.html'
@@ -80,13 +81,14 @@ angular.module('starter', ['ionic'])
             views: {
               'circular-letter': {
                 templateUrl: 'templates/circular-letter.html',
-                contrioller:'CircularLetterCtrl'
+                controller:'CircularLetterCtrl'
               }
             }
           })
 
           .state('app.info', {
             url: '/information',
+              abstract: true,
             views: {
               'menuContent': {
                 templateUrl: 'templates/information.html',
@@ -122,5 +124,5 @@ angular.module('starter', ['ionic'])
             }
           });
       // if none of the above states are matched, use this as the fallback
-      $urlRouterProvider.otherwise('/app/home');
+      $urlRouterProvider.otherwise('/app/home/news-feed');
     });
