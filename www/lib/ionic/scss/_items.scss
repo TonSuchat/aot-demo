@@ -498,6 +498,27 @@ button.item.item-button-right {
 }
 
 
+// New component
+.item-avatar-center,
+.item-avatar-center .item-content {
+  min-height: $item-avatar-width + ($item-padding * 2);
+
+  > img:first-child,
+  .item-image {
+    margin: 10px auto;
+    max-width: $item-avatar-width;
+    max-height: $item-avatar-height;
+    width: 100%;
+    height: 100%;
+    border-radius: $item-avatar-border-radius;
+    display:block;
+  }
+}
+
+
+
+
+
 // Item Thumbnails
 // -------------------------------
 
