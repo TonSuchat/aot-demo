@@ -114,6 +114,15 @@ angular.module('starter', ['ionic'])
               }
             }
           })
+          .state('app.profile', {
+            url: '/profile',
+            views: {
+              'hr': {
+                templateUrl: 'templates/profile.html',
+                controller: 'ProfileCtrl'
+              }
+            }
+          })
 
           .state('app.directory', {
             url: '/directory',
