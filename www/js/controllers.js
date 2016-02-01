@@ -68,6 +68,9 @@ angular.module('starter')
 
 .controller('NewsFeedCtrl', function($scope, $stateParams) {
 })
+.controller('NewsCtrl', function($scope, $stateParams) {
+  console.log('news click');
+})
 .controller('CircularLetterCtrl', function($scope, $stateParams) {
 })
 .controller('InfoCtrl', function($scope, $stateParams) {

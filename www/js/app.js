@@ -65,11 +65,12 @@ angular.module('starter', ['ionic'])
             }
           })
 
-          .state('app.home.news-feed.news', {
-            url: '/news/:news-id',
+          .state('app.home.news', {
+            url: '/news',
             views: {
               'news-feed': {
-                templateUrl: 'templates/news.html'
+                templateUrl: 'templates/news.html',
+                  controller: 'NewsCtrl'
               }
             }
           })
