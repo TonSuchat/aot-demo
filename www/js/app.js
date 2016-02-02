@@ -4,7 +4,7 @@
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic'])
+angular.module('starter', ['ionic','directory'])
 
     .run(function($ionicPlatform) {
       $ionicPlatform.ready(function() {
@@ -114,19 +114,46 @@ angular.module('starter', ['ionic'])
               }
             }
           })
+          .state('app.info.time', {
+            url: '/time',
+            views: {
+              'hr': {
+                templateUrl: 'templates/time.html',
+                controller: 'TimeCtrl'
+              }
+            }
+          })
+          .state('app.info.leave', {
+            url: '/leave',
+            views: {
+              'hr': {
+                templateUrl: 'templates/leave.html',
+                controller: 'LeaveCtrl'
+              }
+            }
+          })
           .state('app.info.medical', {
             url: '/medical',
             views: {
-              'hr': {
+              'finance': {
                 templateUrl: 'templates/medical.html',
                 controller: 'MedicalCtrl'
+              }
+            }
+          })
+          .state('app.info.medical-detail', {
+            url: '/medical-detail',
+            views: {
+              'finance': {
+                templateUrl: 'templates/medical-detail.html',
+                controller: 'MedicalDetailCtrl'
               }
             }
           })
           .state('app.info.fuel', {
             url: '/fuel',
             views: {
-              'hr': {
+              'finance': {
                 templateUrl: 'templates/fuel.html',
                 controller: 'FuelCtrl'
               }
@@ -146,7 +173,8 @@ angular.module('starter', ['ionic'])
             url: '/directory',
             views: {
               'menuContent': {
-                templateUrl: 'templates/directory.html'
+                templateUrl: 'templates/directory.html',
+                  controller:'DirectoryCtrl'
               }
             }
           });

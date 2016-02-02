@@ -75,6 +75,17 @@ angular.module('starter')
 })
 .controller('InfoCtrl', function($scope, $stateParams) {
 })
+.controller('TimeCtrl', function($scope, $stateParams) {
+})
+.controller('LeaveCtrl', function($scope, $stateParams) {
+})
+.controller('MedicalCtrl', function($scope, $stateParams) {
+})
+.controller('MedicalDetailCtrl', function($scope, $stateParams) {
+  console.log('med detail');
+})
+.controller('FuelCtrl', function($scope, $stateParams) {
+})
 .controller('ProfileCtrl', function($scope, $stateParams) {
 })
 .controller('FinanceCtrl', function($scope, $stateParams) {
