@@ -1,8 +1,25 @@
-angular.module('directory', [])
+angular.module('starter')
     .factory('shareData', function(){
         // I know this doesn't work, but what will?
         var directoryList = {};
         return directoryList;
+    })
+
+
+
+
+
+    .config(function($stateProvider) {
+        $stateProvider
+            .state('app.directory', {
+                url: '/directory',
+                views: {
+                    'menuContent': {
+                        templateUrl: 'templates/directory/directory.html',
+                        controller: 'DirectoryCtrl'
+                    }
+                }
+            });
     })
     .controller('DirectoryCtrl',function($scope,shareData){
         //$scope.searchData =  {};

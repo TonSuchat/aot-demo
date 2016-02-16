@@ -4,7 +4,7 @@
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic','directory'])
+angular.module('starter', ['ionic'])
 
     .run(function($ionicPlatform) {
       $ionicPlatform.ready(function() {
@@ -60,7 +60,7 @@ angular.module('starter', ['ionic','directory'])
             url: '/news-feed',
             views: {
               'news-feed': {
-                templateUrl: 'templates/news-feed.html',
+                templateUrl: 'templates/news/news-feed.html',
                 controller: 'NewsFeedCtrl'
               }
             }
@@ -70,7 +70,7 @@ angular.module('starter', ['ionic','directory'])
             url: '/news',
             views: {
               'news-feed': {
-                templateUrl: 'templates/news.html',
+                templateUrl: 'templates/news/news.html',
                   controller: 'NewsCtrl'
               }
             }
@@ -80,85 +80,12 @@ angular.module('starter', ['ionic','directory'])
             url: '/circular-letter',
             views: {
               'circular-letter': {
-                templateUrl: 'templates/circular-letter.html',
+                templateUrl: 'templates/news/circular-letter.html',
                 controller:'CircularLetterCtrl'
               }
             }
           })
 
-          .state('app.info', {
-            url: '/information',
-              abstract: true,
-            views: {
-              'menuContent': {
-                templateUrl: 'templates/information.html',
-                controller: 'InfoCtrl'
-              }
-            }
-          })
-          .state('app.info.finance', {
-            url: '/finance',
-            views: {
-              'finance': {
-                templateUrl: 'templates/finance.html',
-                controller: 'FinanceCtrl'
-              }
-            }
-          })
-          .state('app.info.hr', {
-            url: '/hr',
-            views: {
-              'hr': {
-                templateUrl: 'templates/hr.html',
-                controller: 'HrCtrl'
-              }
-            }
-          })
-          .state('app.info.time', {
-            url: '/time',
-            views: {
-              'hr': {
-                templateUrl: 'templates/time.html',
-                controller: 'TimeCtrl'
-              }
-            }
-          })
-          .state('app.info.leave', {
-            url: '/leave',
-            views: {
-              'hr': {
-                templateUrl: 'templates/leave.html',
-                controller: 'LeaveCtrl'
-              }
-            }
-          })
-          .state('app.info.medical', {
-            url: '/medical',
-            views: {
-              'finance': {
-                templateUrl: 'templates/medical.html',
-                controller: 'MedicalCtrl'
-              }
-            }
-          })
-          .state('app.info.medical-detail', {
-            url: '/medical-detail',
-            views: {
-              'finance': {
-                templateUrl: 'templates/medical-detail.html',
-                controller: 'MedicalDetailCtrl'
-              }
-            }
-          })
-          .state('app.info.fuel', {
-            url: '/fuel',
-            views: {
-              'finance': {
-                templateUrl: 'templates/fuel.html',
-                controller: 'FuelCtrl'
-              }
-            }
-          })
           .state('app.profile', {
             url: '/profile',
             views: {
@@ -168,16 +95,7 @@ angular.module('starter', ['ionic','directory'])
               }
             }
           })
-
-          .state('app.directory', {
-            url: '/directory',
-            views: {
-              'menuContent': {
-                templateUrl: 'templates/directory.html',
-                  controller:'DirectoryCtrl'
-              }
-            }
-          });
+;
       // if none of the above states are matched, use this as the fallback
       $urlRouterProvider.otherwise('/app/home/news-feed');
     });

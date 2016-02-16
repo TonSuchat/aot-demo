@@ -1,0 +1,22 @@
+
+<ion-view view-title="Directory">
+
+    <ion-content>
+        <div class="bar bar-header item-input-inset">
+            <label class="item-input-wrapper">
+                <i class="icon ion-ios-search placeholder-icon"></i>
+                <form ng-submit="searchEnter()">
+                    <input type="search" placeholder="Search" ng-model="searchData.keyword">
+                </form>
+            </label>
+        </div>
+        <ion-list>
+            <ion-item ng-repeat="people in directoryList" class="item-thumbnail-left"  href="#/app/person/{{people.id}}">
+                <img ng-src="http://{{people.PictureThumb}}" alt="">
+                <h2>{{people.Firstname}}</h2>
+                <h3>{{people.Position}}</h3>
+                <p>{{people.Section}} {{people.Department}}</p>
+            </ion-item>
+        </ion-list>
+    </ion-content>
+</ion-view>
