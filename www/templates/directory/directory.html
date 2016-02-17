@@ -1,19 +1,32 @@
 
-<ion-view view-title="Directory">
+<ion-view view-title="สมุดโทรศัพท์">
 
     <ion-content>
+    <form ng-submit="searchEnter()">
         <div class="bar bar-header item-input-inset">
             <label class="item-input-wrapper">
                 <i class="icon ion-ios-search placeholder-icon"></i>
-                <form ng-submit="searchEnter()">
-                    <input type="search" placeholder="Search" ng-model="searchData.keyword">
-                </form>
+                    <input type="search" placeholder="ค้นหาเบอร์โทรศัพท์" ng-model="searchData.keyword">
             </label>
         </div>
+        <div class='row'>
+            <div class='col'>
+                <h4 style='color:gray;'>ต้องพิมพ์อย่างน้อย 2 ตัวอักษร</h4>
+            </div>
+        </div>
+        <div class='row'>
+            <div class='col'>
+                <button type='submit' class='button button-positive'>
+                    <i class='icon ion-search'></i>
+                    ค้นหา
+                </button>
+            </div>
+        </div>
+    </form>
         <ion-list>
             <ion-item ng-repeat="people in directoryList" class="item-thumbnail-left"  href="#/app/person/{{people.id}}">
                 <img ng-src="http://{{people.PictureThumb}}" alt="">
-                <h2>{{people.Firstname}}</h2>
+                <h2>{{people.Firstname}} {{ people.Nickname != null ? '(' + people.Nickname + ')' : ''}}</h2>
                 <h3>{{people.Position}}</h3>
                 <p>{{people.Section}} {{people.Department}}</p>
             </ion-item>
