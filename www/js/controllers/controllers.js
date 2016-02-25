@@ -1,6 +1,6 @@
 angular.module('starter')
 
-    .controller('AppCtrl', function($scope, $ionicModal, $timeout, AuthService, $ionicPopup) {
+    .controller('AppCtrl', function($scope, $ionicModal, $timeout, AuthService, $ionicPopup,$location) {
 
       // With the new view caching in Ionic, Controllers are only called
       // when they are recreated or on app start, instead of every page change.
@@ -15,6 +15,8 @@ angular.module('starter')
         $scope.loginData = {};
         $scope.isAuthen = AuthService.isAuthenticated();
         $scope.fullname = AuthService.fullname();
+        $scope.userPicturethumb = AuthService.picThumb();
+        $scope.userPosition = AuthService.position();
 
       }
       // Create the login modal that we will use later
@@ -32,7 +34,7 @@ angular.module('starter')
       // Open the login modal
       $scope.login = function() {
         $scope.modal.show();
-        console.log(AuthService.isAuthenticated());
+        //console.log(AuthService.isAuthenticated());
       };
 
       // Perform the login action when the user submits the login form
@@ -40,8 +42,8 @@ angular.module('starter')
         AuthService.login($scope.loginData.username, $scope.loginData.password).then(function() {
           //$state.go('app.home', {}, {reload: true});
           //$scope.setCurrentUsername(data.username);
-          console.log(AuthService.isAuthenticated());
-          console.log(AuthService.fullname());
+          //console.log(AuthService.isAuthenticated());
+          //console.log(AuthService.fullname());
           checkAuthen();
 
           $scope.closeLogin();
@@ -58,11 +60,11 @@ angular.module('starter')
         //});
       };
       $scope.logout = function () {
-
         AuthService.logout();
-
         checkAuthen();
-      }
+        $location.path('/news-feed');
+      };
+
       checkAuthen();
     })
 

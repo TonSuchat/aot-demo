@@ -18,15 +18,11 @@
     </ion-header-bar>
     <ion-content>
       <ion-list>
-        <ion-item class="item-stable item-avatar-newline" ng-show="isAuthen" menu-close href="#/app/profile">
-        <img src="../img/484134.png" alt="Profile Picture">
-
-
+        <ion-item class="item-stable item-avatar-newline item-text-wrap" ng-show="isAuthen" menu-close href="#/app/profile">
+        <!-- <img src="../img/484134.png" alt="Profile Picture"> -->
+        <img src="{{'http://' + userPicturethumb}}" alt="Profile Picture">
           <h2>{{fullname}}</h2>
-          <p>จทส.วรค.5 สสน.ฝรส.</p>
-
-
-
+          <p>{{userPosition}}</p>
         </ion-item>
         <ion-item class="item-icon-left" menu-close href="#/app/home/news-feed">
           <i class="icon ion-clipboard"></i> ข่าวสาร ทอท.

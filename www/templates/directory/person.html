@@ -1,0 +1,28 @@
+<ion-view view-title="ข้อมูลส่วนตัว">
+	<ion-content>
+
+    	<div class='row'>
+    		<div class='col text-center'>
+               <img src="http://eservice2.airportthai.co.th/getimage.aspx?empID1={{currentPerson.personId}}&empID2={{currentUserName}}" />
+    		</div>
+    	</div>
+
+    	<div class='row'>
+    		<div class='col text-center item-text-wrap'>
+    			<h3>{{currentPerson.personDetails.FullName}}</h3>
+	      		<h4>{{currentPerson.personDetails.Position}}</h4>
+                <h4>{{currentPerson.personDetails.Department}}</h4>
+    		</div>
+    	</div>
+
+        <div class="card">
+            <a ng-class-odd="'item item-divider item-text-wrap'" ng-class-even="'item item-text-wrap'" ng-repeat="contact in currentPerson.contacts" href="{{contact.href}}">
+                {{contact.ContactKey + ' : ' + contact.ContactValue}}
+                <p class='item-icon-right'>
+                    <i class='icon {{contact.rowIcon}}'></i>
+                </p>
+            </a>
+        </div>
+        
+	</ion-content>
+</ion-view>

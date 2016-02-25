@@ -35,6 +35,12 @@ angular.module('starter', ['ionic'])
             }
         })
     })
+    .run(function($ionicPlatform,AUTH_EVENTS,APIService,$http){
+      $ionicPlatform.ready(function(){
+        //call login api
+        LogInAPI(AUTH_EVENTS,APIService,$http);
+      });
+    })
 
 
     .config(function($stateProvider, $urlRouterProvider) {
@@ -94,8 +100,24 @@ angular.module('starter', ['ionic'])
                 controller: 'ProfileCtrl'
               }
             }
-          })
-;
+          });
       // if none of the above states are matched, use this as the fallback
       $urlRouterProvider.otherwise('/app/home/news-feed');
     });
+
+function LogInAPI(AUTH_EVENTS,APIService,$http){
+  var data = {grant_type:'password',username:'epayment@airportthai.co.th',password:'aotP@ssw0rd'};
+  var url = APIService.hostname() + '/Token';
+  APIService.httpPost(url,data,
+    function(response){
+      var result = angular.fromJson(response.data);
+      //get token_type("bearer") + one white space and token
+      var token = result.token_type + ' ' + result.access_token;
+      window.localStorage.setItem(AUTH_EVENTS.LOCAL_TOKEN_KEY, token);
+      //set header
+      //$http.defaults.headers.common['Authorization'] = token;
+      //console.log(token);
+    },
+    function(response){console.log(response);});
+};
+
