@@ -1,5 +1,5 @@
 //variable for storage data for used between Directory and Person controller
-var sharePersonData = {};
+var sharePersonData = [];
 var prefixData = [
     { prefixkey: 'officetel', prefixvalue: 'เบอร์สำนักงาน' , prefixType:'tel' },
     { prefixkey: 'officefax', prefixvalue: 'เบอร์ Fax' , prefixType:'tel' },
