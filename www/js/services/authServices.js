@@ -1,6 +1,6 @@
 angular.module('starter')
 
-    .service('AuthService', function($q, $http,AUTH_EVENTS,APIService) {
+    .service('AuthService', function($q, $http,AUTH_EVENTS,APIService,UserProfileSQLite) {
         //var LOCAL_TOKEN_KEY = 'yourTokenKey';
         var username = '';
         var isAuthenticated = false;
@@ -38,10 +38,12 @@ angular.module('starter')
             var data = {keyword:username,start:1,retrieve:1};
             APIService.httpPost(url,data,
                 function(response){
-                    var result = response.data;
+                    var result = response.data[0];
                     isAuthenticated = true;
-                    fullname = result[0].PrefixName + ' ' + result[0].Firstname + ' ' + result[0].Lastname;
-                    picThumb = result[0].PictureThumb; position = result[0].Position;
+                    fullname = result.PrefixName + ' ' + result.Firstname + ' ' + result.Lastname;
+                    picThumb = result.PictureThumb; position = result.Position;
+                    //save user data to sqlite db
+                    UserProfileSQLite.SaveUserProfile(result);
                     successAction();
                 },
                 function(){});

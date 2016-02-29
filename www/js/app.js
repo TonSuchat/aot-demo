@@ -4,7 +4,7 @@
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic'])
+angular.module('starter', ['ionic','ngCordova'])
 
     .run(function($ionicPlatform) {
       $ionicPlatform.ready(function() {
@@ -39,6 +39,34 @@ angular.module('starter', ['ionic'])
       $ionicPlatform.ready(function(){
         //call login api
         LogInAPI(AUTH_EVENTS,APIService,$http);
+      });
+    })
+    .run(function($ionicPlatform,SQLiteService,UserProfileSQLite){
+      $ionicPlatform.ready(function(){
+        //open db
+        SQLiteService.OpenDB();
+        //initial all tables
+        SQLiteService.InitailTables();
+
+        // SQLiteService.ExecuteData('INSERT INTO people (firstname, lastname,deleted,dirty,ts) VALUES (?,?,?,?,?)',['my-firstname2','my-lastname2',true,false,'23/02/2016 03:23:00'],
+        // function(response){
+        //   console.log(response.rows);
+        // },
+        // function(error){console.log(error);});
+
+        // SQLiteService.ExecuteData('select * from userprofile',null,
+        //   function(response){
+        //     //console.log(response);
+        //     console.log(response.rows[0]);
+        //   },
+        //   function(error){console.log(error);});
+
+        SQLiteService.Execute("select * from medical",null).then(
+          function(response){
+          console.log(response);
+        },function(){});
+
+        //UserProfileSQLite.GetLatestTS().then(function(resp){console.log(resp);});
       });
     })
 

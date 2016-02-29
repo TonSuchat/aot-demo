@@ -1,15 +1,18 @@
 <ion-view view-title="ข้อมูลเบิกจ่าย">
     <ion-content>
 
+        <input type='button' ng-click='SyncMedicalData()' value='SyncMedicalData' />
+
         <div class="card" >
             <div class="item item-divider">
                 <h2>ค่ารักษาพยาบาล</h2>
             </div>
             <a class="item item-body" href="#/app/information/medical">
-                รวม 22,124 บาท
-                <span class="badge badge-assertive">2</span>
+                รวม {{medicalInfo.totalSpent | number}} บาท
+                <span ng-hide='medicalInfo.notification == 0' class="badge badge-assertive">{{medicalInfo.notification}}</span>
             </a>
         </div>
+
         <div class="card">
             <div class="item item-divider">
                 <h2>ค่าเล่าเรียนบุตร</h2>

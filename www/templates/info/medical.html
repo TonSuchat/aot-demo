@@ -1,6 +1,7 @@
-<ion-view view-title="Medical">
+<ion-view view-title="ค่ารักษาพยาบาล">
     <ion-content>
-        <div class="list">
+
+         <!-- <div class="list"> 
             <div class="item item-divider">
                 วันที่ 29 ม.ค.59
             </div>
@@ -30,7 +31,20 @@
             <a href="#/app/information/medical-detail" class="item">
                จำนวน 1,434 บาท
                 <span class="item-note">ธ.กรุงไทย</span>
-            </a>
-        </div>
+            </a>             
+         </div> -->
+
+            <div class='list' >
+                <div ng-repeat='info in MedicalInfo'>
+                    <div class="item item-divider">
+                        วันที่ {{info.paidDate}}
+                    </div>
+                    <a href="#/app/information/medical-detail/{{detail.id}}" ng-repeat='detail in info.paidDetails' class="item">
+                       จำนวน {{detail.total | number}} บาท
+                        <span class="item-note">{{detail.bankName}}</span>
+                    </a>
+                </div>
+            </div>
+
     </ion-content>
 </ion-view>
