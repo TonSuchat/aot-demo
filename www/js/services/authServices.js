@@ -38,6 +38,7 @@ angular.module('starter')
             var data = {keyword:username,start:1,retrieve:1};
             APIService.httpPost(url,data,
                 function(response){
+                    if(response.data == null || response.data.length == 0) return;
                     var result = response.data[0];
                     isAuthenticated = true;
                     fullname = result.PrefixName + ' ' + result.Firstname + ' ' + result.Lastname;
@@ -70,6 +71,7 @@ angular.module('starter')
                 APIService.httpPost(url,data,
                     function(response){
                         var result = response.data;
+                        if(result == null || result.length == 0) return reject('Login Failed.');
                         if (result) {
                             username = user;
                             window.localStorage.setItem(AUTH_EVENTS.LOCAL_USERNAME_KEY, username);

@@ -61,11 +61,12 @@ angular.module('starter', ['ionic','ngCordova'])
         //   },
         //   function(error){console.log(error);});
 
-        SQLiteService.Execute("select * from medical",null).then(
-          function(response){
-          console.log(response);
-        },function(){});
+        // SQLiteService.Execute("select * from timeattendance",null).then(
+        //   function(response){
+        //   console.log(response);
+        // },function(error){console.log(error);});
 
+        
         //UserProfileSQLite.GetLatestTS().then(function(resp){console.log(resp);});
       });
     })

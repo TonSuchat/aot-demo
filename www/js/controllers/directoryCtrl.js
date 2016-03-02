@@ -8,7 +8,6 @@ var prefixData = [
     { prefixkey: 'facebook', prefixvalue: 'Facebook' , prefixType:'facebook' },
     { prefixkey: 'mobilephone', prefixvalue: 'เบอร์มือถือ' , prefixType:'tel' },
 ];
-//var tmpContacts = { OfficeTel: '021234567', OfficeFax: '021234567-1', 'eMailAddress': 'abc@g.com', 'Line': 'lineId', 'Facebook': 'Facebook Id', 'MobilePhone': '089-1234567' };
 
 angular.module('starter')
     // .factory('shareData', function () {
@@ -86,7 +85,7 @@ function GetDirectories($scope, APIService) {
     APIService.httpPost(url, data,
         function (response) {
             var result = response.data;
-            if (result == null) $scope.haveMoreData = false;
+            if (result == null || result.length == 0) $scope.haveMoreData = false;
             else {
                 (result.length < 20) ? $scope.haveMoreData = false : $scope.haveMoreData = true;
                 $scope.directoryList = ($scope.directoryList.length > 0) ? $scope.directoryList.concat(result) : result;

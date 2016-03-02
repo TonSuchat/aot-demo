@@ -1,30 +1,27 @@
 <ion-view view-title="ข้อมูลการลงเวลา">
     <ion-content>
+
         <div class="list">
-            <div class="item">วันที่ 1 ม.ค.59
-             <span class="item-note">07.59</span>
+          <label class="item item-input item-select">
+            <div class="input-label">
+              เดือน
             </div>
-            <div class="item">วันที่ 2 ม.ค.59
-             <span class="item-note">07.59</span>
+            <select ng-change='BindList()' ng-options='option.name for option in ddlMonthsData.options track by option.val' ng-model='ddlMonthsData.selectedOptions'>
+            </select>
+          </label>
+        </div>
+
+        <div class="list padding-top">
+            <div ng-repeat='info in listTimeInfo'>
+                <div class="item item-divider">
+                    วันที่ {{info.taDate}}
+                </div>
+                 <div ng-repeat='details in info.taDetails' class='item'>
+                    <h2>เวลา {{details.taStampTime}} น.</h2>
+                    <p>{{details.taLocation}}</p>
+                </div>
             </div>
-            <div class="item">วันที่ 3 ม.ค.59
-             <span class="item-note">07.59</span>
-            </div>
-            <div class="item">วันที่ 4 ม.ค.59
-             <span class="item-note">07.59</span>
-            </div>
-            <div class="item">วันที่ 5 ม.ค.59
-             <span class="item-note">07.59</span>
-            </div>
-            <div class="item">วันที่ 6 ม.ค.59
-             <span class="item-note">07.59</span>
-            </div>
-            <div class="item">วันที่ 7 ม.ค.59
-             <span class="item-note">07.59</span>
-            </div>
-            <div class="item">วันที่ 8 ม.ค.59
-             <span class="item-note">07.59</span>
-            </div>
+             
         </div>
     </ion-content>
 </ion-view>

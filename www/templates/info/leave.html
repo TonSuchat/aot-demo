@@ -1,34 +1,28 @@
-<ion-view view-title="Leave">
+<ion-view view-title="ข้อมูลวันลา">
     <ion-content>
         <div class="list">
-            <div class="item item-divider">
-                ลาป่วย 3 วัน
-            </div>
-            <div class="item">
-                วันที่ 1 ม.ค.59
-            </div>
-            <div class="item">
-                วันที่ 2 ม.ค.59
-            </div>
-            <div class="item">
-                วันที่ 3 ม.ค.59
-            </div>
-
 
             <div class="item item-divider">
-                ลาพักผ่อน 2 วัน
+                ลาป่วย {{leaveInfo.sickLeave.totalLeave}} วัน
             </div>
-            <div class="item">
-                วันที่ 4 ม.ค.59
+            <div class="item" ng-repeat='leavedate in leaveInfo.sickLeave.leaveDate'>
+                วันที่ {{leavedate.leavefrom}}
             </div>
-            <div class="item">
-                วันที่ 5 ม.ค.59
+            
+            <div class="item item-divider">
+                ลาพักผ่อน {{leaveInfo.annualLeave.totalLeave}} วัน
             </div>
-
+            <div class="item" ng-repeat='leavedate in leaveInfo.annualLeave.leaveDate'>
+                วันที่ {{leavedate.leavefrom}}
+            </div>            
 
             <div class="item item-divider">
-                กิจ 0 วัน
+                ลากิจ {{leaveInfo.personalLeave.totalLeave}} วัน
             </div>
+            <div class="item" ng-repeat='leavedate in leaveInfo.personalLeave.leaveDate'>
+                วันที่ {{leavedate.leavefrom}}
+            </div>            
+
         </div>
     </ion-content>
 </ion-view>

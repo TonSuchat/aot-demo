@@ -1,3 +1,7 @@
+//***config
+var enableSync = false;
+//***config
+
 angular.module('starter')
     .constant('AUTH_EVENTS',{
         notAuthenticated : 'auth-not-authenticated',

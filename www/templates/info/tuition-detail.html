@@ -1,0 +1,29 @@
+<ion-view view-title="รายละเอียดค่าเล่าเรียนบุตร">
+    <ion-content>
+        <div class="list">
+            <div class="item item-divider">
+                <h2>ค่าเล่าเรียนบุตร</h2>
+            </div>
+            <div class="item">
+                <h2>วันที่ ทอท. จ่ายเงิน </h2>
+                <span class="item-text-wrap">{{TuitionDetails.paidDate}}</span>
+            </div>
+            <div class="item">
+                <h2>ค่าใช้จ่าย : </h2>
+                <span class="item-text-wrap">{{TuitionDetails.total | number}} บาท</span>
+            </div>
+            <div class="item">
+                <h2>ภาษี : </h2>
+                <span class="item-text-wrap">{{TuitionDetails.vatAmnt | number}} บาท</span>
+            </div>
+            <div class="item">
+                <h2>ค่าใช้จ่ายรวมภาษี : </h2>
+                <span class="item-text-wrap">{{TuitionDetails.grandTotal | number}} บาท</span>
+            </div>
+            <div class="item">
+                <h2>ธนาคาร : </h2>
+                <span class="item-text-wrap">{{TuitionDetails.bankName}}</span>
+            </div>
+        </div>
+    </ion-content>
+</ion-view>

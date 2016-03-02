@@ -1,6 +1,6 @@
 angular.module('starter')
 
-    .controller('AppCtrl', function($scope, $ionicModal, $timeout, AuthService, $ionicPopup,$location) {
+    .controller('AppCtrl', function($scope, $ionicModal, $timeout, AuthService, $ionicPopup,$location,SQLiteService) {
 
       // With the new view caching in Ionic, Controllers are only called
       // when they are recreated or on app start, instead of every page change.
@@ -60,6 +60,9 @@ angular.module('starter')
         //});
       };
       $scope.logout = function () {
+        //delete all datas and all tables
+        SQLiteService.DeleteAllTables();
+        //logout logic
         AuthService.logout();
         checkAuthen();
         $location.path('/news-feed');
