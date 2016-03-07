@@ -1,0 +1,45 @@
+<ion-view view-title="Add Or Edit TestSync">
+    <ion-content>
+        <h1>TestSync-Detail</h1>
+        <h2>Mode : {{Mode}}</h2>
+        <div class='list'>
+            <label class='item item-input item-stacked-label'>
+                <span class='input-label'>ClientId</span>
+                <p>{{info.clientid}}</p>
+            </label>
+            <label class='item item-input item-stacked-label'>
+                <span class='input-label'>Id</span>
+                <input type='text' ng-model='info.ID' />
+            </label>
+            <label class='item item-input item-stacked-label'>
+                <span class='input-label'>Field 1</span>
+                <input type='text' ng-model='info.field1' />
+            </label>
+            <label class='item item-input item-stacked-label'>
+                <span class='input-label'>Field 2</span>
+                <input type='text' ng-model='info.field2' />
+            </label>
+            <label class='item item-input item-stacked-label'>
+                <span class='input-label'>Field 3</span>
+                <input type='text' ng-model='info.field3' />
+            </label>
+            <label class='item item-input item-stacked-label'>
+                <span class='input-label'>TimeStamp</span>
+                <input type='text' ng-model='info.TimeStamp' />
+            </label>
+            <label class='item item-input item-stacked-label'>
+                <span class='input-label'>Deleted</span>
+                <input type='text' ng-model='info.deleted' placeholder='true or false' />
+            </label>
+            <label class='item item-input item-stacked-label'>
+                <span class='input-label'>Dirty</span>
+                <input type='text' ng-model='info.dirty' placeholder='true or false' />
+            </label>
+            <label class='item item-input item-stacked-label'>
+                <span class='input-label'>TS</span>
+                <input type='text' ng-model='info.ts' placeholder='time stamp' />
+            </label>
+        </div>
+        <input type='button' class='button button-block button-balanced' ng-click='SaveData()' value='Save' />
+    </ion-content>
+</ion-view>

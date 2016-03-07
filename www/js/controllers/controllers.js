@@ -79,4 +79,62 @@ angular.module('starter')
     .controller('CircularLetterCtrl', function($scope, $stateParams) {
     })
     .controller('ProfileCtrl', function($scope, $stateParams) {
-    });
+    })
+    .controller('TestSyncCtrl',function($scope,SyncService,TestSyncSQLite){
+        //bind data
+        $scope.testSyncDatas = [];
+        TestSyncSQLite.GetAll().then(function(response){
+          angular.forEach(response.rows,function(value,key){
+            $scope.testSyncDatas.push(response.rows[key]);
+          });
+        });
+
+      //delete data
+      $scope.DeleteData = function(clientId){
+        if(confirm('You want to delete data clientId : ' + clientId + ' ?')){
+            TestSyncSQLite.DeleteById(clientId);
+        }
+      };
+    })
+     .controller('TestDetailSyncCtrl',function($scope,$stateParams,TestSyncSQLite,$location){
+        var clientId = $stateParams.Id;
+        $scope.Mode = '';
+        $scope.info = {};
+        if(clientId != 0){
+            $scope.Mode = 'Edit';
+            TestSyncSQLite.GetById(clientId).then(function(response){
+                if(response.rows != null && response.rows.length > 0){
+                    var result = response.rows[0];
+                    $scope.info.clientid = result.clientid;
+                    $scope.info.ID = result.ID;
+                    $scope.info.field1 = result.field1;
+                    $scope.info.field2 = result.field2;
+                    $scope.info.field3 = result.field3;
+                    $scope.info.TimeStamp = result.TimeStamp;
+                    $scope.info.deleted = result.deleted;
+                    $scope.info.dirty = result.dirty;
+                    $scope.info.ts = result.ts;
+                }
+            });
+        }
+        else {
+            $scope.Mode = 'Create';
+            $scope.info.ts = null;
+        }
+        
+        $scope.SaveData = function(){
+            if($scope.Mode == 'Create'){
+                console.log($scope.info);
+                TestSyncSQLite.Add([$scope.info],true).then(function(){$location.path('/app/testsync');window.location.reload();});
+            }
+            else{
+                console.log($scope.info);
+                TestSyncSQLite.Update($scope.info,$scope.info.deleted,true,'clientid',$scope.info.clientid).then(
+                    function(){
+                        $location.path('/app/testsync');
+                        window.location.reload();
+                    });
+            }
+        };
+
+     })

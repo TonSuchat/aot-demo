@@ -54,20 +54,20 @@ angular.module('starter', ['ionic','ngCordova'])
         // },
         // function(error){console.log(error);});
 
-        // SQLiteService.ExecuteData('select * from userprofile',null,
-        //   function(response){
-        //     //console.log(response);
-        //     console.log(response.rows[0]);
+        // SQLiteService.Execute('select * from testsync',null).then(function(response){
+        //     console.log(response);
         //   },
-        //   function(error){console.log(error);});
+        // function(error){console.log(error);});
 
-        // SQLiteService.Execute("select * from timeattendance",null).then(
-        //   function(response){
-        //   console.log(response);
+        // var data = ['1','f1-edit','f2-editzzz','f3-editaaaaa','03032016101900',false,false,'03032016101900'];
+        // SQLiteService.Execute("insert into testsync(id, field1, field2, field3, timestamp, deleted, dirty, ts) values(?,?,?,?,?,?,?,?)",data).then(
+        //       function(response){
+        //       console.log(response);
         // },function(error){console.log(error);});
 
-        
+      
         //UserProfileSQLite.GetLatestTS().then(function(resp){console.log(resp);});
+
       });
     })
 
@@ -129,7 +129,25 @@ angular.module('starter', ['ionic','ngCordova'])
                 controller: 'ProfileCtrl'
               }
             }
-          });
+          })
+          .state('app.testsync', {
+            url: '/testsync',
+            views: {
+              'menuContent': {
+                templateUrl: 'templates/testsync.html',
+                controller:'TestSyncCtrl'
+              }
+            }
+          })
+          .state('app.testsync-detail', {
+            url: '/testsync-detail/:Id',
+            views: {
+              'menuContent': {
+                templateUrl: 'templates/testsync-detail.html',
+                controller:'TestDetailSyncCtrl'
+              }
+            }
+          })
       // if none of the above states are matched, use this as the fallback
       $urlRouterProvider.otherwise('/app/home/news-feed');
     });
