@@ -17,16 +17,46 @@ angular.module('starter')
 		});
 	};
 
-	this.BaseGetLatestTS = function(tablename,orderBySubStr){
-		var sql = '';
-		if(orderBySubStr)
-			sql = "SELECT ts FROM " + tablename + " ORDER BY CAST(SUBSTR(ts,5,4) AS INT) DESC, CAST(SUBSTR(ts,3,2) AS INT) DESC, CAST(SUBSTR(ts,1,2) AS INT) DESC, ts DESC LIMIT 1";
-		else 
-			sql = "SELECT ts FROM " + tablename + " ORDER BY ts DESC LIMIT 1";
+	//****share-method****
+	this.BaseGetLatestTS = function(tablename){
+		var sql = "SELECT TS FROM " + tablename + " ORDER BY TS DESC LIMIT 1";
+		// if(orderBySubStr)
+		// 	sql = "SELECT ts FROM " + tablename + " ORDER BY CAST(SUBSTR(ts,5,4) AS INT) DESC, CAST(SUBSTR(ts,3,2) AS INT) DESC, CAST(SUBSTR(ts,1,2) AS INT) DESC, ts DESC LIMIT 1";
+		// else 
+		// 	sql = "SELECT ts FROM " + tablename + " ORDER BY ts DESC LIMIT 1";
 		return this.Execute(sql).then(function(response){
 			return (response.rows.length > 0) ? response.rows[0] : null;
 		},function(error){});
 	};
+
+	this.GetDataByTSIsNull = function(tablename){
+		return this.Execute("SELECT * FROM " + tablename + " WHERE (TS is null  OR TS = '')").then(function(response){return response;},function(error){return error;});			
+	};
+
+	this.GetDataIsDirty = function(tablename){
+		return this.Execute("SELECT * FROM " + tablename + " WHERE dirty = 'true' ").then(function(response){return response;},function(error){return error;});				
+	};
+
+	this.CountByServerId = function(id,tablename){
+		return this.Execute("SELECT COUNT(*) AS countTotal FROM " + tablename + " WHERE Id = " + id).then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.CountIsNotDirtyById = function(id,tablename){
+		return this.Execute("SELECT COUNT(*) AS countTotal FROM " + tablename + " WHERE Id = " + id + " AND dirty = 'false'").then(function(response){return response;},function(error){return error;});			
+	};
+
+	this.DeleteAll = function(tablename){
+		return this.Execute("DELETE FROM " + tablename).then(function(response){return response;},function(error){return error;});	
+	};
+
+	this.DeleteByServerId = function(tablename,id){
+		return this.Execute("DELETE FROM " + tablename + " WHERE Id = " + id).then(function(response){return response;},function(error){return error;});
+	};
+
+	this.DeleteDataIsFlagDeleted = function(tablename){
+		return this.Execute("DELETE FROM " + tablename + " WHERE DL = 'true' AND dirty = 'false' ").then(function(response){return response;},function(error){return error;});				
+	};
+	//****share-method****
 
 	this.InitailTables = function(){
 		//**Test-Sync-Code
@@ -42,7 +72,8 @@ angular.module('starter')
 
 	//**Test-Sync-Code
 	this.CreateTestSyncTable = function(){
-		$cordovaSQLite.execute(db, "CREATE TABLE IF NOT EXISTS testsync (clientid integer primary key AUTOINCREMENT, ID int, field1 text, field2 text, field3 text, TimeStamp text,deleted boolean,dirty boolean,ts datetime) ");
+		//$cordovaSQLite.execute(db, "CREATE TABLE IF NOT EXISTS testsync (clientid integer primary key AUTOINCREMENT, Id int, field1 text, field2 text, field3 text, TimeStamp text,deleted boolean,dirty boolean,ts datetime) ");
+		$cordovaSQLite.execute(db, "CREATE TABLE IF NOT EXISTS testsync (clientid integer primary key AUTOINCREMENT, Id int, field1 text, field2 text, field3 text, TS datetime, DL boolean, dirty boolean) ");
 	}
 	//**Test-Sync-Code
 
@@ -50,21 +81,20 @@ angular.module('starter')
 		$cordovaSQLite.execute(db, "CREATE TABLE IF NOT EXISTS userprofile (clientid integer primary key AUTOINCREMENT, UserID text, PrefixName text, Firstname text, Lastname text, Nickname text, Position text, Section text, Department text, CitizenID text, PicturePath text,PictureThumb text, posi_name_gover text, orga_gover text, changeDate text, OfficeTel text, OfficeFax text, MobilePhone text, eMailAddress text, Line text, Facebook text, deleted boolean, dirty boolean, ts datetime)");
 	};
 	this.CreateMedicalTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS medical(clientid integer primary key AUTOINCREMENT, Id int,EmpID text, HospType text, HospName text, PatientType text, Family text, PatientName text, Disease text, Total int, DocDate text, PaidDate text, BankName text, deleted boolean,dirty boolean,ts datetime)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS medical(clientid integer primary key AUTOINCREMENT, Id int,EmpID text, HospType text, HospName text, PatientType text, Family text, PatientName text, Disease text, Total int, DocDate text, PaidDate text, BankName text, DL boolean,dirty boolean,TS datetime)");
 	};
 	this.CreateTuitionTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS tuition(clientid integer primary key AUTOINCREMENT, Id int,Empl_Code text, Paid_Date text, Total_Amnt int, Vat_Amnt int, Grand_Total int, BankName text, deleted boolean,dirty boolean,ts datetime)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS tuition(clientid integer primary key AUTOINCREMENT, Id int,Empl_Code text, Paid_Date text, Total_Amnt int, Vat_Amnt int, Grand_Total int, BankName text, DL boolean,dirty boolean,TS datetime)");
 	};
 	this.CreateRoyalTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS royal(clientid integer primary key AUTOINCREMENT, Id int,Empl_Code text, Roya_Code text, Roya_Name int, Roya_Date text, deleted boolean,dirty boolean,ts datetime)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS royal(clientid integer primary key AUTOINCREMENT, Id int,Empl_Code text, Roya_Code text, Roya_Name int, Roya_Date text, DL boolean,dirty boolean,TS datetime)");
 	};
 	this.CreateTimeAttendanceTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS timeattendance(clientid integer primary key AUTOINCREMENT, Id int, SequenceID text, EmpID text, StampTime datetime, MachineID text, StampResult boolean, Location text, Airport text, stampdate text, stamptimeonly text, deleted boolean,dirty boolean,ts datetime)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS timeattendance(clientid integer primary key AUTOINCREMENT, Id int, SequenceID text, EmpID text, StampTime datetime, MachineID text, StampResult boolean, Location text, Airport text, stampdate text, stamptimeonly text, DL boolean,dirty boolean,TS datetime)");
 	};
 	this.CreateLeaveTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS leave(clientid integer primary key AUTOINCREMENT, Id int, Empl_Code text, Empl_Name text, Leave_Code text, Leave_Day text, Leave_From text, Leave_To text, Leave_Date text, Updt_Date text, Tran_Seqe text, Leave_Timecode text, deleted boolean,dirty boolean,ts datetime)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS leave(clientid integer primary key AUTOINCREMENT, Id int, Empl_Code text, Empl_Name text, Leave_Code text, Leave_Day text, Leave_From text, Leave_To text, Leave_Date text, Updt_Date text, Tran_Seqe text, Leave_Timecode text, DL boolean,dirty boolean,TS datetime)");
 	};
-
 
 	this.DeleteAllTables = function(){
 		$cordovaSQLite.execute(db, "DELETE FROM userprofile");
@@ -97,13 +127,44 @@ angular.module('starter')
 	};
 })
 .service('MedicalSQLite', function(SQLiteService){
-
+	//***Necessary-Method
 	this.GetLatestTS = function(){
-		return SQLiteService.BaseGetLatestTS('medical',true).then(function(response){return response;},function(error){return error;});
+		return SQLiteService.BaseGetLatestTS('medical').then(function(response){return response;},function(error){return error;});
 	};
 
-	this.SaveMedicals = function(data){
-		var sql = "INSERT INTO medical (id, empid, hosptype, hospname, patienttype, family, patientname, disease, total, docdate, paiddate, bankname, deleted, dirty, ts) VALUES ";
+	this.CountByServerId = function(serverid){
+		return SQLiteService.CountByServerId(serverid,'medical').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.CountIsNotDirtyById = function(id){
+		return SQLiteService.CountIsNotDirtyById(id,'medical').then(function(response){return response;},function(error){return error;});		
+	};
+
+	
+	this.GetDataByTSIsNull = function(){
+		return SQLiteService.GetDataByTSIsNull('medical');
+	};
+
+	this.GetDataIsDirty = function(){
+		return SQLiteService.GetDataIsDirty("medical");
+	};
+
+	this.DeleteDataIsFlagDeleted = function(){
+		return SQLiteService.DeleteDataIsFlagDeleted("medical");
+	};
+
+	this.Update = function(data,isDirty,clientUpdate){
+		var sql;
+		if(clientUpdate)
+			sql = "UPDATE medical SET Id = ?,EmpID = ?, HospType = ?, HospName = ?, PatientType = ?, Family = ?, PatientName = ?, Disease = ?, Total = ?, DocDate = ?, PaidDate = ?, BankName = ?, DL = ?,dirty = ?,TS = ? WHERE clientid = " + data.clientid;	
+		else
+			sql = "UPDATE medical SET Id = ?,EmpID = ?, HospType = ?, HospName = ?, PatientType = ?, Family = ?, PatientName = ?, Disease = ?, Total = ?, DocDate = ?, PaidDate = ?, BankName = ?, DL = ?,dirty = ?,TS = ? WHERE Id = " + data.Id;
+		var param = [data.Id,data.EmpID,data.HospType,data.HospName,data.PatientType,data.Family,data.PatientName,data.Disease,data.Total,data.DocDate,data.PaidDate,data.BankName,data.DL,isDirty,data.TS];
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
+	};
+
+	this.Add = function(data,createFromClient){
+		var sql = "INSERT INTO medical (id, empid, hosptype, hospname, patienttype, family, patientname, disease, total, docdate, paiddate, bankname, DL, dirty, TS) VALUES ";
 		var param = []; 
 		var rowArgs = [];
 		data.forEach(function(item){
@@ -120,13 +181,18 @@ angular.module('starter')
 			param.push(item.DocDate);
 			param.push(item.PaidDate);
 			param.push(item.BankName);
-			param.push(false);
-			param.push(false);
-			param.push(item.PaidDate);
+			param.push(item.DL);
+			//dirty
+			if(createFromClient) param.push(true);
+			else param.push(false);
+			//TS
+			if(createFromClient) param.push(null);
+			else param.push(item.TS);
 		});
 		sql += rowArgs.join(', ');
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){console.log(error); return error;});
 	};
+	//***Necessary-Method
 
 	this.GetSumMedicalTotal = function(){
 		return SQLiteService.Execute("SELECT SUM(total) AS total FROM medical").then(function(response){return response;},function(error){return error;});
@@ -140,29 +206,49 @@ angular.module('starter')
 		return SQLiteService.Execute("SELECT DISTINCT paiddate FROM medical ORDER BY CAST(SUBSTR(paiddate,5,4) AS INT) DESC, CAST(SUBSTR(paiddate,3,2) AS INT) DESC, CAST(SUBSTR(paiddate,1,2) AS INT) DESC").then(function(response){return response;},function(error){return error;});
 	};
 
-	this.DeleteAllMedical = function(){
-		return SQLiteService.Execute("DELETE FROM medical").then(function(response){return response;},function(error){return error;});	
+	this.DeleteAll = function(){
+		return SQLiteService.DeleteAll("medical").then(function(response){return response;},function(error){return error;});	
 	};
+
 })
 .service('TuitionSQLite', function(SQLiteService){
-	this.GetSumTuitionGrandTotal = function(){
-		return SQLiteService.Execute("SELECT SUM(Grand_Total) AS Grand_Total FROM tuition").then(function(response){return response;},function(error){return error;});
-	};
-
-	this.DeleteAllTuition = function(){
-		return SQLiteService.Execute("DELETE FROM tuition").then(function(response){return response;},function(error){return error;});		
-	};
-
-	this.GetDistinctPaidDate = function(){
-		return SQLiteService.Execute("SELECT DISTINCT Paid_Date FROM tuition ORDER BY CAST(SUBSTR(Paid_Date,5,4) AS INT) DESC, CAST(SUBSTR(Paid_Date,3,2) AS INT) DESC, CAST(SUBSTR(Paid_Date,1,2) AS INT) DESC").then(function(response){return response;},function(error){return error;});
-	};
-
+	//***Necessary-Method
 	this.GetLatestTS = function(){
-		return SQLiteService.BaseGetLatestTS('tuition',true).then(function(response){return response;},function(error){return error;});
+		return SQLiteService.BaseGetLatestTS('tuition').then(function(response){return response;},function(error){return error;});
 	};
 
-	this.SaveTuitions = function(data){
-		var sql = "INSERT INTO tuition (Id, Empl_Code, Paid_Date, Total_Amnt, Vat_Amnt, Grand_Total, BankName, deleted, dirty, ts) VALUES ";
+	this.CountByServerId = function(serverid){
+		return SQLiteService.CountByServerId(serverid,'tuition').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.CountIsNotDirtyById = function(id){
+		return SQLiteService.CountIsNotDirtyById(id,'tuition').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.GetDataByTSIsNull = function(){
+		return SQLiteService.GetDataByTSIsNull('tuition');
+	};
+
+	this.GetDataIsDirty = function(){
+		return SQLiteService.GetDataIsDirty("tuition");
+	};
+
+	this.DeleteDataIsFlagDeleted = function(){
+		return SQLiteService.DeleteDataIsFlagDeleted("tuition");
+	};
+
+	this.Update = function(data,isDirty,clientUpdate){
+		var sql;
+		if(clientUpdate)
+			sql = "UPDATE tuition SET Id = ?, Empl_Code = ?, Paid_Date = ?, Total_Amnt = ?, Vat_Amnt = ?, Grand_Total = ?, BankName = ?, DL = ?, dirty = ?, TS = ? WHERE clientid = " + data.clientid;
+		else
+			sql = "UPDATE tuition SET Id = ?, Empl_Code = ?, Paid_Date = ?, Total_Amnt = ?, Vat_Amnt = ?, Grand_Total = ?, BankName = ?, DL = ?, dirty = ?, TS = ? WHERE Id = " + data.Id;
+		var param = [data.Id,data.Empl_Code,data.Paid_Date,data.Total_Amnt,data.Vat_Amnt,data.Grand_Total,data.BankName,data.DL,isDirty,data.TS];
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
+	};
+
+	this.Add = function(data,createFromClient){
+		var sql = "INSERT INTO tuition (Id, Empl_Code, Paid_Date, Total_Amnt, Vat_Amnt, Grand_Total, BankName, DL, dirty, TS) VALUES ";
 		var param = []; 
 		var rowArgs = [];
 		data.forEach(function(item){
@@ -174,12 +260,29 @@ angular.module('starter')
 			param.push(item.Vat_Amnt);
 			param.push(item.Grand_Total);
 			param.push(item.BankName);
-			param.push(false);
-			param.push(false);
-			param.push(item.Paid_Date);
+			param.push(item.DL);
+			//dirty
+			if(createFromClient) param.push(true);
+			else param.push(false);
+			//TS
+			if(createFromClient) param.push(null);
+			else param.push(item.TS);
 		});
 		sql += rowArgs.join(', ');
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){console.log(error); return error;});
+	};
+	//***Necessary-Method
+
+	this.GetSumTuitionGrandTotal = function(){
+		return SQLiteService.Execute("SELECT SUM(Grand_Total) AS Grand_Total FROM tuition").then(function(response){return response;},function(error){return error;});
+	};
+
+	this.DeleteAll = function(){
+		return SQLiteService.Execute("DELETE FROM tuition").then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.GetDistinctPaidDate = function(){
+		return SQLiteService.Execute("SELECT DISTINCT Paid_Date FROM tuition ORDER BY CAST(SUBSTR(Paid_Date,5,4) AS INT) DESC, CAST(SUBSTR(Paid_Date,3,2) AS INT) DESC, CAST(SUBSTR(Paid_Date,1,2) AS INT) DESC").then(function(response){return response;},function(error){return error;});
 	};
 
 	this.GetTuitions = function(){
@@ -187,20 +290,45 @@ angular.module('starter')
 	};
 })
 .service('RoyalSQLite', function(SQLiteService){
-	this.DeleteAllRoyal = function(){
-		return SQLiteService.Execute("DELETE FROM royal").then(function(response){return response;},function(error){return error;});		
-	};
-
-	this.GetRoyals = function(){
-		return SQLiteService.Execute("SELECT * FROM royal ORDER BY Roya_Date DESC").then(function(response){return response;},function(error){return error;});
-	};
-
+	//***Necessary-Method
 	this.GetLatestTS = function(){
-		return SQLiteService.BaseGetLatestTS('royal',true).then(function(response){return response;},function(error){return error;});
+		return SQLiteService.BaseGetLatestTS('royal').then(function(response){return response;},function(error){return error;});
 	};
 
-	this.SaveRoyals = function(data){
-		var sql = "INSERT INTO royal (Id, Empl_Code, Roya_Code, Roya_Name, Roya_Date, deleted, dirty, ts) VALUES ";
+	this.CountByServerId = function(serverid){
+		return SQLiteService.CountByServerId(serverid,'royal').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.CountIsNotDirtyById = function(id){
+		return SQLiteService.CountIsNotDirtyById(id,'royal').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.GetDataByTSIsNull = function(){
+		return SQLiteService.GetDataByTSIsNull('royal');
+	};
+
+	this.GetDataIsDirty = function(){
+		return SQLiteService.GetDataIsDirty("royal");
+	};
+
+	this.DeleteDataIsFlagDeleted = function(){
+		return SQLiteService.DeleteDataIsFlagDeleted("royal");
+	};
+
+	this.Update = function(data,isDirty,clientUpdate){
+		var sql;
+		if(clientUpdate)
+			sql = "UPDATE royal SET Id = ?, Empl_Code = ?, Roya_Code = ?, Roya_Name = ?, Roya_Date = ?, DL = ?, dirty = ?, TS = ? WHERE clientid = " + data.clientid;
+		else
+			sql = "UPDATE royal SET Id = ?, Empl_Code = ?, Roya_Code = ?, Roya_Name = ?, Roya_Date = ?, DL = ?, dirty = ?, TS = ? WHERE Id = " + data.Id;
+		var param = [data.Id,data.Empl_Code,data.Roya_Code,data.Roya_Name,data.Roya_Date,data.DL,isDirty,data.TS];
+		console.log(sql);
+		console.log(param);
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
+	};
+
+	this.Add = function(data,createFromClient){
+		var sql = "INSERT INTO royal (Id, Empl_Code, Roya_Code, Roya_Name, Roya_Date, DL, dirty, TS) VALUES ";
 		var param = []; 
 		var rowArgs = [];
 		data.forEach(function(item){
@@ -210,29 +338,72 @@ angular.module('starter')
 			param.push(item.Roya_Code);
 			param.push(item.Roya_Name);
 			param.push(item.Roya_Date);
-			param.push(false);
-			param.push(false);
-			param.push(item.Roya_Date);
+			param.push(item.DL);
+			//dirty
+			if(createFromClient) param.push(true);
+			else param.push(false);
+			//TS
+			if(createFromClient) param.push(null);
+			else param.push(item.TS);
 		});
 		sql += rowArgs.join(', ');
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){console.log(error); return error;});
 	};
+	//***Necessary-Method
+
+	this.DeleteAll = function(){
+		return SQLiteService.Execute("DELETE FROM royal").then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.GetRoyals = function(){
+		return SQLiteService.Execute("SELECT * FROM royal ORDER BY Roya_Date DESC").then(function(response){return response;},function(error){return error;});
+	};
+	
 })
 .service('TimeAttendanceSQLite', function(SQLiteService){
-	this.DeleteAllTimeAttendance = function(){
-		return SQLiteService.Execute("DELETE FROM timeattendance").then(function(response){return response;},function(error){return error;});		
-	};
-
-	this.GetTimeAttendances = function(){
-		return SQLiteService.Execute("SELECT * FROM timeattendance ORDER BY stamptime DESC").then(function(response){return response;},function(error){return error;});
-	};
-
+	//***Necessary-Method
 	this.GetLatestTS = function(){
-		return SQLiteService.BaseGetLatestTS('timeattendance',false).then(function(response){return response;},function(error){return error;});
+		return SQLiteService.BaseGetLatestTS('timeattendance').then(function(response){return response;},function(error){return error;});
 	};
 
-	this.SaveTimeAttendances = function(data){
-		var sql = "INSERT INTO timeattendance (Id, SequenceID, EmpID, StampTime, MachineID, StampResult, Location, Airport, stampdate, stamptimeonly, deleted, dirty, ts) VALUES ";
+	this.CountByServerId = function(serverid){
+		return SQLiteService.CountByServerId(serverid,'timeattendance').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.CountIsNotDirtyById = function(id){
+		return SQLiteService.CountIsNotDirtyById(id,'timeattendance').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.GetDataByTSIsNull = function(){
+		return SQLiteService.GetDataByTSIsNull('timeattendance');
+	};
+
+	this.GetDataIsDirty = function(){
+		return SQLiteService.GetDataIsDirty("timeattendance");
+	};
+
+	this.DeleteDataIsFlagDeleted = function(){
+		return SQLiteService.DeleteDataIsFlagDeleted("timeattendance");
+	};
+
+	this.Update = function(data,isDirty,clientUpdate){
+		var sql;
+		var param;
+		if(clientUpdate)
+		{
+			sql = "UPDATE timeattendance SET Id = ?, SequenceID = ?, EmpID = ?, StampTime = ?, MachineID = ?, StampResult = ?, Location = ?, Airport = ?, stampdate = ?, stamptimeonly = ?, DL = ?, dirty = ?, TS = ? WHERE clientid = " + data.clientid;
+			param = [data.Id,data.SequenceID,data.EmpID,data.StampTime,data.MachineID,data.StampResult,data.Location,data.Airport,null,null,data.DL,isDirty,data.TS];
+		}			
+		else
+		{
+			sql = "UPDATE timeattendance SET Id = ?, SequenceID = ?, EmpID = ?, StampTime = ?, MachineID = ?, StampResult = ?, Location = ?, Airport = ?, stampdate = ?, stamptimeonly = ?, DL = ?, dirty = ?, TS = ? WHERE Id = " + data.Id;		
+			param = [data.Id,data.SequenceID,data.EmpID,data.StampTime,data.MachineID,data.StampResult,data.Location,data.Airport,TransformDateToddMMyyyyFormat(data.StampTime),GetTimeByStampTime(data.StampTime),data.DL,isDirty,data.TS];
+		}
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
+	};
+
+	this.Add = function(data,createFromClient){
+		var sql = "INSERT INTO timeattendance (Id, SequenceID, EmpID, StampTime, MachineID, StampResult, Location, Airport, stampdate, stamptimeonly, DL, dirty, TS) VALUES ";
 		var param = []; 
 		var rowArgs = [];
 		data.forEach(function(item){
@@ -245,14 +416,32 @@ angular.module('starter')
 			param.push(item.StampResult);
 			param.push(item.Location);
 			param.push(item.Airport);
-			param.push(TransformDateToddMMyyyyFormat(item.StampTime));
-			param.push(GetTimeByStampTime(item.StampTime));
-			param.push(false);
-			param.push(false);
-			param.push(item.StampTime);
+			//stampdate
+			if(createFromClient) param.push(null);
+			else param.push(TransformDateToddMMyyyyFormat(item.StampTime));
+			//stamptimeonly
+			if(createFromClient) param.push(null);
+			else param.push(GetTimeByStampTime(item.StampTime));
+			//DL
+			param.push(item.DL);
+			//dirty
+			if(createFromClient) param.push(true);
+			else param.push(false);
+			//TS
+			if(createFromClient) param.push(null);
+			else param.push(item.TS);
 		});
 		sql += rowArgs.join(', ');
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){console.log(error); return error;});
+	};
+	//***Necessary-Method
+
+	this.DeleteAll = function(){
+		return SQLiteService.Execute("DELETE FROM timeattendance").then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.GetTimeAttendances = function(){
+		return SQLiteService.Execute("SELECT * FROM timeattendance ORDER BY stamptime DESC").then(function(response){return response;},function(error){return error;});
 	};
 
 	this.GetDistinctStampDateByFromDateAndToDate = function(date){
@@ -260,20 +449,43 @@ angular.module('starter')
 	};
 })
 .service('LeaveSQLite',function(SQLiteService){
+	//***Necessary-Method
 	this.GetLatestTS = function(){
-		return SQLiteService.BaseGetLatestTS('leave',true).then(function(response){return response;},function(error){return error;});
+		return SQLiteService.BaseGetLatestTS('leave').then(function(response){return response;},function(error){return error;});
 	};
 
-	this.DeleteAllLeave = function(){
-		return SQLiteService.Execute("DELETE FROM leave").then(function(response){return response;},function(error){return error;});		
+	this.CountByServerId = function(serverid){
+		return SQLiteService.CountByServerId(serverid,'leave').then(function(response){return response;},function(error){return error;});		
 	};
 
-	this.GetLeaves = function(){
-		return SQLiteService.Execute("SELECT * FROM leave ORDER BY CAST(SUBSTR(Leave_From,5,4) AS INT) DESC, CAST(SUBSTR(Leave_From,3,2) AS INT) DESC, CAST(SUBSTR(Leave_From,1,2) AS INT) DESC ").then(function(response){return response;},function(error){return error;});
+	this.CountIsNotDirtyById = function(id){
+		return SQLiteService.CountIsNotDirtyById(id,'leave').then(function(response){return response;},function(error){return error;});		
 	};
 
-	this.SaveLeaves = function(data){
-		var sql = "INSERT INTO leave (Id, Empl_Code, Empl_Name, Leave_Code, Leave_Day, Leave_From, Leave_To, Leave_Date, Updt_Date, Tran_Seqe, Leave_Timecode, deleted, dirty, ts) VALUES ";
+	this.GetDataByTSIsNull = function(){
+		return SQLiteService.GetDataByTSIsNull('leave');
+	};
+
+	this.GetDataIsDirty = function(){
+		return SQLiteService.GetDataIsDirty("leave");
+	};
+
+	this.DeleteDataIsFlagDeleted = function(){
+		return SQLiteService.DeleteDataIsFlagDeleted("leave");
+	};
+
+	this.Update = function(data,isDirty,clientUpdate){
+		var sql;
+		if(clientUpdate)
+			sql = "UPDATE leave SET Id = ?, Empl_Code = ?, Empl_Name = ?, Leave_Code = ?, Leave_Day = ?, Leave_From = ?, Leave_To = ?, Leave_Date = ?, Updt_Date = ?, Tran_Seqe = ?, Leave_Timecode = ?, DL = ?, dirty = ?, TS = ? WHERE clientid = " + data.clientid;
+		else
+			sql = "UPDATE leave SET Id = ?, Empl_Code = ?, Empl_Name = ?, Leave_Code = ?, Leave_Day = ?, Leave_From = ?, Leave_To = ?, Leave_Date = ?, Updt_Date = ?, Tran_Seqe = ?, Leave_Timecode = ?, DL = ?, dirty = ?, TS = ? WHERE Id = " + data.Id;
+		var param = [data.Id,data.Empl_Code,data.Empl_Name,data.Leave_Code,data.Leave_Day,data.Leave_From,data.Leave_To,data.Leave_Date,data.Updt_Date,data.Tran_Seqe,data.Leave_Timecode,data.DL,isDirty,data.TS];
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
+	};
+
+	this.Add = function(data,createFromClient){
+		var sql = "INSERT INTO leave (Id, Empl_Code, Empl_Name, Leave_Code, Leave_Day, Leave_From, Leave_To, Leave_Date, Updt_Date, Tran_Seqe, Leave_Timecode, DL, dirty, TS) VALUES ";
 		var param = []; 
 		var rowArgs = [];
 		data.forEach(function(item){
@@ -289,86 +501,105 @@ angular.module('starter')
 			param.push(item.Updt_Date);
 			param.push(item.Tran_Seqe);
 			param.push(item.Leave_Timecode);
-			param.push(false);
-			param.push(false);
-			param.push(item.Leave_Date);
+			param.push(item.DL);
+			//dirty
+			if(createFromClient) param.push(true);
+			else param.push(false);
+			//TS
+			if(createFromClient) param.push(null);
+			else param.push(item.TS);
 		});
 		sql += rowArgs.join(', ');
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){console.log(error); return error;});
 	};
+	//***Necessary-Method
+
+	this.DeleteAll = function(){
+		return SQLiteService.Execute("DELETE FROM leave").then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.GetLeaves = function(){
+		return SQLiteService.Execute("SELECT * FROM leave ORDER BY CAST(SUBSTR(Leave_From,5,4) AS INT) DESC, CAST(SUBSTR(Leave_From,3,2) AS INT) DESC, CAST(SUBSTR(Leave_From,1,2) AS INT) DESC ").then(function(response){return response;},function(error){return error;});
+	};
+
 })
 
 //***Test-Sync-Code
 .service('TestSyncSQLite',function(SQLiteService){
+	//***Necessary-Method
 	this.GetLatestTS = function(){
-		return SQLiteService.BaseGetLatestTS('testsync',true).then(function(response){return response;},function(error){return error;});
+		return SQLiteService.BaseGetLatestTS('testsync').then(function(response){return response;},function(error){return error;});
 	};
 
-	this.DeleteAll = function(){
-		return SQLiteService.Execute("DELETE FROM testsync").then(function(response){return response;},function(error){return error;});		
+	this.CountByServerId = function(serverid){
+		return SQLiteService.CountByServerId(serverid,'testsync').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.CountIsNotDirtyById = function(id){
+		return SQLiteService.CountIsNotDirtyById(id,'testsync').then(function(response){return response;},function(error){return error;});		
+	};
+
+	
+	this.GetDataByTSIsNull = function(){
+		return SQLiteService.GetDataByTSIsNull('testsync');
+	};
+
+	this.GetDataIsDirty = function(){
+		return SQLiteService.GetDataIsDirty("testsync");
+	};
+
+	this.DeleteDataIsFlagDeleted = function(){
+		return SQLiteService.DeleteDataIsFlagDeleted("testsync");
+	};
+
+	this.Update = function(data,isDirty,clientUpdate){
+		var sql;
+		if(clientUpdate)
+			sql = "UPDATE testsync SET Id = ?, field1 = ?, field2 = ?, field3 = ?,TS = ?, DL = ?, dirty = ? WHERE clientid = " + data.clientid;
+		else
+			sql = "UPDATE testsync SET Id = ?, field1 = ?, field2 = ?, field3 = ?,TS = ?, DL = ?, dirty = ? WHERE Id = " + data.Id;
+		var param = [data.Id,data.field1,data.field2,data.field3,data.TS,data.DL,isDirty];
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});			
 	};
 
 	this.Add = function(data,createFromClient){
-		var sql = "INSERT INTO testsync (ID, field1, field2, field3, TimeStamp, deleted, dirty, ts) VALUES ";
+		var sql = "INSERT INTO testsync (Id, field1, field2, field3, TS, DL, dirty) VALUES ";
 		var param = []; 
 		var rowArgs = [];
 		data.forEach(function(item){
-			rowArgs.push("(?,?,?,?,?,?,?,?)");
-			param.push(item.ID);
+			rowArgs.push("(?,?,?,?,?,?,?)");
+			param.push(item.Id);
 			param.push(item.field1);
 			param.push(item.field2);
 			param.push(item.field3);
-			param.push(item.TimeStamp);
-			param.push(false);
+			//TS
+			if(createFromClient) param.push(null); 
+			else param.push(item.TS); 
+			//DL
+			param.push(item.DL);
+			//dirty
 			if(createFromClient) param.push(true); 
 			else param.push(false);
-			if(createFromClient) param.push(null); 
-			else param.push(item.TimeStamp);
 		});
 		sql += rowArgs.join(', ');
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){console.log(error); return error;});
 	};
+	//***Necessary-Method
 
-	this.CountById = function(id){
-		return SQLiteService.Execute("SELECT COUNT(*) AS countTotal FROM testsync WHERE id = " + id + " ").then(function(response){return response;},function(error){return error;});		
-	};
-
-	this.CountIsNotDirtyById = function(id){
-		return SQLiteService.Execute("SELECT COUNT(*) AS countTotal FROM testsync WHERE id = '" + id + "' AND dirty = 'false'").then(function(response){return response;},function(error){return error;});			
-	};
-	
-	this.Update = function(data,isDeleted,isDirty,whereFieldName,whereValue){
-		var sql = "UPDATE testsync SET ID = ?, field1 = ?, field2 = ?, field3 = ?,TimeStamp = ?, deleted = ?,dirty = ?,ts = ? WHERE " + whereFieldName + " = " + whereValue;
-		var param = [data.ID,data.field1,data.field2,data.field3,data.TimeStamp,isDeleted,isDirty,data.TimeStamp];
-		// if(whereFieldName == 'clientid')
-		// 	param = [data.id,data.field1,data.field2,data.field3,data.timestamp,isDeleted,isDirty,data.timestamp];
-		// else
-		// 	param = [data.ID,data.field1,data.field2,data.field3,data.TimeStamp,isDeleted,isDirty,data.TimeStamp];
-		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});			
-	};
-
-	this.GetDataByTSIsNull = function(){
-		return SQLiteService.Execute("SELECT * FROM testsync WHERE ts is null ").then(function(response){return response;},function(error){return error;});			
-	};
-
-	this.GetDataIsDirty = function(){
-		return SQLiteService.Execute("SELECT * FROM testsync WHERE dirty = 'true' ").then(function(response){return response;},function(error){return error;});				
-	};
-
-	this.DeleteDataIsFlagDeleted = function(){
-		return SQLiteService.Execute("DELETE FROM testsync WHERE deleted = 'true' ").then(function(response){return response;},function(error){return error;});				
+	this.DeleteAll = function(){
+		return SQLiteService.Execute("DELETE FROM testsync").then(function(response){return response;},function(error){return error;});		
 	};
 
 	this.GetAll = function(){
 		return SQLiteService.Execute("SELECT * FROM testsync").then(function(response){return response;},function(error){return error;});
 	};
 
-	this.GetById = function(clientid){
+	this.GetByClientId = function(clientid){
 		return SQLiteService.Execute("SELECT * FROM testsync WHERE clientid = " + clientid).then(function(response){return response;},function(error){return error;});	
-	}
+	};
 
-	this.DeleteById = function(clientid){
-		return SQLiteService.Execute("DELETE FROM testsync WHERE clientid = " + clientid).then(function(response){return response;},function(error){return error;});
-	}
+	// this.DeleteByServerId = function(serverid){
+	// 	return SQLiteService.DeleteByServerId('testsync',serverid).then(function(response){return response;},function(error){return error;});
+	// };
 })
 //***Test-Sync-Code

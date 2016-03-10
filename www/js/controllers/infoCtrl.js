@@ -119,35 +119,50 @@ angular.module('starter')
 
     .controller('InfoCtrl', function($scope, $stateParams) {
     })
-    .controller('TimeCtrl', function($scope, $filter, TimeAttendanceSQLite, APIService, AuthService) {
+    .controller('TimeCtrl', function($scope, $filter, TimeAttendanceSQLite, SyncService) {
 
         //if disable sync, Get new data when page load.
-        if(!enableSync) ProcessSyncTimeData($scope,TimeAttendanceSQLite,APIService,AuthService,$filter);
+        SyncService.SyncTime();
+        //if(!enableSync) ProcessSyncTimeData($scope,TimeAttendanceSQLite,APIService,AuthService,$filter);
 
         // //get all data only one times for use with $filter
         TimeAttendanceSQLite.GetTimeAttendances().then(function(response){
             $scope.allTADatas = response.rows;
-        })
+        });
 
         $scope.BindList = function(){
             var selectedVal = $scope.ddlMonthsData.selectedOptions.val;
             if(!selectedVal || selectedVal.length == 0) return;
             TimeAttendanceSQLite.GetDistinctStampDateByFromDateAndToDate(selectedVal).then(
                 function(response){
-                    if(response.rows != null && response.rows.length > 0){
-                        $scope.listTimeInfo = GetTimeInfo(response.rows,$filter,$scope.allTADatas);
+                    if($scope.allTADatas.length == 0){
+                        TimeAttendanceSQLite.GetTimeAttendances().then(function(response){
+                            $scope.allTADatas = response.rows;
+                            if(response.rows != null && response.rows.length > 0){
+                                $scope.listTimeInfo = GetTimeInfo(response.rows,$filter,$scope.allTADatas);
+                            }
+                            else $scope.listTimeInfo = [];
+                        });
                     }
-                    else $scope.listTimeInfo = [];
+                    else{
+                        if(response.rows != null && response.rows.length > 0){
+                            $scope.listTimeInfo = GetTimeInfo(response.rows,$filter,$scope.allTADatas);
+                        }
+                        else $scope.listTimeInfo = [];
+                    }
             });
         };
 
         InitialTimeInfo($scope,$filter);
 
     })
-    .controller('LeaveCtrl', function($scope, $stateParams,$filter,LeaveSQLite,APIService,AuthService) {
+    .controller('LeaveCtrl', function($scope, $stateParams,$filter,LeaveSQLite, SyncService) {
         //if disable sync, Get new data when page load.
-        if(!enableSync) ProcessSyncLeaveData($scope,LeaveSQLite,APIService,AuthService,$filter)
-        InitialLeaveInfo($scope,$filter,LeaveSQLite);
+        SyncService.SyncLeave().then(function(){
+            InitialLeaveInfo($scope,$filter,LeaveSQLite);
+        });  
+        //if(!enableSync) ProcessSyncLeaveData($scope,LeaveSQLite,APIService,AuthService,$filter)
+        
     })
     .controller('MedicalCtrl', function($scope, $stateParams, $filter, MedicalSQLite) {
         MedicalSQLite.GetMedicals().then(function(response){
@@ -166,20 +181,25 @@ angular.module('starter')
     .controller('FuelDetailCtrl', function($scope, $stateParams) {
 
     })
-    .controller('FinanceCtrl', function($scope, $stateParams, APIService, AuthService, MedicalSQLite, TuitionSQLite) {
+    .controller('FinanceCtrl', function($scope, MedicalSQLite, TuitionSQLite, SyncService) {
 
         //***Medical
         //if disable sync, Get new data when page load.
-        if(!enableSync) ProcessSyncMedicalData($scope,MedicalSQLite,APIService,AuthService);
+        SyncService.SyncMedical().then(function(numberOfNewData){
+             //get current data from sqlite
+             InitialMedicalInfo($scope,MedicalSQLite,numberOfNewData);    
+        });
         //get current data from sqlite
-        InitialMedicalInfo($scope,MedicalSQLite);
+        //if(!enableSync) ProcessSyncMedicalData($scope,MedicalSQLite,APIService,AuthService);
         //***Medical
 
         //***tuition
-        //if disable sync, Get new data when page load.
-        if(!enableSync) ProcessSyncTuitionData($scope,TuitionSQLite,APIService,AuthService);
+        SyncService.SyncTuition().then(function(numberOfNewData){
+            //get current data from sqlite
+            InitialTuitionInfo($scope,TuitionSQLite,numberOfNewData);
+        });   
         //get current data from sqlite
-        InitialTuitionInfo($scope,TuitionSQLite);
+        //if(!enableSync) ProcessSyncTuitionData($scope,TuitionSQLite,APIService,AuthService);
         //***tuition
 
     })
@@ -200,11 +220,15 @@ angular.module('starter')
     .controller('TuitionDetailCtrl', function($scope, $stateParams, $filter) {
         InitialTuitionDetails($scope,$filter,$stateParams);
     })
-    .controller('RoyalCtrl', function($scope, $stateParams, RoyalSQLite, APIService, AuthService, $filter) {
-        //if disable sync, Get new data when page load.
-        if(!enableSync) ProcessSyncRoyalData($scope,RoyalSQLite,APIService,AuthService,$filter);
+    .controller('RoyalCtrl', function($scope, $stateParams, RoyalSQLite, SyncService, $filter) {
+        SyncService.SyncRoyal().then(function(){
+            //get current data from sqlite
+            InitialRoyalInfo($scope,RoyalSQLite,$filter);
+        });
+       
         //get current data from sqlite
-        InitialRoyalInfo($scope,RoyalSQLite,$filter);
+        //else InitialRoyalInfo($scope,RoyalSQLite,$filter);
+        //if(!enableSync) ProcessSyncRoyalData($scope,RoyalSQLite,APIService,AuthService,$filter);  
     })
 
 function InitialMedicalInfo($scope,MedicalSQLite,totalNotification){

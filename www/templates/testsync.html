@@ -1,24 +1,26 @@
 <ion-view view-title="Test-Sync">
     <ion-content>
-        <h1>TestSync</h1>
-        <div class='list'>
-        	<a ng-repeat='eachItem in testSyncDatas' class='item' href='#/app/testsync-detail/{{eachItem.clientid}}'>
-        		<p>client Id : {{eachItem.clientid}}</p>
-        		<p>Id : {{eachItem.ID}}</p>
-        		<p>Field1 : {{eachItem.field1}}</p>
-        		<p>Field2 : {{eachItem.field2}}</p>
-        		<p>Field3 : {{eachItem.field3}}</p>
-        		<p>TimeStamp : {{eachItem.TimeStamp}}</p>
-        		<p>Deleted : {{eachItem.deleted}}</p>
-        		<p>Dirty : {{eachItem.dirty}}</p>
-        		<p>TS : {{eachItem.ts}}</p>
-        		 <button ng-click='DeleteData(eachItem.clientid)' class="button button-assertive">
-			      <i class="icon ion-ios-trash"></i>
-			    </button>
-        	</a>
-        </div>
 
-        <a class='button' href='#app/testsync-detail/0'>createTestSync</a>
+        <button type='button' ng-click='StartSync()' class='button button-block button-'>Sync-Data</button>
+
+        <a class='button button-block button-balanced' href='#app/testsync-detail/0'>
+            <i class='icon ion-android-add-circle'></i>
+            createTestSync
+        </a>
+
+        <ion-list show-delete="false" can-swipe="true">
+            <ion-item href="#/app/testsync-detail/{{eachItem.clientid}}" ng-repeat='eachItem in testSyncDatas'>
+                <p>client Id : {{eachItem.clientid}}</p>
+                <p>Id : {{eachItem.Id}}</p>
+                <p>Field1 : {{eachItem.field1}}</p>
+                <p>Field2 : {{eachItem.field2}}</p>
+                <p>Field3 : {{eachItem.field3}}</p>
+                <p>TimeStamp : {{eachItem.TS}}</p>
+                <p>DL : {{eachItem.DL}}</p>
+                <p>Dirty : {{eachItem.dirty}}</p>
+                <ion-option-button ng-click='DeleteData(eachItem.clientid)' class="button-assertive icon ion-trash-a"></ion-option-button>
+            </ion-item>
+        </ion-list>
 
     </ion-content>
 </ion-view>

@@ -1,8 +1,10 @@
 <ion-view view-title="Add Or Edit TestSync">
     <ion-content>
-        <h1>TestSync-Detail</h1>
-        <h2>Mode : {{Mode}}</h2>
-        <div class='list'>
+        <div class='padding-top'>
+            <h2>Mode : {{Mode}}</h2>
+        </div>
+        
+        <div class='list padding-top'>
             <label class='item item-input item-stacked-label'>
                 <span class='input-label'>ClientId</span>
                 <p>{{info.clientid}}</p>
@@ -24,20 +26,16 @@
                 <input type='text' ng-model='info.field3' />
             </label>
             <label class='item item-input item-stacked-label'>
-                <span class='input-label'>TimeStamp</span>
-                <input type='text' ng-model='info.TimeStamp' />
+                <span class='input-label'>TS</span>
+                <input type='text' ng-model='info.TS' />
             </label>
             <label class='item item-input item-stacked-label'>
-                <span class='input-label'>Deleted</span>
-                <input type='text' ng-model='info.deleted' placeholder='true or false' />
+                <span class='input-label'>DL</span>
+                <input type='text' ng-model='info.DL' placeholder='true or false' />
             </label>
             <label class='item item-input item-stacked-label'>
                 <span class='input-label'>Dirty</span>
                 <input type='text' ng-model='info.dirty' placeholder='true or false' />
-            </label>
-            <label class='item item-input item-stacked-label'>
-                <span class='input-label'>TS</span>
-                <input type='text' ng-model='info.ts' placeholder='time stamp' />
             </label>
         </div>
         <input type='button' class='button button-block button-balanced' ng-click='SaveData()' value='Save' />

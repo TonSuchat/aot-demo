@@ -38,35 +38,35 @@ angular.module('starter', ['ionic','ngCordova'])
     .run(function($ionicPlatform,AUTH_EVENTS,APIService,$http){
       $ionicPlatform.ready(function(){
         //call login api
-        LogInAPI(AUTH_EVENTS,APIService,$http);
+        //LogInAPI(AUTH_EVENTS,APIService,$http);
       });
     })
-    .run(function($ionicPlatform,SQLiteService,UserProfileSQLite){
+    .run(function($ionicPlatform, SQLiteService, APIService){
       $ionicPlatform.ready(function(){
         //open db
         SQLiteService.OpenDB();
         //initial all tables
         SQLiteService.InitailTables();
 
-        // SQLiteService.ExecuteData('INSERT INTO people (firstname, lastname,deleted,dirty,ts) VALUES (?,?,?,?,?)',['my-firstname2','my-lastname2',true,false,'23/02/2016 03:23:00'],
-        // function(response){
-        //   console.log(response.rows);
-        // },
-        // function(error){console.log(error);});
-
         // SQLiteService.Execute('select * from testsync',null).then(function(response){
         //     console.log(response);
         //   },
         // function(error){console.log(error);});
 
-        // var data = ['1','f1-edit','f2-editzzz','f3-editaaaaa','03032016101900',false,false,'03032016101900'];
-        // SQLiteService.Execute("insert into testsync(id, field1, field2, field3, timestamp, deleted, dirty, ts) values(?,?,?,?,?,?,?,?)",data).then(
-        //       function(response){
-        //       console.log(response);
-        // },function(error){console.log(error);});
+        // APIService.httpPost('http://localhost:51754/api/TestSync/UpdateData',{Id:99,field1:"a",field2:"b",field3:"c"},
+        //   function(response){console.log(response.data);},function(error){console.log(error);});
 
-      
-        //UserProfileSQLite.GetLatestTS().then(function(resp){console.log(resp);});
+        // var apiDatas = {
+        //   GetData:{ObjectID:1,SyncMedicalViewModel:{EmpID: '484074', FromDate: '4444', ToDate: '55555'}},
+        //   AddData:{},
+        //   UpdateData:{}
+        // };
+
+        // var tmpJson = {ObjectID:1,MedicalObject:{}};
+        // var jsonData = {Id:1,HospType:'รัฐบาล',HospName:'Name'};
+
+        // apiDatas.GetData[Object.keys(apiDatas.GetData)[1]].TS = "9999999";
+        // console.log(apiDatas.GetData);
 
       });
     })
