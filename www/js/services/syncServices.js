@@ -72,6 +72,16 @@ angular.module('starter')
     return ProcessSyncData(APIService,RoyalSQLite,$q,apiURLs,apiDatas);
   };
 
+  this.SyncCircular = function(){
+    var apiDatas = {
+      GetData:{ObjectID:3,SyncCircularLetterViewModel:{DocDate: GetCurrentDate().replace(/\//g,'')}},
+      AddData:{ObjectID:3,ObjectCircularLetterEntity:{}},
+      UpdateData:{ObjectID:3,ObjectCircularLetterEntity:{}}
+    };
+    console.log('SYNC-CIRCULAR');
+    //return ProcessSyncData(APIService,CircularSQLite,$q,apiURLs,apiDatas);
+  };
+
 });
 
 function SyncDownloadFromServer(APIService,GenericSQLite,$q,apiURLs,apiDatas){

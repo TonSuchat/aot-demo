@@ -77,8 +77,28 @@ angular.module('starter')
       console.log('news click');
     })
     .controller('CircularLetterCtrl', function($scope, $stateParams) {
+      
     })
-    .controller('ProfileCtrl', function($scope, $stateParams) {
+    .controller('ProfileCtrl', function($scope, UserProfileSQLite) {
+        UserProfileSQLite.GetUserProfile().then(
+          function(response){
+            if(response.rows != null && response.rows.length > 0){
+              var result = response.rows[0];
+              $scope.profile = {};
+              $scope.profile.UserID = result.UserID;
+              $scope.profile.FullName = result.PrefixName + ' ' + result.Firstname + ' ' + result.Lastname; 
+              $scope.profile.Nickname = (result.Nickname && result.Nickname.length > 0) ? ' (' + result.Nickname + ')' : '';
+              $scope.profile.Department = result.Department;
+              $scope.profile.Section = result.Section;
+              $scope.profile.Position = result.Position;
+              $scope.profile.OfficeTel = (result.OfficeTel && result.OfficeTel.length > 0) ? result.OfficeTel : '-';
+              $scope.profile.OfficeFax = (result.OfficeFax && result.OfficeFax.length > 0) ? result.OfficeFax : '-';
+              $scope.profile.MobilePhone = (result.MobilePhone && result.MobilePhone.length > 0) ? response.MobilePhone : '-';
+              $scope.profile.eMailAddress = (result.eMailAddress && result.eMailAddress.length > 0) ? result.eMailAddress : '-';
+              $scope.profile.Facebook = (result.Facebook && result.Facebook.length > 0) ? result.Facebook : '-';
+              $scope.profile.Line = (result.Line && result.Line.length > 0) ? result.Line : '-';
+            };
+        })
     })
     .controller('TestSyncCtrl',function($scope,SyncService,TestSyncSQLite){
 

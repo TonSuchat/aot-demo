@@ -68,6 +68,7 @@ angular.module('starter')
 		this.CreateRoyalTable();
 		this.CreateTimeAttendanceTable();
 		this.CreateLeaveTable();
+		this.CreateCircularTable();
 	};
 
 	//**Test-Sync-Code
@@ -78,7 +79,7 @@ angular.module('starter')
 	//**Test-Sync-Code
 
 	this.CreateUserProfileTable = function(){
-		$cordovaSQLite.execute(db, "CREATE TABLE IF NOT EXISTS userprofile (clientid integer primary key AUTOINCREMENT, UserID text, PrefixName text, Firstname text, Lastname text, Nickname text, Position text, Section text, Department text, CitizenID text, PicturePath text,PictureThumb text, posi_name_gover text, orga_gover text, changeDate text, OfficeTel text, OfficeFax text, MobilePhone text, eMailAddress text, Line text, Facebook text, deleted boolean, dirty boolean, ts datetime)");
+		$cordovaSQLite.execute(db, "CREATE TABLE IF NOT EXISTS userprofile (clientid integer primary key AUTOINCREMENT, UserID text, PrefixName text, Firstname text, Lastname text, Nickname text, Position text, Section text, Department text, CitizenID text, PicturePath text,PictureThumb text, posi_name_gover text, orga_gover text, changeDate text, OfficeTel text, OfficeFax text, MobilePhone text, eMailAddress text, Line text, Facebook text, DL boolean, dirty boolean, TS datetime)");
 	};
 	this.CreateMedicalTable = function(){
 		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS medical(clientid integer primary key AUTOINCREMENT, Id int,EmpID text, HospType text, HospName text, PatientType text, Family text, PatientName text, Disease text, Total int, DocDate text, PaidDate text, BankName text, DL boolean,dirty boolean,TS datetime)");
@@ -95,6 +96,9 @@ angular.module('starter')
 	this.CreateLeaveTable = function(){
 		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS leave(clientid integer primary key AUTOINCREMENT, Id int, Empl_Code text, Empl_Name text, Leave_Code text, Leave_Day text, Leave_From text, Leave_To text, Leave_Date text, Updt_Date text, Tran_Seqe text, Leave_Timecode text, DL boolean,dirty boolean,TS datetime)");
 	};
+	this.CreateCircularTable = function(){
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS circular(clientid integer primary key AUTOINCREMENT, Id int, DocID text, DocDate text, Link text, Description text, DocNumber text, DL boolean,dirty boolean,TS datetime)");	
+	};
 
 	this.DeleteAllTables = function(){
 		$cordovaSQLite.execute(db, "DELETE FROM userprofile");
@@ -103,7 +107,7 @@ angular.module('starter')
 		$cordovaSQLite.execute(db, "DELETE FROM royal");
 		$cordovaSQLite.execute(db, "DELETE FROM timeattendance");
 		$cordovaSQLite.execute(db, "DELETE FROM leave");
-	}
+	};
 
 })
 .service('UserProfileSQLite', function(SQLiteService){
@@ -115,16 +119,21 @@ angular.module('starter')
 		SQLiteService.Execute(sql).then(
 			function(){
 				//insert new data
-				sql = "INSERT INTO userprofile (userid, prefixname, firstname, lastname, nickname, position, section, department, citizenid, picturepath, picturethumb, posi_name_gover, orga_gover, changedate, officetel, officefax, mobilephone, emailaddress, line, facebook, deleted, dirty, ts) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				sql = "INSERT INTO userprofile (userid, prefixname, firstname, lastname, nickname, position, section, department, citizenid, picturepath, picturethumb, posi_name_gover, orga_gover, changedate, officetel, officefax, mobilephone, emailaddress, line, facebook, DL, dirty, TS) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				console.log(sql);
 				var param = [data.UserID,data.PrefixName,data.Firstname,data.Lastname,data.Nickname,data.Position,data.Section,data.Department,data.CitizenID,data.PicturePath,data.PictureThumb,data.posi_name_gover,data.orga_gover,data.changeDate,data.ContactList[0].OfficeTel,data.ContactList[0].OfficeFax,data.ContactList[0].MobilePhone,data.ContactList[0].eMailAddress,data.ContactList[0].Line,data.ContactList[0].Facebook,false,false,data.changeDate];
-				SQLiteService.Execute(sql,param);
+				SQLiteService.Execute(sql,param).then(function(){},function(error){console.log(error);});
 			},
-			function(error){})
+			function(error){console.log(error);})
 	};
 
 	this.GetLatestTS = function(){
 		return SQLiteService.BaseGetLatestTS('userprofile',false).then(function(response){return response;},function(error){return error;});
 	};
+
+	this.GetUserProfile = function(){
+		return SQLiteService.Execute('SELECT * FROM userprofile').then(function(response){return response;},function(error){return error;});	
+	}
 })
 .service('MedicalSQLite', function(SQLiteService){
 	//***Necessary-Method
@@ -522,6 +531,69 @@ angular.module('starter')
 		return SQLiteService.Execute("SELECT * FROM leave ORDER BY CAST(SUBSTR(Leave_From,5,4) AS INT) DESC, CAST(SUBSTR(Leave_From,3,2) AS INT) DESC, CAST(SUBSTR(Leave_From,1,2) AS INT) DESC ").then(function(response){return response;},function(error){return error;});
 	};
 
+})
+.service('CircularSQLite',function(SQLiteService){
+	//***Necessary-Method
+	this.GetLatestTS = function(){
+		return SQLiteService.BaseGetLatestTS('circular').then(function(response){return response;},function(error){return error;});
+	};
+
+	this.CountByServerId = function(serverid){
+		return SQLiteService.CountByServerId(serverid,'circular').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.CountIsNotDirtyById = function(id){
+		return SQLiteService.CountIsNotDirtyById(id,'circular').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.GetDataByTSIsNull = function(){
+		return SQLiteService.GetDataByTSIsNull('circular');
+	};
+
+	this.GetDataIsDirty = function(){
+		return SQLiteService.GetDataIsDirty("circular");
+	};
+
+	this.DeleteDataIsFlagDeleted = function(){
+		return SQLiteService.DeleteDataIsFlagDeleted("circular");
+	};
+
+	this.Update = function(data,isDirty,clientUpdate){
+		var sql;
+		if(clientUpdate)
+			sql = "UPDATE circular SET Id = ?, DocID = ?, DocDate = ?, Link = ?, Description = ?, DocNumber = ?, DL = ?,dirty = ?,TS = ? WHERE clientid = " + data.clientid;
+		else
+			sql = "UPDATE circular SET Id = ?, DocID = ?, DocDate = ?, Link = ?, Description = ?, DocNumber = ?, DL = ?,dirty = ?,TS = ? WHERE Id = " + data.Id;
+		var param = [data.Id,data.DocID,data.DocDate,data.Link,data.Description,data.DocNumber,data.DL,isDirty,data.TS];
+		console.log(sql);
+		console.log(param);
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
+	};
+
+	this.Add = function(data,createFromClient){
+		var sql = "INSERT INTO circular (Id, DocID, DocDate, Link, Description, DocNumber, DL, dirty, TS) VALUES ";
+		var param = []; 
+		var rowArgs = [];
+		data.forEach(function(item){
+			rowArgs.push("(?,?,?,?,?,?,?,?,?)");
+			param.push(item.Id);
+			param.push(item.DocID);
+			param.push(item.DocDate);
+			param.push(item.Link);
+			param.push(item.Description);
+			param.push(item.DocNumber);
+			param.push(item.DL);
+			//dirty
+			if(createFromClient) param.push(true);
+			else param.push(false);
+			//TS
+			if(createFromClient) param.push(null);
+			else param.push(item.TS);
+		});
+		sql += rowArgs.join(', ');
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){console.log(error); return error;});
+	};
+	//***Necessary-Method
 })
 
 //***Test-Sync-Code
