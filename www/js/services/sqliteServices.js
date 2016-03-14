@@ -594,6 +594,14 @@ angular.module('starter')
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){console.log(error); return error;});
 	};
 	//***Necessary-Method
+
+	this.GetDistinctDate = function(){
+		return SQLiteService.Execute("SELECT DISTINCT DocDate FROM circular ORDER BY CAST(SUBSTR(DocDate,5,4) AS INT) DESC, CAST(SUBSTR(DocDate,3,2) AS INT) DESC, CAST(SUBSTR(DocDate,1,2) AS INT) DESC").then(function(response){return response;},function(error){return error;});
+	};
+
+	this.GetAll = function(){
+		return SQLiteService.Execute("SELECT * FROM circular").then(function(response){return response;},function(error){return error;});	
+	};
 })
 
 //***Test-Sync-Code

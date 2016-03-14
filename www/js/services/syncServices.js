@@ -1,6 +1,6 @@
 angular.module('starter')
 
-.service('SyncService',function($q,AuthService,APIService,TestSyncSQLite,UserProfileSQLite,MedicalSQLite,TuitionSQLite,RoyalSQLite,TimeAttendanceSQLite,LeaveSQLite){
+.service('SyncService',function($q,AuthService,APIService,TestSyncSQLite,UserProfileSQLite,MedicalSQLite,TuitionSQLite,RoyalSQLite,TimeAttendanceSQLite,LeaveSQLite,CircularSQLite){
 
   enableSync = true;
 
@@ -74,12 +74,12 @@ angular.module('starter')
 
   this.SyncCircular = function(){
     var apiDatas = {
-      GetData:{ObjectID:3,SyncCircularLetterViewModel:{DocDate: GetCurrentDate().replace(/\//g,'')}},
+      GetData:{ObjectID:3,SyncCircularLetterViewModel:{DocDate:''}},
       AddData:{ObjectID:3,ObjectCircularLetterEntity:{}},
       UpdateData:{ObjectID:3,ObjectCircularLetterEntity:{}}
     };
     console.log('SYNC-CIRCULAR');
-    //return ProcessSyncData(APIService,CircularSQLite,$q,apiURLs,apiDatas);
+    return ProcessSyncData(APIService,CircularSQLite,$q,apiURLs,apiDatas);
   };
 
 });

@@ -76,8 +76,18 @@ angular.module('starter')
     .controller('NewsCtrl', function($scope, $stateParams) {
       console.log('news click');
     })
-    .controller('CircularLetterCtrl', function($scope, $stateParams) {
-      
+    .controller('CircularLetterCtrl', function($scope, $filter, SyncService, CircularSQLite) {
+
+      SyncService.SyncCircular().then(function(){
+        CircularSQLite.GetAll().then(function(allData){
+          if(allData.rows != null && allData.rows.length > 0){
+            CircularSQLite.GetDistinctDate().then(function(distinctDate){
+              $scope.Circulars = InitialCirculars(distinctDate,$filter,allData);
+            });
+          }
+        });
+      });
+
     })
     .controller('ProfileCtrl', function($scope, UserProfileSQLite) {
         UserProfileSQLite.GetUserProfile().then(
@@ -168,3 +178,20 @@ angular.module('starter')
         };
 
      })
+
+function InitialCirculars(distinctCircularDate,$filter,allData){
+    var result = [];
+    for (var i = 0; i <= distinctCircularDate.rows.length -1; i++) {
+        var currentCircularDate = distinctCircularDate.rows[i].DocDate;
+        var currentDetailsByDate = $filter('filter')(allData.rows,{DocDate:currentCircularDate});   
+        if(currentCircularDate.indexOf('/') > -1) currentCircularDate = currentCircularDate.replace(/\//g,'');
+        var newData = {};
+        newData.circularDate = GetThaiDateByDate($filter,currentCircularDate);
+        newData.circularDetails = [];
+        for (var z = 0; z <= currentDetailsByDate.length -1; z++) {
+            newData.circularDetails.push({link:currentDetailsByDate[z].Link,header:currentDetailsByDate[z].Description,description:currentDetailsByDate[z].DocNumber});    
+        };
+        result.push(newData);
+    };
+    return result;
+};
