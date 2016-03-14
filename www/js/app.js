@@ -38,10 +38,13 @@ angular.module('starter', ['ionic','ngCordova'])
     .run(function($ionicPlatform,AUTH_EVENTS,APIService,$http,$q,NotiService,$cordovaPush){
       $ionicPlatform.ready(function(){
         //call login api
-        LogInAPI(AUTH_EVENTS,APIService,$http,$q).then(function(){
-          //post to gcm(google cloud messaging) for register device and get token from gcm
-         NotiService.Register();
-        });
+        //LogInAPI(AUTH_EVENTS,APIService,$http,$q).then(function(){
+        //  //post to gcm(google cloud messaging) for register device and get token from gcm
+        //
+        //});
+          pushNotification = window.plugins.pushNotification;
+          NotiService.Register(pushNotification);
+
       });
     })
     .run(function($ionicPlatform, SQLiteService, APIService){

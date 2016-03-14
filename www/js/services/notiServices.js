@@ -1,12 +1,12 @@
 /**
  * Created by danupon on 1/26/2016 AD.
  */
-pushNotification = window.plugins.pushNotification;
+//pushNotification = window.plugins.pushNotification;
 
 angular.module('starter')
 .service('NotiService',function(){
-	
-    this.Register = function(){
+
+    this.Register = function(pushNotification){
         pushNotification.register(
             onNotification,
             errorHandler,
