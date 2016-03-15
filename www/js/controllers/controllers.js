@@ -9,6 +9,15 @@ angular.module('starter')
       //$scope.$on('$ionicView.enter', function(e) {
       //});
 
+      //bypass login if still loging in.
+      $scope.bypassLogIn = function(){
+        AuthService.bypassLogIn().then(function(){
+          checkAuthen();
+        });
+      };
+
+      //$scope.bypassLogIn();
+
       // Form data for the login modal
       function checkAuthen(){
 
@@ -93,7 +102,7 @@ angular.module('starter')
         UserProfileSQLite.GetUserProfile().then(
           function(response){
             if(response.rows != null && response.rows.length > 0){
-              var result = response.rows[0];
+              var result = response.rows.item(0);
               $scope.profile = {};
               $scope.profile.UserID = result.UserID;
               $scope.profile.FullName = result.PrefixName + ' ' + result.Firstname + ' ' + result.Lastname; 
@@ -141,7 +150,7 @@ angular.module('starter')
             $scope.Mode = 'Edit';
             TestSyncSQLite.GetByClientId(clientId).then(function(response){
                 if(response.rows != null && response.rows.length > 0){
-                    var result = response.rows[0];
+                    var result = response.rows.item(0);
                     $scope.info.clientid = result.clientid;
                     $scope.info.Id = result.Id;
                     $scope.info.field1 = result.field1;
@@ -182,8 +191,9 @@ angular.module('starter')
 function InitialCirculars(distinctCircularDate,$filter,allData){
     var result = [];
     for (var i = 0; i <= distinctCircularDate.rows.length -1; i++) {
-        var currentCircularDate = distinctCircularDate.rows[i].DocDate;
-        var currentDetailsByDate = $filter('filter')(allData.rows,{DocDate:currentCircularDate});   
+        var currentCircularDate = distinctCircularDate.rows.item(i).DocDate;
+        allDataArr = ConvertQueryResultToArray(allData);
+        var currentDetailsByDate = $filter('filter')(allDataArr,{DocDate:currentCircularDate});   
         if(currentCircularDate.indexOf('/') > -1) currentCircularDate = currentCircularDate.replace(/\//g,'');
         var newData = {};
         newData.circularDate = GetThaiDateByDate($filter,currentCircularDate);

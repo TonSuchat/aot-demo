@@ -58,3 +58,11 @@ function GetTimeByStampTime(stampTime){
     if(!stampTime || stampTime.length == 0) return;
     return stampTime.substring(11,16);
 }
+
+function ConvertQueryResultToArray(data){
+    var newArr = [];
+    for (var i = 0; i <= data.rows.length - 1; i++) {
+        newArr.push(data.rows.item(i));
+    };
+    return newArr;
+}

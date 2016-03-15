@@ -35,27 +35,28 @@ angular.module('starter', ['ionic','ngCordova'])
             }
         })
     })
-    .run(function($ionicPlatform,AUTH_EVENTS,APIService,$http,$q,NotiService,$cordovaPush){
+    .run(function($ionicPlatform,AUTH_EVENTS,APIService,$http,$q,NotiService,$cordovaDevice){
       $ionicPlatform.ready(function(){
         //call login api
         LogInAPI(AUTH_EVENTS,APIService,$http,$q).then(function(){
-         //post to gcm(google cloud messaging) for register device and get token from gcm
-        
+          //post to gcm(google cloud messaging) for register device and get token from gcm
+          // if (window.cordova){
+          //   pushNotification = window.plugins.pushNotification;
+          //   NotiService.Register(pushNotification);  
+          // }
         });
-          // pushNotification = window.plugins.pushNotification;
-          // NotiService.Register(pushNotification);
-
+          
       });
     })
-    .run(function($ionicPlatform, SQLiteService, APIService){
+    .run(function($ionicPlatform, SQLiteService ){
       $ionicPlatform.ready(function(){
         //open db
         SQLiteService.OpenDB();
         //initial all tables
         SQLiteService.InitailTables();
 
-        // SQLiteService.Execute('select * from testsync',null).then(function(response){
-        //     console.log(response);
+        // SQLiteService.Execute('select * from userprofile',null).then(function(response){
+        //     console.log(response.rows.item);
         //   },
         // function(error){console.log(error);});
 

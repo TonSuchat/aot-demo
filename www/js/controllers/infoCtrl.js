@@ -127,7 +127,7 @@ angular.module('starter')
 
         // //get all data only one times for use with $filter
         TimeAttendanceSQLite.GetTimeAttendances().then(function(response){
-            $scope.allTADatas = response.rows;
+            $scope.allTADatas = ConvertQueryResultToArray(response);
         });
 
         $scope.BindList = function(){
@@ -135,18 +135,20 @@ angular.module('starter')
             if(!selectedVal || selectedVal.length == 0) return;
             TimeAttendanceSQLite.GetDistinctStampDateByFromDateAndToDate(selectedVal).then(
                 function(response){
+                    var distinctStampDateArr = ConvertQueryResultToArray(response);
                     if($scope.allTADatas.length == 0){
-                        TimeAttendanceSQLite.GetTimeAttendances().then(function(response){
-                            $scope.allTADatas = response.rows;
-                            if(response.rows != null && response.rows.length > 0){
-                                $scope.listTimeInfo = GetTimeInfo(response.rows,$filter,$scope.allTADatas);
+                        TimeAttendanceSQLite.GetTimeAttendances().then(function(allData){
+                            var allDataArr = ConvertQueryResultToArray(allData);
+                            $scope.allTADatas = allDataArr;
+                            if(allDataArr != null && allDataArr.length > 0){
+                                $scope.listTimeInfo = GetTimeInfo(allDataArr,$filter,$scope.allTADatas);
                             }
                             else $scope.listTimeInfo = [];
                         });
                     }
                     else{
-                        if(response.rows != null && response.rows.length > 0){
-                            $scope.listTimeInfo = GetTimeInfo(response.rows,$filter,$scope.allTADatas);
+                        if(distinctStampDateArr != null && distinctStampDateArr.length > 0){
+                            $scope.listTimeInfo = GetTimeInfo(distinctStampDateArr,$filter,$scope.allTADatas);
                         }
                         else $scope.listTimeInfo = [];
                     }
@@ -235,7 +237,7 @@ function InitialMedicalInfo($scope,MedicalSQLite,totalNotification){
     $scope.medicalInfo = {};
     MedicalSQLite.GetSumMedicalTotal().then(
         function(response){
-            if(response.rows[0].total != null && response.rows[0].total > 0) $scope.medicalInfo.totalSpent = response.rows[0].total;
+            if(response.rows.item(0).total != null && response.rows.item(0).total > 0) $scope.medicalInfo.totalSpent = response.rows.item(0).total;
             else $scope.medicalInfo.totalSpent = 0;
         },
         function(error){$scope.medicalInfo.totalSpent = 0;}
@@ -247,7 +249,7 @@ function InitialTuitionInfo($scope,TuitionSQLite,totalNotification){
     $scope.tuitionInfo = {};
     TuitionSQLite.GetSumTuitionGrandTotal().then(
         function(response){
-            if(response.rows[0].Grand_Total != null && response.rows[0].Grand_Total > 0) $scope.tuitionInfo.totalSpent = response.rows[0].Grand_Total;
+            if(response.rows.item(0).Grand_Total != null && response.rows.item(0).Grand_Total > 0) $scope.tuitionInfo.totalSpent = response.rows.item(0).Grand_Total;
             else $scope.tuitionInfo.totalSpent = 0;
         },
         function(error){$scope.tuitionInfo.totalSpent = 0;}
@@ -261,9 +263,9 @@ function InitialRoyalInfo($scope,RoyalSQLite,$filter){
         if(response.rows.length > 0){
             for (var i = 0; i <= response.rows.length - 1; i++) {
                 var currentRoyal = {};
-                currentRoyal.royalName = response.rows[i].Roya_Name;
-                currentRoyal.royalCode = response.rows[i].Roya_Code;
-                currentRoyal.royalDate = GetThaiDateByDate($filter,response.rows[i].Roya_Date);
+                currentRoyal.royalName = response.rows.item(i).Roya_Name;
+                currentRoyal.royalCode = response.rows.item(i).Roya_Code;
+                currentRoyal.royalDate = GetThaiDateByDate($filter,response.rows.item(i).Roya_Date);
                 $scope.RoyalInfo.push(currentRoyal);
             };    
         }
@@ -277,7 +279,7 @@ function InitialTimeInfo($scope,$filter){
 
 function InitialLeaveInfo($scope,$filter,LeaveSQLite){
     LeaveSQLite.GetLeaves().then(function(response){
-        var result = response.rows;
+        var result = ConvertQueryResultToArray(response);
         if(result == null || result.length == 0) return;
         $scope.leaveInfo = {};
         $scope.leaveInfo.sickLeave = GetLeaveDetails('1',result,$filter);
@@ -287,7 +289,8 @@ function InitialLeaveInfo($scope,$filter,LeaveSQLite){
 };
 
 function InitialMedicalDetails($scope,$filter,$stateParams){
-    var currentMedical = $filter('filter')(shareMedicalData.rows, { Id: $stateParams.Id });
+    var shareMedicalDataArr = ConvertQueryResultToArray(shareMedicalData);
+    var currentMedical = $filter('filter')(shareMedicalDataArr, { Id: $stateParams.Id });
     $scope.MedicalDetails = {};
     $scope.MedicalDetails.hospitalType = (currentMedical[0].HospType == 320) ? 'รัฐบาล' : 'เอกชน';
     $scope.MedicalDetails.hospitalName = currentMedical[0].HospName;
@@ -302,7 +305,8 @@ function InitialMedicalDetails($scope,$filter,$stateParams){
 };
 
 function InitialTuitionDetails($scope,$filter,$stateParams){
-    var currentTuition = $filter('filter')(shareTuitionData.rows, { Id: $stateParams.Id });
+    var shareTuitionDataArr = ConvertQueryResultToArray(shareTuitionData);
+    var currentTuition = $filter('filter')(shareTuitionDataArr, { Id: $stateParams.Id });
     $scope.TuitionDetails = {};
     $scope.TuitionDetails.paidDate = GetThaiDateByDate($filter,currentTuition[0].Paid_Date.replace(/\//g,''));
     $scope.TuitionDetails.total = currentTuition[0].Total_Amnt;
@@ -480,14 +484,15 @@ function CreateFinanceInfoGroupByDate(distinctPaidDate,$filter,shareData,type){
     for (var i = 0; i <= distinctPaidDate.rows.length -1; i++) {
         var currentPaidDate;
         var currentFinanceDetailsByPaidDate;
+        var shareDataArr = ConvertQueryResultToArray(shareData);
         switch(type){
             case "medical":
-                currentPaidDate = distinctPaidDate.rows[i].PaidDate;
-                currentFinanceDetailsByPaidDate = $filter('filter')(shareData.rows,{PaidDate:currentPaidDate});   
+                currentPaidDate = distinctPaidDate.rows.item(i).PaidDate;
+                currentFinanceDetailsByPaidDate = $filter('filter')(shareDataArr,{PaidDate:currentPaidDate});   
             break;
             case "tuition":
-                currentPaidDate = distinctPaidDate.rows[i].Paid_Date;
-                currentFinanceDetailsByPaidDate = $filter('filter')(shareData.rows,{Paid_Date:currentPaidDate});
+                currentPaidDate = distinctPaidDate.rows.item(i).Paid_Date;
+                currentFinanceDetailsByPaidDate = $filter('filter')(shareDataArr,{Paid_Date:currentPaidDate});
             break;
         }
         if(currentPaidDate.indexOf('/') > -1) currentPaidDate = currentPaidDate.replace(/\//g,'');

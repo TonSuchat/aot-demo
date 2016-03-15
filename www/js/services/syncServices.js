@@ -109,10 +109,10 @@ function SyncDownloadFromServer(APIService,GenericSQLite,$q,apiURLs,apiDatas){
                     angular.forEach(result,function(value,key){
                       //check id already exist?
                       GenericSQLite.CountByServerId(value.Id).then(function(resultCountIsExist){
-                        if(resultCountIsExist.rows[0].countTotal > 0){
+                        if(resultCountIsExist.rows.item(0).countTotal > 0){
                           //check client dirty if not update client data
                           GenericSQLite.CountIsNotDirtyById(value.Id).then(function(resultCountIsNotDirty){
-                            if(resultCountIsNotDirty.rows[0].countTotal > 0){
+                            if(resultCountIsNotDirty.rows.item(0).countTotal > 0){
                               //update data
                               console.log('update :' + value.Id);
                               GenericSQLite.Update(value,false,false).then(
@@ -156,7 +156,8 @@ function SyncCreateFromClient(APIService,GenericSQLite,$q,apiURLs,apiDatas){
     GenericSQLite.GetDataByTSIsNull().then(
       function(response){
         if(response.rows.length > 0){
-          angular.forEach(response.rows,function(value,key){
+          var responseArr = ConvertQueryResultToArray(response);
+          angular.forEach(responseArr,function(value,key){
             //post data to insert at server
             var url = APIService.hostname() + apiURLs.AddURL;
             //apiDatas.AddData = value; //{Id:null,field1:value.field1,field2:value.field2,field3:value.field3};
@@ -165,7 +166,7 @@ function SyncCreateFromClient(APIService,GenericSQLite,$q,apiURLs,apiDatas){
               function(resultFromServer){
                 console.log(resultFromServer);
                   if(resultFromServer.data != null){
-                      var currentData = response.rows[key];
+                      var currentData = response.rows.item(key);
                       currentData.Id = resultFromServer.data.Id; //return id from server
                       currentData.TS = resultFromServer.data.TS; //return ts from server
                       console.log(currentData);
@@ -192,7 +193,8 @@ function SyncUpdateFromClient(APIService,GenericSQLite,$q,apiURLs,apiDatas){
      //get list dirty data
      GenericSQLite.GetDataIsDirty().then(function(response){
         if(response.rows.length > 0){
-          angular.forEach(response.rows,function(value,key){
+          var responseArr = ConvertQueryResultToArray(response);
+          angular.forEach(responseArr,function(value,key){
             //post to update at server
             var url = APIService.hostname() + apiURLs.UpdateURL;
             //apiDatas.UpdateData = value //{Id:null,field1:value.field1,field2:value.field2,field3:value.field3};

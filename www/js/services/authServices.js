@@ -19,7 +19,7 @@ angular.module('starter')
             useCredentials();
         }
 
-        function useCredentials(successAction) {
+        function useCredentials(successAction,userData) {
 
             // username = token.split('.')[0];
             
@@ -31,23 +31,30 @@ angular.module('starter')
             // if (username == '484074') {
             //     fullname = "Sontaya Wilaijit";
             // }
-
+            if(userData != null){
+                isAuthenticated = true;
+                fullname = userData.PrefixName + ' ' + userData.Firstname + ' ' + userData.Lastname;
+                picThumb = userData.PictureThumb; position = userData.Position;
+                successAction();
+            }
+            else{
+                var url = APIService.hostname() + '/ContactDirectory/viewContactPaging';
+                var data = {keyword:username,start:1,retrieve:1};
+                APIService.httpPost(url,data,
+                    function(response){
+                        if(response.data == null || response.data.length == 0) return;
+                        var result = response.data[0];
+                        isAuthenticated = true;
+                        fullname = result.PrefixName + ' ' + result.Firstname + ' ' + result.Lastname;
+                        picThumb = result.PictureThumb; position = result.Position;
+                        //save user data to sqlite db
+                        UserProfileSQLite.SaveUserProfile(result);
+                        successAction();
+                    },
+                    function(){});
+            }
             // Set the token as header for your requests!
             //$http.defaults.headers.common['X-Auth-Token'] = token;
-            var url = APIService.hostname() + '/ContactDirectory/viewContactPaging';
-            var data = {keyword:username,start:1,retrieve:1};
-            APIService.httpPost(url,data,
-                function(response){
-                    if(response.data == null || response.data.length == 0) return;
-                    var result = response.data[0];
-                    isAuthenticated = true;
-                    fullname = result.PrefixName + ' ' + result.Firstname + ' ' + result.Lastname;
-                    picThumb = result.PictureThumb; position = result.Position;
-                    //save user data to sqlite db
-                    UserProfileSQLite.SaveUserProfile(result);
-                    successAction();
-                },
-                function(){});
         }
 
         function destroyUserCredentials() {
@@ -75,7 +82,7 @@ angular.module('starter')
                         if (result) {
                             username = user;
                             window.localStorage.setItem(AUTH_EVENTS.LOCAL_USERNAME_KEY, username);
-                            useCredentials(function () { APIService.HideLoading(); resolve('Login success.'); });
+                            useCredentials(function () { APIService.HideLoading(); resolve('Login success.'); },null);
                         }
                         else {
                             APIService.HideLoading();
@@ -92,6 +99,20 @@ angular.module('starter')
                 // } else {
                 //     reject('Login Failed.');
                 // }     
+            });
+        };
+
+        var bypassLogIn = function(){
+            return $q(function(resolve, reject) {
+                UserProfileSQLite.GetUserProfile().then(
+                    function(response){
+                        if(response.rows != null && response.rows.length > 0){
+                            username = response.rows.item(0).UserID;
+                            useCredentials(function(){resolve();},response.rows.item(0));
+                        }
+                        resolve();
+                    },
+                    function(error){console.log(error);reject(error);})    
             });
         };
 
@@ -119,7 +140,8 @@ angular.module('starter')
             fullname: function() {return fullname;},
             role: function() {return role;},
             picThumb: function(){return picThumb},
-            position: function(){return position}
+            position: function(){return position},
+            bypassLogIn: bypassLogIn
         };
     })
 

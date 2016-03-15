@@ -25,7 +25,7 @@ angular.module('starter')
 		// else 
 		// 	sql = "SELECT ts FROM " + tablename + " ORDER BY ts DESC LIMIT 1";
 		return this.Execute(sql).then(function(response){
-			return (response.rows.length > 0) ? response.rows[0] : null;
+			return (response.rows.length > 0) ? response.rows.item(0) : null;
 		},function(error){});
 	};
 
