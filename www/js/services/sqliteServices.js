@@ -107,6 +107,7 @@ angular.module('starter')
 		$cordovaSQLite.execute(db, "DELETE FROM royal");
 		$cordovaSQLite.execute(db, "DELETE FROM timeattendance");
 		$cordovaSQLite.execute(db, "DELETE FROM leave");
+		$cordovaSQLite.execute(db, "DELETE FROM circular");
 	};
 
 })

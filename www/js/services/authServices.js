@@ -32,9 +32,10 @@ angular.module('starter')
             //     fullname = "Sontaya Wilaijit";
             // }
             if(userData != null){
-                isAuthenticated = true;
-                fullname = userData.PrefixName + ' ' + userData.Firstname + ' ' + userData.Lastname;
-                picThumb = userData.PictureThumb; position = userData.Position;
+                isAuthenticated = window.localStorage.setItem("AuthServices_isAuthenticated", true); //true;
+                fullname = window.localStorage.setItem("AuthServices_fullname", userData.PrefixName + ' ' + userData.Firstname + ' ' + userData.Lastname); //userData.PrefixName + ' ' + userData.Firstname + ' ' + userData.Lastname;
+                picThumb = window.localStorage.setItem("AuthServices_picThumb", userData.PictureThumb); //userData.PictureThumb; 
+                position = window.localStorage.setItem("AuthServices_position", userData.Position); //userData.Position;
                 successAction();
             }
             else{
@@ -44,9 +45,10 @@ angular.module('starter')
                     function(response){
                         if(response.data == null || response.data.length == 0) return;
                         var result = response.data[0];
-                        isAuthenticated = true;
-                        fullname = result.PrefixName + ' ' + result.Firstname + ' ' + result.Lastname;
-                        picThumb = result.PictureThumb; position = result.Position;
+                        isAuthenticated = window.localStorage.setItem("AuthServices_isAuthenticated", true); //true;
+                        fullname = window.localStorage.setItem("AuthServices_fullname", result.PrefixName + ' ' + result.Firstname + ' ' + result.Lastname); //result.PrefixName + ' ' + result.Firstname + ' ' + result.Lastname;
+                        picThumb = window.localStorage.setItem("AuthServices_picThumb", result.PictureThumb); //result.PictureThumb; 
+                        position = window.localStorage.setItem("AuthServices_position", result.Position); //result.Position;
                         //save user data to sqlite db
                         UserProfileSQLite.SaveUserProfile(result);
                         successAction();
@@ -63,8 +65,9 @@ angular.module('starter')
             isAuthenticated = false;
             //$http.defaults.headers.common['X-Auth-Token'] = undefined;
             $http.defaults.headers.common['Authorization'] = undefined;
-            window.localStorage.removeItem(AUTH_EVENTS.LOCAL_TOKEN_KEY);
-            window.localStorage.removeItem(AUTH_EVENTS.LOCAL_USERNAME_KEY);
+            ClearAllUserLocalStorage(AUTH_EVENTS);
+            // window.localStorage.removeItem(AUTH_EVENTS.LOCAL_TOKEN_KEY);
+            // window.localStorage.removeItem(AUTH_EVENTS.LOCAL_USERNAME_KEY);
         }
 
         var login = function(user, pw) {
@@ -135,12 +138,12 @@ angular.module('starter')
             login: login,
             logout: logout,
             isAuthorized: isAuthorized,
-            isAuthenticated: function() {return isAuthenticated;},
+            isAuthenticated: function() {return window.localStorage.getItem("AuthServices_isAuthenticated");}, //isAuthenticated;
             username: function() {return (!username && username != null) ? username : window.localStorage.getItem(AUTH_EVENTS.LOCAL_USERNAME_KEY);},
-            fullname: function() {return fullname;},
+            fullname: function() {return window.localStorage.getItem("AuthServices_fullname");}, //fullname;
             role: function() {return role;},
-            picThumb: function(){return picThumb},
-            position: function(){return position},
+            picThumb: function(){return window.localStorage.getItem("AuthServices_picThumb");}, //picThumb
+            position: function(){return window.localStorage.getItem("AuthServices_position");}, //position
             bypassLogIn: bypassLogIn
         };
     })
@@ -160,3 +163,13 @@ angular.module('starter')
     .config(function ($httpProvider) {
         $httpProvider.interceptors.push('AuthInterceptor');
     });
+
+
+    function ClearAllUserLocalStorage(AUTH_EVENTS){
+        window.localStorage.removeItem(AUTH_EVENTS.LOCAL_TOKEN_KEY);
+        window.localStorage.removeItem(AUTH_EVENTS.LOCAL_USERNAME_KEY);
+        window.localStorage.removeItem("AuthServices_isAuthenticated");
+        window.localStorage.removeItem("AuthServices_fullname");
+        window.localStorage.removeItem("AuthServices_picThumb");
+        window.localStorage.removeItem("AuthServices_position");
+    };

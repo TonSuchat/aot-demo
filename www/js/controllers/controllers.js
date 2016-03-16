@@ -9,15 +9,6 @@ angular.module('starter')
       //$scope.$on('$ionicView.enter', function(e) {
       //});
 
-      //bypass login if still loging in.
-      $scope.bypassLogIn = function(){
-        AuthService.bypassLogIn().then(function(){
-          checkAuthen();
-        });
-      };
-
-      //$scope.bypassLogIn();
-
       // Form data for the login modal
       function checkAuthen(){
 

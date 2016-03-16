@@ -30,6 +30,7 @@ angular.module('starter')
 
     window.onNotification = function(e){
       console.log('notification received');
+      console.log(e);
       switch(e.event){
         case 'registered':
           if(e.regid.length > 0){
@@ -37,7 +38,7 @@ angular.module('starter')
             alert(device_token);
             console.log(device_token);
             //todo post to store token on server
-            StoreTokenOnServer(device_token,'');
+            //StoreTokenOnServer(device_token,'');
           }
           break;
         case 'message':

@@ -40,20 +40,22 @@ angular.module('starter', ['ionic','ngCordova'])
         //call login api
         LogInAPI(AUTH_EVENTS,APIService,$http,$q).then(function(){
           //post to gcm(google cloud messaging) for register device and get token from gcm
-          // if (window.cordova){
-          //   pushNotification = window.plugins.pushNotification;
-          //   NotiService.Register(pushNotification);  
-          // }
+          if (window.cordova){
+            pushNotification = window.plugins.pushNotification;
+            NotiService.Register(pushNotification);  
+          }
         });
           
       });
     })
-    .run(function($ionicPlatform, SQLiteService ){
+    .run(function($ionicPlatform, SQLiteService, AuthService){
       $ionicPlatform.ready(function(){
         //open db
         SQLiteService.OpenDB();
         //initial all tables
         SQLiteService.InitailTables();
+        //bypass login if still loging in.
+        AuthService.bypassLogIn();
 
         // SQLiteService.Execute('select * from userprofile',null).then(function(response){
         //     console.log(response.rows.item);
