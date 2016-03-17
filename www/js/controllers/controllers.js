@@ -76,44 +76,50 @@ angular.module('starter')
       checkAuthen();
     })
 
-    .controller('NewsFeedCtrl', function($scope, $stateParams, SyncService, NewsSQLite, $ionicPlatform) {
+    .controller('NewsFeedCtrl', function($scope, $stateParams, SyncService, NewsSQLite, $ionicPlatform, APIService) {
+
       $ionicPlatform.ready(function(){
-        $scope.listNews = [];
-        SyncService.SyncNews().then(function(){
-          NewsSQLite.GetAll().then(function(allData){
-            if(allData.rows != null && allData.rows.length > 0){
-                for (var i = 0; i <= allData.rows.length - 1; i++) {
-                  $scope.listNews.push({link:allData.rows.item(i).FileName,title:allData.rows.item(i).Title});
-                };
-            }
-          });
-        });
+        InitialNewsFeedProcess($scope, $stateParams, SyncService, NewsSQLite, $ionicPlatform, APIService);
       });
-      
+
       $scope.OpenPDF = function(link){
         window.open(link,'_system','location=no');
+      };
+
+      $scope.Refresh = function(){
+        InitialNewsFeedProcess($scope, $stateParams, SyncService, NewsSQLite, $ionicPlatform, APIService);
       };
 
     })
     .controller('NewsCtrl', function($scope, $stateParams) {
       console.log('news click');
     })
-    .controller('CircularLetterCtrl', function($scope, $filter, SyncService, CircularSQLite) {
+    .controller('CircularLetterCtrl', function($scope, $filter, SyncService, CircularSQLite, APIService, $ionicPlatform) {
+      $ionicPlatform.ready(function(){
 
-      SyncService.SyncCircular().then(function(){
-        CircularSQLite.GetAll().then(function(allData){
-          if(allData.rows != null && allData.rows.length > 0){
-            CircularSQLite.GetDistinctDate().then(function(distinctDate){
-              $scope.Circulars = InitialCirculars(distinctDate,$filter,allData);
-            });
-          }
-        });
+        InitialCircularProcess($scope, $filter, SyncService, CircularSQLite, APIService);
+
+        $scope.Refresh = function(){
+          InitialCircularProcess($scope, $filter, SyncService, CircularSQLite, APIService);
+        };
+
+        $scope.loadMoreData = function(){
+          if ($scope.isfirstLoad) { $scope.isfirstLoad = false; $scope.$broadcast('scroll.infiniteScrollComplete'); return; };
+          //start +3
+          APIService.ShowLoading();
+          $scope.start += $scope.retrieve;
+          var result = InitialCirculars($scope.distinctDate,$filter,$scope.allData,$scope.start,$scope.retrieve);
+          $scope.Circulars = ($scope.Circulars.length > 0) ? $scope.Circulars.concat(result) : result;
+          FinalCircularAction($scope,APIService);
+          $scope.haveMoreData = (($scope.start + $scope.retrieve) < $scope.distinctDate.rows.length) ? true : false;
+        };
+
+        $scope.OpenPDF = function(link){
+          window.open(link,'_system','location=no');
+        };
+
       });
-
-      $scope.OpenPDF = function(link){
-        window.open(link,'_system','location=no');
-      };
-
+      
     })
     .controller('ProfileCtrl', function($scope, UserProfileSQLite) {
         UserProfileSQLite.GetUserProfile().then(
@@ -205,10 +211,26 @@ angular.module('starter')
 
      })
 
-function InitialCirculars(distinctCircularDate,$filter,allData){
+function InitialCirculars(distinctCircularDate,$filter,allData,start,retrieve){
     var result = [];
-    for (var i = 0; i <= distinctCircularDate.rows.length -1; i++) {
-        var currentCircularDate = distinctCircularDate.rows.item(i).DocDate;
+    // for (var i = 0; i <= retrieve - 1; i++) {
+    //     var currentCircularDate = distinctCircularDate.rows.item(i).DocDate;
+    //     allDataArr = ConvertQueryResultToArray(allData);
+    //     var currentDetailsByDate = $filter('filter')(allDataArr,{DocDate:currentCircularDate});   
+    //     if(currentCircularDate.indexOf('/') > -1) currentCircularDate = currentCircularDate.replace(/\//g,'');
+    //     var newData = {};
+    //     newData.circularDate = GetThaiDateByDate($filter,currentCircularDate);
+    //     newData.circularDetails = [];
+    //     for (var z = 0; z <= currentDetailsByDate.length -1; z++) {
+    //         newData.circularDetails.push({link:currentDetailsByDate[z].Link,header:currentDetailsByDate[z].Description,description:currentDetailsByDate[z].DocNumber});    
+    //     };
+    //     result.push(newData);
+    // };
+    var counter = 1;
+    var currentIndex = start - 1;
+    if(allData.rows != null && distinctCircularDate.rows != null){
+      while ((currentIndex < distinctCircularDate.rows.length) && (counter <= retrieve)){
+        var currentCircularDate = distinctCircularDate.rows.item(currentIndex).DocDate;
         allDataArr = ConvertQueryResultToArray(allData);
         var currentDetailsByDate = $filter('filter')(allDataArr,{DocDate:currentCircularDate});   
         if(currentCircularDate.indexOf('/') > -1) currentCircularDate = currentCircularDate.replace(/\//g,'');
@@ -219,6 +241,61 @@ function InitialCirculars(distinctCircularDate,$filter,allData){
             newData.circularDetails.push({link:currentDetailsByDate[z].Link,header:currentDetailsByDate[z].Description,description:currentDetailsByDate[z].DocNumber});    
         };
         result.push(newData);
+        counter++;
+        currentIndex++;
+      }  
     };
     return result;
+};
+
+function FinalCircularAction($scope,APIService){
+  APIService.HideLoading();
+  $scope.$broadcast('scroll.infiniteScrollComplete');
+  $scope.$broadcast('scroll.refreshComplete');
+};
+
+function InitialCircularProcess($scope, $filter, SyncService, CircularSQLite, APIService){
+  $scope.Circulars = [];
+  $scope.haveMoreData = false;
+  $scope.isfirstLoad = true;
+  $scope.allData;
+  $scope.distinctDate;
+  $scope.start = 1;
+  $scope.retrieve = 3;
+  APIService.ShowLoading();
+  SyncService.SyncCircular().then(function(){
+    CircularSQLite.GetAll().then(function(allData){
+      if(allData.rows != null && allData.rows.length > 0){
+        $scope.allData = allData;
+        CircularSQLite.GetDistinctDate().then(function(distinctDate){
+          $scope.distinctDate = distinctDate;
+          APIService.ShowLoading();
+          $scope.Circulars = InitialCirculars(distinctDate,$filter,allData,$scope.start,$scope.retrieve);
+          FinalCircularAction($scope,APIService);
+          $scope.haveMoreData = (($scope.start + $scope.retrieve) < $scope.distinctDate.rows.length) ? true : false;
+        });
+      }
+      APIService.HideLoading();
+    });
+  });
+};
+
+function InitialNewsFeedProcess($scope, $stateParams, SyncService, NewsSQLite, $ionicPlatform, APIService){
+  $scope.listNews = [];
+  APIService.ShowLoading();
+  SyncService.SyncNews().then(function(){
+    NewsSQLite.GetAll().then(function(allData){
+      if(allData.rows != null && allData.rows.length > 0){
+          for (var i = 0; i <= allData.rows.length - 1; i++) {
+            $scope.listNews.push({link:allData.rows.item(i).FileName,title:allData.rows.item(i).Title});
+          };
+      }
+      FinalNewsFeedAction($scope,APIService);
+    });
+  });
+};
+
+function FinalNewsFeedAction($scope,APIService){
+  $scope.$broadcast('scroll.refreshComplete');
+  APIService.HideLoading();
 };

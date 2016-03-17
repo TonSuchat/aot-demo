@@ -119,52 +119,82 @@ angular.module('starter')
 
     .controller('InfoCtrl', function($scope, $stateParams) {
     })
-    .controller('TimeCtrl', function($scope, $filter, TimeAttendanceSQLite, SyncService) {
+    .controller('TimeCtrl', function($scope, $filter, TimeAttendanceSQLite, SyncService, $ionicPlatform, APIService) {
+        $ionicPlatform.ready(function(){
+            APIService.ShowLoading();
+            //if disable sync, Get new data when page load.
+            SyncService.SyncTime().then(function(){
+                FinalActionInfo($scope,APIService);
+            });
+            //if(!enableSync) ProcessSyncTimeData($scope,TimeAttendanceSQLite,APIService,AuthService,$filter);
 
-        //if disable sync, Get new data when page load.
-        SyncService.SyncTime();
-        //if(!enableSync) ProcessSyncTimeData($scope,TimeAttendanceSQLite,APIService,AuthService,$filter);
+            // //get all data only one times for use with $filter
+            TimeAttendanceSQLite.GetTimeAttendances().then(function(response){
+                $scope.allTADatas = ConvertQueryResultToArray(response);
+            });
 
-        // //get all data only one times for use with $filter
-        TimeAttendanceSQLite.GetTimeAttendances().then(function(response){
-            $scope.allTADatas = ConvertQueryResultToArray(response);
-        });
-
-        $scope.BindList = function(){
-            var selectedVal = $scope.ddlMonthsData.selectedOptions.val;
-            if(!selectedVal || selectedVal.length == 0) return;
-            TimeAttendanceSQLite.GetDistinctStampDateByFromDateAndToDate(selectedVal).then(
-                function(response){
-                    var distinctStampDateArr = ConvertQueryResultToArray(response);
-                    if($scope.allTADatas.length == 0){
-                        TimeAttendanceSQLite.GetTimeAttendances().then(function(allData){
-                            var allDataArr = ConvertQueryResultToArray(allData);
-                            $scope.allTADatas = allDataArr;
-                            if(allDataArr != null && allDataArr.length > 0){
-                                $scope.listTimeInfo = GetTimeInfo(allDataArr,$filter,$scope.allTADatas);
+            $scope.BindList = function(){
+                var selectedVal = $scope.ddlMonthsData.selectedOptions.val;
+                if(!selectedVal || selectedVal.length == 0) return;
+                TimeAttendanceSQLite.GetDistinctStampDateByFromDateAndToDate(selectedVal).then(
+                    function(response){
+                        var distinctStampDateArr = ConvertQueryResultToArray(response);
+                        if($scope.allTADatas.length == 0){
+                            TimeAttendanceSQLite.GetTimeAttendances().then(function(allData){
+                                var allDataArr = ConvertQueryResultToArray(allData);
+                                $scope.allTADatas = allDataArr;
+                                if(allDataArr != null && allDataArr.length > 0){
+                                    $scope.listTimeInfo = GetTimeInfo(allDataArr,$filter,$scope.allTADatas);
+                                }
+                                else $scope.listTimeInfo = [];
+                            });
+                        }
+                        else{
+                            if(distinctStampDateArr != null && distinctStampDateArr.length > 0){
+                                $scope.listTimeInfo = GetTimeInfo(distinctStampDateArr,$filter,$scope.allTADatas);
                             }
                             else $scope.listTimeInfo = [];
-                        });
-                    }
-                    else{
-                        if(distinctStampDateArr != null && distinctStampDateArr.length > 0){
-                            $scope.listTimeInfo = GetTimeInfo(distinctStampDateArr,$filter,$scope.allTADatas);
                         }
-                        else $scope.listTimeInfo = [];
-                    }
-            });
-        };
+                });
+            };
 
-        InitialTimeInfo($scope,$filter);
+            InitialTimeInfo($scope,$filter);
+
+            $scope.Refresh = function(){
+                APIService.ShowLoading();
+                //if disable sync, Get new data when page load.
+                SyncService.SyncTime().then(function(){
+                    FinalActionInfo($scope,APIService);
+                });
+                //if(!enableSync) ProcessSyncTimeData($scope,TimeAttendanceSQLite,APIService,AuthService,$filter);
+
+                // //get all data only one times for use with $filter
+                TimeAttendanceSQLite.GetTimeAttendances().then(function(response){
+                    $scope.allTADatas = ConvertQueryResultToArray(response);
+                });
+                InitialTimeInfo($scope,$filter);
+            };
+
+        });
 
     })
-    .controller('LeaveCtrl', function($scope, $stateParams,$filter,LeaveSQLite, SyncService) {
-        //if disable sync, Get new data when page load.
-        SyncService.SyncLeave().then(function(){
-            InitialLeaveInfo($scope,$filter,LeaveSQLite);
-        });  
-        //if(!enableSync) ProcessSyncLeaveData($scope,LeaveSQLite,APIService,AuthService,$filter)
-        
+    .controller('LeaveCtrl', function($scope, $filter, LeaveSQLite, SyncService, $ionicPlatform, APIService) {
+        $ionicPlatform.ready(function(){
+            APIService.ShowLoading();
+            SyncService.SyncLeave().then(function(){
+                InitialLeaveInfo($scope,$filter,LeaveSQLite);
+                FinalActionInfo($scope,APIService);
+            });
+
+            $scope.Refresh = function(){
+                APIService.ShowLoading();
+                SyncService.SyncLeave().then(function(){
+                    InitialLeaveInfo($scope,$filter,LeaveSQLite);
+                    FinalActionInfo($scope,APIService);
+                });
+            };
+        });
+
     })
     .controller('MedicalCtrl', function($scope, $stateParams, $filter, MedicalSQLite, SyncService) {
         MedicalSQLite.GetMedicals().then(function(response){
@@ -184,31 +214,59 @@ angular.module('starter')
     .controller('FuelDetailCtrl', function($scope, $stateParams) {
 
     })
-    .controller('FinanceCtrl', function($scope, MedicalSQLite, TuitionSQLite, SyncService) {
-        //***Medical
-        //if disable sync, Get new data when page load.
-        SyncService.SyncMedical().then(function(numberOfNewData){
-             //get current data from sqlite
-             InitialMedicalInfo($scope,MedicalSQLite,numberOfNewData);    
-        });
-        //get current data from sqlite
-        //if(!enableSync) ProcessSyncMedicalData($scope,MedicalSQLite,APIService,AuthService);
-        //***Medical
+    .controller('FinanceCtrl', function($scope, MedicalSQLite, TuitionSQLite, SyncService, $ionicPlatform, APIService) {
 
-        //***tuition
-        SyncService.SyncTuition().then(function(numberOfNewData){
-            //get current data from sqlite
-            InitialTuitionInfo($scope,TuitionSQLite,numberOfNewData);
-        });   
-        //get current data from sqlite
-        //if(!enableSync) ProcessSyncTuitionData($scope,TuitionSQLite,APIService,AuthService);
-        //***tuition
+        $ionicPlatform.ready(function(){
+            var syncCompleted = 0;
+            APIService.ShowLoading();
+            //***Medical
+            SyncService.SyncMedical().then(function(numberOfNewData){
+                syncCompleted++;
+                 //get current data from sqlite
+                 InitialMedicalInfo($scope,MedicalSQLite,numberOfNewData);
+                 if(syncCompleted == 2) FinalActionInfo($scope,APIService);
+            });
+            //***Medical
+
+            //***tuition
+            SyncService.SyncTuition().then(function(numberOfNewData){
+                syncCompleted++;
+                //get current data from sqlite
+                InitialTuitionInfo($scope,TuitionSQLite,numberOfNewData);
+                if(syncCompleted == 2) FinalActionInfo($scope,APIService);
+            });   
+            //***tuition
+
+            //pull to sync data
+            $scope.Refresh = function(){
+                syncCompleted = 0;
+                APIService.ShowLoading();
+                //***Medical
+                SyncService.SyncMedical().then(function(numberOfNewData){
+                    syncCompleted++;
+                    //get current data from sqlite
+                    InitialMedicalInfo($scope,MedicalSQLite,numberOfNewData);
+                    if(syncCompleted == 2) FinalActionInfo($scope,APIService);    
+                });
+                //***Medical
+
+                //***tuition
+                SyncService.SyncTuition().then(function(numberOfNewData){
+                    syncCompleted++;
+                    //get current data from sqlite
+                    InitialTuitionInfo($scope,TuitionSQLite,numberOfNewData);
+                    if(syncCompleted == 2) FinalActionInfo($scope,APIService); 
+                });   
+                //***tuition
+            };
+
+        });
 
     })
     .controller('HrCtrl', function($scope, $stateParams) {
 
     })
-    .controller('TuitionCtrl', function($scope, $stateParams, $filter, TuitionSQLite, SyncService) {
+    .controller('TuitionCtrl', function($scope, $filter, TuitionSQLite, SyncService) {
         // shareTuitionData = tmpTuitionData;
         // $scope.TuitionInfo = CreateFinanceInfoGroupByDate(tmpDistinctTuitionData,$filter,shareTuitionData,'tuition');
         TuitionSQLite.GetTuitions().then(function(response){
@@ -222,15 +280,24 @@ angular.module('starter')
     .controller('TuitionDetailCtrl', function($scope, $stateParams, $filter) {
         InitialTuitionDetails($scope,$filter,$stateParams);
     })
-    .controller('RoyalCtrl', function($scope, $stateParams, RoyalSQLite, SyncService, $filter) {
-        SyncService.SyncRoyal().then(function(){
-            //get current data from sqlite
-            InitialRoyalInfo($scope,RoyalSQLite,$filter);
+    .controller('RoyalCtrl', function($scope, RoyalSQLite, SyncService, $filter, $ionicPlatform, APIService) {
+        $ionicPlatform.ready(function(){
+            APIService.ShowLoading();
+            SyncService.SyncRoyal().then(function(){
+                //get current data from sqlite
+                InitialRoyalInfo($scope,RoyalSQLite,$filter);
+                FinalActionInfo($scope,APIService);
+            });
+
+            $scope.Refresh = function(){
+                APIService.ShowLoading();
+                SyncService.SyncRoyal().then(function(){
+                    //get current data from sqlite
+                    InitialRoyalInfo($scope,RoyalSQLite,$filter);
+                    FinalActionInfo($scope,APIService);
+                });
+            };
         });
-       
-        //get current data from sqlite
-        //else InitialRoyalInfo($scope,RoyalSQLite,$filter);
-        //if(!enableSync) ProcessSyncRoyalData($scope,RoyalSQLite,APIService,AuthService,$filter);  
     })
 
 function InitialMedicalInfo($scope,MedicalSQLite,totalNotification){
@@ -572,4 +639,9 @@ function GetLeaveDetails(leaveCode,allLeaveDatas,$filter){
         result.leaveDate.push({leavedate:GetThaiDateByDate($filter,leaves[i].Leave_Date),leavefrom:GetThaiDateByDate($filter,leaves[i].Leave_From)});
     };
     return result;
-}
+};
+
+function FinalActionInfo($scope,APIService){
+    $scope.$broadcast('scroll.refreshComplete');
+    APIService.HideLoading();
+};

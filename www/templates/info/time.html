@@ -1,6 +1,7 @@
-<ion-view cache-view="false" view-title="ข้อมูลการลงเวลา">
+<ion-view view-title="ข้อมูลการลงเวลา">
     <ion-content>
-
+        <ion-refresher pulling-text="โหลดข้อมูลใหม่" on-refresh="Refresh()">
+        </ion-refresher>
         <div class="list">
           <label class="item item-input item-select">
             <div class="input-label">

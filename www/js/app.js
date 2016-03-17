@@ -22,18 +22,18 @@ angular.module('starter', ['ionic','ngCordova'])
       });
     })
     .run(function($ionicPlatform, $ionicPopup) {
-        $ionicPlatform.onHardwareBackButton(function () {
-            if(true) { // your check here
-                $ionicPopup.confirm({
-                    title: 'System warning',
-                    template: 'are you sure you want to exit?'
-                }).then(function(res){
-                    if( res ){
-                        navigator.app.exitApp();
-                    }
-                })
-            }
-        })
+        // $ionicPlatform.onHardwareBackButton(function () {
+        //     if(true) { // your check here
+        //         $ionicPopup.confirm({
+        //             title: 'System warning',
+        //             template: 'are you sure you want to exit?'
+        //         }).then(function(res){
+        //             if( res ){
+        //                 navigator.app.exitApp();
+        //             }
+        //         })
+        //     }
+        // })
     })
     .run(function($ionicPlatform,AUTH_EVENTS,APIService,$http,$q,NotiService,$cordovaDevice){
       $ionicPlatform.ready(function(){
@@ -79,7 +79,28 @@ angular.module('starter', ['ionic','ngCordova'])
 
       });
     })
-
+    .run(function($rootScope, $ionicPlatform, $ionicHistory){
+      $ionicPlatform.registerBackButtonAction(function(e){
+        if ($rootScope.backButtonPressedOnceToExit) {
+          ionic.Platform.exitApp();
+        }
+        else if ($ionicHistory.backView()) {
+          $ionicHistory.goBack();
+          e.preventDefault();
+        }
+        else {
+          $rootScope.backButtonPressedOnceToExit = true;
+          window.plugins.toast.showShortCenter(
+            "Press back button again to exit",function(a){},function(b){}
+          );
+          setTimeout(function(){
+            $rootScope.backButtonPressedOnceToExit = false;
+          },2000);
+        }
+        e.preventDefault();
+        return false;
+      },101);
+    })
 
     .config(function($stateProvider, $urlRouterProvider) {
       $stateProvider

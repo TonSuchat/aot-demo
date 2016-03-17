@@ -1,5 +1,7 @@
-<ion-view cache-view="false" view-title="ข้อมูลวันลา">
+<ion-view view-title="ข้อมูลวันลา">
     <ion-content>
+        <ion-refresher pulling-text="โหลดข้อมูลใหม่" on-refresh="Refresh()">
+        </ion-refresher>
         <div class="list">
 
             <div class="item item-divider">

@@ -154,7 +154,7 @@ function SyncDownloadFromServer(APIService,GenericSQLite,$q,apiURLs,apiDatas){
             }
             else resolve(0);
           },
-          function(error){reject(error);});    
+          function(error){reject(0);});
     });
   })
 };

@@ -1,13 +1,13 @@
-<ion-view cache-view="false" view-title="ประวัติการได้รับเครื่องราชย์">
+<ion-view view-title="ประวัติการได้รับเครื่องราชย์">
     <ion-content>
-    
-            <div class='list' >
-                <div class='item' ng-repeat='info in RoyalInfo'>
-                    <h2>{{info.royalName}}</h2>
-                    <p>{{info.royalCode}}</p>
-                    <p>{{info.royalDate}}</p>
-                </div>
+    	<ion-refresher pulling-text="โหลดข้อมูลใหม่" on-refresh="Refresh()">
+        </ion-refresher>
+        <div class='list' >
+            <div class='item' ng-repeat='info in RoyalInfo'>
+                <h2>{{info.royalName}}</h2>
+                <p>{{info.royalCode}}</p>
+                <p>{{info.royalDate}}</p>
             </div>
-
+        </div>
     </ion-content>
 </ion-view>
