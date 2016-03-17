@@ -166,7 +166,7 @@ angular.module('starter')
         //if(!enableSync) ProcessSyncLeaveData($scope,LeaveSQLite,APIService,AuthService,$filter)
         
     })
-    .controller('MedicalCtrl', function($scope, $stateParams, $filter, MedicalSQLite) {
+    .controller('MedicalCtrl', function($scope, $stateParams, $filter, MedicalSQLite, SyncService) {
         MedicalSQLite.GetMedicals().then(function(response){
             shareMedicalData = response;
             //get distinct paiddate for group data by paiddate
@@ -174,6 +174,7 @@ angular.module('starter')
                 $scope.MedicalInfo = CreateFinanceInfoGroupByDate(resultDistinct,$filter,shareMedicalData,'medical');
             });
         });
+ 
     })
     .controller('MedicalDetailCtrl', function($scope, $stateParams, $filter) {
         InitialMedicalDetails($scope,$filter,$stateParams);
@@ -184,7 +185,6 @@ angular.module('starter')
 
     })
     .controller('FinanceCtrl', function($scope, MedicalSQLite, TuitionSQLite, SyncService) {
-
         //***Medical
         //if disable sync, Get new data when page load.
         SyncService.SyncMedical().then(function(numberOfNewData){
@@ -208,7 +208,7 @@ angular.module('starter')
     .controller('HrCtrl', function($scope, $stateParams) {
 
     })
-    .controller('TuitionCtrl', function($scope, $stateParams, $filter, TuitionSQLite) {
+    .controller('TuitionCtrl', function($scope, $stateParams, $filter, TuitionSQLite, SyncService) {
         // shareTuitionData = tmpTuitionData;
         // $scope.TuitionInfo = CreateFinanceInfoGroupByDate(tmpDistinctTuitionData,$filter,shareTuitionData,'tuition');
         TuitionSQLite.GetTuitions().then(function(response){

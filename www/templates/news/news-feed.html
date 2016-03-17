@@ -1,7 +1,7 @@
-<ion-view view-title="ข่าวประกาศ">
+<ion-view cache-view="false" view-title="ข่าวประกาศ">
     <ion-content>
 
-        <div class="list card">
+       <!--  <div class="list card">
             <a href="#/app/home/news" class="item item-body item-text-wrap">
                 <h2>ทดม wifi ดีที่สุดจากการจัดอันดับ best wifi airport world 2015.</h2>
                 <p>
@@ -29,6 +29,13 @@
                     กพท.จัดประชุม สายการบิน-สนามบิน 27 ม.ค.นี้ วางกฎคุมตุ๊กตาลูกเทพขึ้นเครื่องบิน เตรียมออกกฎเข้มให้สถานะ ตุ๊กตาลูกเทพเป็นสัมภาระ ห้ามเปิดให้จองตั๋วเฉพาะ ชี้ตอนเครื่องขึ้นลงต้องจับยัดใต้โต๊ะ...
                 </p>
             </a>
+        </div> -->
+
+        <div class='list card' ng-repeat='news in listNews'>
+             <div ng-click='OpenPDF(news.link)' class="item item-body item-text-wrap">
+                {{news.title}}
+            </div>
         </div>
+
     </ion-content>
 </ion-view>

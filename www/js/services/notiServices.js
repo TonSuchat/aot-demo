@@ -6,6 +6,8 @@
 angular.module('starter')
 .service('NotiService',function($q,APIService,$cordovaDevice){
 
+    var serviceObj = this;
+
     this.Register = function(pushNotification){
         pushNotification.register(
             onNotification,
@@ -20,25 +22,32 @@ angular.module('starter')
         );
     };
 
-    this.StoreTokenOnServer = function(token,empid){
+    this.StoreTokenOnServer = function(token,empid,isUpdate){
         var deviceInfo = $cordovaDevice.getDevice();
-        var url = APIService.hostname() + '/DeviceRegistered/Register'
-        var data = {RegisterID : token, OS : deviceInfo.platform, Model:deviceInfo.model, Serial:deviceInfo.serial, EmpID: empid};
+        var url = '';
+        if(!isUpdate) url = APIService.hostname() + '/DeviceRegistered/Register'
+        else url = APIService.hostname() + '/DeviceRegistered/UpdateDevice'
+        var data = {RegisterID : token, OS : deviceInfo.platform, Model:deviceInfo.model, Serial:deviceInfo.serial, EmpID: empid, RegistAction:true, DeviceName:''};
+        console.log('isUpdate -> ' + isUpdate);
+        console.log('empid -> ' + empid);
         console.log(data);
         APIService.httpPost(url,data,function(response){},function(error){console.log(error);});
     };
 
     window.onNotification = function(e){
-      console.log('notification received');
-      console.log(e);
+      // console.log('notification received');
+      // console.log(e);
       switch(e.event){
         case 'registered':
           if(e.regid.length > 0){
             var device_token = e.regid;
-            alert(device_token);
             console.log(device_token);
-            //todo post to store token on server
-            //StoreTokenOnServer(device_token,'');
+             //window.localStorage.removeItem('GCMToken');
+            if(window.localStorage.getItem('GCMToken') != null && window.localStorage.getItem('GCMToken').length > 0 && (window.localStorage.getItem('GCMToken') == device_token)) return;
+            //set token to local storage
+            window.localStorage.setItem('GCMToken',device_token);
+            //post to store token on server
+            serviceObj.StoreTokenOnServer(device_token,'',false);
           }
           break;
         case 'message':

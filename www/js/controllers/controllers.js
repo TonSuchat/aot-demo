@@ -1,6 +1,6 @@
 angular.module('starter')
 
-    .controller('AppCtrl', function($scope, $ionicModal, $timeout, AuthService, $ionicPopup,$location,SQLiteService) {
+    .controller('AppCtrl', function($scope, $ionicModal, $timeout, AuthService, $ionicPopup,$location,SQLiteService,NotiService) {
 
       // With the new view caching in Ionic, Controllers are only called
       // when they are recreated or on app start, instead of every page change.
@@ -39,12 +39,16 @@ angular.module('starter')
 
       // Perform the login action when the user submits the login form
       $scope.doLogin = function() {
+        var currentUserName = $scope.loginData.username;
         AuthService.login($scope.loginData.username, $scope.loginData.password).then(function() {
           //$state.go('app.home', {}, {reload: true});
           //$scope.setCurrentUsername(data.username);
           //console.log(AuthService.isAuthenticated());
           //console.log(AuthService.fullname());
           checkAuthen();
+          //update register device -> empid to server
+          if(window.localStorage.getItem('GCMToken') != null && window.localStorage.getItem('GCMToken').length > 0) 
+            NotiService.StoreTokenOnServer(window.localStorage.getItem('GCMToken'),currentUserName,true);
 
           $scope.closeLogin();
 
@@ -61,17 +65,35 @@ angular.module('starter')
       };
       $scope.logout = function () {
         //delete all datas and all tables
-        SQLiteService.DeleteAllTables();
-        //logout logic
-        AuthService.logout();
-        checkAuthen();
-        $location.path('/news-feed');
+        SQLiteService.DeleteAllTables().then(function(){
+          //logout logic
+          AuthService.logout();
+          checkAuthen();
+          $location.path('/news-feed');  
+        });
       };
 
       checkAuthen();
     })
 
-    .controller('NewsFeedCtrl', function($scope, $stateParams) {
+    .controller('NewsFeedCtrl', function($scope, $stateParams, SyncService, NewsSQLite, $ionicPlatform) {
+      $ionicPlatform.ready(function(){
+        $scope.listNews = [];
+        SyncService.SyncNews().then(function(){
+          NewsSQLite.GetAll().then(function(allData){
+            if(allData.rows != null && allData.rows.length > 0){
+                for (var i = 0; i <= allData.rows.length - 1; i++) {
+                  $scope.listNews.push({link:allData.rows.item(i).FileName,title:allData.rows.item(i).Title});
+                };
+            }
+          });
+        });
+      });
+      
+      $scope.OpenPDF = function(link){
+        window.open(link,'_system','location=no');
+      };
+
     })
     .controller('NewsCtrl', function($scope, $stateParams) {
       console.log('news click');
@@ -87,6 +109,10 @@ angular.module('starter')
           }
         });
       });
+
+      $scope.OpenPDF = function(link){
+        window.open(link,'_system','location=no');
+      };
 
     })
     .controller('ProfileCtrl', function($scope, UserProfileSQLite) {

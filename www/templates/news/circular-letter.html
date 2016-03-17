@@ -1,11 +1,12 @@
-<ion-view view-title="หนังสือเวียน">
+<ion-view cache-view="false" view-title="หนังสือเวียน">
     <ion-content>
         <div class="list">
             <div ng-repeat='circular in Circulars'>
                 <div class="item item-divider">
                     <h2>วันที่ {{circular.circularDate}}</h2>
                 </div>
-                <a href="{{circularDetail.link}}" class="item" ng-repeat='circularDetail in circular.circularDetails'>
+                <!-- <a href="{{circularDetail.link}}" class="item" ng-repeat='circularDetail in circular.circularDetails'> -->
+                <a href="#" ng-click='OpenPDF(circularDetail.link)' class="item" ng-repeat='circularDetail in circular.circularDetails'>
                     <h2>{{circularDetail.header}}</h2>
                     <p>{{circularDetail.description}}</p>
                 </a>

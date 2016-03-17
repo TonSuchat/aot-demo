@@ -1,6 +1,6 @@
 angular.module('starter')
 
-.service('SyncService',function($q,AuthService,APIService,TestSyncSQLite,UserProfileSQLite,MedicalSQLite,TuitionSQLite,RoyalSQLite,TimeAttendanceSQLite,LeaveSQLite,CircularSQLite){
+.service('SyncService',function($q,AuthService,APIService,TestSyncSQLite,UserProfileSQLite,MedicalSQLite,TuitionSQLite,RoyalSQLite,TimeAttendanceSQLite,LeaveSQLite,CircularSQLite,NewsSQLite){
 
   enableSync = true;
 
@@ -82,6 +82,16 @@ angular.module('starter')
     return ProcessSyncData(APIService,CircularSQLite,$q,apiURLs,apiDatas);
   };
 
+  this.SyncNews = function(){
+    var apiDatas = {
+      GetData:{ObjectID:8,SyncNewsViewModel:{PubDate:''}},
+      AddData:{ObjectID:8,ObjectNewsEntity:{}},
+      UpdateData:{ObjectID:8,ObjectNewsEntity:{}}
+    };
+    console.log('SYNC-NEWS');
+    return ProcessSyncData(APIService,NewsSQLite,$q,apiURLs,apiDatas);
+  };
+
 });
 
 function SyncDownloadFromServer(APIService,GenericSQLite,$q,apiURLs,apiDatas){
@@ -90,10 +100,10 @@ function SyncDownloadFromServer(APIService,GenericSQLite,$q,apiURLs,apiDatas){
     var keysbyindex;
     var currentId;
     //get latest ts
-    GenericSQLite.GetLatestTS().then(function(lastesTS){
+    GenericSQLite.GetLatestTS().then(function(latesTS){
         //post to get new data
         var url = APIService.hostname() + apiURLs.GetURL;
-        apiDatas.GetData.TimeStamp = (lastesTS == null) ? '' : (lastesTS.TS.toString().length == 13) ? '0' + lastesTS.TS : lastesTS.TS;
+        apiDatas.GetData.TimeStamp = (latesTS == null) ? '' : (latesTS.TS.toString().length == 13) ? '0' + latesTS.TS : latesTS.TS;
         APIService.httpPost(url,apiDatas.GetData,
           function(response){
             var result = response.data;

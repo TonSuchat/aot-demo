@@ -1,4 +1,5 @@
 var db;
+var tableNames = ['userprofile','medical','tuition','royal','timeattendance','leave','circular','news'];
 
 angular.module('starter')
 .service('SQLiteService',function($cordovaSQLite,$q){
@@ -69,6 +70,7 @@ angular.module('starter')
 		this.CreateTimeAttendanceTable();
 		this.CreateLeaveTable();
 		this.CreateCircularTable();
+		this.CreateNewsTable();
 	};
 
 	//**Test-Sync-Code
@@ -100,14 +102,29 @@ angular.module('starter')
 		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS circular(clientid integer primary key AUTOINCREMENT, Id int, DocID text, DocDate text, Link text, Description text, DocNumber text, DL boolean,dirty boolean,TS datetime)");	
 	};
 
+	this.CreateNewsTable = function(){
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS news(clientid integer primary key AUTOINCREMENT, Id int, Title text, PubDate text, FileName text, DL boolean,dirty boolean,TS datetime)");	
+	};
+
 	this.DeleteAllTables = function(){
-		$cordovaSQLite.execute(db, "DELETE FROM userprofile");
-		$cordovaSQLite.execute(db, "DELETE FROM medical");
-		$cordovaSQLite.execute(db, "DELETE FROM tuition");
-		$cordovaSQLite.execute(db, "DELETE FROM royal");
-		$cordovaSQLite.execute(db, "DELETE FROM timeattendance");
-		$cordovaSQLite.execute(db, "DELETE FROM leave");
-		$cordovaSQLite.execute(db, "DELETE FROM circular");
+		// $cordovaSQLite.execute(db, "DELETE FROM userprofile");
+		// $cordovaSQLite.execute(db, "DELETE FROM medical");
+		// $cordovaSQLite.execute(db, "DELETE FROM tuition");
+		// $cordovaSQLite.execute(db, "DELETE FROM royal");
+		// $cordovaSQLite.execute(db, "DELETE FROM timeattendance");
+		// $cordovaSQLite.execute(db, "DELETE FROM leave");
+		// $cordovaSQLite.execute(db, "DELETE FROM circular");
+		return $q(function(resolve,reject){
+			var totalProcess = 0;
+			for (var i = 0; i <= tableNames.length - 1; i++) {
+				$cordovaSQLite.execute(db, "DELETE FROM " + tableNames[i]).then(
+					function(){
+						totalProcess++;
+						if(totalProcess == tableNames.length) resolve();
+					},
+					function(error){console.log(error);reject(error);});
+			};
+		});
 	};
 
 })
@@ -219,7 +236,6 @@ angular.module('starter')
 	this.DeleteAll = function(){
 		return SQLiteService.DeleteAll("medical").then(function(response){return response;},function(error){return error;});	
 	};
-
 })
 .service('TuitionSQLite', function(SQLiteService){
 	//***Necessary-Method
@@ -367,8 +383,7 @@ angular.module('starter')
 
 	this.GetRoyals = function(){
 		return SQLiteService.Execute("SELECT * FROM royal ORDER BY Roya_Date DESC").then(function(response){return response;},function(error){return error;});
-	};
-	
+	};	
 })
 .service('TimeAttendanceSQLite', function(SQLiteService){
 	//***Necessary-Method
@@ -531,7 +546,6 @@ angular.module('starter')
 	this.GetLeaves = function(){
 		return SQLiteService.Execute("SELECT * FROM leave ORDER BY CAST(SUBSTR(Leave_From,5,4) AS INT) DESC, CAST(SUBSTR(Leave_From,3,2) AS INT) DESC, CAST(SUBSTR(Leave_From,1,2) AS INT) DESC ").then(function(response){return response;},function(error){return error;});
 	};
-
 })
 .service('CircularSQLite',function(SQLiteService){
 	//***Necessary-Method
@@ -602,6 +616,69 @@ angular.module('starter')
 
 	this.GetAll = function(){
 		return SQLiteService.Execute("SELECT * FROM circular").then(function(response){return response;},function(error){return error;});	
+	};
+})
+.service('NewsSQLite',function(SQLiteService){
+	//***Necessary-Method
+	this.GetLatestTS = function(){
+		return SQLiteService.BaseGetLatestTS('news').then(function(response){return response;},function(error){return error;});
+	};
+
+	this.CountByServerId = function(serverid){
+		return SQLiteService.CountByServerId(serverid,'news').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.CountIsNotDirtyById = function(id){
+		return SQLiteService.CountIsNotDirtyById(id,'news').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.GetDataByTSIsNull = function(){
+		return SQLiteService.GetDataByTSIsNull('news');
+	};
+
+	this.GetDataIsDirty = function(){
+		return SQLiteService.GetDataIsDirty("news");
+	};
+
+	this.DeleteDataIsFlagDeleted = function(){
+		return SQLiteService.DeleteDataIsFlagDeleted("news");
+	};
+
+	this.Update = function(data,isDirty,clientUpdate){
+		var sql;
+		if(clientUpdate)
+			sql = "UPDATE news SET Id = ?, Title = ?, PubDate = ?, FileName = ?, DL = ?,dirty = ?,TS = ? WHERE clientid = " + data.clientid;
+		else
+			sql = "UPDATE news SET Id = ?, Title = ?, PubDate = ?, FileName = ?, DL = ?,dirty = ?,TS = ? WHERE Id = " + data.Id;
+		var param = [data.Id,data.Title,data.PubDate,data.FileName,data.DL,isDirty,data.TS];
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
+	};
+
+	this.Add = function(data,createFromClient){
+		var sql = "INSERT INTO news (Id, Title, PubDate, FileName, DL, dirty, TS) VALUES ";
+		var param = []; 
+		var rowArgs = [];
+		data.forEach(function(item){
+			rowArgs.push("(?,?,?,?,?,?,?)");
+			param.push(item.Id);
+			param.push(item.Title);
+			param.push(item.PubDate);
+			param.push(item.FileName);
+			param.push(item.DL);
+			//dirty
+			if(createFromClient) param.push(true);
+			else param.push(false);
+			//TS
+			if(createFromClient) param.push(null);
+			else param.push(item.TS);
+		});
+		sql += rowArgs.join(', ');
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){console.log(error); return error;});
+	};
+	//***Necessary-Method
+
+	this.GetAll = function(){
+		return SQLiteService.Execute("SELECT * FROM news").then(function(response){return response;},function(error){return error;});	
 	};
 })
 
