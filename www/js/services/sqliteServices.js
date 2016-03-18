@@ -580,8 +580,6 @@ angular.module('starter')
 		else
 			sql = "UPDATE circular SET Id = ?, DocID = ?, DocDate = ?, Link = ?, Description = ?, DocNumber = ?, DL = ?,dirty = ?,TS = ? WHERE Id = " + data.Id;
 		var param = [data.Id,data.DocID,data.DocDate,data.Link,data.Description,data.DocNumber,data.DL,isDirty,data.TS];
-		console.log(sql);
-		console.log(param);
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
 	};
 

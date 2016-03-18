@@ -74,7 +74,10 @@ angular.module('starter')
             
             
             return $q(function(resolve, reject) {
-
+                if(!user || user.length == 0 || !pw || pw.length == 0){
+                    APIService.HideLoading();
+                    return reject('Login Failed.');
+                };
                 var url = APIService.hostname() + '/Authen/AuthenUser';
                 var data = {username:user,password:pw};
                 APIService.ShowLoading();
