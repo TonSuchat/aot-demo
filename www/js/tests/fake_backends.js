@@ -5,6 +5,7 @@ angular.module('starter')
 		var loginURL = APIService.hostname() + '/Authen/AuthenUser';
 		var userprofileURL = APIService.hostname() + '/ContactDirectory/viewContactPaging';
 		var syncValueGetURL = APIService.hostname() + '/SyncData/SyncValue';
+		var stockURL = APIService.hostname() + '/Stocks/getAOTStockLive';
 
 		//get api token
 		$httpBackend.whenPOST(apiTokenURL).respond(function(method,url,data,headers){
@@ -52,6 +53,10 @@ angular.module('starter')
 				default:
 					return [404,{},{}];
 			};
+		});
+		//stock price
+		$httpBackend.whenPOST(stockURL).respond(function(method,url,data,headers){
+			return [200,fakeStock,{}];
 		});
 		//templates
 		$httpBackend.whenGET(/templates\/\w+.*/).passThrough();

@@ -1169,3 +1169,11 @@ var fakeRoyals = [
     "TS": "10032016145748"
   }
 ];
+
+var fakeStock = [
+  {
+    "Price": "406.00",
+    "Pdiff": "0.00",
+    "Diff": "0.00"
+  }
+];

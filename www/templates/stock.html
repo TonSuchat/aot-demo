@@ -1,0 +1,143 @@
+<ion-view cache-view="false" view-title="ราคาหุ้น">
+    <ion-content>
+
+        <!-- <input type='button' ng-click='SyncMedicalData()' value='SyncMedicalData' /> -->
+        <ion-refresher pulling-text="โหลดข้อมูลใหม่" on-refresh="Refresh()">
+        </ion-refresher>
+  
+        <!-- <div class='list card'>
+
+          <div class='item item-avatar'>
+            <img src="img/stock-logo.png">
+            <h2>ราคาหุ้น AOT</h2>
+            <p>18 มีนาคม 2559 15:30 น.</p>
+          </div>
+
+          <div class='item item-body'>
+
+            <div class='row'>
+              <div class='col'>
+                <h2>ราคาล่าสุด</h2>
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col'>
+                <span>404.00</span>
+              </div>
+            </div>
+
+
+            <div class='row'>
+              <div class='col'>
+                <h2>เปลี่ยนแปลง</h2>
+              </div>
+              <div class='col'>
+                <h2>% เปลี่ยนแปลง</h2>
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col'>
+                <span>+2.00 <i style='color:green;' class='icon ion-arrow-up-b'></i></span>
+              </div>
+              <div class='col'>
+                <span>0.50</span>
+              </div>
+            </div>
+
+            <br />
+            <img src="img/aot-logo.png" class='full-image'>
+
+          </div>
+
+        </div> -->
+        <!-- <div class='border:1px solid;border-radius:6px;'>
+            <div class='row'>
+              <div class='col'>
+                <h2>AOT</h2>
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col'>
+                <h3>ราคาล่าสุด</h3>
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col'>
+                <h3 style='color:green;'>404.00</h3>
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col'>
+                <h3>เปลี่ยนแปลง</h3>
+              </div>
+              <div class='col'>
+                <h3>%เปลี่ยนแปลง</h3>
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col'>
+                <h4 style='color:green;'>+2.00 <i style='color:green;' class='icon ion-arrow-up-b'></i></h4>
+              </div>
+              <div class='col'>
+                <h4 style='color:green;'>+0.50%</h4>
+              </div>
+            </div>
+        </div> -->
+
+        <div class="card">
+
+          <div class="item item-divider">
+            <h2><i class='icon ion-arrow-graph-up-right'></i> ราคาหุ้น <b>AOT</b></h2>
+          </div>
+          <div class="item item-text-wrap">
+
+            <div class='row'>
+              <div class='col'>
+                <h1 style='color:{{stockInfo.color}};'>{{stockInfo.price}}</h1>
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col'>
+                <h2>เปลี่ยนแปลง</h2>
+              </div>
+              <div class='col'>
+                <h2>%เปลี่ยนแปลง</h2>
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col'>
+                <h2 style='color:{{stockInfo.color}};'>{{stockInfo.priceDif}} 
+                  <i ng-show="(stockInfo.type == 'up')" style='color:#0BC70B;' class='icon ion-arrow-up-b'></i>
+                  <i ng-show="(stockInfo.type == 'down')" style='color:#FF3232;' class='icon ion-arrow-down-b'></i>
+                </h2>
+                  
+              </div>
+              <div class='col'>
+                <h2 style='color:{{stockInfo.color}};'>{{stockInfo.pricePercentDif}}%</h2>
+              </div>
+            </div>
+          </div>
+        
+        </div>
+        
+        <div class='row'>
+          <div class='col'>
+            <span>ข้อมูลล่าสุด </span>
+            <span style='color:{{stockInfo.color}};'>{{stockInfo.currentDate}}</span>
+          </div>
+        </div>
+        
+
+
+        
+
+    </ion-content>
+</ion-view>

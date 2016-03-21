@@ -66,3 +66,11 @@ function ConvertQueryResultToArray(data){
     };
     return newArr;
 }
+
+function GetCurrentTime(){
+    var currentdate = new Date(); 
+    var datetime = currentdate.getHours() + ":"  
+                + currentdate.getMinutes() + ":" 
+                + currentdate.getSeconds();
+    return datetime;
+}

@@ -138,7 +138,6 @@ angular.module('starter')
 			function(){
 				//insert new data
 				sql = "INSERT INTO userprofile (userid, prefixname, firstname, lastname, nickname, position, section, department, citizenid, picturepath, picturethumb, posi_name_gover, orga_gover, changedate, officetel, officefax, mobilephone, emailaddress, line, facebook, DL, dirty, TS) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-				console.log(sql);
 				var param = [data.UserID,data.PrefixName,data.Firstname,data.Lastname,data.Nickname,data.Position,data.Section,data.Department,data.CitizenID,data.PicturePath,data.PictureThumb,data.posi_name_gover,data.orga_gover,data.changeDate,data.ContactList[0].OfficeTel,data.ContactList[0].OfficeFax,data.ContactList[0].MobilePhone,data.ContactList[0].eMailAddress,data.ContactList[0].Line,data.ContactList[0].Facebook,false,false,data.changeDate];
 				SQLiteService.Execute(sql,param).then(function(){},function(error){console.log(error);});
 			},
@@ -348,8 +347,6 @@ angular.module('starter')
 		else
 			sql = "UPDATE royal SET Id = ?, Empl_Code = ?, Roya_Code = ?, Roya_Name = ?, Roya_Date = ?, DL = ?, dirty = ?, TS = ? WHERE Id = " + data.Id;
 		var param = [data.Id,data.Empl_Code,data.Roya_Code,data.Roya_Name,data.Roya_Date,data.DL,isDirty,data.TS];
-		console.log(sql);
-		console.log(param);
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
 	};
 

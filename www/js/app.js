@@ -5,6 +5,7 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js
 angular.module('starter', ['ionic','ngCordova','ngMockE2E'])
+//angular.module('starter', ['ionic','ngCordova'])
 
     .run(function($ionicPlatform) {
       $ionicPlatform.ready(function() {
@@ -175,6 +176,15 @@ angular.module('starter', ['ionic','ngCordova','ngMockE2E'])
               'menuContent': {
                 templateUrl: 'templates/testsync-detail.html',
                 controller:'TestDetailSyncCtrl'
+              }
+            }
+          })
+          .state('app.stock', {
+            url: '/stock',
+            views: {
+              'menuContent': {
+                templateUrl: 'templates/stock.html',
+                controller:'StockCtrl'
               }
             }
           })

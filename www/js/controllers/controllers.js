@@ -210,6 +210,15 @@ angular.module('starter')
         };
 
      })
+     .controller('StockCtrl',function($scope,APIService,$filter){
+      
+        GetStockData($scope,APIService,$filter);
+
+        $scope.Refresh = function(){
+          GetStockData($scope,APIService,$filter);
+        };
+
+     })
 
 function InitialCirculars(distinctCircularDate,$filter,allData,start,retrieve){
     var result = [];
@@ -290,12 +299,54 @@ function InitialNewsFeedProcess($scope, $stateParams, SyncService, NewsSQLite, $
             $scope.listNews.push({link:allData.rows.item(i).FileName,title:allData.rows.item(i).Title});
           };
       }
-      FinalNewsFeedAction($scope,APIService);
+      FinalCtrlAction($scope,APIService);
     });
   });
 };
 
-function FinalNewsFeedAction($scope,APIService){
+function FinalCtrlAction($scope,APIService){
   $scope.$broadcast('scroll.refreshComplete');
   APIService.HideLoading();
+};
+
+function GetStockData($scope,APIService,$filter){
+  var url = APIService.hostname() + '/Stocks/getAOTStockLive';
+  APIService.ShowLoading();
+  APIService.httpPost(url,null,
+    function(response){
+      if(response.data != null && response.data.length > 0){
+        InitialStockProcess($scope,$filter,response.data[0]);
+      }
+      FinalCtrlAction($scope,APIService);
+    },
+    function(error){
+      FinalCtrlAction($scope,APIService);
+      console.log(error);
+    })
+};
+
+function InitialStockProcess($scope,$filter,data){
+  //green : #0BC70B
+  //red : #FF3232
+  //gray : gray (in case price is not either up or down)
+  $scope.stockInfo = {};
+  $scope.stockInfo.price = data.Price;
+  $scope.stockInfo.priceDif = data.Diff;
+  $scope.stockInfo.pricePercentDif = data.Pdiff;
+  //up
+  if(data.Diff.indexOf('+') >= 0) {
+    $scope.stockInfo.color = '#0BC70B';
+    $scope.stockInfo.type = 'up';
+  }
+  //down
+  else if (data.Diff.indexOf('-') >= 0){
+     $scope.stockInfo.color = '#FF3232'; 
+    $scope.stockInfo.type = 'down';
+  }
+  //not change
+  else{
+    $scope.stockInfo.color = 'gray'; 
+    $scope.stockInfo.type = '';
+  }
+  $scope.stockInfo.currentDate = GetThaiDateByDate($filter,GetCurrentDate().replace(/\//g,'')) + ' เวลา ' + GetCurrentTime() + ' น.' ;
 };
