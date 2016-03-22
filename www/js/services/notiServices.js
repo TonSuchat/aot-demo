@@ -43,7 +43,7 @@ window.onNotification = function(e){
     case 'registered':
       if(e.regid.length > 0){
         var device_token = e.regid;
-        console.log(device_token);
+        console.log('GCM Token = ' + device_token);
          //window.localStorage.removeItem('GCMToken');
         if(window.localStorage.getItem('GCMToken') != null && window.localStorage.getItem('GCMToken').length > 0 && (window.localStorage.getItem('GCMToken') == device_token)) return;
         //set token to local storage

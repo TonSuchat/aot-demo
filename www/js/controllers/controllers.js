@@ -219,6 +219,14 @@ angular.module('starter')
         };
 
      })
+     .controller('QRCodeCtrl',function($scope,$cordovaBarcodeScanner){
+        //active when ready
+        ActiveBarcodeScanner($cordovaBarcodeScanner);
+
+        $scope.Scan = function(){
+          ActiveBarcodeScanner($cordovaBarcodeScanner);
+        };
+     })
 
 function InitialCirculars(distinctCircularDate,$filter,allData,start,retrieve){
     var result = [];
@@ -349,4 +357,16 @@ function InitialStockProcess($scope,$filter,data){
     $scope.stockInfo.type = '';
   }
   $scope.stockInfo.currentDate = GetThaiDateByDate($filter,GetCurrentDate().replace(/\//g,'')) + ' เวลา ' + GetCurrentTime() + ' น.' ;
+};
+
+function ActiveBarcodeScanner($cordovaBarcodeScanner){
+  document.addEventListener("deviceready", function () {
+     $cordovaBarcodeScanner.scan().then(function(barcodeData) {
+        console.log(barcodeData);
+        if(barcodeData.format == 'QR_CODE')
+          window.open(barcodeData.text,'_system','location=no');
+      }, function(error) {
+        console.log(error);
+      });
+  });
 };

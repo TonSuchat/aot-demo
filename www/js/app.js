@@ -188,6 +188,15 @@ angular.module('starter', ['ionic','ngCordova','ngMockE2E'])
               }
             }
           })
+          .state('app.qrcode', {
+            url: '/qrcode',
+            views: {
+              'menuContent': {
+                templateUrl: 'templates/qrcode.html',
+                controller:'QRCodeCtrl'
+              }
+            }
+          })
       // if none of the above states are matched, use this as the fallback
       $urlRouterProvider.otherwise('/app/home/news-feed');
     });
