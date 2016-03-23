@@ -9,6 +9,8 @@ angular.module('starter')
       //$scope.$on('$ionicView.enter', function(e) {
       //});
 
+      $scope.PMNumber = 509;
+
       // Form data for the login modal
       function checkAuthen(){
 
@@ -339,8 +341,8 @@ function InitialStockProcess($scope,$filter,data){
   //gray : gray (in case price is not either up or down)
   $scope.stockInfo = {};
   $scope.stockInfo.price = data.Price;
-  $scope.stockInfo.priceDif = data.Diff;
-  $scope.stockInfo.pricePercentDif = data.Pdiff;
+  $scope.stockInfo.priceDif = data.Pdiff;
+  $scope.stockInfo.pricePercentDif = data.Diff;
   //up
   if(data.Diff.indexOf('+') >= 0) {
     $scope.stockInfo.color = '#0BC70B';

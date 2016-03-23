@@ -5,7 +5,7 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js
 angular.module('starter', ['ionic','ngCordova','ngMockE2E'])
-//angular.module('starter', ['ionic','ngCordova'])
+// angular.module('starter', ['ionic','ngCordova'])
 
     .run(function($ionicPlatform) {
       $ionicPlatform.ready(function() {
@@ -194,6 +194,24 @@ angular.module('starter', ['ionic','ngCordova','ngMockE2E'])
               'menuContent': {
                 templateUrl: 'templates/qrcode.html',
                 controller:'QRCodeCtrl'
+              }
+            }
+          })
+          .state('app.pms', {
+            url: '/pms',
+            views: {
+              'menuContent': {
+                templateUrl: 'templates/pm/pms.html',
+                controller:'PrivateMessagesCtrl'
+              }
+            }
+          })
+          .state('app.pms-detail', {
+            url: '/pms/:pmId',
+            views: {
+              'menuContent': {
+                templateUrl: 'templates/pm/pm-detail.html',
+                controller:'PrivateMessageDetailCtrl'
               }
             }
           })
