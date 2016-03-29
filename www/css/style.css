@@ -85,3 +85,55 @@
 .cf {
   clear: both !important;
 }
+
+.img-circle{
+  max-width: 70px;
+  max-height: 70px;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid;
+  border-color: #9A9A9A;
+}
+
+/*herader*/
+/*background-color: #273340 !important;
+border-bottom: 2px solid #4E5E6D !important;*/
+
+/*menu*/
+/*background-color: #354658 !important;
+border-bottom: 2px solid #4E5E6D;
+color: #F0F1F1;*/
+
+/*Side-Menu*/
+.header-dark{
+  background-color: #009cde !important;
+  border-bottom: 2px dashed #4E4E4E !important;
+}
+.header-dark h1{
+  color: black;
+}
+.dark {
+  background-color: #CEEEF7 !important;
+  color: black;
+}
+.dark .scroll-content {
+  background-color: #CEEEF7 !important;
+}
+.dark .item {
+  background-color: #CEEEF7;
+  border: none;
+  border-bottom: 2px dashed #0a9dc7;
+  padding: 20px;
+  color: black;
+  max-height: none;
+}
+.dark .item:last-child {
+  border-bottom: 2px dashed #0a9dc7 !important;
+}
+.dark h2,
+.dark h3,
+.dark p,
+.dark a {
+  color: black;
+}

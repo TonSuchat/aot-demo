@@ -1,7 +1,8 @@
 <ion-side-menus enable-menu-with-back-views="false">
 
   <ion-side-menu-content>
-    <ion-nav-bar class="bar-positive" align-title='center'>
+    <!-- <ion-nav-bar class="bar-positive" align-title='center'> -->
+    <ion-nav-bar class='bar-calm' align-title='center'>
       <!-- <ion-nav-back-button>
       </ion-nav-back-button> -->
       <ion-nav-back-button class="button-clear">
@@ -27,14 +28,56 @@
   
 
   <ion-side-menu side="left">
-    <ion-header-bar class="bar-positive">
-      <h1 class="title">Menu</h1>
+    <ion-header-bar align-title='center' class="bar-calm">
+      <h1 class="title">เมนู</h1>
     </ion-header-bar>
-    <ion-content>
-      <ion-list>
-        <ion-item class="item-stable item-avatar-newline item-text-wrap" ng-show="isAuthen" menu-close href="#/app/profile">
-        <!-- <img src="../img/484134.png" alt="Profile Picture"> -->
-        <img src="{{'http://' + userPicturethumb}}" alt="Profile Picture">
+    <ion-content class='dark'>
+  
+      <ul class='list'>
+
+        <a href='#/app/profile' ng-show="isAuthen" class='item' menu-close>
+          <div class='text-center'>
+            <img src="{{'http://' + userPicturethumb}}" class='img-circle' alt="Profile Picture" />
+          </div>
+          <div class='item-text-wrap text-center'>
+            <h2>{{fullname}}</h2>
+            <p>{{userPosition}}</p>
+          </div>
+        </a>
+
+        <a href="#/app/home/news-feed" menu-close class='item'>
+          <i class="icon ion-clipboard"></i>&nbsp;&nbsp;ข่าวสาร ทอท.
+        </a>
+
+        <a href="#/app/information/finance" ng-show="isAuthen" menu-close class='item'>
+          <i class="icon ion-information"></i>&nbsp;&nbsp;ตรวจสอบข้อมูล
+        </a>
+
+        <a href="#/app/directory" ng-show="isAuthen" menu-close class='item'>
+           <i class="icon ion-android-call"></i>&nbsp;&nbsp;สมุดโทรศัพท์
+        </a>
+
+        <a href="#/app/stock" menu-close class='item'>
+           <i class='icon ion-ios-pulse-strong'></i>&nbsp;&nbsp;ราคาหุ้น
+        </a>
+
+        <a href="#/app/qrcode" menu-close class='item'>
+           <i class='icon ion-qr-scanner'></i>&nbsp;&nbsp;สแกน QR-Code
+        </a>
+
+        <a href="#" ng-hide="isAuthen" ng-click="login()" menu-close class='item'>
+           <i class='icon ion-log-in'></i>&nbsp;&nbsp;เข้าสู่ระบบ
+        </a>
+
+        <a href="#" ng-show="isAuthen" menu-close ng-click="logout()" class='item'>
+           <i class='icon ion-log-out'></i>&nbsp;&nbsp;ออกจากระบบ
+        </a>
+
+      </ul>
+
+    <!--   <ion-list>
+        <ion-item class="item-stable item-avatar-newline item-text-wrap text-center" ng-show="isAuthen" menu-close href="#/app/profile">
+          <img src="{{'http://' + userPicturethumb}}" class='img-center' alt="Profile Picture" />
           <h2>{{fullname}}</h2>
           <p>{{userPosition}}</p>
         </ion-item>
@@ -55,18 +98,21 @@
         </ion-item>
         <ion-item class='item-icon-left' menu-close href='#/app/qrcode'>
           <i class='icon ion-qr-scanner'></i>
-          แสกน QR-Code
+          สแกน QR-Code
         </ion-item>
-        <ion-item ng-hide="isAuthen" menu-close ng-click="login()">
-          Login
+        <ion-item class="item-icon-left" ng-hide="isAuthen" menu-close ng-click="login()">
+          <i class='icon ion-log-in'></i> 
+          เข้าสู่ระบบ
         </ion-item>
-        <ion-item ng-show="isAuthen" menu-close ng-click="logout()">
-          Logout
+        <ion-item class="item-icon-left" ng-show="isAuthen" menu-close ng-click="logout()">
+           <i class='icon ion-log-out'></i> 
+           ออกจากระบบ
         </ion-item>
         <ion-item menu-close href="#/app/testsync">
           TestSync
         </ion-item>
-      </ion-list>
+      </ion-list> -->
+
     </ion-content>
   </ion-side-menu>
 </ion-side-menus>
