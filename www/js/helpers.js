@@ -22,7 +22,7 @@
     if(mm<10) mm='0'+mm
     today = dd+'/'+mm+'/'+yyyy;
     return today;
-}
+};
 
 function GetFiscalDate(){
 	var today = new Date();
@@ -31,33 +31,33 @@ function GetFiscalDate(){
 	var year = today.getFullYear();
 	if(month > 10) return '0110' + year;
 	else return '0110' + (year - 1);
-}
+};
 
 function GetThaiDateByDate($filter,inputDate){
     var currentMonth = $filter('filter')(shortnessThaiMonth, { monthValue: inputDate.substring(2,4) });
     return inputDate.substring(0,2) + ' ' + currentMonth[0].monthName + ' ' + (parseInt(inputDate.substring(4,8)) + 543);
-}
+};
 
 //change date format from such as '04.02.2016 07:48:48' to '04022016'
 function TransformDateToddMMyyyyFormat(inputDate){
     if(!inputDate || inputDate.length == 0) return;
     return inputDate.substring(0,10).replace(/\./g,'');
-}
+};
 
 function GetThaiMonthNameByMonth($filter,monthVal){
     if(!monthVal || monthVal.length == 0) return;
     var currentMonth = $filter('filter')(shortnessThaiMonth, { monthValue: monthVal });
     return currentMonth[0].monthName;
-}
+};
 
 function GetStringNumber2Digits(n){
     return n > 9 ? "" + n: "0" + n;
-}
+};
 
 function GetTimeByStampTime(stampTime){
     if(!stampTime || stampTime.length == 0) return;
     return stampTime.substring(11,16);
-}
+};
 
 function ConvertQueryResultToArray(data){
     var newArr = [];
@@ -65,7 +65,7 @@ function ConvertQueryResultToArray(data){
         newArr.push(data.rows.item(i));
     };
     return newArr;
-}
+};
 
 function GetCurrentTime(){
     var currentdate = new Date(); 
@@ -73,4 +73,4 @@ function GetCurrentTime(){
                 + currentdate.getMinutes() + ":" 
                 + currentdate.getSeconds();
     return datetime;
-}
+};
