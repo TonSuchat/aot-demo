@@ -221,14 +221,7 @@ angular.module('starter')
         };
 
      })
-     .controller('QRCodeCtrl',function($scope,$cordovaBarcodeScanner){
-        //active when ready
-        ActiveBarcodeScanner($cordovaBarcodeScanner);
-
-        $scope.Scan = function(){
-          ActiveBarcodeScanner($cordovaBarcodeScanner);
-        };
-     })
+     
 
 function InitialCirculars(distinctCircularDate,$filter,allData,start,retrieve){
     var result = [];
@@ -327,9 +320,11 @@ function GetStockData($scope,APIService,$filter){
       if(response.data != null && response.data.length > 0){
         InitialStockProcess($scope,$filter,response.data[0]);
       }
+      else InitialStockProcess($scope,$filter,null);
       FinalCtrlAction($scope,APIService);
     },
     function(error){
+      //in case can't get current data, Will not show current time.
       FinalCtrlAction($scope,APIService);
       console.log(error);
     })
@@ -340,16 +335,16 @@ function InitialStockProcess($scope,$filter,data){
   //red : #FF3232
   //gray : gray (in case price is not either up or down)
   $scope.stockInfo = {};
-  $scope.stockInfo.price = data.Price;
-  $scope.stockInfo.priceDif = data.Pdiff;
-  $scope.stockInfo.pricePercentDif = data.Diff;
+  $scope.stockInfo.price = (data == null) ? '-' : data.Price;
+  $scope.stockInfo.priceDif = (data == null) ? '-' : data.Pdiff;
+  $scope.stockInfo.pricePercentDif = (data == null) ? '-' : data.Diff;
   //up
-  if(data.Diff.indexOf('+') >= 0) {
+  if(data != null && data.Diff.indexOf('+') >= 0) {
     $scope.stockInfo.color = '#0BC70B';
     $scope.stockInfo.type = 'up';
   }
   //down
-  else if (data.Diff.indexOf('-') >= 0){
+  else if (data != null && data.Diff.indexOf('-') >= 0){
      $scope.stockInfo.color = '#FF3232'; 
     $scope.stockInfo.type = 'down';
   }
@@ -358,17 +353,7 @@ function InitialStockProcess($scope,$filter,data){
     $scope.stockInfo.color = 'gray'; 
     $scope.stockInfo.type = '';
   }
-  $scope.stockInfo.currentDate = GetThaiDateByDate($filter,GetCurrentDate().replace(/\//g,'')) + ' เวลา ' + GetCurrentTime() + ' น.' ;
+  $scope.stockInfo.currentDate = (data == null) ? 'ไม่สามารถถึงข้อมูลล่าสุดได้' : GetThaiDateByDate($filter,GetCurrentDate().replace(/\//g,'')) + ' เวลา ' + GetCurrentTime() + ' น.';
 };
 
-function ActiveBarcodeScanner($cordovaBarcodeScanner){
-  document.addEventListener("deviceready", function () {
-     $cordovaBarcodeScanner.scan().then(function(barcodeData) {
-        console.log(barcodeData);
-        if(barcodeData.format == 'QR_CODE')
-          window.open(barcodeData.text,'_system','location=no');
-      }, function(error) {
-        console.log(error);
-      });
-  });
-};
+
