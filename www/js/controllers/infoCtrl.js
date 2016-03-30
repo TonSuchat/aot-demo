@@ -119,7 +119,7 @@ angular.module('starter')
 
     .controller('InfoCtrl', function($scope, $stateParams) {
     })
-    .controller('TimeCtrl', function($scope, $filter, TimeAttendanceSQLite, SyncService, $ionicPlatform, APIService) {
+    .controller('TimeCtrl', function($scope, $filter, TimeAttendanceSQLite, SyncService, $ionicPlatform, APIService, $rootScope) {
         $ionicPlatform.ready(function(){
             APIService.ShowLoading();
             //if disable sync, Get new data when page load.
@@ -177,8 +177,10 @@ angular.module('starter')
 
         });
 
+        CheckNeedToReload($rootScope,'/time');
+
     })
-    .controller('LeaveCtrl', function($scope, $filter, LeaveSQLite, SyncService, $ionicPlatform, APIService) {
+    .controller('LeaveCtrl', function($scope, $filter, LeaveSQLite, SyncService, $ionicPlatform, APIService, $rootScope) {
         $ionicPlatform.ready(function(){
             APIService.ShowLoading();
             SyncService.SyncLeave().then(function(){
@@ -194,6 +196,8 @@ angular.module('starter')
                 });
             };
         });
+
+        CheckNeedToReload($rootScope,'/leave');
 
     })
     .controller('MedicalCtrl', function($scope, $stateParams, $filter, MedicalSQLite, SyncService) {
@@ -214,9 +218,10 @@ angular.module('starter')
     .controller('FuelDetailCtrl', function($scope, $stateParams) {
 
     })
-    .controller('FinanceCtrl', function($scope, MedicalSQLite, TuitionSQLite, SyncService, $ionicPlatform, APIService) {
+    .controller('FinanceCtrl', function($scope, MedicalSQLite, TuitionSQLite, SyncService, $ionicPlatform, APIService, $rootScope) {
 
         $ionicPlatform.ready(function(){
+
             var syncCompleted = 0;
             APIService.ShowLoading();
             //***Medical
@@ -262,6 +267,8 @@ angular.module('starter')
 
         });
 
+        CheckNeedToReload($rootScope,'/finance');
+
     })
     .controller('HrCtrl', function($scope, $stateParams) {
 
@@ -280,7 +287,7 @@ angular.module('starter')
     .controller('TuitionDetailCtrl', function($scope, $stateParams, $filter) {
         InitialTuitionDetails($scope,$filter,$stateParams);
     })
-    .controller('RoyalCtrl', function($scope, RoyalSQLite, SyncService, $filter, $ionicPlatform, APIService) {
+    .controller('RoyalCtrl', function($scope, RoyalSQLite, SyncService, $filter, $ionicPlatform, APIService, $rootScope) {
         $ionicPlatform.ready(function(){
             APIService.ShowLoading();
             SyncService.SyncRoyal().then(function(){
@@ -298,6 +305,8 @@ angular.module('starter')
                 });
             };
         });
+
+        CheckNeedToReload($rootScope,'/royal');
     })
 
 function InitialMedicalInfo($scope,MedicalSQLite,totalNotification){

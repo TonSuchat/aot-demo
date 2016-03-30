@@ -78,11 +78,13 @@ angular.module('starter')
       checkAuthen();
     })
 
-    .controller('NewsFeedCtrl', function($scope, $stateParams, SyncService, NewsSQLite, $ionicPlatform, APIService) {
+    .controller('NewsFeedCtrl', function($scope, $stateParams, SyncService, NewsSQLite, $ionicPlatform, APIService, $rootScope) {
 
       $ionicPlatform.ready(function(){
         InitialNewsFeedProcess($scope, $stateParams, SyncService, NewsSQLite, $ionicPlatform, APIService);
       });
+
+      CheckNeedToReload($rootScope,'/news-feed');
 
       $scope.OpenPDF = function(link){
         window.open(link,'_system','location=no');
@@ -96,7 +98,7 @@ angular.module('starter')
     .controller('NewsCtrl', function($scope, $stateParams) {
       console.log('news click');
     })
-    .controller('CircularLetterCtrl', function($scope, $filter, SyncService, CircularSQLite, APIService, $ionicPlatform) {
+    .controller('CircularLetterCtrl', function($scope, $filter, SyncService, CircularSQLite, APIService, $ionicPlatform, $rootScope) {
       $ionicPlatform.ready(function(){
 
         InitialCircularProcess($scope, $filter, SyncService, CircularSQLite, APIService);
@@ -121,6 +123,8 @@ angular.module('starter')
         };
 
       });
+
+      CheckNeedToReload($rootScope,'/circular-letter');
       
     })
     .controller('ProfileCtrl', function($scope, UserProfileSQLite) {
