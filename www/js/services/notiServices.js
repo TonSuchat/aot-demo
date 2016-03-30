@@ -3,6 +3,8 @@
  */
 //pushNotification = window.plugins.pushNotification;
 var serviceObj;
+var needReload = false;
+
 angular.module('starter')
 .service('NotiService',function($q,APIService,$cordovaDevice){
 
@@ -53,8 +55,10 @@ window.onNotification = function(e){
       }
       break;
     case 'message':
-      alert('msg received');
-      alert(JSON.stringify(e));
+      // alert('msg received');
+      // alert(JSON.stringify(e));
+
+      ProcessNotification(e.payload)
       break;
 
     case 'error':
@@ -65,4 +69,24 @@ window.onNotification = function(e){
 
 window.errorHandler = function(error){
   alert('an error occured');
+};
+
+
+function ProcessNotification(data){
+  //check if messageType is hyperlink
+  if(data.messageType.type == "1"){
+    if(confirm('ต้องการเปิด link : ' + data.messageType.optData + ' ?'))
+      window.open(data.messageType.optData,'_system','location=no');
+  }
+  else{
+    //check if need to confirm and redirect to specific path
+    if(data.alertType == "1"){
+      if(confirm('ต้องการดูข้อมูล : ' + data.title + ' ?')){
+        needReload = true;
+        window.location.href = '#/app' + data.menu;
+      }
+    }
+    //just show message
+    else alert(data.message);  
+  }
 };
