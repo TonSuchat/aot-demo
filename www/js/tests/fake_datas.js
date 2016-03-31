@@ -1177,3 +1177,43 @@ var fakeStock = [
     "Diff": "0.00"
   }
 ];
+
+var fakePMRooms = [
+    {Id:359,roomName:'ปู่ชิว',roomIcon:'img/people.jpg',lastMsg:'นี่คือข้อความล่าสุดนะ',totalNewMsg:5,DL:false,TS:'31032016094200'},
+    {Id:367,roomName:'ดณุพล',roomIcon:'http://10.74.29.166/ContactDirectory/images/484134_thumb.png',lastMsg:'นี่คือข้อความล่าสุดนะ',totalNewMsg:2,DL:false,TS:'31032016095700'},
+    {Id:347,roomName:'อมร',roomIcon:'http://10.74.29.166/ContactDirectory/images/525173_thumb.png',lastMsg:'นี่คือข้อความล่าสุดนะ',totalNewMsg:0,DL:false,TS:'31032016095714'},
+    {Id:348,roomName:'อมร',roomIcon:'http://10.74.29.166/ContactDirectory/images/525173_thumb.png',lastMsg:'นี่คือข้อความล่าสุดนะ',totalNewMsg:0,DL:false,TS:'31032016095714'},
+    {Id:349,roomName:'อมร',roomIcon:'http://10.74.29.166/ContactDirectory/images/525173_thumb.png',lastMsg:'นี่คือข้อความล่าสุดนะ',totalNewMsg:0,DL:false,TS:'31032016095714'},
+    {Id:350,roomName:'อมร',roomIcon:'http://10.74.29.166/ContactDirectory/images/525173_thumb.png',lastMsg:'นี่คือข้อความล่าสุดนะ',totalNewMsg:0,DL:false,TS:'31032016095714'},
+    {Id:351,roomName:'อมร',roomIcon:'http://10.74.29.166/ContactDirectory/images/525173_thumb.png',lastMsg:'นี่คือข้อความล่าสุดนะ',totalNewMsg:0,DL:false,TS:'31032016095714'},
+    {Id:352,roomName:'อมร',roomIcon:'http://10.74.29.166/ContactDirectory/images/525173_thumb.png',lastMsg:'นี่คือข้อความล่าสุดนะ',totalNewMsg:0,DL:false,TS:'31032016095714'},
+    {Id:353,roomName:'อมร',roomIcon:'http://10.74.29.166/ContactDirectory/images/525173_thumb.png',lastMsg:'นี่คือข้อความล่าสุดนะ',totalNewMsg:0,DL:false,TS:'31032016095714'},
+    {Id:400,roomName:'อมร',roomIcon:'http://10.74.29.166/ContactDirectory/images/525173_thumb.png',lastMsg:'นี่คือข้อความล่าสุดนะ',totalNewMsg:0,DL:false,TS:'31032016095714'},
+    {Id:401,roomName:'อมร',roomIcon:'http://10.74.29.166/ContactDirectory/images/525173_thumb.png',lastMsg:'นี่คือข้อความล่าสุดนะ',totalNewMsg:0,DL:false,TS:'31032016095714'},
+    {Id:402,roomName:'อมร',roomIcon:'http://10.74.29.166/ContactDirectory/images/525173_thumb.png',lastMsg:'นี่คือข้อความล่าสุดนะ',totalNewMsg:0,DL:false,TS:'31032016095714'},
+    {Id:403,roomName:'อมร',roomIcon:'http://10.74.29.166/ContactDirectory/images/525173_thumb.png',lastMsg:'นี่คือข้อความล่าสุดนะ',totalNewMsg:0,DL:false,TS:'31032016095714'},
+    {Id:404,roomName:'อมร',roomIcon:'http://10.74.29.166/ContactDirectory/images/525173_thumb.png',lastMsg:'นี่คือข้อความล่าสุดนะ',totalNewMsg:0,DL:false,TS:'31032016095714'},
+    {Id:405,roomName:'อมร',roomIcon:'http://10.74.29.166/ContactDirectory/images/525173_thumb.png',lastMsg:'นี่คือข้อความล่าสุดนะ',totalNewMsg:0,DL:false,TS:'31032016095714'},
+    {Id:406,roomName:'อมร',roomIcon:'http://10.74.29.166/ContactDirectory/images/525173_thumb.png',lastMsg:'นี่คือข้อความล่าสุดนะ',totalNewMsg:0,DL:false,TS:'31032016095714'},
+    {Id:407,roomName:'อมร',roomIcon:'http://10.74.29.166/ContactDirectory/images/525173_thumb.png',lastMsg:'นี่คือข้อความล่าสุดนะ',totalNewMsg:0,DL:false,TS:'31032016095714'},
+    {Id:408,roomName:'อมร',roomIcon:'http://10.74.29.166/ContactDirectory/images/525173_thumb.png',lastMsg:'นี่คือข้อความล่าสุดนะ',totalNewMsg:0,DL:false,TS:'31032016095714'},
+    {Id:409,roomName:'อมร',roomIcon:'http://10.74.29.166/ContactDirectory/images/525173_thumb.png',lastMsg:'นี่คือข้อความล่าสุดนะ',totalNewMsg:0,DL:false,TS:'31032016095714'},
+    {Id:410,roomName:'อมร',roomIcon:'http://10.74.29.166/ContactDirectory/images/525173_thumb.png',lastMsg:'นี่คือข้อความล่าสุดนะ',totalNewMsg:0,DL:false,TS:'31032016095714'},
+    {Id:411,roomName:'อมร',roomIcon:'http://10.74.29.166/ContactDirectory/images/525173_thumb.png',lastMsg:'นี่คือข้อความล่าสุดนะ',totalNewMsg:0,DL:false,TS:'31032016095714'},
+    {Id:412,roomName:'อมร',roomIcon:'http://10.74.29.166/ContactDirectory/images/525173_thumb.png',lastMsg:'นี่คือข้อความล่าสุดนะ',totalNewMsg:0,DL:false,TS:'31032016095714'},
+];
+
+var fakePMMsgs = [
+    {Id:1,Empl_Code:'484134',message:'ข้อความที่ 1',readTotal:1,DL:false,TS:'27032016112000'},
+    {Id:2,Empl_Code:'484074',message:'ข้อความที่ 2',readTotal:1,DL:false,TS:'27032016112012'},
+    {Id:3,Empl_Code:'484074',message:'ข้อความที่ 3',readTotal:1,DL:false,TS:'27032016112900'},
+    {Id:4,Empl_Code:'484074',message:'ข้อความที่ 4',readTotal:2,DL:false,TS:'27032016113000'},
+    {Id:5,Empl_Code:'484134',message:'ข้อความที่ 5',readTotal:2,DL:false,TS:'27032016113100'},
+    {Id:6,Empl_Code:'484134',message:'ข้อความที่ 6',readTotal:1,DL:false,TS:'30032016113100'},
+];
+
+var fakeGetEMPsInRoom = [
+    {Empl_Code:'484074'},
+    {Empl_Code:'484134'}
+    //{Empl_Code:'484135'},
+];

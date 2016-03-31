@@ -7,6 +7,8 @@ angular.module('starter')
 		var syncValueGetURL = APIService.hostname() + '/SyncData/SyncValue';
 		var stockURL = APIService.hostname() + '/Stocks/getAOTStockLive';
 
+		var getEmpsInRoom = APIService.hostname() + '/PM/GetEmpInRoom';
+
 		//get api token
 		$httpBackend.whenPOST(apiTokenURL).respond(function(method,url,data,headers){
 			return [200,true,{}];
@@ -50,6 +52,14 @@ angular.module('starter')
 				case 8:
 					return [200,fakeNews,{}];
 					break;
+				//PMRoom
+				case 9:
+					return [200,fakePMRooms,{}];
+					break;
+				//PMMsg
+				case 10:
+					return [200,fakePMMsgs,{}];
+					break;
 				default:
 					return [404,{},{}];
 			};
@@ -58,6 +68,10 @@ angular.module('starter')
 		$httpBackend.whenPOST(stockURL).respond(function(method,url,data,headers){
 			return [200,fakeStock,{}];
 		});
+		//get emp in room
+		$httpBackend.whenPOST(getEmpsInRoom).respond(function(method,url,data,headers){
+			return [200,fakeGetEMPsInRoom,{}];
+		});
 		//templates
 		$httpBackend.whenGET(/templates\/\w+.*/).passThrough();
 
@@ -65,5 +79,7 @@ angular.module('starter')
 
 
 function GetObjectId(data){
-	return parseInt(data.substring(9,10));
+	var lastIndex = data.indexOf('&');
+	var startIndex = data.indexOf('=');
+	return parseInt(data.substring(startIndex + 1,lastIndex));
 };
