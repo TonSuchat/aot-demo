@@ -15,6 +15,12 @@
     		</div>
     	</div>
 
+        <div class='row'>
+            <button class='button button-block button-calm'>
+                <i class='icon ion-chatbubble-working '></i> ส่งข้อความ
+            </button>
+        </div>
+
         <div class="card">
             <a ng-class-odd="'item item-divider item-text-wrap'" ng-class-even="'item item-text-wrap'" ng-repeat="contact in currentPerson.contacts" href="{{contact.href}}">
                 {{contact.ContactKey + ' : ' + contact.ContactValue}}
@@ -23,6 +29,8 @@
                 </p>
             </a>
         </div>
+
+      
         
 	</ion-content>
 </ion-view>

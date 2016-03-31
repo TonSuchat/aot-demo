@@ -1,5 +1,5 @@
 var db;
-var tableNames = ['userprofile','medical','tuition','royal','timeattendance','leave','circular','news'];
+var tableNames = ['userprofile','medical','tuition','royal','timeattendance','leave','circular','news','pmroom','pmmsg'];
 
 angular.module('starter')
 .service('SQLiteService',function($cordovaSQLite,$q){
@@ -71,6 +71,8 @@ angular.module('starter')
 		this.CreateLeaveTable();
 		this.CreateCircularTable();
 		this.CreateNewsTable();
+		this.CreatePMRoomTable();
+		this.CreatePMMsgTable();
 	};
 
 	//**Test-Sync-Code
@@ -106,14 +108,15 @@ angular.module('starter')
 		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS news(clientid integer primary key AUTOINCREMENT, Id int, Title text, PubDate text, FileName text, DL boolean,dirty boolean,TS datetime)");	
 	};
 
+	this.CreatePMRoomTable = function(){
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmroom(clientid integer primary key AUTOINCREMENT, Id int, roomName text, roomIcon text, totalNewMsg int, lastMsg text, DL boolean,dirty boolean,TS datetime)");
+	};
+
+	this.CreatePMMsgTable = function(){
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmmsg(clientid integer primary key AUTOINCREMENT, Id int, Empl_Code text, message text, readTotal int, DL boolean,dirty boolean,TS datetime)");
+	};
+
 	this.DeleteAllTables = function(){
-		// $cordovaSQLite.execute(db, "DELETE FROM userprofile");
-		// $cordovaSQLite.execute(db, "DELETE FROM medical");
-		// $cordovaSQLite.execute(db, "DELETE FROM tuition");
-		// $cordovaSQLite.execute(db, "DELETE FROM royal");
-		// $cordovaSQLite.execute(db, "DELETE FROM timeattendance");
-		// $cordovaSQLite.execute(db, "DELETE FROM leave");
-		// $cordovaSQLite.execute(db, "DELETE FROM circular");
 		return $q(function(resolve,reject){
 			var totalProcess = 0;
 			for (var i = 0; i <= tableNames.length - 1; i++) {
@@ -674,6 +677,131 @@ angular.module('starter')
 
 	this.GetAll = function(){
 		return SQLiteService.Execute("SELECT * FROM news").then(function(response){return response;},function(error){return error;});	
+	};
+})
+.service('PMRoomSQLite',function(SQLiteService){
+	//***Necessary-Method
+	this.GetLatestTS = function(){
+		return SQLiteService.BaseGetLatestTS('pmroom').then(function(response){return response;},function(error){return error;});
+	};
+
+	this.CountByServerId = function(serverid){
+		return SQLiteService.CountByServerId(serverid,'pmroom').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.CountIsNotDirtyById = function(id){
+		return SQLiteService.CountIsNotDirtyById(id,'pmroom').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.GetDataByTSIsNull = function(){
+		return SQLiteService.GetDataByTSIsNull('pmroom');
+	};
+
+	this.GetDataIsDirty = function(){
+		return SQLiteService.GetDataIsDirty("pmroom");
+	};
+
+	this.DeleteDataIsFlagDeleted = function(){
+		return SQLiteService.DeleteDataIsFlagDeleted("pmroom");
+	};
+
+	this.Update = function(data,isDirty,clientUpdate){
+		var sql;
+		if(clientUpdate)
+			sql = "UPDATE pmroom SET Id = ?, roomName = ?, roomIcon = ?, totalNewMsg = ?, lastMsg = ?, DL = ?,dirty = ?,TS = ? WHERE clientid = " + data.clientid;	
+		else
+			sql = "UPDATE pmroom SET Id = ?, roomName = ?, roomIcon = ?, totalNewMsg = ?, lastMsg = ?, DL = ?,dirty = ?,TS = ? WHERE Id = " + data.Id;
+		var param = [data.Id,data.roomName,data.roomIcon,data.totalNewMsg,data.lastMsg,data.DL,isDirty,data.TS];
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
+	};
+
+	this.Add = function(data,createFromClient){
+		var sql = "INSERT INTO pmroom (Id, roomName, roomIcon, totalNewMsg, lastMsg, DL, dirty, TS) VALUES ";
+		var param = []; 
+		var rowArgs = [];
+		data.forEach(function(item){
+			rowArgs.push("(?,?,?,?,?,?,?,?)");
+			param.push(item.Id);
+			param.push(item.roomName);
+			param.push(item.roomIcon);
+			param.push(item.totalNewMsg);
+			param.push(item.lastMsg);
+			param.push(item.DL);
+			//dirty
+			if(createFromClient) param.push(true);
+			else param.push(false);
+			//TS
+			if(createFromClient) param.push(null);
+			else param.push(item.TS);
+		});
+		sql += rowArgs.join(', ');
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){console.log(error); return error;});
+	};
+	//***Necessary-Method
+	this.GetAll = function(){
+		return SQLiteService.Execute("SELECT * FROM pmroom ORDER BY TS DESC").then(function(response){return response;},function(error){return error;});	
+	};
+})
+.service('PMMsgSQLite',function(SQLiteService){
+	//***Necessary-Method
+	this.GetLatestTS = function(){
+		return SQLiteService.BaseGetLatestTS('pmmsg').then(function(response){return response;},function(error){return error;});
+	};
+
+	this.CountByServerId = function(serverid){
+		return SQLiteService.CountByServerId(serverid,'pmmsg').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.CountIsNotDirtyById = function(id){
+		return SQLiteService.CountIsNotDirtyById(id,'pmmsg').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.GetDataByTSIsNull = function(){
+		return SQLiteService.GetDataByTSIsNull('pmmsg');
+	};
+
+	this.GetDataIsDirty = function(){
+		return SQLiteService.GetDataIsDirty("pmmsg");
+	};
+
+	this.DeleteDataIsFlagDeleted = function(){
+		return SQLiteService.DeleteDataIsFlagDeleted("pmmsg");
+	};
+
+	this.Update = function(data,isDirty,clientUpdate){
+		var sql;
+		if(clientUpdate)
+			sql = "UPDATE pmmsg SET Id = ?, Empl_Code = ?, message = ?, readTotal = ?, DL = ?,dirty = ?,TS = ? WHERE clientid = " + data.clientid;	
+		else
+			sql = "UPDATE pmmsg SET Id = ?, Empl_Code = ?, message = ?, readTotal = ?, DL = ?,dirty = ?,TS = ? WHERE Id = " + data.Id;
+		var param = [data.Id,data.Empl_Code,data.message,data.readTotal,data.DL,isDirty,data.TS];
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
+	};
+
+	this.Add = function(data,createFromClient){
+		var sql = "INSERT INTO pmmsg (Id, Empl_Code, message, readTotal, DL, dirty, TS) VALUES ";
+		var param = []; 
+		var rowArgs = [];
+		data.forEach(function(item){
+			rowArgs.push("(?,?,?,?,?,?,?)");
+			param.push(item.Id);
+			param.push(item.Empl_Code);
+			param.push(item.message);
+			param.push(item.readTotal);
+			param.push(item.DL);
+			//dirty
+			if(createFromClient) param.push(true);
+			else param.push(false);
+			//TS
+			if(createFromClient) param.push(null);
+			else param.push(item.TS);
+		});
+		sql += rowArgs.join(', ');
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){console.log(error); return error;});
+	};
+	//***Necessary-Method
+	this.GetAll = function(){
+		return SQLiteService.Execute("SELECT * FROM pmmsg ORDER BY TS").then(function(response){return response;},function(error){return error;});	
 	};
 })
 

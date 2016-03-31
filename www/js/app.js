@@ -4,8 +4,8 @@
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js
-// angular.module('starter', ['ionic','ngCordova','ngMockE2E'])
-angular.module('starter', ['ionic','ngCordova'])
+angular.module('starter', ['ionic','ngCordova','ngMockE2E','btford.socket-io'])
+// angular.module('starter', ['ionic','ngCordova','btford.socket-io'])
 
     .run(function($ionicPlatform) {
       $ionicPlatform.ready(function() {
@@ -197,21 +197,21 @@ angular.module('starter', ['ionic','ngCordova'])
               }
             }
           })
-          .state('app.pms', {
-            url: '/pms',
+          .state('app.pmsrooms', {
+            url: '/pmsrooms',
             views: {
               'menuContent': {
-                templateUrl: 'templates/pm/pms.html',
-                controller:'PrivateMessagesCtrl'
+                templateUrl: 'templates/pm/pms-rooms.html',
+                controller:'PrivateMessageRoomsCtrl'
               }
             }
           })
-          .state('app.pms-detail', {
-            url: '/pms/:pmId',
+          .state('app.pms-msgs', {
+            url: '/pmsmsgs/:roomId',
             views: {
               'menuContent': {
-                templateUrl: 'templates/pm/pm-detail.html',
-                controller:'PrivateMessageDetailCtrl'
+                templateUrl: 'templates/pm/pm-messages.html',
+                controller:'PrivateMessagesCtrl'
               }
             }
           })

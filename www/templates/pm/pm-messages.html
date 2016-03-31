@@ -1,0 +1,33 @@
+<ion-view cache-view="false" view-title="ปู่ชิว No.1">
+
+    <ion-content has-bouncing='true' delegate-handle="userMessageScroll">
+
+      <div class='message-wrapper' ng-repeat='message in msgDetails'>
+        <div class='chat-bubble {{message.side}}'>
+            <div class='msg'>
+              <span>{{message.msg}}</span>
+            </div>
+            <div class='msg-date'>
+              <div ng-show='(message.side == "right")'>
+                <span ng-show="(message.readTotal > 0)">(อ่านแล้ว) <span ng-show="isGroup">{{message.readTotal}}</span> | </span>
+              </div>
+              <div>
+                 <span>ส่งเมื่อ : {{message.msgDate}}</span>
+              </div>
+            </div>
+          </div>
+          <div class='cf'></div>
+      </div>
+      
+    </ion-content>
+
+
+    <ion-footer-bar keyboard-attach class="bar-stable item-input-inset">
+      <label class="item-input-wrapper">
+        <input type="text" placeholder="พิมพ์ข้อความที่นี่ ...." ng-model="message" />
+      </label>
+      <button ng-disabled='message.length == 0' class="button button-icon icon ion-android-send footer-btn" ng-click="sendMessage()">
+      </button>
+    </ion-footer-bar>
+
+</ion-view>

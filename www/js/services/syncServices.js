@@ -1,6 +1,6 @@
 angular.module('starter')
 
-.service('SyncService',function($q,AuthService,APIService,TestSyncSQLite,UserProfileSQLite,MedicalSQLite,TuitionSQLite,RoyalSQLite,TimeAttendanceSQLite,LeaveSQLite,CircularSQLite,NewsSQLite){
+.service('SyncService',function($q,AuthService,APIService,TestSyncSQLite,UserProfileSQLite,MedicalSQLite,TuitionSQLite,RoyalSQLite,TimeAttendanceSQLite,LeaveSQLite,CircularSQLite,NewsSQLite,PMRoomSQLite,PMMsgSQLite){
 
   enableSync = true;
 
@@ -25,7 +25,7 @@ angular.module('starter')
       UpdateData:{ObjectID:1,ObjectMedicalEntity:{}}
     };
     console.log('SYNC-MEDICAL');
-    return ProcessSyncData(APIService,MedicalSQLite,$q,apiURLs,apiDatas);
+    return ProcessSyncData(APIService,MedicalSQLite,$q,apiURLs,apiDatas,false);
   };
 
   this.SyncTuition = function(){
@@ -36,7 +36,7 @@ angular.module('starter')
       UpdateData:{ObjectID:6,ObjectASSIEntity:{}}
     };
     console.log('SYNC-TUITION')
-    return ProcessSyncData(APIService,TuitionSQLite,$q,apiURLs,apiDatas);
+    return ProcessSyncData(APIService,TuitionSQLite,$q,apiURLs,apiDatas,false);
   };
 
   this.SyncTime = function(){
@@ -47,7 +47,7 @@ angular.module('starter')
       UpdateData:{ObjectID:2,ObjectTAEntity:{}},
     };
     console.log('SYNC-TIMEATTENDANCE');
-    return ProcessSyncData(APIService,TimeAttendanceSQLite,$q,apiURLs,apiDatas);
+    return ProcessSyncData(APIService,TimeAttendanceSQLite,$q,apiURLs,apiDatas,false);
   };
 
   this.SyncLeave = function(){
@@ -58,7 +58,7 @@ angular.module('starter')
       UpdateData:{ObjectID:4,ObjectLeaveEntity:{}}
     };
     console.log('SYNC-LEAVE');
-    return ProcessSyncData(APIService,LeaveSQLite,$q,apiURLs,apiDatas);
+    return ProcessSyncData(APIService,LeaveSQLite,$q,apiURLs,apiDatas,false);
   };
 
   this.SyncRoyal = function(){
@@ -69,7 +69,7 @@ angular.module('starter')
       UpdateData:{ObjectID:5,ObjectRoyalEntity:{}}
     };
     console.log('SYNC-ROYAL');
-    return ProcessSyncData(APIService,RoyalSQLite,$q,apiURLs,apiDatas);
+    return ProcessSyncData(APIService,RoyalSQLite,$q,apiURLs,apiDatas,false);
   };
 
   this.SyncCircular = function(){
@@ -79,7 +79,7 @@ angular.module('starter')
       UpdateData:{ObjectID:3,ObjectCircularLetterEntity:{}}
     };
     console.log('SYNC-CIRCULAR');
-    return ProcessSyncData(APIService,CircularSQLite,$q,apiURLs,apiDatas);
+    return ProcessSyncData(APIService,CircularSQLite,$q,apiURLs,apiDatas,false);
   };
 
   this.SyncNews = function(){
@@ -89,16 +89,39 @@ angular.module('starter')
       UpdateData:{ObjectID:8,ObjectNewsEntity:{}}
     };
     console.log('SYNC-NEWS');
-    return ProcessSyncData(APIService,NewsSQLite,$q,apiURLs,apiDatas);
+    return ProcessSyncData(APIService,NewsSQLite,$q,apiURLs,apiDatas,false);
+  };
+
+  this.SyncPMRoom = function(){
+    var empcode = '484074';
+    var apiDatas = {
+      GetData:{ObjectID:9,SyncPMRoomViewModel:{Empl_Code:empcode}},
+      AddData:{ObjectID:9,ObjectPMRoomEntity:{}},
+      UpdateData:{ObjectID:9,ObjectPMRoomEntity:{}}
+    };
+    console.log('SYNC-PMRoom');
+    return ProcessSyncData(APIService,PMRoomSQLite,$q,apiURLs,apiDatas,false);
+  };
+
+  this.SyncPMMsg = function(roomId){
+    var empcode = '484074';
+    var apiDatas = {
+      GetData:{ObjectID:10,SyncPMMsgViewModel:{roomID:roomId,Empl_Code:empcode}},
+      AddData:{ObjectID:10,ObjectPMMsgEntity:{}},
+      UpdateData:{ObjectID:10,ObjectPMMsgEntity:{}}
+    };
+    console.log('SYNC-PMMsg');
+    return ProcessSyncData(APIService,PMMsgSQLite,$q,apiURLs,apiDatas,true);
   };
 
 });
 
-function SyncDownloadFromServer(APIService,GenericSQLite,$q,apiURLs,apiDatas){
+function SyncDownloadFromServer(APIService,GenericSQLite,$q,apiURLs,apiDatas,isSyncPMMsg){
   return  $q(function(resolve,reject){
     var counter = 0;
     var keysbyindex;
     var currentId;
+    var arrPmMsgsChanged = [];
     //get latest ts
     GenericSQLite.GetLatestTS().then(function(latesTS){
         //post to get new data
@@ -127,14 +150,22 @@ function SyncDownloadFromServer(APIService,GenericSQLite,$q,apiURLs,apiDatas){
                               console.log('update :' + value.Id);
                               GenericSQLite.Update(value,false,false).then(
                                 function(response){
+                                  //if sync private messages push current record to changed list for trigger websocket
+                                  if(isSyncPMMsg) arrPmMsgsChanged.push(value);
                                   counter++;
-                                  if(counter == result.length) resolve(result.length);
+                                  if(counter == result.length){
+                                    if(isSyncPMMsg) resolve(arrPmMsgsChanged);
+                                    else resolve(result.length);
+                                  }
                                 },function(error){reject(error);});
                             }
                             //if is dirty go to next round;
                             else{
                               counter++;
-                              if(counter == result.length) resolve(result.length);
+                              if(counter == result.length){
+                                if(isSyncPMMsg) resolve(arrPmMsgsChanged);
+                                else resolve(result.length);
+                              }
                             }
                           });  
                         }
@@ -143,8 +174,13 @@ function SyncDownloadFromServer(APIService,GenericSQLite,$q,apiURLs,apiDatas){
                           console.log('create new : ' + value.Id);
                           GenericSQLite.Add([value],false).then(
                             function(){
+                              //if sync private messages push current record to changed list for trigger websocket
+                              if(isSyncPMMsg) arrPmMsgsChanged.push(value);
                               counter++;
-                              if(counter == result.length) resolve(result.length);
+                              if(counter == result.length){
+                                if(isSyncPMMsg) resolve(arrPmMsgsChanged);
+                                else resolve(result.length);
+                              }
                             },
                             function(error){reject(error);});
                         }
@@ -152,7 +188,10 @@ function SyncDownloadFromServer(APIService,GenericSQLite,$q,apiURLs,apiDatas){
                     });
                 }
             }
-            else resolve(0);
+            else {
+              if(isSyncPMMsg) resolve(arrPmMsgsChanged);
+              else resolve(0);
+            }
           },
           function(error){reject(0);});
     });
@@ -236,10 +275,10 @@ function SyncDeleteClientData(GenericSQLite,$q){
 	});
 };
 
-function ProcessSyncData(APIService,GenericSQLite,$q,apiURLs,apiDatas){
+function ProcessSyncData(APIService,GenericSQLite,$q,apiURLs,apiDatas,isSyncPMMsg){
   //Sync update data from server
   console.log('start-SyncDownloadFromServer');
-  return SyncDownloadFromServer(APIService,GenericSQLite,$q,apiURLs,apiDatas).then(
+  return SyncDownloadFromServer(APIService,GenericSQLite,$q,apiURLs,apiDatas,isSyncPMMsg).then(
     function(numberOfNewData){
       //Sync data created from client
       console.log('start-SyncCreateFromClient');

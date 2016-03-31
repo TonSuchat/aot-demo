@@ -82,6 +82,10 @@
     font-size: 12px;
 }
 
+.msg-date div{
+    display: inline-block;
+}
+
 .cf {
   clear: both !important;
 }
