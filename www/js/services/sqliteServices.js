@@ -20,9 +20,9 @@ angular.module('starter')
 
 	//****share-method****
 	this.BaseGetLatestTS = function(tablename){
-		var sql = "SELECT TS FROM " + tablename + " ORDER BY TS DESC LIMIT 1";
+		//var sql = "SELECT TS FROM " + tablename + " ORDER BY TS DESC LIMIT 1";
 		// if(orderBySubStr)
-		// 	sql = "SELECT ts FROM " + tablename + " ORDER BY CAST(SUBSTR(ts,5,4) AS INT) DESC, CAST(SUBSTR(ts,3,2) AS INT) DESC, CAST(SUBSTR(ts,1,2) AS INT) DESC, ts DESC LIMIT 1";
+		var sql = "SELECT ts FROM " + tablename + " ORDER BY CAST(SUBSTR(ts,5,4) AS INT) DESC, CAST(SUBSTR(ts,3,2) AS INT) DESC, CAST(SUBSTR(ts,1,2) AS INT) DESC, CAST(SUBSTR(ts,9,2) AS INT) DESC, CAST(SUBSTR(ts,11,2) AS INT) DESC, CAST(SUBSTR(13,2) AS INT) DESC, Id DESC LIMIT 1";
 		// else 
 		// 	sql = "SELECT ts FROM " + tablename + " ORDER BY ts DESC LIMIT 1";
 		return this.Execute(sql).then(function(response){
@@ -78,42 +78,42 @@ angular.module('starter')
 	//**Test-Sync-Code
 	this.CreateTestSyncTable = function(){
 		//$cordovaSQLite.execute(db, "CREATE TABLE IF NOT EXISTS testsync (clientid integer primary key AUTOINCREMENT, Id int, field1 text, field2 text, field3 text, TimeStamp text,deleted boolean,dirty boolean,ts datetime) ");
-		$cordovaSQLite.execute(db, "CREATE TABLE IF NOT EXISTS testsync (clientid integer primary key AUTOINCREMENT, Id int, field1 text, field2 text, field3 text, TS datetime, DL boolean, dirty boolean) ");
+		$cordovaSQLite.execute(db, "CREATE TABLE IF NOT EXISTS testsync (clientid integer primary key AUTOINCREMENT, Id int, field1 text, field2 text, field3 text, TS text, DL boolean, dirty boolean) ");
 	}
 	//**Test-Sync-Code
 
 	this.CreateUserProfileTable = function(){
-		$cordovaSQLite.execute(db, "CREATE TABLE IF NOT EXISTS userprofile (clientid integer primary key AUTOINCREMENT, UserID text, PrefixName text, Firstname text, Lastname text, Nickname text, Position text, Section text, Department text, CitizenID text, PicturePath text,PictureThumb text, posi_name_gover text, orga_gover text, changeDate text, OfficeTel text, OfficeFax text, MobilePhone text, eMailAddress text, Line text, Facebook text, DL boolean, dirty boolean, TS datetime)");
+		$cordovaSQLite.execute(db, "CREATE TABLE IF NOT EXISTS userprofile (clientid integer primary key AUTOINCREMENT, UserID text, PrefixName text, Firstname text, Lastname text, Nickname text, Position text, Section text, Department text, CitizenID text, PicturePath text,PictureThumb text, posi_name_gover text, orga_gover text, changeDate text, OfficeTel text, OfficeFax text, MobilePhone text, eMailAddress text, Line text, Facebook text, DL boolean, dirty boolean, TS text)");
 	};
 	this.CreateMedicalTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS medical(clientid integer primary key AUTOINCREMENT, Id int,EmpID text, HospType text, HospName text, PatientType text, Family text, PatientName text, Disease text, Total int, DocDate text, PaidDate text, BankName text, DL boolean,dirty boolean,TS datetime)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS medical(clientid integer primary key AUTOINCREMENT, Id int,EmpID text, HospType text, HospName text, PatientType text, Family text, PatientName text, Disease text, Total int, DocDate text, PaidDate text, BankName text, DL boolean,dirty boolean,TS text)");
 	};
 	this.CreateTuitionTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS tuition(clientid integer primary key AUTOINCREMENT, Id int,Empl_Code text, Paid_Date text, Total_Amnt int, Vat_Amnt int, Grand_Total int, BankName text, DL boolean,dirty boolean,TS datetime)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS tuition(clientid integer primary key AUTOINCREMENT, Id int,Empl_Code text, Paid_Date text, Total_Amnt int, Vat_Amnt int, Grand_Total int, BankName text, DL boolean,dirty boolean,TS text)");
 	};
 	this.CreateRoyalTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS royal(clientid integer primary key AUTOINCREMENT, Id int,Empl_Code text, Roya_Code text, Roya_Name int, Roya_Date text, DL boolean,dirty boolean,TS datetime)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS royal(clientid integer primary key AUTOINCREMENT, Id int,Empl_Code text, Roya_Code text, Roya_Name int, Roya_Date text, DL boolean,dirty boolean,TS text)");
 	};
 	this.CreateTimeAttendanceTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS timeattendance(clientid integer primary key AUTOINCREMENT, Id int, SequenceID text, EmpID text, StampTime datetime, MachineID text, StampResult boolean, Location text, Airport text, stampdate text, stamptimeonly text, DL boolean,dirty boolean,TS datetime)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS timeattendance(clientid integer primary key AUTOINCREMENT, Id int, SequenceID text, EmpID text, StampTime datetime, MachineID text, StampResult boolean, Location text, Airport text, stampdate text, stamptimeonly text, DL boolean,dirty boolean,TS text)");
 	};
 	this.CreateLeaveTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS leave(clientid integer primary key AUTOINCREMENT, Id int, Empl_Code text, Empl_Name text, Leave_Code text, Leave_Day text, Leave_From text, Leave_To text, Leave_Date text, Updt_Date text, Tran_Seqe text, Leave_Timecode text, DL boolean,dirty boolean,TS datetime)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS leave(clientid integer primary key AUTOINCREMENT, Id int, Empl_Code text, Empl_Name text, Leave_Code text, Leave_Day text, Leave_From text, Leave_To text, Leave_Date text, Updt_Date text, Tran_Seqe text, Leave_Timecode text, DL boolean,dirty boolean,TS text)");
 	};
 	this.CreateCircularTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS circular(clientid integer primary key AUTOINCREMENT, Id int, DocID text, DocDate text, Link text, Description text, DocNumber text, DL boolean,dirty boolean,TS datetime)");	
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS circular(clientid integer primary key AUTOINCREMENT, Id int, DocID text, DocDate text, Link text, Description text, DocNumber text, DL boolean,dirty boolean,TS text)");	
 	};
 
 	this.CreateNewsTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS news(clientid integer primary key AUTOINCREMENT, Id int, Title text, PubDate text, FileName text, DL boolean,dirty boolean,TS datetime)");	
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS news(clientid integer primary key AUTOINCREMENT, Id int, Title text, PubDate text, FileName text, DL boolean,dirty boolean,TS text)");	
 	};
 
 	this.CreatePMRoomTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmroom(clientid integer primary key AUTOINCREMENT, Id int, roomName text, roomIcon text, totalNewMsg int, lastMsg text, DL boolean,dirty boolean,TS datetime)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmroom(clientid integer primary key AUTOINCREMENT, Id int, roomName text, roomIcon text, totalNewMsg int, lastMsg text, DL boolean,dirty boolean,TS text)");
 	};
 
 	this.CreatePMMsgTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmmsg(clientid integer primary key AUTOINCREMENT, Id int, Empl_Code text, message text, readTotal int, DL boolean,dirty boolean,TS datetime)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmmsg(clientid integer primary key AUTOINCREMENT, Id int, Empl_Code text, message text, readTotal int, DL boolean,dirty boolean,TS text)");
 	};
 
 	this.DeleteAllTables = function(){
@@ -801,7 +801,13 @@ angular.module('starter')
 	};
 	//***Necessary-Method
 	this.GetAll = function(){
-		return SQLiteService.Execute("SELECT * FROM pmmsg ORDER BY TS").then(function(response){return response;},function(error){return error;});	
+		return SQLiteService.Execute("SELECT * FROM pmmsg ORDER BY CAST(SUBSTR(ts,5,4) AS INT), CAST(SUBSTR(ts,3,2) AS INT), CAST(SUBSTR(ts,1,2) AS INT), CAST(SUBSTR(ts,9,2) AS INT), CAST(SUBSTR(ts,11,2) AS INT), CAST(SUBSTR(13,2) AS INT), Id").then(function(response){return response;},function(error){return error;});	
+	};
+
+	this.UpdateReadTotal = function(msgId,readTotal){
+		sql = "UPDATE pmmsg SET readTotal = ? WHERE Id = " + msgId;
+		var param = [readTotal];
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
 	};
 })
 
