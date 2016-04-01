@@ -115,6 +115,7 @@ function CheckValidate($scope) {
 function FinalAction($scope, APIService) {
     APIService.HideLoading();
     $scope.$broadcast('scroll.infiniteScrollComplete');
+    $scope.$broadcast('scroll.refreshComplete');
 };
 
 function InitialVariables($scope) {
