@@ -117,13 +117,15 @@ angular.module('starter')
         });
 
         //append msg to sender side when insert DB success
-        SocketService.on('send_success',function(retFromServer){
+        SocketService.on('send_success',function(retFromServer,recvMSG){
             var data = {Id:retFromServer.Id,Empl_Code:$scope.empId,message:retFromServer.msg,readTotal:0,DL:false,TS:retFromServer.TS};
             //save to sqlite
             PMMsgSQLite.Add([data],false).then(function(){
                 //find msg in msgDetails by tmpId and edit TS,Id
                 UpdateSendDateTimeToMsg($scope.msgDetails,retFromServer);
-                viewScroll.scrollBottom(true);    
+                viewScroll.scrollBottom(true);
+                //web socket send to receiver for append message
+                SocketService.emit('append_message_to_receiver',$scope.roomId,recvMSG);
             });
         });
 
@@ -131,7 +133,7 @@ angular.module('starter')
             if($scope.msgDetails == null || $scope.msgDetails.length <= 0) return;
             //set readeTotal use filter by msgid
             for (var i = 0; i <= $scope.msgDetails.length - 1; i++) {
-                if($scope.msgDetails[i].Id == msgId){
+                if(parseInt($scope.msgDetails[i].Id) == parseInt(msgId)){
                     $scope.msgDetails[i].readTotal = readTotal;
                     break;
                 }
