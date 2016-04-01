@@ -41,12 +41,16 @@ angular.module('starter')
 })
 .controller('PrivateMessagesCtrl',function($scope,$ionicScrollDelegate,$stateParams,SocketService,PMMsgSQLite,$filter,APIService,$ionicPlatform,SyncService){
     $ionicPlatform.ready(function(){
-
+ 
         $scope.roomId = $stateParams.roomId
         $scope.empId = '484074'; //AuthService.username()
         $scope.message = '';
+        $scope.msgDetails = [];
+        $scope.allMsg = [];
+        $scope.scrollDetails = {start:0,retrieve:10};
 
         //sync msg and insert/update into sqlite (post to api number 34 to bulk update and get last msg data)
+        APIService.ShowLoading();
         SyncService.SyncPMMsg().then(
             function(response){
                 var listMsgChanged = (response != null && response.length > 0) ? response : [];
@@ -54,9 +58,29 @@ angular.module('starter')
                 IterationSendReEnterEvent(listMsgChanged,SocketService,$scope.roomId);
                 //select all message from sqlite and bind to msgDetails
                 PMMsgSQLite.GetAll().then(function(response){
-                    if(response.rows != null && response.rows.length > 0) InitialPMMsgDetails($scope,ConvertQueryResultToArray(response),$scope.empId);
+                    if(response.rows != null && response.rows.length > 0){
+                        $scope.allMsg = ConvertQueryResultToArray(response);
+                        $scope.scrollDetails.start = $scope.allMsg.length;
+                        var result = GetInfiniteScrollDataReverse($scope.allMsg,$scope.scrollDetails.start,$scope.scrollDetails.retrieve);
+                        InitialPMMsgDetails($scope,result,$scope.empId);
+                        viewScroll.scrollBottom(true);
+                        APIService.HideLoading();
+                    } 
                 });
         });
+
+        $scope.loadPreviousMsg = function(){
+            if($scope.scrollDetails.start == 0) return FinalAction($scope,APIService);
+            APIService.ShowLoading();
+            if(($scope.scrollDetails.start - $scope.scrollDetails.retrieve) <= 0){
+                $scope.scrollDetails.start = 0;
+                $scope.scrollDetails.retrieve = $scope.scrollDetails.start;
+            }
+            else $scope.scrollDetails.start = ($scope.scrollDetails.start - $scope.scrollDetails.retrieve);
+            var result = GetInfiniteScrollDataReverse($scope.allMsg,$scope.scrollDetails.start,$scope.scrollDetails.retrieve);
+            InitialPMMsgDetails($scope,result,$scope.empId);
+            FinalAction($scope,APIService);
+        };
 
         var viewScroll = $ionicScrollDelegate.$getByHandle('userMessageScroll');
 
@@ -65,42 +89,63 @@ angular.module('starter')
         
         //join to current room
         SocketService.emit('join_room',$scope.roomId);
-         
-        //*************test code*************
-        //FakeData($scope);
-        //*************test code*************
 
         $scope.sendMessage = function(){
+            //gen tmpid
+            var tmpId = GeneratedGUID();
             //web socket send msg
-            SocketService.emit('send_message',$scope.roomId,$scope.message,$scope.empId);
+            SocketService.emit('send_message',$scope.roomId,$scope.message,$scope.empId,tmpId);
+            //push objMSG Id,TS = null
+            var senderMSG = {msgId:null,side:'right',msg:$scope.message,msgDate:'',readTotal:0,tmpId:tmpId};
+            $scope.msgDetails.push(senderMSG);
             $scope.message = '';
+            viewScroll.scrollBottom(true);
         };
 
         //push msg from sender
         SocketService.on('append_message',function(msg){
-            //todo insert msg into sqlite
-            //push msg
-            $scope.msgDetails.push(msg);
-            viewScroll.scrollBottom(true);
-            //web socket send back to update readed flag
-            SocketService.emit('received_message',$scope.roomId,$scope.empId,msg.msgId);
+            var data = {Id:msg.Id,Empl_Code:$scope.empId,message:msg.msg,readTotal:0,DL:false,TS:msg.TS};
+            msg.TS = TransformServerTSToDateTimeStr(msg.TS.toString());
+            //insert msg into sqlite
+            PMMsgSQLite.Add([data],false).then(function(){
+                //push msg
+                $scope.msgDetails.push(msg);
+                viewScroll.scrollBottom(true);
+                //web socket send back to update readed flag
+                SocketService.emit('received_message',$scope.roomId,$scope.empId,msg.Id);    
+            });
         });
 
         //append msg to sender side when insert DB success
-        SocketService.on('send_success',function(msg){
-            //todo save to sqlite
-            $scope.msgDetails.push(msg);
-            viewScroll.scrollBottom(true);
+        SocketService.on('send_success',function(retFromServer){
+            var data = {Id:retFromServer.Id,Empl_Code:$scope.empId,message:retFromServer.msg,readTotal:0,DL:false,TS:retFromServer.TS};
+            //save to sqlite
+            PMMsgSQLite.Add([data],false).then(function(){
+                //find msg in msgDetails by tmpId and edit TS,Id
+                UpdateSendDateTimeToMsg($scope.msgDetails,retFromServer);
+                viewScroll.scrollBottom(true);    
+            });
         });
 
         SocketService.on('set_readTotal',function(msgId,readTotal){
-            //todo set readeTotal use filter by msgid
+            if($scope.msgDetails == null || $scope.msgDetails.length <= 0) return;
+            //set readeTotal use filter by msgid
             for (var i = 0; i <= $scope.msgDetails.length - 1; i++) {
-                if($scope.msgDetails[i].msgId == msgId){
+                if($scope.msgDetails[i].Id == msgId){
                     $scope.msgDetails[i].readTotal = readTotal;
                     break;
                 }
             };
+            // //update readTotal to sqlite
+            // PMMsgSQLite.UpdateReadTotal(msgId,readTotal).then(function(){
+            //     //set readeTotal use filter by msgid
+            //     for (var i = 0; i <= $scope.msgDetails.length - 1; i++) {
+            //         if($scope.msgDetails[i].Id == msgId){
+            //             $scope.msgDetails[i].readTotal = readTotal;
+            //             break;
+            //         }
+            //     };    
+            // })
         });
 
     });
@@ -109,13 +154,24 @@ angular.module('starter')
 
 function GetInfiniteScrollData(alldata,start,retrieve){
     var result = [];
-    var counter = 1;
     var lastIndex = ((start-1) + (retrieve-1));
     for (var i = start - 1; i <= lastIndex; i++) {
         if(alldata[i] != null)
             result.push(alldata[i]);
         else
             break;
+    };
+    return result;
+};
+
+function GetInfiniteScrollDataReverse(alldata,start,retrieve){
+    var result = [];
+    var counter = 0;
+    for (var i = (start-1); i >= 0; i--) {
+        if(counter == retrieve)
+            break;
+        result.push(alldata[i]);
+        counter += 1;
     };
     return result;
 };
@@ -133,21 +189,31 @@ function CheckThisRoomIsGroup($scope,APIService,roomId){
 
 function IterationSendReEnterEvent(listChanged,SocketService,roomId){
     angular.forEach(listChanged,function(value,key){
-        SocketService.emit('reenter_received_message',roomId,value.message,value.readTotal);
+        SocketService.emit('reenter_received_message',roomId,value.Id,value.readTotal);
     });
 };
 
 function InitialPMMsgDetails($scope,data,myEmpId){
-    $scope.msgDetails = [];
+    if(data == null || data.length == 0) return;
     angular.forEach(data,function(value,key){
-        $scope.msgDetails.push({
-                msgId:value.Id,
-                side:(value.Empl_Code == myEmpId) ? 'right' : 'left',
-                msg:value.message,
-                msgDate:TransformServerTSToDateTimeStr(value.TS.toString()),
-                readTotal:value.readTotal
-            });
+        $scope.msgDetails.unshift({
+            Id:value.Id,
+            side:(value.Empl_Code == myEmpId) ? 'right' : 'left',
+            msg:value.message,
+            TS:TransformServerTSToDateTimeStr(value.TS.toString()),
+            readTotal:value.readTotal
+        });
     });
+};
+
+function UpdateSendDateTimeToMsg(data,updatedMsg){
+    for (var i = 0; i <= data.length - 1; i++) {
+        if(data[i].tmpId == updatedMsg.tmpId){
+            data[i].TS = TransformServerTSToDateTimeStr(updatedMsg.TS.toString());
+            data[i].Id = updatedMsg.Id;
+            break;
+        }
+    };
 };
 
 function FakeData($scope){
