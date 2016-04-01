@@ -739,7 +739,7 @@ angular.module('starter')
 	};
 	//***Necessary-Method
 	this.GetAll = function(){
-		return SQLiteService.Execute("SELECT * FROM pmroom ORDER BY TS DESC").then(function(response){return response;},function(error){return error;});	
+		return SQLiteService.Execute("SELECT * FROM pmroom ORDER BY CAST(SUBSTR(ts,5,4) AS INT) DESC, CAST(SUBSTR(ts,3,2) AS INT) DESC, CAST(SUBSTR(ts,1,2) AS INT) DESC, CAST(SUBSTR(ts,9,2) AS INT) DESC, CAST(SUBSTR(ts,11,2) AS INT) DESC, CAST(SUBSTR(13,2) AS INT) DESC, Id DESC").then(function(response){return response;},function(error){return error;});	
 	};
 })
 .service('PMMsgSQLite',function(SQLiteService){
