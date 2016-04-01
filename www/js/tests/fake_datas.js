@@ -1210,6 +1210,12 @@ var fakePMMsgs = [
     {Id:4,Empl_Code:'484074',message:'ข้อความที่ 4',readTotal:2,DL:false,TS:'27032016113000'},
     {Id:5,Empl_Code:'484134',message:'ข้อความที่ 5',readTotal:2,DL:false,TS:'27032016113100'},
     {Id:6,Empl_Code:'484134',message:'ข้อความที่ 6',readTotal:1,DL:false,TS:'30032016113100'},
+    {Id:7,Empl_Code:'484134',message:'ข้อความที่ 7',readTotal:1,DL:false,TS:'30032016114000'},
+    {Id:8,Empl_Code:'484074',message:'ข้อความที่ 8',readTotal:1,DL:false,TS:'30032016115012'},
+    {Id:9,Empl_Code:'484074',message:'ข้อความที่ 9',readTotal:1,DL:false,TS:'31032016112900'},
+    {Id:10,Empl_Code:'484074',message:'ข้อความที่ 10',readTotal:2,DL:false,TS:'01042016123000'},
+    {Id:11,Empl_Code:'484134',message:'ข้อความที่ 11',readTotal:2,DL:false,TS:'01042016123100'},
+    {Id:12,Empl_Code:'484134',message:'ข้อความที่ 12',readTotal:1,DL:false,TS:'01042016123100'},
 ];
 
 var fakeGetEMPsInRoom = [
