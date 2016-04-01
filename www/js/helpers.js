@@ -93,3 +93,13 @@ function TransformServerTSToDateTimeStr(ts){
     if(ts.length == 13) return result = ts.substring(0,1) + '/' + ts.substring(1,3) + '/' + ts.substring(3,7) + ' ' + ts.substring(7,9) + ':' + ts.substring(9,11);
     else return result = ts.substring(0,2) + '/' + ts.substring(2,4) + '/' + ts.substring(4,8) + ' ' + ts.substring(8,10) + ':' + ts.substring(10,12);
 };
+
+function GeneratedGUID(){
+    function s4() {
+        return Math.floor((1 + Math.random()) * 0x10000)
+          .toString(16)
+          .substring(1);
+    }
+  return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+    s4() + '-' + s4() + s4() + s4();
+};
