@@ -113,7 +113,7 @@ angular.module('starter')
 	};
 
 	this.CreatePMMsgTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmmsg(clientid integer primary key AUTOINCREMENT, Id int, Empl_Code text, message text, readTotal int, DL boolean,dirty boolean,TS text)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmmsg(clientid integer primary key AUTOINCREMENT, Id int, Empl_Code text, message text, readTotal int, roomId text, DL boolean,dirty boolean,TS text)");
 	};
 
 	this.DeleteAllTables = function(){
@@ -771,23 +771,24 @@ angular.module('starter')
 	this.Update = function(data,isDirty,clientUpdate){
 		var sql;
 		if(clientUpdate)
-			sql = "UPDATE pmmsg SET Id = ?, Empl_Code = ?, message = ?, readTotal = ?, DL = ?,dirty = ?,TS = ? WHERE clientid = " + data.clientid;	
+			sql = "UPDATE pmmsg SET Id = ?, Empl_Code = ?, message = ?, readTotal = ?, roomId = ?, DL = ?,dirty = ?,TS = ? WHERE clientid = " + data.clientid;	
 		else
-			sql = "UPDATE pmmsg SET Id = ?, Empl_Code = ?, message = ?, readTotal = ?, DL = ?,dirty = ?,TS = ? WHERE Id = " + data.Id;
-		var param = [data.Id,data.Empl_Code,data.message,data.readTotal,data.DL,isDirty,data.TS];
+			sql = "UPDATE pmmsg SET Id = ?, Empl_Code = ?, message = ?, readTotal = ?, roomId = ?, DL = ?,dirty = ?,TS = ? WHERE Id = " + data.Id;
+		var param = [data.Id,data.Empl_Code,data.message,data.readTotal,data.roomId,data.DL,isDirty,data.TS];
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
 	};
 
 	this.Add = function(data,createFromClient){
-		var sql = "INSERT INTO pmmsg (Id, Empl_Code, message, readTotal, DL, dirty, TS) VALUES ";
+		var sql = "INSERT INTO pmmsg (Id, Empl_Code, message, readTotal, roomId, DL, dirty, TS) VALUES ";
 		var param = []; 
 		var rowArgs = [];
 		data.forEach(function(item){
-			rowArgs.push("(?,?,?,?,?,?,?)");
+			rowArgs.push("(?,?,?,?,?,?,?,?)");
 			param.push(item.Id);
 			param.push(item.Empl_Code);
 			param.push(item.message);
 			param.push(item.readTotal);
+			param.push(item.roomId);
 			param.push(item.DL);
 			//dirty
 			if(createFromClient) param.push(true);
@@ -800,8 +801,9 @@ angular.module('starter')
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){console.log(error); return error;});
 	};
 	//***Necessary-Method
-	this.GetAll = function(){
-		return SQLiteService.Execute("SELECT * FROM pmmsg ORDER BY CAST(SUBSTR(ts,5,4) AS INT), CAST(SUBSTR(ts,3,2) AS INT), CAST(SUBSTR(ts,1,2) AS INT), CAST(SUBSTR(ts,9,2) AS INT), CAST(SUBSTR(ts,11,2) AS INT), CAST(SUBSTR(13,2) AS INT), Id").then(function(response){return response;},function(error){return error;});	
+	
+	this.GetAllMsgByRoomId = function(roomId){
+		return SQLiteService.Execute("SELECT * FROM pmmsg WHERE roomId = '" + roomId + "' ORDER BY CAST(SUBSTR(ts,5,4) AS INT), CAST(SUBSTR(ts,3,2) AS INT), CAST(SUBSTR(ts,1,2) AS INT), CAST(SUBSTR(ts,9,2) AS INT), CAST(SUBSTR(ts,11,2) AS INT), CAST(SUBSTR(13,2) AS INT), Id").then(function(response){return response;},function(error){return error;});	
 	};
 
 	this.UpdateReadTotal = function(msgId,readTotal){

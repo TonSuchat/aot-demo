@@ -8,6 +8,7 @@ angular.module('starter')
 		var stockURL = APIService.hostname() + '/Stocks/getAOTStockLive';
 
 		var getEmpsInRoom = APIService.hostname() + '/PM/GetEmpInRoom';
+		var getRoomIdByEmplId = APIService.hostname() + '/PM/GetRoomId';
 
 		//get api token
 		$httpBackend.whenPOST(apiTokenURL).respond(function(method,url,data,headers){
@@ -71,6 +72,10 @@ angular.module('starter')
 		//get emp in room
 		$httpBackend.whenPOST(getEmpsInRoom).respond(function(method,url,data,headers){
 			return [200,fakeGetEMPsInRoom,{}];
+		});
+		//get roomId by empl_code_1,2
+		$httpBackend.whenPOST(getRoomIdByEmplId).respond(function(method,url,data,headers){
+			return [200,fakeGetRoomId,{}];
 		});
 		//templates
 		$httpBackend.whenGET(/templates\/\w+.*/).passThrough();

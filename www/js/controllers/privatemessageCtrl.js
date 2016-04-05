@@ -53,21 +53,21 @@ angular.module('starter')
 
         //sync msg and insert/update into sqlite (post to api number 34 to bulk update and get last msg data)
         APIService.ShowLoading();
-        SyncService.SyncPMMsg().then(
+        SyncService.SyncPMMsg($scope.roomId).then(
             function(response){
                 var listMsgChanged = (response != null && response.length > 0) ? response : [];
                 //loop list to trigger web socket reenter_received_message
                 IterationSendReEnterEvent(listMsgChanged,socket,$scope.roomId);
                 //select all message from sqlite and bind to msgDetails
-                PMMsgSQLite.GetAll().then(function(response){
+                PMMsgSQLite.GetAllMsgByRoomId($scope.roomId).then(function(response){
                     if(response.rows != null && response.rows.length > 0){
                         $scope.allMsg = ConvertQueryResultToArray(response);
                         $scope.scrollDetails.start = $scope.allMsg.length;
                         var result = GetInfiniteScrollDataReverse($scope.allMsg,$scope.scrollDetails.start,$scope.scrollDetails.retrieve);
                         InitialPMMsgDetails($scope,result,$scope.empId);
                         viewScroll.scrollBottom(true);
-                        APIService.HideLoading();
-                    } 
+                    }
+                    APIService.HideLoading();
                 });
         });
 
@@ -107,7 +107,7 @@ angular.module('starter')
         //push msg from sender
         socket.on('append_message',function(msg){
             console.log('append_message');
-            var data = {Id:msg.Id,Empl_Code:$scope.empId,message:msg.msg,readTotal:0,DL:false,TS:msg.TS};
+            var data = {Id:msg.Id,Empl_Code:$scope.empId,message:msg.msg,readTotal:0,roomId:$scope.roomId,DL:false,TS:msg.TS};
             msg.TS = TransformServerTSToDateTimeStr(msg.TS.toString());
             //insert msg into sqlite
             PMMsgSQLite.Add([data],false).then(function(){
@@ -121,11 +121,12 @@ angular.module('starter')
 
         //append msg to sender side when insert DB success
         socket.on('send_success',function(retFromServer,recvMSG){
-            var data = {Id:retFromServer.Id,Empl_Code:$scope.empId,message:retFromServer.msg,readTotal:0,DL:false,TS:retFromServer.TS};
+            var data = {Id:retFromServer.Id,Empl_Code:$scope.empId,message:retFromServer.msg,readTotal:0,roomId:$scope.roomId,DL:false,TS:retFromServer.TS};
             //save to sqlite
             PMMsgSQLite.Add([data],false).then(function(){
                 //find msg in msgDetails by tmpId and edit TS,Id
                 UpdateSendDateTimeToMsg($scope.msgDetails,retFromServer);
+                $scope.$apply();
                 viewScroll.scrollBottom(true);
                 //web socket send to receiver for append message
                 socket.emit('append_message_to_receiver',$scope.roomId,recvMSG);
@@ -142,16 +143,6 @@ angular.module('starter')
                 }
             };
             $scope.$apply();
-            // //update readTotal to sqlite
-            // PMMsgSQLite.UpdateReadTotal(msgId,readTotal).then(function(){
-            //     //set readeTotal use filter by msgid
-            //     for (var i = 0; i <= $scope.msgDetails.length - 1; i++) {
-            //         if($scope.msgDetails[i].Id == msgId){
-            //             $scope.msgDetails[i].readTotal = readTotal;
-            //             break;
-            //         }
-            //     };    
-            // })
         });
 
         $rootScope.$on( "$stateChangeSuccess", function(e, toState, toParams, fromState, fromParams) {

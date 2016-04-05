@@ -1223,3 +1223,7 @@ var fakeGetEMPsInRoom = [
     {Empl_Code:'484134'}
     //{Empl_Code:'484135'},
 ];
+
+var fakeGetRoomId = [
+    {roomId:'411'}
+];
