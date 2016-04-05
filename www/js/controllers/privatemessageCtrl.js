@@ -39,7 +39,7 @@ angular.module('starter')
 
     });
 })
-.controller('PrivateMessagesCtrl',function($scope,$ionicScrollDelegate,$stateParams,PMMsgSQLite,$filter,APIService,$ionicPlatform,SyncService,socketFactory,$rootScope){
+.controller('PrivateMessagesCtrl',function($scope,$ionicScrollDelegate,$stateParams,PMMsgSQLite,$filter,APIService,$ionicPlatform,SyncService,socketFactory,$rootScope,PMRoomSQLite){
     $ionicPlatform.ready(function(){
         
         var socket = io.connect('http://10.74.17.233:1150');
@@ -50,6 +50,9 @@ angular.module('starter')
         $scope.msgDetails = [];
         $scope.allMsg = [];
         $scope.scrollDetails = {start:0,retrieve:10};
+
+        //Set roomName
+        SetRoomName($scope,PMRoomSQLite);
 
         //sync msg and insert/update into sqlite (post to api number 34 to bulk update and get last msg data)
         APIService.ShowLoading();
@@ -88,7 +91,7 @@ angular.module('starter')
 
         //check this room is group or just 1:1 by POST to count check and set $scope.isGroup
         CheckThisRoomIsGroup($scope,APIService,$scope.roomId);
-        
+
         //join to current room
         socket.emit('join_room',$scope.roomId);
 
@@ -217,6 +220,17 @@ function UpdateSendDateTimeToMsg(data,updatedMsg){
             break;
         }
     };
+};
+
+function SetRoomName($scope,PMRoomSQLite){
+    $scope.roomName = '';
+    PMRoomSQLite.GetRoomNameById($scope.roomId).then(
+        function(response){
+            if(response != null){
+                var data = ConvertQueryResultToArray(response);
+                $scope.roomName = data[0].roomName;
+            };
+    });
 };
 
 function FakeData($scope){
