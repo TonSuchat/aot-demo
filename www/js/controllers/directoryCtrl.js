@@ -67,7 +67,7 @@ angular.module('starter')
         };
 
     })
-    .controller('PersonCtrl', function ($scope, $stateParams, $filter,APIService,AuthService) {
+    .controller('PersonCtrl', function ($scope, $stateParams, $filter,APIService,AuthService,$location) {
         $scope.currentPerson = {};
         $scope.currentPerson.personId = $stateParams.personId;
         $scope.currentUserName = AuthService.username();
@@ -77,14 +77,19 @@ angular.module('starter')
         $scope.currentPerson.personDetails = { FullName: fullname, Position: result[0].Position, Department: result[0].Section };
         $scope.currentPerson.contacts = ChangePrefixDataToThaiVersion(result[0].ContactList[0], $filter);
 
+        //redirect to private message view
         $scope.sendPMMsg = function(){
-            //todo get roomId from server
-            var url = APIService.hostname() + '/PrivateMessage/GetRoomId';
+            //get roomId from server
+            var url = APIService.hostname() + '/PM/GetRoomId';
             var empId = AuthService.username();
             var data = {Empl_Code:empId,Empl_Code2:$scope.currentPerson.personId};
-            console.log(url);
-            console.log(empId);
-            //APIService.httpPost()
+            APIService.httpPost(url,data,
+                function(response){
+                    console.log(response.data[0].roomId);
+                    if(response.data[0].roomId != null)
+                        $location.path('/app/pmsmsgs/' + response.data[0].roomId);
+                },
+                function(error){console.log(error);});
         };
 
     });
