@@ -39,9 +39,11 @@ angular.module('starter')
 
     });
 })
-.controller('PrivateMessagesCtrl',function($scope,$ionicScrollDelegate,$stateParams,SocketService,PMMsgSQLite,$filter,APIService,$ionicPlatform,SyncService){
+.controller('PrivateMessagesCtrl',function($scope,$ionicScrollDelegate,$stateParams,PMMsgSQLite,$filter,APIService,$ionicPlatform,SyncService,socketFactory,$rootScope){
     $ionicPlatform.ready(function(){
- 
+        
+        var socket = io.connect('http://10.74.17.233:1150');
+
         $scope.roomId = $stateParams.roomId
         $scope.empId = '484074'; //AuthService.username()
         $scope.message = '';
@@ -55,7 +57,7 @@ angular.module('starter')
             function(response){
                 var listMsgChanged = (response != null && response.length > 0) ? response : [];
                 //loop list to trigger web socket reenter_received_message
-                IterationSendReEnterEvent(listMsgChanged,SocketService,$scope.roomId);
+                IterationSendReEnterEvent(listMsgChanged,socket,$scope.roomId);
                 //select all message from sqlite and bind to msgDetails
                 PMMsgSQLite.GetAll().then(function(response){
                     if(response.rows != null && response.rows.length > 0){
@@ -88,13 +90,13 @@ angular.module('starter')
         CheckThisRoomIsGroup($scope,APIService,$scope.roomId);
         
         //join to current room
-        SocketService.emit('join_room',$scope.roomId);
+        socket.emit('join_room',$scope.roomId);
 
         $scope.sendMessage = function(){
             //gen tmpid
             var tmpId = GeneratedGUID();
             //web socket send msg
-            SocketService.emit('send_message',$scope.roomId,$scope.message,$scope.empId,tmpId);
+            socket.emit('send_message',$scope.roomId,$scope.message,$scope.empId,tmpId);
             //push objMSG Id,TS = null
             var senderMSG = {msgId:null,side:'right',msg:$scope.message,msgDate:'',readTotal:0,tmpId:tmpId};
             $scope.msgDetails.push(senderMSG);
@@ -103,7 +105,8 @@ angular.module('starter')
         };
 
         //push msg from sender
-        SocketService.on('append_message',function(msg){
+        socket.on('append_message',function(msg){
+            console.log('append_message');
             var data = {Id:msg.Id,Empl_Code:$scope.empId,message:msg.msg,readTotal:0,DL:false,TS:msg.TS};
             msg.TS = TransformServerTSToDateTimeStr(msg.TS.toString());
             //insert msg into sqlite
@@ -112,12 +115,12 @@ angular.module('starter')
                 $scope.msgDetails.push(msg);
                 viewScroll.scrollBottom(true);
                 //web socket send back to update readed flag
-                SocketService.emit('received_message',$scope.roomId,$scope.empId,msg.Id);    
+                socket.emit('received_message',$scope.roomId,$scope.empId,msg.Id);    
             });
         });
 
         //append msg to sender side when insert DB success
-        SocketService.on('send_success',function(retFromServer,recvMSG){
+        socket.on('send_success',function(retFromServer,recvMSG){
             var data = {Id:retFromServer.Id,Empl_Code:$scope.empId,message:retFromServer.msg,readTotal:0,DL:false,TS:retFromServer.TS};
             //save to sqlite
             PMMsgSQLite.Add([data],false).then(function(){
@@ -125,11 +128,11 @@ angular.module('starter')
                 UpdateSendDateTimeToMsg($scope.msgDetails,retFromServer);
                 viewScroll.scrollBottom(true);
                 //web socket send to receiver for append message
-                SocketService.emit('append_message_to_receiver',$scope.roomId,recvMSG);
+                socket.emit('append_message_to_receiver',$scope.roomId,recvMSG);
             });
         });
 
-        SocketService.on('set_readTotal',function(msgId,readTotal){
+        socket.on('set_readTotal',function(msgId,readTotal){
             if($scope.msgDetails == null || $scope.msgDetails.length <= 0) return;
             //set readeTotal use filter by msgid
             for (var i = 0; i <= $scope.msgDetails.length - 1; i++) {
@@ -138,6 +141,7 @@ angular.module('starter')
                     break;
                 }
             };
+            $scope.$apply();
             // //update readTotal to sqlite
             // PMMsgSQLite.UpdateReadTotal(msgId,readTotal).then(function(){
             //     //set readeTotal use filter by msgid
@@ -148,6 +152,12 @@ angular.module('starter')
             //         }
             //     };    
             // })
+        });
+
+        $rootScope.$on( "$stateChangeSuccess", function(e, toState, toParams, fromState, fromParams) {
+            if(fromState.url = '/pmsmsgs/:roomId'){
+                socket.disconnect();
+            }
         });
 
     });
@@ -189,9 +199,9 @@ function CheckThisRoomIsGroup($scope,APIService,roomId){
     },function(){});
 };
 
-function IterationSendReEnterEvent(listChanged,SocketService,roomId){
+function IterationSendReEnterEvent(listChanged,socket,roomId){
     angular.forEach(listChanged,function(value,key){
-        SocketService.emit('reenter_received_message',roomId,value.Id,value.readTotal);
+        socket.emit('reenter_received_message',roomId,value.Id,value.readTotal);
     });
 };
 

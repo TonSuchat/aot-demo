@@ -76,6 +76,17 @@ angular.module('starter')
         var fullname = result[0].PrefixName + ' ' + result[0].Firstname + ' ' + result[0].Lastname + ' ' + nickname;
         $scope.currentPerson.personDetails = { FullName: fullname, Position: result[0].Position, Department: result[0].Section };
         $scope.currentPerson.contacts = ChangePrefixDataToThaiVersion(result[0].ContactList[0], $filter);
+
+        $scope.sendPMMsg = function(){
+            //todo get roomId from server
+            var url = APIService.hostname() + '/PrivateMessage/GetRoomId';
+            var empId = AuthService.username();
+            var data = {Empl_Code:empId,Empl_Code2:$scope.currentPerson.personId};
+            console.log(url);
+            console.log(empId);
+            //APIService.httpPost()
+        };
+
     });
 
 function GetDirectories($scope, APIService) {
