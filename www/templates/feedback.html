@@ -1,0 +1,32 @@
+<ion-view cache-view="false" view-title="แสดงความคิดเห็น">
+    <ion-content>
+    	
+    	<div class="list list-inset">
+    		<label class="item item-input">
+		  	  <h2>คะแนน</h2>
+		    </label>
+
+			<div class="labelbox">
+		      <div class="row">
+		        <div class="col">
+		          <rating readonly='noInternet' ng-model="rating.rate" max="5"></rating>
+		        </div>
+		      </div>
+		    </div>
+
+		    <label class="item item-input">
+		  	  <h2>ความคิดเห็น</h2>
+		    </label>
+
+		    <label class="item item-input">
+		      <textarea ng-disabled='noInternet' ng-model='$parent.feedbackMSG' rows='5' placeholder='พิมพ์ความคิดเห็นลงตรงนี้...'></textarea>
+		    </label>
+
+		</div>
+ 		
+ 		<div class='padding'>
+ 			<button ng-disabled='noInternet' class='button button-calm button-block' ng-click='sendFeedback()'>ส่งความคิดเห็น&nbsp;&nbsp;<i class='icon ion-paper-airplane'></i></button>
+ 		</div>
+ 		 
+    </ion-content>
+</ion-view>

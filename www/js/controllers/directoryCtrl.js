@@ -81,6 +81,7 @@ angular.module('starter')
         
         $scope.currentPerson = {};
         $scope.currentPerson.personId = $stateParams.personId;
+        $scope.PMRoomId = $stateParams.pmroomid;
 
         //process show/hide button create/invite private message
         CheckForShowPMButton($scope,$stateParams,APIService);

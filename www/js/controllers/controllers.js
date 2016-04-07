@@ -181,7 +181,7 @@ angular.module('starter')
         }
       };
     })
-     .controller('TestDetailSyncCtrl',function($scope,$stateParams,TestSyncSQLite,$location){
+    .controller('TestDetailSyncCtrl',function($scope,$stateParams,TestSyncSQLite,$location){
         var clientId = $stateParams.Id;
         $scope.Mode = '';
         $scope.info = {};
@@ -225,8 +225,8 @@ angular.module('starter')
             }
         };
 
-     })
-     .controller('StockCtrl',function($scope,APIService,$filter,$cordovaNetwork,$ionicPopup){
+    })
+    .controller('StockCtrl',function($scope,APIService,$filter,$cordovaNetwork,$ionicPopup){
         
         //if no internet connection
         if(!CheckNetwork($cordovaNetwork)){
@@ -244,7 +244,38 @@ angular.module('starter')
           else GetStockData($scope,APIService,$filter);
         };
 
-     })
+    })
+    .controller('FeedbackCtrl',function($scope,APIService,$cordovaNetwork,$ionicPopup,$location){
+      // set the rate and max variables
+      $scope.rating = {};
+      $scope.rating.rate = 1;
+      $scope.feedbackMSG = '';
+      $scope.noInternet = false;
+
+      //if no internet connection
+      if(!CheckNetwork($cordovaNetwork)){
+        $scope.noInternet = true;
+        OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+      };
+      
+      $scope.sendFeedback = function(){
+        var url = APIService.hostname() + '/Feedback';
+        var data = {Msg:$scope.feedbackMSG,Rating:$scope.rating.rate};
+        console.log(data);
+        APIService.ShowLoading();
+        APIService.httpPost(url,data,
+          function(response){
+            APIService.HideLoading();
+            if(response != null && response.data){
+              alert('ระบบได้ทำการส่งความคิดเห็นของคุณแล้ว ขอบคุณที่ร่วมเป็นส่วนหนึ่งในการพัฒนาแอพพลิเคชั่น');
+              $location.path('#/app/home/news-feed');
+            }
+          },
+          function(error){APIService.HideLoading();console.log(error);});
+      };
+
+    })    
+
      
 
 function InitialCirculars(distinctCircularDate,$filter,allData,start,retrieve){

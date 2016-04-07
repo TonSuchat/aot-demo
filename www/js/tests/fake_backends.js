@@ -10,6 +10,7 @@ angular.module('starter')
 		var getEmpsInRoom = APIService.hostname() + '/PM/GetEmpInRoom';
 		var getRoomIdByEmplId = APIService.hostname() + '/PM/GetRoomId';
 		var invitePersonInroom = APIService.hostname() + '/PM/InvitePerson';
+		var sendFeedback = APIService.hostname() + '/Feedback';
 
 		//get api token
 		$httpBackend.whenPOST(apiTokenURL).respond(function(method,url,data,headers){
@@ -78,8 +79,12 @@ angular.module('starter')
 		$httpBackend.whenPOST(getRoomIdByEmplId).respond(function(method,url,data,headers){
 			return [200,fakeGetRoomId,{}];
 		});
-		//return 200
+		//invite person in private message
 		$httpBackend.whenPOST(invitePersonInroom).respond(function(method,url,data,headers){
+			return [200,true,{}];
+		});
+		//sendFeedback
+		$httpBackend.whenPOST(sendFeedback).respond(function(method,url,data,headers){
 			return [200,true,{}];
 		});
 		//templates
