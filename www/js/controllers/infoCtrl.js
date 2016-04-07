@@ -119,7 +119,7 @@ angular.module('starter')
 
     .controller('InfoCtrl', function($scope, $stateParams) {
     })
-    .controller('TimeCtrl', function($scope, $filter, TimeAttendanceSQLite, SyncService, $ionicPlatform, APIService, $rootScope) {
+    .controller('TimeCtrl', function($scope, $filter, TimeAttendanceSQLite, SyncService, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup) {
         $ionicPlatform.ready(function(){
             APIService.ShowLoading();
             //if disable sync, Get new data when page load.
@@ -161,18 +161,25 @@ angular.module('starter')
             InitialTimeInfo($scope,$filter);
 
             $scope.Refresh = function(){
-                APIService.ShowLoading();
-                //if disable sync, Get new data when page load.
-                SyncService.SyncTime().then(function(){
+                //if no internet connection
+                if(!CheckNetwork($cordovaNetwork)){
+                    OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
                     FinalActionInfo($scope,APIService);
-                });
-                //if(!enableSync) ProcessSyncTimeData($scope,TimeAttendanceSQLite,APIService,AuthService,$filter);
+                }
+                else{
+                    APIService.ShowLoading();
+                    //if disable sync, Get new data when page load.
+                    SyncService.SyncTime().then(function(){
+                        FinalActionInfo($scope,APIService);
+                    });
+                    //if(!enableSync) ProcessSyncTimeData($scope,TimeAttendanceSQLite,APIService,AuthService,$filter);
 
-                // //get all data only one times for use with $filter
-                TimeAttendanceSQLite.GetTimeAttendances().then(function(response){
-                    $scope.allTADatas = ConvertQueryResultToArray(response);
-                });
-                InitialTimeInfo($scope,$filter);
+                    // //get all data only one times for use with $filter
+                    TimeAttendanceSQLite.GetTimeAttendances().then(function(response){
+                        $scope.allTADatas = ConvertQueryResultToArray(response);
+                    });
+                    InitialTimeInfo($scope,$filter);    
+                }
             };
 
         });
@@ -180,7 +187,7 @@ angular.module('starter')
         CheckNeedToReload($rootScope,'/time');
 
     })
-    .controller('LeaveCtrl', function($scope, $filter, LeaveSQLite, SyncService, $ionicPlatform, APIService, $rootScope) {
+    .controller('LeaveCtrl', function($scope, $filter, LeaveSQLite, SyncService, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup) {
         $ionicPlatform.ready(function(){
             APIService.ShowLoading();
             SyncService.SyncLeave().then(function(){
@@ -189,11 +196,18 @@ angular.module('starter')
             });
 
             $scope.Refresh = function(){
-                APIService.ShowLoading();
-                SyncService.SyncLeave().then(function(){
-                    InitialLeaveInfo($scope,$filter,LeaveSQLite);
+                //if no internet connection
+                if(!CheckNetwork($cordovaNetwork)){
+                    OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
                     FinalActionInfo($scope,APIService);
-                });
+                }
+                else{
+                    APIService.ShowLoading();
+                    SyncService.SyncLeave().then(function(){
+                        InitialLeaveInfo($scope,$filter,LeaveSQLite);
+                        FinalActionInfo($scope,APIService);
+                    });    
+                }
             };
         });
 
@@ -218,7 +232,7 @@ angular.module('starter')
     .controller('FuelDetailCtrl', function($scope, $stateParams) {
 
     })
-    .controller('FinanceCtrl', function($scope, MedicalSQLite, TuitionSQLite, SyncService, $ionicPlatform, APIService, $rootScope) {
+    .controller('FinanceCtrl', function($scope, MedicalSQLite, TuitionSQLite, SyncService, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup) {
 
         $ionicPlatform.ready(function(){
 
@@ -244,25 +258,32 @@ angular.module('starter')
 
             //pull to sync data
             $scope.Refresh = function(){
-                syncCompleted = 0;
-                APIService.ShowLoading();
-                //***Medical
-                SyncService.SyncMedical().then(function(numberOfNewData){
-                    syncCompleted++;
-                    //get current data from sqlite
-                    InitialMedicalInfo($scope,MedicalSQLite,numberOfNewData);
-                    if(syncCompleted == 2) FinalActionInfo($scope,APIService);    
-                });
-                //***Medical
+                //if no internet connection
+                if(!CheckNetwork($cordovaNetwork)){
+                    OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+                    FinalActionInfo($scope,APIService);
+                }
+                else{
+                    syncCompleted = 0;
+                    APIService.ShowLoading();
+                    //***Medical
+                    SyncService.SyncMedical().then(function(numberOfNewData){
+                        syncCompleted++;
+                        //get current data from sqlite
+                        InitialMedicalInfo($scope,MedicalSQLite,numberOfNewData);
+                        if(syncCompleted == 2) FinalActionInfo($scope,APIService);    
+                    });
+                    //***Medical
 
-                //***tuition
-                SyncService.SyncTuition().then(function(numberOfNewData){
-                    syncCompleted++;
-                    //get current data from sqlite
-                    InitialTuitionInfo($scope,TuitionSQLite,numberOfNewData);
-                    if(syncCompleted == 2) FinalActionInfo($scope,APIService); 
-                });   
-                //***tuition
+                    //***tuition
+                    SyncService.SyncTuition().then(function(numberOfNewData){
+                        syncCompleted++;
+                        //get current data from sqlite
+                        InitialTuitionInfo($scope,TuitionSQLite,numberOfNewData);
+                        if(syncCompleted == 2) FinalActionInfo($scope,APIService); 
+                    });   
+                    //***tuition    
+                }
             };
 
         });
@@ -287,7 +308,7 @@ angular.module('starter')
     .controller('TuitionDetailCtrl', function($scope, $stateParams, $filter) {
         InitialTuitionDetails($scope,$filter,$stateParams);
     })
-    .controller('RoyalCtrl', function($scope, RoyalSQLite, SyncService, $filter, $ionicPlatform, APIService, $rootScope) {
+    .controller('RoyalCtrl', function($scope, RoyalSQLite, SyncService, $filter, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup) {
         $ionicPlatform.ready(function(){
             APIService.ShowLoading();
             SyncService.SyncRoyal().then(function(){
@@ -297,12 +318,19 @@ angular.module('starter')
             });
 
             $scope.Refresh = function(){
-                APIService.ShowLoading();
-                SyncService.SyncRoyal().then(function(){
-                    //get current data from sqlite
-                    InitialRoyalInfo($scope,RoyalSQLite,$filter);
+                //if no internet connection
+                if(!CheckNetwork($cordovaNetwork)){
+                    OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
                     FinalActionInfo($scope,APIService);
-                });
+                }
+                else{
+                    APIService.ShowLoading();
+                    SyncService.SyncRoyal().then(function(){
+                        //get current data from sqlite
+                        InitialRoyalInfo($scope,RoyalSQLite,$filter);
+                        FinalActionInfo($scope,APIService);
+                    });    
+                }
             };
         });
 

@@ -103,3 +103,18 @@ function GeneratedGUID(){
   return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
     s4() + '-' + s4() + s4() + s4();
 };
+
+function CheckNetwork($cordovaNetwork){
+    if (window.cordova){
+        if($cordovaNetwork.getNetwork() == 'none' || $cordovaNetwork.isOffline()) return false;
+        else return true;    
+    }
+    else return true;
+};
+
+function OpenIonicAlertPopup($ionicPopup,title,content){
+    $ionicPopup.alert({
+        title: title,
+        content: content
+    });
+};

@@ -78,7 +78,7 @@ angular.module('starter')
       checkAuthen();
     })
 
-    .controller('NewsFeedCtrl', function($scope, $stateParams, SyncService, NewsSQLite, $ionicPlatform, APIService, $rootScope) {
+    .controller('NewsFeedCtrl', function($scope, $stateParams, SyncService, NewsSQLite, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup) {
 
       $ionicPlatform.ready(function(){
         InitialNewsFeedProcess($scope, $stateParams, SyncService, NewsSQLite, $ionicPlatform, APIService);
@@ -91,20 +91,30 @@ angular.module('starter')
       };
 
       $scope.Refresh = function(){
-        InitialNewsFeedProcess($scope, $stateParams, SyncService, NewsSQLite, $ionicPlatform, APIService);
+        //if no internet connection
+        if(!CheckNetwork($cordovaNetwork)){
+            OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+            FinalCtrlAction($scope,APIService);
+        }
+        else InitialNewsFeedProcess($scope, $stateParams, SyncService, NewsSQLite, $ionicPlatform, APIService);
       };
 
     })
     .controller('NewsCtrl', function($scope, $stateParams) {
       console.log('news click');
     })
-    .controller('CircularLetterCtrl', function($scope, $filter, SyncService, CircularSQLite, APIService, $ionicPlatform, $rootScope) {
+    .controller('CircularLetterCtrl', function($scope, $filter, SyncService, CircularSQLite, APIService, $ionicPlatform, $rootScope, $cordovaNetwork, $ionicPopup) {
       $ionicPlatform.ready(function(){
 
         InitialCircularProcess($scope, $filter, SyncService, CircularSQLite, APIService);
 
         $scope.Refresh = function(){
-          InitialCircularProcess($scope, $filter, SyncService, CircularSQLite, APIService);
+          //if no internet connection
+          if(!CheckNetwork($cordovaNetwork)){
+              OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+              FinalCtrlAction($scope,APIService);
+          }
+          else InitialCircularProcess($scope, $filter, SyncService, CircularSQLite, APIService);
         };
 
         $scope.loadMoreData = function(){
@@ -216,12 +226,22 @@ angular.module('starter')
         };
 
      })
-     .controller('StockCtrl',function($scope,APIService,$filter){
-      
+     .controller('StockCtrl',function($scope,APIService,$filter,$cordovaNetwork,$ionicPopup){
+        
+        //if no internet connection
+        if(!CheckNetwork($cordovaNetwork)){
+            OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+        };
+
         GetStockData($scope,APIService,$filter);
 
         $scope.Refresh = function(){
-          GetStockData($scope,APIService,$filter);
+          //if no internet connection
+          if(!CheckNetwork($cordovaNetwork)){
+              OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+              FinalCtrlAction($scope,APIService);
+          }
+          else GetStockData($scope,APIService,$filter);
         };
 
      })

@@ -24,7 +24,7 @@ angular.module('starter')
     .config(function ($stateProvider) {
         $stateProvider
             .state('app.directory', {
-                url: '/directory',
+                url: '/directory?pmroomid',
                 views: {
                     'menuContent': {
                         templateUrl: 'templates/directory/directory.html',
@@ -33,7 +33,7 @@ angular.module('starter')
                 }
             })
             .state('app.directory-person', {
-                url: '/directory/:personId',
+                url: '/directory/:personId?pmroomid',
                 views: {
                     'menuContent': {
                         templateUrl: 'templates/directory/person.html',
@@ -42,7 +42,17 @@ angular.module('starter')
                 }
             });
     })
-    .controller('DirectoryCtrl', function ($scope, APIService) {
+    .controller('DirectoryCtrl', function ($scope, APIService, $stateParams, $cordovaNetwork, $ionicPopup) {
+        
+        $scope.noInternet = false;
+        //if no internet connection
+        if(!CheckNetwork($cordovaNetwork)){
+            $scope.noInternet = true;
+            OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+        };
+        
+        $scope.PMRoomId = $stateParams.pmroomid;
+
         $scope.directoryList = [];
         //set data to share variable for used in person controller
         sharePersonData = [];
@@ -68,8 +78,13 @@ angular.module('starter')
 
     })
     .controller('PersonCtrl', function ($scope, $stateParams, $filter,APIService,AuthService,$location) {
+        
         $scope.currentPerson = {};
         $scope.currentPerson.personId = $stateParams.personId;
+
+        //process show/hide button create/invite private message
+        CheckForShowPMButton($scope,$stateParams,APIService);
+
         $scope.currentUserName = AuthService.username();
         var result = $filter('filter')(sharePersonData, { UserID: $scope.currentPerson.personId });
         var nickname = (result[0].Nickname && result[0].Nickname != null) ? '(' + result[0].Nickname + ')' : '';
@@ -90,6 +105,20 @@ angular.module('starter')
                         $location.path('/app/pmsmsgs/' + response.data[0].roomId);
                 },
                 function(error){console.log(error);});
+        };
+
+        //invite new person into room
+        $scope.InvitePMMSg = function(){
+            var url = APIService.hostname() + '/PM/InvitePerson';
+            var data = {roomID:$scope.PMRoomId,Empl_Code:$scope.currentPerson.personId};
+            APIService.httpPost(url,data,
+                function(response){
+                    if(response != null && response.data != null){
+                        if(response.data)
+                            $location.path('/app/pmsmsgs/' + $scope.PMRoomId);    
+                    }
+                },
+                function(error){console.log(error);});  
         };
 
     });
@@ -168,5 +197,32 @@ function ChangePrefixDataToThaiVersion(contacts, $filter) {
     });
     return contactDatas;
 };
-
  
+
+function CheckForShowPMButton($scope,$stateParams,APIService){
+    $scope.PMInfo = {pmRoomId:$stateParams.pmroomid,showInvitebtn:true};
+    if($scope.PMInfo.pmRoomId == 0) $scope.PMInfo.isInvite = false;
+    else {
+        $scope.PMInfo.isInvite = true;
+        //check current person has already in room?
+        var url = APIService.hostname() + '/PM/GetEmpInRoom';
+        var data = {roomID:$scope.PMInfo.pmRoomId};
+        APIService.httpPost(url,data,
+            function(response){
+                if(response != null && response.data != null){
+                    console.log(response.data);
+                    for (var i = 0; i <= response.data.length - 1; i++) {
+                        if(response.data[i].Empl_Code == $scope.currentPerson.personId){
+                            $scope.PMInfo.showInvitebtn = false;
+                            break;
+                        }
+                    };
+                }
+                else $scope.PMInfo.showInvitebtn = false;
+            },
+            function(error){
+                console.log(error);
+                $scope.PMInfo.showInvitebtn = false;
+            });
+    }
+};

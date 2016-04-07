@@ -1,6 +1,7 @@
 <ion-view cache-view="false">
   <ion-nav-title>
-    {{roomName}}
+    
+  <span class='button icon-right button-clear ion-android-arrow-dropdown' ng-click='popover.show($event)'>{{roomName}}&nbsp;&nbsp;</span>
   </ion-nav-title>
 
     <ion-content has-bouncing='true' delegate-handle="userMessageScroll">
@@ -30,10 +31,20 @@
 
     <ion-footer-bar keyboard-attach class="bar-stable item-input-inset">
       <label class="item-input-wrapper">
-        <input type="text" placeholder="พิมพ์ข้อความที่นี่ ...." ng-model="message" />
+        <input type="text" ng-disabled='noInternet' placeholder="พิมพ์ข้อความที่นี่ ...." ng-model="message" />
       </label>
-      <button ng-disabled='message.length == 0' class="button button-icon icon ion-android-send footer-btn" ng-click="sendMessage()">
+      <button ng-disabled='message.length == 0' ng-disabled='noInternet' class="button button-icon icon ion-android-send footer-btn" ng-click="sendMessage()">
       </button>
     </ion-footer-bar>
+
+    <script id="templates/PMMenus.html" type="text/ng-template">
+      <ion-popover-view>
+        <ion-content>
+          <div class="list">
+            <a class="item text-center icon-left ion-plus-circled" ng-click='popover.hide($event)' href="#/app/directory?pmroomid={{roomId}}"> ชวนคนอื่นเข้าร่วม</a>
+          </div>
+        </ion-content>
+      </ion-popover-view>
+    </script>
 
 </ion-view>

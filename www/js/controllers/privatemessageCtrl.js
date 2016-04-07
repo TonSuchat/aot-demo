@@ -1,8 +1,14 @@
 angular.module('starter')
 
-.controller('PrivateMessageRoomsCtrl',function($scope,$ionicPlatform,SyncService,PMRoomSQLite,APIService){
+.controller('PrivateMessageRoomsCtrl',function($scope,$ionicPlatform,SyncService,PMRoomSQLite,APIService,$cordovaNetwork,$ionicPopup){
     
     $ionicPlatform.ready(function(){
+
+        //if no internet connection
+        if(!CheckNetwork($cordovaNetwork)){
+             OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+        };
+          
         $scope.haveMoreData = false;
         $scope.isfirstLoad = true;
         $scope.roomsDetail = [];
@@ -39,8 +45,22 @@ angular.module('starter')
 
     });
 })
-.controller('PrivateMessagesCtrl',function($scope,$ionicScrollDelegate,$stateParams,PMMsgSQLite,$filter,APIService,$ionicPlatform,SyncService,socketFactory,$rootScope,PMRoomSQLite){
+.controller('PrivateMessagesCtrl',function($scope,$ionicScrollDelegate,$stateParams,PMMsgSQLite,$filter,APIService,$ionicPlatform,SyncService,socketFactory,$rootScope,PMRoomSQLite,$ionicPopover,$cordovaNetwork,$ionicPopup){
     $ionicPlatform.ready(function(){
+
+        //popover private message menus
+        $ionicPopover.fromTemplateUrl('templates/PMMenus.html', {
+            scope: $scope,
+        }).then(function(popover) {
+            $scope.popover = popover;
+        });
+
+        $scope.noInternet = false;
+        //if no internet connection
+        if(!CheckNetwork($cordovaNetwork)){
+            $scope.noInternet = true;
+            OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+        };
         
         var socket = io.connect('http://10.74.17.233:1150');
 

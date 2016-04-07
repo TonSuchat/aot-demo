@@ -9,6 +9,7 @@ angular.module('starter')
 
 		var getEmpsInRoom = APIService.hostname() + '/PM/GetEmpInRoom';
 		var getRoomIdByEmplId = APIService.hostname() + '/PM/GetRoomId';
+		var invitePersonInroom = APIService.hostname() + '/PM/InvitePerson';
 
 		//get api token
 		$httpBackend.whenPOST(apiTokenURL).respond(function(method,url,data,headers){
@@ -76,6 +77,10 @@ angular.module('starter')
 		//get roomId by empl_code_1,2
 		$httpBackend.whenPOST(getRoomIdByEmplId).respond(function(method,url,data,headers){
 			return [200,fakeGetRoomId,{}];
+		});
+		//return 200
+		$httpBackend.whenPOST(invitePersonInroom).respond(function(method,url,data,headers){
+			return [200,true,{}];
 		});
 		//templates
 		$httpBackend.whenGET(/templates\/\w+.*/).passThrough();

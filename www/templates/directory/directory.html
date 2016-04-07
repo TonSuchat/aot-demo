@@ -18,7 +18,7 @@
         </div>
         <div class='row'>
             <div class='col'>
-                <button type='submit' class='button button-positive button-block'>
+                <button ng-disabled='noInternet' type='submit' class='button button-positive button-block'>
                     <i class='icon ion-search'></i>
                     ค้นหา
                 </button>
@@ -26,7 +26,7 @@
         </div>
     </form>
         <ion-list>
-            <ion-item ng-repeat="person in directoryList" class="item-thumbnail-left item-text-wrap" href="#/app/directory/{{person.UserID}}">
+            <ion-item ng-repeat="person in directoryList" class="item-thumbnail-left item-text-wrap" href="#/app/directory/{{person.UserID}}?pmroomid={{PMRoomId}}">
                 <img ng-src="http://{{person.PictureThumb}}" alt="">
                 <h2>{{person.PrefixName + ' ' + person.Firstname + ' ' + person.Lastname}} {{ (person.Nickname != null && person.Nickname) ? '(' + person.Nickname + ')' : ''}}</h2>
                 <h3>{{person.Position}}</h3>
