@@ -21,9 +21,10 @@ angular.module('starter')
 			return [200,true,{}];
 		});
 		//userprofile
-		$httpBackend.whenPOST(userprofileURL).respond(function(method,url,data,headers){
-			return [200,fakeUserProfile,{}];
-		});
+		// $httpBackend.whenPOST(userprofileURL).respond(function(method,url,data,headers){
+		// 	return [200,fakeUserProfile,{}];
+		// });
+		$httpBackend.whenPOST(userprofileURL).passThrough();
 		//sync get data from server
 		$httpBackend.whenPOST(syncValueGetURL).respond(function(method,url,data,headers){
 			switch(GetObjectId(data)){

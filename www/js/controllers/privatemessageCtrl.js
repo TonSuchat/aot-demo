@@ -45,15 +45,11 @@ angular.module('starter')
 
     });
 })
-.controller('PrivateMessagesCtrl',function($scope,$ionicScrollDelegate,$stateParams,PMMsgSQLite,$filter,APIService,$ionicPlatform,SyncService,socketFactory,$rootScope,PMRoomSQLite,$ionicPopover,$cordovaNetwork,$ionicPopup){
+.controller('PrivateMessagesCtrl',function($scope,$ionicScrollDelegate,$stateParams,PMMsgSQLite,$filter,APIService,$ionicPlatform,SyncService,socketFactory,$rootScope,PMRoomSQLite,$ionicPopover,$cordovaNetwork,$ionicPopup,PMSubscribeSQLite){
     $ionicPlatform.ready(function(){
 
         //popover private message menus
-        $ionicPopover.fromTemplateUrl('templates/PMMenus.html', {
-            scope: $scope,
-        }).then(function(popover) {
-            $scope.popover = popover;
-        });
+        $ionicPopover.fromTemplateUrl('templates/PMMenus.html', {scope: $scope,}).then(function(popover) { $scope.popover = popover; });
 
         $scope.noInternet = false;
         //if no internet connection
@@ -65,11 +61,13 @@ angular.module('starter')
         var socket = io.connect('http://10.74.17.233:1150');
 
         $scope.roomId = $stateParams.roomId
-        $scope.empId = '484074'; //AuthService.username()
+        $scope.empId = '484074'; //AuthService.username() **Hard-Code**
         $scope.message = '';
         $scope.msgDetails = [];
         $scope.allMsg = [];
+        $scope.allSubscribe = [];
         $scope.scrollDetails = {start:0,retrieve:10};
+        var viewScroll = $ionicScrollDelegate.$getByHandle('userMessageScroll');
 
         //Set roomName
         SetRoomName($scope,PMRoomSQLite);
@@ -81,16 +79,10 @@ angular.module('starter')
                 var listMsgChanged = (response != null && response.length > 0) ? response : [];
                 //loop list to trigger web socket reenter_received_message
                 IterationSendReEnterEvent(listMsgChanged,socket,$scope.roomId);
-                //select all message from sqlite and bind to msgDetails
-                PMMsgSQLite.GetAllMsgByRoomId($scope.roomId).then(function(response){
-                    if(response.rows != null && response.rows.length > 0){
-                        $scope.allMsg = ConvertQueryResultToArray(response);
-                        $scope.scrollDetails.start = $scope.allMsg.length;
-                        var result = GetInfiniteScrollDataReverse($scope.allMsg,$scope.scrollDetails.start,$scope.scrollDetails.retrieve);
-                        InitialPMMsgDetails($scope,result,$scope.empId);
-                        viewScroll.scrollBottom(true);
-                    }
-                    APIService.HideLoading();
+                //sync subscribe
+                SyncService.SyncSubscribe($scope.roomId).then(function(){
+                    //select all message from sqlite and bind to msgDetails
+                    PMMsgInitialProcess(PMMsgSQLite,PMSubscribeSQLite,$scope,APIService,viewScroll,$filter);
                 });
         });
 
@@ -107,10 +99,8 @@ angular.module('starter')
             FinalAction($scope,APIService);
         };
 
-        var viewScroll = $ionicScrollDelegate.$getByHandle('userMessageScroll');
-
-        //check this room is group or just 1:1 by POST to count check and set $scope.isGroup
-        CheckThisRoomIsGroup($scope,APIService,$scope.roomId);
+        // //sync subscribe and check this room is group/1:1
+        // SyncSubscribe($scope,APIService,$scope.roomId,PMSubscribeSQLite);
 
         //join to current room
         socket.emit('join_room',$scope.roomId);
@@ -202,16 +192,46 @@ function GetInfiniteScrollDataReverse(alldata,start,retrieve){
     return result;
 };
 
-function CheckThisRoomIsGroup($scope,APIService,roomId){
-    $scope.isGroup = false;
-    var url = APIService.hostname() + '/PM/GetEmpInRoom';
-    APIService.httpPost(url,{roomID:roomId},function(response){
-        if(response.data != null) {
-            if(response.data.length > 2) 
-                $scope.isGroup = true;
-        }
-    },function(){});
-};
+// //******************************************************
+// function SyncSubscribe($scope,APIService,roomId,PMSubscribeSQLite){
+    
+//     var url = APIService.hostname() + '/PM/GetEmpInRoom';
+//     APIService.httpPost(url,{roomID:roomId},function(response){
+//         if(response.data != null) {
+//             if(response.data.length > 2) $scope.isGroup = true;
+//             //sync subscribe
+//             var directoryURL = APIService.hostname() + '/ContactDirectory/viewContactPaging';
+//             angular.forEach(response.data,function(value,key){
+//                 PMSubscribeSQLite.CountSubscribeByEmpId(value.Empl_Code).then(
+//                     function(response){
+//                         if(response != null && response.rows != null){
+//                             var result = ConvertQueryResultToArray(response);
+//                             if(result[0].totalCount == 0){
+//                                 //get info & insert into pmsubsribe
+//                                 var directoryData = {keyword:value.Empl_Code,start:1,retrieve:1};
+//                                 APIService.httpPost(directoryURL,directoryData,
+//                                     function(response){
+//                                         var result = response.data[0];
+//                                         if(response != null && response.data != null){
+//                                             //convert picthumb to base64
+//                                             ConvertImgPNGToBase64(result.PictureThumb,function(base64){
+//                                                 if(base64 && base64.length > 0){
+//                                                     //save user data to pmsubscribe
+//                                                     var data = {Empl_Code:result.UserID,Firstname:result.Firstname,Lastname:result.Lastname,PictureThumb:base64};
+//                                                     PMSubscribeSQLite.Add([data]);
+//                                                 }
+//                                             });
+//                                         };
+//                                     },
+//                                     function(error){console.log(error);});
+//                             }
+//                         };
+//                     });
+//             });
+//         }
+//     },function(){});
+// };
+// //******************************************************
 
 function IterationSendReEnterEvent(listChanged,socket,roomId){
     angular.forEach(listChanged,function(value,key){
@@ -219,15 +239,18 @@ function IterationSendReEnterEvent(listChanged,socket,roomId){
     });
 };
 
-function InitialPMMsgDetails($scope,data,myEmpId){
+function InitialPMMsgDetails($scope,data,myEmpId,allsubscribe,$filter){
     if(data == null || data.length == 0) return;
     angular.forEach(data,function(value,key){
+        var eachSubscribe =  $filter('filter')(allsubscribe, { Empl_Code: value.Empl_Code });
         $scope.msgDetails.unshift({
             Id:value.Id,
             side:(value.Empl_Code == myEmpId) ? 'right' : 'left',
             msg:value.message,
             TS:TransformServerTSToDateTimeStr(value.TS.toString()),
-            readTotal:value.readTotal
+            readTotal:value.readTotal,
+            Firstname:eachSubscribe[0].Firstname,
+            PictureThumb:eachSubscribe[0].PictureThumb 
         });
     });
 };
@@ -253,9 +276,33 @@ function SetRoomName($scope,PMRoomSQLite){
     });
 };
 
-function FakeData($scope){
-    $scope.msgDetails.push({msgId:1,roomId:$scope.roomId,side:'left',msg:'asdasdasd',msgDate:'22/3/2016 16:22',readTotal:1});
-    $scope.msgDetails.push({msgId:2,roomId:$scope.roomId,side:'right',msg:'Lorem ipsum dolor',msgDate:'22/3/2016 16:22',readTotal:0});
-    $scope.msgDetails.push({msgId:3,roomId:$scope.roomId,side:'left',msg:'asdasdasd',msgDate:'22/3/2016 16:22',readTotal:1});
-    $scope.msgDetails.push({msgId:4,roomId:$scope.roomId,side:'right',msg:'Lorem ipsum dolor Lorem ipsum dolor Lorem ipsum dolor Lorem ipsum dolor',msgDate:'22/3/2016 16:22',readTotal:1});
+function PMMsgInitialProcess(PMMsgSQLite,PMSubscribeSQLite,$scope,APIService,viewScroll,$filter){
+    APIService.ShowLoading();
+    PMSubscribeSQLite.GetAllSubScribe().then(function(response){
+        if(response != null && response.rows != null){
+            $scope.allSubscribe = ConvertQueryResultToArray(response);
+            PMMsgSQLite.GetAllMsgByRoomId($scope.roomId).then(function(response){
+                if(response.rows != null && response.rows.length > 0){
+                    $scope.allMsg = ConvertQueryResultToArray(response);
+                    $scope.scrollDetails.start = $scope.allMsg.length;
+                    var result = GetInfiniteScrollDataReverse($scope.allMsg,$scope.scrollDetails.start,$scope.scrollDetails.retrieve);
+                    InitialPMMsgDetails($scope,result,$scope.empId,$scope.allSubscribe,$filter);
+                    viewScroll.scrollBottom(true);
+                }
+                APIService.HideLoading();
+            });    
+        }
+        else APIService.HideLoading();
+    });
+
+    //check this room is group/1:1
+    $scope.isGroup = false;
+    var url = APIService.hostname() + '/PM/GetEmpInRoom';
+    APIService.httpPost(url,{roomID:$scope.roomId},
+        function(response){
+            if(response.data != null) {
+                if(response.data.length > 2) $scope.isGroup = true;
+            }
+        },
+        function(error){});
 };

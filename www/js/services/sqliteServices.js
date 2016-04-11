@@ -1,5 +1,5 @@
 var db;
-var tableNames = ['userprofile','medical','tuition','royal','timeattendance','leave','circular','news','pmroom','pmmsg'];
+var tableNames = ['userprofile','medical','tuition','royal','timeattendance','leave','circular','news','pmroom','pmmsg','pmsubscribe'];
 
 angular.module('starter')
 .service('SQLiteService',function($cordovaSQLite,$q){
@@ -22,7 +22,7 @@ angular.module('starter')
 	this.BaseGetLatestTS = function(tablename){
 		//var sql = "SELECT TS FROM " + tablename + " ORDER BY TS DESC LIMIT 1";
 		// if(orderBySubStr)
-		var sql = "SELECT ts FROM " + tablename + " ORDER BY CAST(SUBSTR(ts,5,4) AS INT) DESC, CAST(SUBSTR(ts,3,2) AS INT) DESC, CAST(SUBSTR(ts,1,2) AS INT) DESC, CAST(SUBSTR(ts,9,2) AS INT) DESC, CAST(SUBSTR(ts,11,2) AS INT) DESC, CAST(SUBSTR(13,2) AS INT) DESC, Id DESC LIMIT 1";
+		var sql = "SELECT ts FROM " + tablename + " ORDER BY CAST(SUBSTR(ts,5,4) AS INT) DESC, CAST(SUBSTR(ts,3,2) AS INT) DESC, CAST(SUBSTR(ts,1,2) AS INT) DESC, CAST(SUBSTR(ts,9,2) AS INT) DESC, CAST(SUBSTR(ts,11,2) AS INT) DESC, CAST(SUBSTR(ts,13,2) AS INT) DESC, Id DESC LIMIT 1";
 		// else 
 		// 	sql = "SELECT ts FROM " + tablename + " ORDER BY ts DESC LIMIT 1";
 		return this.Execute(sql).then(function(response){
@@ -73,6 +73,7 @@ angular.module('starter')
 		this.CreateNewsTable();
 		this.CreatePMRoomTable();
 		this.CreatePMMsgTable();
+		this.CreatePMSubscribeTable();
 	};
 
 	//**Test-Sync-Code
@@ -114,6 +115,10 @@ angular.module('starter')
 
 	this.CreatePMMsgTable = function(){
 		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmmsg(clientid integer primary key AUTOINCREMENT, Id int, Empl_Code text, message text, readTotal int, roomId text, DL boolean,dirty boolean,TS text)");
+	};
+
+	this.CreatePMSubscribeTable = function(){
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmsubscribe(clientid integer primary key AUTOINCREMENT, Empl_Code text, Firstname text, Lastname text, PictureThumb text)");
 	};
 
 	this.DeleteAllTables = function(){
@@ -807,7 +812,7 @@ angular.module('starter')
 	//***Necessary-Method
 	
 	this.GetAllMsgByRoomId = function(roomId){
-		return SQLiteService.Execute("SELECT * FROM pmmsg WHERE roomId = '" + roomId + "' ORDER BY CAST(SUBSTR(ts,5,4) AS INT), CAST(SUBSTR(ts,3,2) AS INT), CAST(SUBSTR(ts,1,2) AS INT), CAST(SUBSTR(ts,9,2) AS INT), CAST(SUBSTR(ts,11,2) AS INT), CAST(SUBSTR(13,2) AS INT), Id").then(function(response){return response;},function(error){return error;});	
+		return SQLiteService.Execute("select * FROM pmmsg WHERE roomId = '" + roomId + "' ORDER BY CAST(SUBSTR(ts,5,4) AS INT), CAST(SUBSTR(ts,3,2) AS INT), CAST(SUBSTR(ts,1,2) AS INT), CAST(SUBSTR(ts,9,2) AS INT), CAST(SUBSTR(ts,11,2) AS INT), CAST(SUBSTR(ts,13,2) AS INT), Id").then(function(response){return response;},function(error){return error;});	
 	};
 
 	this.UpdateReadTotal = function(msgId,readTotal){
@@ -815,6 +820,32 @@ angular.module('starter')
 		var param = [readTotal];
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
 	};
+})
+.service('PMSubscribeSQLite',function(SQLiteService){
+
+	this.CountSubscribeByEmpId = function(empid){
+		return SQLiteService.Execute("SELECT COUNT(*) as totalCount FROM pmsubscribe WHERE Empl_Code = " + empid).then(function(response){return response;},function(error){return error;});	
+	};
+
+	this.Add = function(data){
+		var sql = "INSERT INTO pmsubscribe (Empl_Code, Firstname, Lastname, PictureThumb) VALUES ";
+		var param = []; 
+		var rowArgs = [];
+		data.forEach(function(item){
+			rowArgs.push("(?,?,?,?)");
+			param.push(item.Empl_Code);
+			param.push(item.Firstname);
+			param.push(item.Lastname);
+			param.push(item.PictureThumb);
+		});
+		sql += rowArgs.join(', ');
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){console.log(error); return error;});
+	};
+
+	this.GetAllSubScribe = function(){
+		return SQLiteService.Execute("select * FROM pmsubscribe").then(function(response){return response;},function(error){return error;});	
+	};
+
 })
 
 //***Test-Sync-Code

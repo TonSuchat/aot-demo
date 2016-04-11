@@ -118,3 +118,21 @@ function OpenIonicAlertPopup($ionicPopup,title,content){
         content: content
     });
 };
+
+function ConvertImgPNGToBase64(url,callback,outputFormat){
+    url = url.replace('10.74.29.166/','http://eservice2.airportthai.co.th/');
+    var img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = function(){
+        var canvas = document.createElement('CANVAS');
+        var ctx = canvas.getContext('2d');
+        var dataURL;
+        canvas.height = this.height;
+        canvas.width = this.width;
+        ctx.drawImage(this, 0, 0);
+        dataURL = canvas.toDataURL(outputFormat);
+        callback(dataURL);
+        canvas = null; 
+    };
+    img.src = url;
+};

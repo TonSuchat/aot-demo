@@ -1,6 +1,6 @@
 angular.module('starter')
 
-    .service('AuthService', function($q, $http,AUTH_EVENTS,APIService,UserProfileSQLite) {
+    .service('AuthService', function($q, $http,AUTH_EVENTS,APIService,UserProfileSQLite,PMSubscribeSQLite) {
         //var LOCAL_TOKEN_KEY = 'yourTokenKey';
         var username = '';
         var isAuthenticated = false;
@@ -21,16 +21,6 @@ angular.module('starter')
 
         function useCredentials(successAction,userData) {
 
-            // username = token.split('.')[0];
-            
-            // authToken = token;
-
-            // if (username == '484134') {
-            //     fullname = "Danupon Kainongsuang";
-            // }
-            // if (username == '484074') {
-            //     fullname = "Sontaya Wilaijit";
-            // }
             if(userData != null){
                 isAuthenticated = window.localStorage.setItem("AuthServices_isAuthenticated", true); //true;
                 fullname = window.localStorage.setItem("AuthServices_fullname", userData.PrefixName + ' ' + userData.Firstname + ' ' + userData.Lastname); //userData.PrefixName + ' ' + userData.Firstname + ' ' + userData.Lastname;
@@ -51,6 +41,14 @@ angular.module('starter')
                         position = window.localStorage.setItem("AuthServices_position", result.Position); //result.Position;
                         //save user data to sqlite db
                         UserProfileSQLite.SaveUserProfile(result);
+                        //convert picthumb to base64
+                        ConvertImgPNGToBase64(result.PictureThumb,function(base64){
+                            if(base64 && base64.length > 0){
+                                //save user data to pmsubscribe
+                                var data = {Empl_Code:username,Firstname:result.Firstname,Lastname:result.Lastname,PictureThumb:base64};
+                                PMSubscribeSQLite.Add([data]);
+                            }
+                        });
                         successAction();
                     },
                     function(){});

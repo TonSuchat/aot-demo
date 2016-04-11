@@ -10,6 +10,11 @@
       </ion-refresher>
 
       <div class='message-wrapper' ng-repeat='message in msgDetails'>
+        <div ng-show='message.side == "left"' class='chat-name'>
+          <img  src="{{message.PictureThumb}}" class='profile-pic left' />
+          <span class='chat-name'>{{message.Firstname}}</span>
+        </div>
+        
         <div class='chat-bubble {{message.side}}'>
             <div class='msg'>
               <span>{{message.msg}}</span>
@@ -22,7 +27,7 @@
                  <span>ส่งเมื่อ : {{message.TS}}</span>
               </div>
             </div>
-          </div>
+        </div>
           <div class='cf'></div>
       </div>
       

@@ -1,6 +1,6 @@
 angular.module('starter')
 
-.service('SyncService',function($q,AuthService,APIService,TestSyncSQLite,UserProfileSQLite,MedicalSQLite,TuitionSQLite,RoyalSQLite,TimeAttendanceSQLite,LeaveSQLite,CircularSQLite,NewsSQLite,PMRoomSQLite,PMMsgSQLite){
+.service('SyncService',function($q,AuthService,APIService,TestSyncSQLite,UserProfileSQLite,MedicalSQLite,TuitionSQLite,RoyalSQLite,TimeAttendanceSQLite,LeaveSQLite,CircularSQLite,NewsSQLite,PMRoomSQLite,PMMsgSQLite,PMSubscribeSQLite){
 
   enableSync = true;
 
@@ -18,7 +18,7 @@ angular.module('starter')
 	};
 
   this.SyncMedical = function(){
-    var myEmpId = '393028'; //AuthService.username()
+    var myEmpId = '393028'; //AuthService.username() **Hard-Code**
     var apiDatas = {
       GetData:{ObjectID:1,SyncMedicalViewModel:{EmpID: myEmpId, FromDate: GetFiscalDate(), ToDate: GetCurrentDate().replace(/\//g,'')}},
       AddData:{ObjectID:1,ObjectMedicalEntity:{}},
@@ -29,7 +29,7 @@ angular.module('starter')
   };
 
   this.SyncTuition = function(){
-    var myEmpId = '409689'; //AuthService.username()
+    var myEmpId = '409689'; //AuthService.username() **Hard-Code**
     var apiDatas = {
       GetData:{ObjectID:6,SyncASSIViewModel:{Empl_Code: myEmpId, FromDate: GetFiscalDate(), ToDate: GetCurrentDate().replace(/\//g,'')}},
       AddData:{ObjectID:6,ObjectASSIEntity:{}},
@@ -40,7 +40,7 @@ angular.module('starter')
   };
 
   this.SyncTime = function(){
-    var myEmpId = '576222'; //AuthService.username()
+    var myEmpId = '576222'; //AuthService.username() **Hard-Code**
     var apiDatas = {
       GetData:{ObjectID:2,SyncTAViewModel:{EmpID: myEmpId, FromDate: GetFiscalDate(), ToDate: GetCurrentDate().replace(/\//g,'')}},
       AddData:{ObjectID:2,ObjectTAEntity:{}},
@@ -51,7 +51,7 @@ angular.module('starter')
   };
 
   this.SyncLeave = function(){
-    var myEmpId = '565888'; //AuthService.username()
+    var myEmpId = '565888'; //AuthService.username() **Hard-Code**
     var apiDatas = {
       GetData:{ObjectID:4,SyncLeaveViewModel:{Empl_Code: myEmpId, LeaveType:'', FromDate: GetFiscalDate(), ToDate: GetCurrentDate().replace(/\//g,'') }},
       AddData:{ObjectID:4,ObjectLeaveEntity:{}},
@@ -62,7 +62,7 @@ angular.module('starter')
   };
 
   this.SyncRoyal = function(){
-    var myEmpId = '221577'; //AuthService.username()
+    var myEmpId = '221577'; //AuthService.username() **Hard-Code**
     var apiDatas = {
       GetData:{ObjectID:5,SyncRoyalViewModel:{Empl_Code: myEmpId}},
       AddData:{ObjectID:5,ObjectRoyalEntity:{}},
@@ -93,7 +93,7 @@ angular.module('starter')
   };
 
   this.SyncPMRoom = function(){
-    var empcode = '484074';
+    var empcode = '484074'; //AuthService.username() **Hard-Code**
     var apiDatas = {
       GetData:{ObjectID:9,SyncPMRoomViewModel:{Empl_Code:empcode}},
       AddData:{ObjectID:9,ObjectPMRoomEntity:{}},
@@ -104,7 +104,7 @@ angular.module('starter')
   };
 
   this.SyncPMMsg = function(roomId){
-    var empcode = '484074';
+    var empcode = '484074'; //AuthService.username() **Hard-Code**
     var apiDatas = {
       GetData:{ObjectID:10,SyncPMMsgViewModel:{roomID:roomId,Empl_Code:empcode}},
       AddData:{ObjectID:10,ObjectPMMsgEntity:{}},
@@ -112,6 +112,57 @@ angular.module('starter')
     };
     console.log('SYNC-PMMsg');
     return ProcessSyncData(APIService,PMMsgSQLite,$q,apiURLs,apiDatas,{PMroomId:roomId,isSyncPMMsg:true});
+  };
+
+  this.SyncSubscribe = function(roomId){
+    var counter = 0;
+    return  $q(function(resolve,reject){
+      var url = APIService.hostname() + '/PM/GetEmpInRoom';
+      APIService.httpPost(url,{roomID:roomId},function(response){
+          if(response.data != null) {
+              var totalEmp = response.data.length;
+              //sync subscribe
+              var directoryURL = APIService.hostname() + '/ContactDirectory/viewContactPaging';
+              angular.forEach(response.data,function(value,key){
+                  PMSubscribeSQLite.CountSubscribeByEmpId(value.Empl_Code).then(
+                      function(response){
+                          if(response != null && response.rows != null){
+                              var result = ConvertQueryResultToArray(response);
+                              if(result[0].totalCount == 0){
+                                  //get info & insert into pmsubsribe
+                                  var directoryData = {keyword:value.Empl_Code,start:1,retrieve:1};
+                                  APIService.httpPost(directoryURL,directoryData,
+                                      function(response){
+                                          var result = response.data[0];
+                                          if(response != null && response.data != null){
+                                              //convert picthumb to base64
+                                              ConvertImgPNGToBase64(result.PictureThumb,function(base64){
+                                                  if(base64 && base64.length > 0){
+                                                      //save user data to pmsubscribe
+                                                      var data = {Empl_Code:result.UserID,Firstname:result.Firstname,Lastname:result.Lastname,PictureThumb:base64};
+                                                      PMSubscribeSQLite.Add([data]);
+                                                  }
+                                              });
+                                          }
+                                          counter++;
+                                          if(counter == totalEmp) resolve();
+                                      },
+                                      function(error){reject(error);});
+                              }
+                              else{
+                                counter++;
+                                if(counter == totalEmp) resolve();
+                              }
+                          }
+                          else{
+                            counter++;
+                            if(counter == totalEmp) resolve();
+                          }
+                      });
+              });
+          }
+      },function(error){reject(error);});
+    });
   };
 
 });
@@ -304,3 +355,4 @@ function ProcessSyncData(APIService,GenericSQLite,$q,apiURLs,apiDatas,optData){
   // return SyncDownloadFromServer(APIService,GenericSQLite,$q,apiURLs,apiDatas).then(
   //   function(response){return response;},function(error){return error;});
 };
+
