@@ -33,7 +33,7 @@
   display: inline-block;
   padding: 10px 18px;
   position: relative;
-  margin: 10px;
+  margin: 10px 10px 10px 10px;
   max-width: 80%;
 }
 
@@ -43,19 +43,31 @@
   height: 16px;
   width: 9px;
   position: absolute;
-  bottom: -7.5px;
+  /*bottom: -7.5px;*/
+  top: -7.5px;
 }
 
 .chat-bubble.left {
   background-color: #e6e5eb;
   float: left;
-  margin-left: 10px;
+  margin-left: 45px;
+}
+
+div.chat-name{
+  /*margin-top: 10px;*/
+}
+
+span.chat-name{
+  margin-left: 45px;
 }
 
 .chat-bubble.left:before {
   background-color: #e6e5eb;
   left: 10px;
-  -webkit-transform: rotate(70deg) skew(5deg);
+  -webkit-transform: rotate(134deg) skew(5deg);
+  /*-webkit-transform: rotate(70deg) skew(5deg);
+  left: 10px;*/
+  
 }
 
 .chat-bubble.right {
@@ -63,12 +75,15 @@
   color: #fff;
   float: right;
   margin-right: 10px;
+  margin-top:10px;
 }
 
 .chat-bubble.right:before {
   background-color: #158ffe;
-  right: 10px;
-  -webkit-transform: rotate(118deg) skew(-5deg);
+  /*right: 10px;
+  -webkit-transform: rotate(118deg) skew(-5deg);*/
+  right: 11px;
+  -webkit-transform: rotate(234deg) skew(-5deg);
 }
 
 .msg{
@@ -84,6 +99,14 @@
 
 .msg-date div{
     display: inline-block;
+}
+
+img.profile-pic {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  position: absolute;
+  /*bottom: 10px;*/
 }
 
 .cf {
