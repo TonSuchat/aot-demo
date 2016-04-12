@@ -750,6 +750,10 @@ angular.module('starter')
 	this.GetRoomNameById = function(id){
 		return SQLiteService.Execute("SELECT roomName FROM pmroom WHERE Id = '" + id + "'").then(function(response){return response;},function(error){return error;});	
 	};
+
+	this.UpdateReadAllMsg = function(id){
+		return SQLiteService.Execute("UPDATE pmroom SET totalNewMsg = 0 WHERE Id = " + id).then(function(response){return response;},function(error){return error;});	
+	};
 })
 .service('PMMsgSQLite',function(SQLiteService){
 	//***Necessary-Method
