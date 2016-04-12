@@ -1,6 +1,6 @@
 angular.module('starter')
 
-    .controller('AppCtrl', function($scope, $ionicModal, $timeout, AuthService, $ionicPopup,$location,SQLiteService,NotiService) {
+    .controller('AppCtrl', function($scope, $ionicModal, $timeout, AuthService, $ionicPopup,$location,SQLiteService,NotiService,SyncService) {
 
       // With the new view caching in Ionic, Controllers are only called
       // when they are recreated or on app start, instead of every page change.
@@ -43,14 +43,13 @@ angular.module('starter')
       $scope.doLogin = function() {
         var currentUserName = $scope.loginData.username;
         AuthService.login($scope.loginData.username, $scope.loginData.password).then(function() {
-          //$state.go('app.home', {}, {reload: true});
-          //$scope.setCurrentUsername(data.username);
-          //console.log(AuthService.isAuthenticated());
-          //console.log(AuthService.fullname());
           checkAuthen();
           //update register device -> empid to server
           if(window.localStorage.getItem('GCMToken') != null && window.localStorage.getItem('GCMToken').length > 0) 
             NotiService.StoreTokenOnServer(window.localStorage.getItem('GCMToken'),currentUserName,true);
+
+          // //sync private message data (rooms/messages/subscribe)
+          // SyncService.SyncInitialPM();
 
           $scope.closeLogin();
 

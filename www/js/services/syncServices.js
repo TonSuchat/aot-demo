@@ -106,7 +106,7 @@ angular.module('starter')
   this.SyncPMMsg = function(roomId){
     var empcode = '484074'; //AuthService.username() **Hard-Code**
     var apiDatas = {
-      GetData:{ObjectID:10,SyncPMMsgViewModel:{roomID:roomId,Empl_Code:empcode}},
+      GetData:{ObjectID:10,SyncPMMsgViewModel:{roomId:roomId,Empl_Code:empcode}},
       AddData:{ObjectID:10,ObjectPMMsgEntity:{}},
       UpdateData:{ObjectID:10,ObjectPMMsgEntity:{}}
     };
@@ -133,19 +133,27 @@ angular.module('starter')
                                   var directoryData = {keyword:value.Empl_Code,start:1,retrieve:1};
                                   APIService.httpPost(directoryURL,directoryData,
                                       function(response){
-                                          var result = response.data[0];
                                           if(response != null && response.data != null){
+                                              var result = response.data[0];
                                               //convert picthumb to base64
                                               ConvertImgPNGToBase64(result.PictureThumb,function(base64){
                                                   if(base64 && base64.length > 0){
-                                                      //save user data to pmsubscribe
-                                                      var data = {Empl_Code:result.UserID,Firstname:result.Firstname,Lastname:result.Lastname,PictureThumb:base64};
-                                                      PMSubscribeSQLite.Add([data]);
+                                                    //save user data to pmsubscribe
+                                                    var data = {Empl_Code:result.UserID,Firstname:result.Firstname,Lastname:result.Lastname,PictureThumb:base64};
+                                                    PMSubscribeSQLite.Add([data]);
+                                                    counter++;
+                                                    if(counter == totalEmp) resolve();
+                                                  }
+                                                  else{
+                                                    counter++;
+                                                    if(counter == totalEmp) resolve();
                                                   }
                                               });
                                           }
-                                          counter++;
-                                          if(counter == totalEmp) resolve();
+                                          else{
+                                            counter++;
+                                            if(counter == totalEmp) resolve();   
+                                          }
                                       },
                                       function(error){reject(error);});
                               }
@@ -163,6 +171,33 @@ angular.module('starter')
           }
       },function(error){reject(error);});
     });
+  };
+
+  this.SyncInitialPM = function(){
+    var service = this;
+    APIService.ShowLoading();
+    //sync rooms
+    service.SyncPMRoom().then(function(){
+      PMRoomSQLite.GetAll().then(
+        function(response){
+          if(response != null){
+            var rooms = ConvertQueryResultToArray(response);
+            //loop all room for sync message in each room
+            angular.forEach(rooms,function(value,key){
+              //sync messages in each room
+              service.SyncPMMsg(value.Id).then(
+                function(){
+                // //sync subscribe in each room
+                // service.SyncSubscribe(value.Id);
+              });
+              
+            });
+            APIService.HideLoading();
+          }
+          else APIService.HideLoading();
+        },
+        function(){APIService.HideLoading();});
+    },function(){APIService.HideLoading();})
   };
 
 });
@@ -200,7 +235,7 @@ function SyncDownloadFromServer(APIService,GenericSQLite,$q,apiURLs,apiDatas,opt
                               //update data
                               console.log('update :' + value.Id);
                               //if sync private messages set roomId to current data to update/insert
-                              if(optData != null && optData.PMroomId != null && optData.PMroomId.length > 0) value.roomId = optData.PMroomId;
+                              if(optData != null && optData.PMroomId != null) value.roomId = optData.PMroomId.toString();
                               GenericSQLite.Update(value,false,false).then(
                                 function(response){
                                   //if sync private messages push current record to changed list for trigger websocket
@@ -226,7 +261,7 @@ function SyncDownloadFromServer(APIService,GenericSQLite,$q,apiURLs,apiDatas,opt
                         else{
                           console.log('create new : ' + value.Id);
                           //if sync private messages set roomId to current data to update/insert
-                          if(optData != null && optData.PMroomId != null && optData.PMroomId.length > 0) value.roomId = optData.PMroomId;
+                          if(optData != null && optData.PMroomId != null) value.roomId = optData.PMroomId.toString();
                           GenericSQLite.Add([value],false).then(
                             function(){
                               //if sync private messages push current record to changed list for trigger websocket
