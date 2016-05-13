@@ -1,7 +1,7 @@
 <ion-view cache-view="false">
   <ion-nav-title>
     
-  <span class='button icon-right button-clear ion-android-arrow-dropdown' ng-click='popover.show($event)'>{{roomName}}&nbsp;&nbsp;</span>
+  <span class='button icon-right button-clear ion-android-arrow-dropdown' ng-click='popover.show($event)'>{{roomDetails.roomName}}&nbsp;&nbsp;</span>
   </ion-nav-title>
 
     <ion-content has-bouncing='true' delegate-handle="userMessageScroll">
@@ -21,7 +21,7 @@
             </div>
             <div class='msg-date'>
               <div ng-show='(message.side == "right")'>
-                <span ng-show="(message.readTotal > 0)">(อ่านแล้ว) <span ng-show="isGroup">{{message.readTotal}}</span> | </span>
+                <span ng-show="(message.readTotal > 0)">(อ่านแล้ว) <span ng-show="roomDetails.roomType == 2">{{message.readTotal}}</span> | </span>
               </div>
               <div>
                  <span>ส่งเมื่อ : {{message.TS}}</span>

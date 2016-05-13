@@ -77,14 +77,14 @@ angular.module('starter')
         };
 
     })
-    .controller('PersonCtrl', function ($scope, $stateParams, $filter,APIService,AuthService,$location) {
+    .controller('PersonCtrl', function ($scope, $stateParams, $filter,APIService,AuthService,$location,PMRoomSQLite,PMUserInRoomSQLite,XMPPService,$q,XMPPApiService) {
         
         $scope.currentPerson = {};
         $scope.currentPerson.personId = $stateParams.personId;
         $scope.PMRoomId = $stateParams.pmroomid;
 
         //process show/hide button create/invite private message
-        CheckForShowPMButton($scope,$stateParams,APIService);
+        CheckForShowPMButton($scope,$stateParams,APIService,XMPPApiService);
 
         $scope.currentUserName = AuthService.username();
         var result = $filter('filter')(sharePersonData, { UserID: $scope.currentPerson.personId });
@@ -95,17 +95,53 @@ angular.module('starter')
 
         //redirect to private message view
         $scope.sendPMMsg = function(){
-            //get roomId from server
-            var url = APIService.hostname() + '/PM/GetRoomId';
-            var empId = AuthService.username();
-            var data = {Empl_Code:empId,Empl_Code2:$scope.currentPerson.personId};
-            APIService.httpPost(url,data,
-                function(response){
-                    console.log(response.data[0].roomId);
-                    if(response.data[0].roomId != null)
-                        $location.path('/app/pmsmsgs/' + response.data[0].roomId);
-                },
-                function(error){console.log(error);});
+            APIService.ShowLoading();
+            //create data in pmroom if not exist
+            PMRoomSQLite.GetRoomIdTypeChat($scope.currentPerson.personId).then(function(response){
+                if(response != null){
+                    var roomId;
+                    result = ConvertQueryResultToArray(response);
+                    if(result.length > 0){
+                        APIService.HideLoading();
+                        $location.path('/app/pmsmsgs/' + result[0].Id);
+                    } 
+                    else{
+                        //todo get base64 string for roomIcon
+                        GetPicThumbBase64($q,APIService,$scope.currentPerson.personId).then(function(base64){
+                            if(base64 != null && base64){
+                                roomId = XMPPService.GetUniqueId();
+                                var roomIcon = base64;
+                                //create xmpproom
+                                var data = {roomName:roomId,naturalName:roomId,description:'one-by-one-chat-room(' + $scope.currentPerson.personId + ',' + $scope.currentUserName + ')',owners:{"owner": "admin@" + xmppURLDetails.domain},members:{"member": [$scope.currentUserName + "@" + xmppURLDetails.domain,$scope.currentPerson.personId + "@" + xmppURLDetails.domain]}};
+                                XMPPApiService.CreateChatRoom(data).then(function(response){
+                                    if(response){
+                                        //join room
+                                        XMPPService.JoinRoom(roomId,$scope.currentUserName);
+                                        //create pmroom
+                                        PMRoomSQLite.Add([roomId,1,fullname,roomIcon,0,'',GetCurrentTSAPIFormat(),$scope.currentPerson.personId]).then(
+                                            function(response){
+                                                //create pmuserinroom
+                                                if(response != null){
+                                                    //send message to create room at receiver side
+                                                    XMPPService.SendMessageCreateChatRoom(roomId,$scope.currentUserName,$scope.currentPerson.personId,window.localStorage.getItem("AuthServices_fullname"));
+                                                    PMUserInRoomSQLite.Add([roomId,$scope.currentPerson.personId]);
+                                                    APIService.HideLoading();
+                                                    $location.path('/app/pmsmsgs/' + roomId);  
+                                                }
+                                            });        
+                                    }
+                                });
+                            }
+                            else{
+                                console.log("can't found base64 picthumb");
+                                APIService.HideLoading();
+                            }
+                        });
+                    }
+                } 
+            });
+            //$scope.currentPerson.personId
+            
         };
 
         //invite new person into room
@@ -200,9 +236,22 @@ function ChangePrefixDataToThaiVersion(contacts, $filter) {
 };
  
 
-function CheckForShowPMButton($scope,$stateParams,APIService){
-    $scope.PMInfo = {pmRoomId:$stateParams.pmroomid,showInvitebtn:true};
-    if($scope.PMInfo.pmRoomId == 0) $scope.PMInfo.isInvite = false;
+function CheckForShowPMButton($scope,$stateParams,APIService,XMPPApiService){
+    $scope.PMInfo = {pmRoomId:$stateParams.pmroomid,showInvitebtn:true,showSendPMbtn:true};
+    if($scope.currentPerson.personId == window.localStorage.getItem('CurrentUserName')){
+        $scope.PMInfo.showSendPMbtn = false;
+        $scope.PMInfo.showInvitebtn = true;
+        return;
+    }
+    if($scope.PMInfo.pmRoomId == 0) {
+        $scope.PMInfo.isInvite = false;
+        //check this person has openfire account? if not hide button
+        XMPPApiService.CheckUserIsExist($scope.currentPerson.personId).then(function(response){
+            console.log(response);
+            if(response == false) $scope.PMInfo.showSendPMbtn = false;
+            else $scope.PMInfo.showSendPMbtn = true;
+        });
+    }
     else {
         $scope.PMInfo.isInvite = true;
         //check current person has already in room?

@@ -4,8 +4,8 @@
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic','ngCordova','ngMockE2E','btford.socket-io','ionic.rating'])
-// angular.module('starter', ['ionic','ngCordova','btford.socket-io','ionic.rating'])
+// angular.module('starter', ['ionic','ngCordova','ngMockE2E','btford.socket-io','ionic.rating'])
+ angular.module('starter', ['ionic','ngCordova','btford.socket-io','ionic.rating'])
 
     .run(function($ionicPlatform) {
       $ionicPlatform.ready(function() {
@@ -49,7 +49,7 @@ angular.module('starter', ['ionic','ngCordova','ngMockE2E','btford.socket-io','i
           
       });
     })
-    .run(function($ionicPlatform, SQLiteService, AuthService){
+    .run(function($ionicPlatform, SQLiteService, AuthService, XMPPService, XMPPApiService){
       $ionicPlatform.ready(function(){
         //open db
         SQLiteService.OpenDB();
@@ -57,6 +57,14 @@ angular.module('starter', ['ionic','ngCordova','ngMockE2E','btford.socket-io','i
         SQLiteService.InitailTables();
         //bypass login if still loging in.
         AuthService.bypassLogIn();
+
+        //XMPPApiService.CreateUser('tonabcdef','tonabcdefg');
+
+        // XMPPService.Authentication('ton','ton');
+
+        window.onbeforeunload = function (event) {
+            XMPPService.Disconnect();
+        };
 
         // SQLiteService.Execute('select * from userprofile',null).then(function(response){
         //     console.log(response.rows.item);
@@ -238,9 +246,9 @@ function LogInAPI(AUTH_EVENTS,APIService,$http,$q){
         //get token_type("bearer") + one white space and token
         var token = result.token_type + ' ' + result.access_token;
         window.localStorage.setItem(AUTH_EVENTS.LOCAL_TOKEN_KEY, token);
-        resolve();
         //set header
         //$http.defaults.headers.common['Authorization'] = token;
+        resolve();
         //console.log(token);
       },
       function(error){console.log(error);reject(error);});

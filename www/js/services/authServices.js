@@ -1,6 +1,6 @@
 angular.module('starter')
 
-    .service('AuthService', function($q, $http,AUTH_EVENTS,APIService,UserProfileSQLite,PMSubscribeSQLite) {
+    .service('AuthService', function($q, $http,AUTH_EVENTS,APIService,UserProfileSQLite,PMSubscribeSQLite,XMPPService,XMPPApiService) {
         //var LOCAL_TOKEN_KEY = 'yourTokenKey';
         var username = '';
         var isAuthenticated = false;
@@ -21,13 +21,18 @@ angular.module('starter')
 
         function useCredentials(successAction,userData) {
 
+            //bypass login
             if(userData != null){
                 isAuthenticated = window.localStorage.setItem("AuthServices_isAuthenticated", true); //true;
-                fullname = window.localStorage.setItem("AuthServices_fullname", userData.PrefixName + ' ' + userData.Firstname + ' ' + userData.Lastname); //userData.PrefixName + ' ' + userData.Firstname + ' ' + userData.Lastname;
-                picThumb = window.localStorage.setItem("AuthServices_picThumb", userData.PictureThumb); //userData.PictureThumb; 
-                position = window.localStorage.setItem("AuthServices_position", userData.Position); //userData.Position;
+                var nickname = (userData.Nickname && userData.Nickname != null) ? '(' + userData.Nickname + ')' : '';
+                window.localStorage.setItem("AuthServices_fullname", userData.PrefixName + ' ' + userData.Firstname + ' ' + userData.Lastname + nickname); //userData.PrefixName + ' ' + userData.Firstname + ' ' + userData.Lastname;
+                window.localStorage.setItem("AuthServices_picThumb", userData.PictureThumb); //userData.PictureThumb; 
+                window.localStorage.setItem("AuthServices_position", userData.Position); //userData.Position;
+                //connect xmpp server
+                XMPPService.Authentication(window.localStorage.getItem("AuthServices_username"),window.localStorage.getItem("AuthServices_password"));
                 successAction();
             }
+            //normal login
             else{
                 var url = APIService.hostname() + '/ContactDirectory/viewContactPaging';
                 var data = {keyword:username,start:1,retrieve:1};
@@ -36,9 +41,10 @@ angular.module('starter')
                         if(response.data == null || response.data.length == 0) return;
                         var result = response.data[0];
                         isAuthenticated = window.localStorage.setItem("AuthServices_isAuthenticated", true); //true;
-                        fullname = window.localStorage.setItem("AuthServices_fullname", result.PrefixName + ' ' + result.Firstname + ' ' + result.Lastname); //result.PrefixName + ' ' + result.Firstname + ' ' + result.Lastname;
-                        picThumb = window.localStorage.setItem("AuthServices_picThumb", result.PictureThumb); //result.PictureThumb; 
-                        position = window.localStorage.setItem("AuthServices_position", result.Position); //result.Position;
+                        var nickname = (result.Nickname && result.Nickname != null) ? '(' + result.Nickname + ')' : '';
+                        window.localStorage.setItem("AuthServices_fullname", result.PrefixName + ' ' + result.Firstname + ' ' + result.Lastname + nickname); //result.PrefixName + ' ' + result.Firstname + ' ' + result.Lastname;
+                        window.localStorage.setItem("AuthServices_picThumb", result.PictureThumb); //result.PictureThumb; 
+                        window.localStorage.setItem("AuthServices_position", result.Position); //result.Position;
                         //save user data to sqlite db
                         UserProfileSQLite.SaveUserProfile(result);
                         //convert picthumb to base64
@@ -48,6 +54,10 @@ angular.module('starter')
                                 var data = {Empl_Code:username,Firstname:result.Firstname,Lastname:result.Lastname,PictureThumb:base64};
                                 PMSubscribeSQLite.Add([data]);
                             }
+                        });
+                        //check if user existed then connect xmpp server ,else create user and connect xmpp server
+                        XMPPApiService.CheckAndCreateUserIfNotExist({username:window.localStorage.getItem("AuthServices_username"),password:window.localStorage.getItem("AuthServices_password"),name:window.localStorage.getItem('AuthServices_fullname')}).then(function(response){
+                            if(response) XMPPService.Authentication(window.localStorage.getItem("AuthServices_username"),window.localStorage.getItem("AuthServices_password"));
                         });
                         successAction();
                     },
@@ -85,6 +95,8 @@ angular.module('starter')
                         if(result == null || result.length == 0) return reject('Login Failed.');
                         if (result) {
                             username = user;
+                            window.localStorage.setItem("AuthServices_username", user);
+                            window.localStorage.setItem("AuthServices_password", pw);
                             window.localStorage.setItem(AUTH_EVENTS.LOCAL_USERNAME_KEY, username);
                             useCredentials(function () { APIService.HideLoading(); resolve('Login success.'); },null);
                         }
@@ -122,6 +134,7 @@ angular.module('starter')
 
         var logout = function() {
             console.log('service logout');
+            XMPPService.Disconnect();
             destroyUserCredentials();
 
         };
@@ -140,7 +153,7 @@ angular.module('starter')
             logout: logout,
             isAuthorized: isAuthorized,
             isAuthenticated: function() {return window.localStorage.getItem("AuthServices_isAuthenticated");}, //isAuthenticated;
-            username: function() {return (!username && username != null) ? username : window.localStorage.getItem(AUTH_EVENTS.LOCAL_USERNAME_KEY);},
+            username: function() {return (!username && username != null && username.length > 0) ? username : window.localStorage.getItem(AUTH_EVENTS.LOCAL_USERNAME_KEY);},
             fullname: function() {return window.localStorage.getItem("AuthServices_fullname");}, //fullname;
             role: function() {return role;},
             picThumb: function(){return window.localStorage.getItem("AuthServices_picThumb");}, //picThumb
@@ -173,4 +186,6 @@ angular.module('starter')
         window.localStorage.removeItem("AuthServices_fullname");
         window.localStorage.removeItem("AuthServices_picThumb");
         window.localStorage.removeItem("AuthServices_position");
+        window.localStorage.removeItem("AuthServices_username");
+        window.localStorage.removeItem("AuthServices_password");
     };

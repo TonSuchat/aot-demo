@@ -1,8 +1,9 @@
 angular.module('starter')
 
-.controller('PrivateMessageRoomsCtrl',function($scope,$ionicPlatform,SyncService,PMRoomSQLite,APIService,$cordovaNetwork,$ionicPopup){
+.controller('PrivateMessageRoomsCtrl',function($scope,$ionicPlatform,SyncService,PMRoomSQLite,APIService,$cordovaNetwork,$ionicPopup,XMPPService,xmppSharedProperties){
     
     $ionicPlatform.ready(function(){
+        
         $scope.haveMoreData = false;
         $scope.isfirstLoad = true;
         $scope.roomsDetail = [];
@@ -11,21 +12,12 @@ angular.module('starter')
         APIService.ShowLoading();
 
         //if no internet connection
-        if(!CheckNetwork($cordovaNetwork)){
-            OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
-            //select all rooms from sqlite and bind to roomsDetail        
-            PMRoomInitialProcess($scope,PMRoomSQLite,APIService);
-        }
-        else{
-            //sync rooms and insert/update room to sqlite
-            SyncService.SyncPMRoom().then(
-                function(){
-                    //select all rooms from sqlite and bind to roomsDetail        
-                    PMRoomInitialProcess($scope,PMRoomSQLite,APIService);
-            },function(){FinalAction($scope, APIService);});
-        }
+        if(!CheckNetwork($cordovaNetwork)) OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
 
-         //this function trigger by ng-infinite-scroll (when scrolled to bottom)
+        //select all rooms from sqlite and bind to roomsDetail        
+        PMRoomInitialProcess($scope,PMRoomSQLite,APIService);
+
+        //this function trigger by ng-infinite-scroll (when scrolled to bottom)
         $scope.loadMoreData = function () {
             if ($scope.isfirstLoad) { $scope.isfirstLoad = false; $scope.$broadcast('scroll.infiniteScrollComplete'); return; }
             APIService.ShowLoading();
@@ -39,11 +31,11 @@ angular.module('starter')
 
     });
 })
-.controller('PrivateMessagesCtrl',function($scope,$ionicScrollDelegate,$stateParams,PMMsgSQLite,$filter,APIService,$ionicPlatform,SyncService,socketFactory,$rootScope,PMRoomSQLite,$ionicPopover,$cordovaNetwork,$ionicPopup,PMSubscribeSQLite){
+.controller('PrivateMessagesCtrl',function($scope,$ionicScrollDelegate,$stateParams,PMMsgSQLite,$filter,APIService,$ionicPlatform,AuthService,SyncService,socketFactory,$rootScope,PMRoomSQLite,$ionicPopover,$cordovaNetwork,$ionicPopup,PMSubscribeSQLite,XMPPService,xmppSharedProperties){
     $ionicPlatform.ready(function(){
 
         $scope.roomId = $stateParams.roomId
-        $scope.empId = '484074'; //AuthService.username() **Hard-Code**
+        $scope.empId = AuthService.username();
         $scope.message = '';
         $scope.msgDetails = [];
         $scope.allMsg = [];
@@ -62,68 +54,44 @@ angular.module('starter')
             $scope.noInternet = true;
             OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
             //select all message from sqlite and bind to msgDetails
-            PMMsgInitialProcess(PMMsgSQLite,PMSubscribeSQLite,$scope,APIService,viewScroll,$filter,PMRoomSQLite);
+            PMMsgInitialProcess(PMMsgSQLite,PMSubscribeSQLite,$scope,APIService,viewScroll,$filter,PMRoomSQLite,xmppSharedProperties);
         }
         else{
-            socket = io.connect('http://10.74.17.233:1150');
-
-            //join to current room
-            socket.emit('join_room',$scope.roomId);
-
-            //sync msg and insert/update into sqlite (post to api number 34 to bulk update and get last msg data)
-            SyncService.SyncPMMsg($scope.roomId).then(
-                function(response){
-                    var listMsgChanged = (response != null && response.length > 0) ? response : [];
-                    //loop list to trigger web socket reenter_received_message
-                    IterationSendReEnterEvent(listMsgChanged,socket,$scope.roomId);
-                    //sync subscribe
-                    SyncService.SyncSubscribe($scope.roomId).then(function(){
-                        //select all message from sqlite and bind to msgDetails
-                        PMMsgInitialProcess(PMMsgSQLite,PMSubscribeSQLite,$scope,APIService,viewScroll,$filter,PMRoomSQLite);
-                    });
+            //resend all new message to notify sender that you seen message
+            SendNotifySeenAllNewMessage($scope.roomId,PMMsgSQLite,XMPPService);
+            //update read all message , lastmsg = null in this room
+            PMRoomSQLite.UpdateReadAllMsg($scope.roomId);
+            //sync subscribe
+            SyncService.SyncSubscribe($scope.roomId).then(function(){
+                //select all message from sqlite and bind to msgDetails
+                PMMsgInitialProcess(PMMsgSQLite,PMSubscribeSQLite,$scope,APIService,viewScroll,$filter,PMRoomSQLite,xmppSharedProperties);
             });
-
-            //push msg from sender
-            socket.on('append_message',function(msg){
-                var data = {Id:msg.Id,Empl_Code:$scope.empId,message:msg.msg,readTotal:0,roomId:$scope.roomId,DL:false,TS:msg.TS};
-                msg.TS = TransformServerTSToDateTimeStr(msg.TS.toString());
-                //insert msg into sqlite
-                PMMsgSQLite.Add([data],false).then(function(){
-                    //push msg
-                    $scope.msgDetails.push(msg);
-                    viewScroll.scrollBottom(true);
-                    //web socket send back to update readed flag
-                    socket.emit('received_message',$scope.roomId,$scope.empId,msg.Id);    
-                });
-            });
-
-            //append msg to sender side when insert DB success
-            socket.on('send_success',function(retFromServer,recvMSG){
-                var data = {Id:retFromServer.Id,Empl_Code:$scope.empId,message:retFromServer.msg,readTotal:0,roomId:$scope.roomId,DL:false,TS:retFromServer.TS};
-                //save to sqlite
-                PMMsgSQLite.Add([data],false).then(function(){
-                    //find msg in msgDetails by tmpId and edit TS,Id
-                    UpdateSendDateTimeToMsg($scope.msgDetails,retFromServer);
-                    $scope.$apply();
-                    viewScroll.scrollBottom(true);
-                    //web socket send to receiver for append message
-                    socket.emit('append_message_to_receiver',$scope.roomId,recvMSG);
-                });
-            });
-
-            socket.on('set_readTotal',function(msgId,readTotal){
-                if($scope.msgDetails == null || $scope.msgDetails.length <= 0) return;
-                //set readeTotal use filter by msgid
-                for (var i = 0; i <= $scope.msgDetails.length - 1; i++) {
-                    if(parseInt($scope.msgDetails[i].Id) == parseInt(msgId)){
-                        $scope.msgDetails[i].readTotal = readTotal;
-                        break;
-                    }
-                };
-                $scope.$apply();
-            });
-
         }
+
+        //append message
+        $scope.$on('incomingMessage',function(env,args){
+            $scope.allMsg.push({Id:0,MessageId:args.msgId,Empl_Code:args.ownerId,message:args.message,readTotal:0,roomId:args.roomId,TS:args.TS});
+            if(args.ownerId == window.localStorage.getItem("CurrentUserName")) $scope.msgDetails.push({msgId:args.msgId,side:'right',msg:args.message,TS:TransformServerTSToDateTimeStr(args.TS.toString()),readTotal:0});                
+            else{
+                var eachSubscribe =  $filter('filter')($scope.allSubscribe, { Empl_Code: args.ownerId });
+                $scope.msgDetails.push({msgId:args.msgId,side:'left',msg:args.message,PictureThumb:eachSubscribe[0].PictureThumb,Firstname:eachSubscribe[0].Firstname,TS:TransformServerTSToDateTimeStr(args.TS.toString()),readTotal:0});
+                //send back to sender for update readed
+                XMPPService.SendSeenMessage(args.roomId,args.msgId,args.ownerId,window.localStorage.getItem("CurrentUserName"));
+            } 
+            if(!$scope.$$phase) $scope.$apply();
+            viewScroll.scrollBottom(true);
+        });
+
+        //receiver seen our message
+        $scope.$on('seenMessage',function(env,args){
+            for (var i = 0; i <= $scope.msgDetails.length - 1; i++) {
+                if($scope.msgDetails[i].msgId == args.msgId){
+                    $scope.msgDetails[i].readTotal = args.readTotal;
+                    break;
+                }
+            };
+            if(!$scope.$$phase) $scope.$apply();
+        });
 
         $scope.loadPreviousMsg = function(){
             if($scope.scrollDetails.start == 0) return FinalAction($scope,APIService);
@@ -140,20 +108,15 @@ angular.module('starter')
 
         $scope.sendMessage = function(){
             if($scope.noInternet) return;
-            //gen tmpid
-            var tmpId = GeneratedGUID();
-            //web socket send msg
-            socket.emit('send_message',$scope.roomId,$scope.message,$scope.empId,tmpId);
-            //push objMSG Id,TS = null
-            var senderMSG = {msgId:null,side:'right',msg:$scope.message,msgDate:'',readTotal:0,tmpId:tmpId};
-            $scope.msgDetails.push(senderMSG);
+            if(!xmppConnectionIsActive) return;
+            XMPPService.SendChatMessage($scope.roomDetails.JId, $scope.empId, $scope.roomId, $scope.message);
             $scope.message = '';
-            viewScroll.scrollBottom(true);
         };
 
-        $rootScope.$on( "$stateChangeSuccess", function(e, toState, toParams, fromState, fromParams) {
-            if(fromState.url = '/pmsmsgs/:roomId'){
-               if(!$scope.noInternet) socket.disconnect();
+        $rootScope.$on( "$stateChangeStart", function(e, toState, toParams, fromState, fromParams) {
+            if(fromState.url == '/pmsmsgs/:roomId'){
+                //clear active room
+                xmppSharedProperties.SetSharedProperties({ActiveRoomId:null});  
             }
         });
 
@@ -199,7 +162,7 @@ function InitialPMMsgDetails($scope,data,myEmpId,allsubscribe,$filter){
             Id:value.Id,
             side:(value.Empl_Code == myEmpId) ? 'right' : 'left',
             msg:value.message,
-            TS:TransformServerTSToDateTimeStr(value.TS.toString()),
+            TS:(value.TS != null) ? TransformServerTSToDateTimeStr(value.TS.toString()) : '',
             readTotal:value.readTotal,
             Firstname:eachSubscribe[0].Firstname,
             PictureThumb:eachSubscribe[0].PictureThumb 
@@ -217,22 +180,34 @@ function UpdateSendDateTimeToMsg(data,updatedMsg){
     };
 };
 
-function SetRoomName($scope,PMRoomSQLite){
-    $scope.roomName = '';
-    PMRoomSQLite.GetRoomNameById($scope.roomId).then(
-        function(response){
-            if(response != null){
-                var data = ConvertQueryResultToArray(response);
-                $scope.roomName = data[0].roomName;
-            };
-    });
-};
+// function SetRoomName($scope,PMRoomSQLite){
+//     $scope.roomName = '';
+//     PMRoomSQLite.GetRoomNameById($scope.roomId).then(
+//         function(response){
+//             if(response != null){
+//                 var data = ConvertQueryResultToArray(response);
+//                 $scope.roomName = data[0].roomName;
+//             };
+//     });
+// };
 
-function PMMsgInitialProcess(PMMsgSQLite,PMSubscribeSQLite,$scope,APIService,viewScroll,$filter,PMRoomSQLite){
-    //Set roomName
-    SetRoomName($scope,PMRoomSQLite);
+function PMMsgInitialProcess(PMMsgSQLite,PMSubscribeSQLite,$scope,APIService,viewScroll,$filter,PMRoomSQLite,xmppSharedProperties){
+    //set active room in sharedProperties
+    xmppSharedProperties.SetSharedProperties({ActiveRoomId:$scope.roomId});
 
+    $scope.roomDetails = {Id:$scope.roomId,roomName:'',roomType:0,senderJId:''};
+    
     APIService.ShowLoading();
+    //get room details
+    PMRoomSQLite.GetRoomById($scope.roomId).then(function(response){
+        if(response != null){
+            var result = ConvertQueryResultToArray(response);
+            $scope.roomDetails.roomName = result[0].roomName;
+            $scope.roomDetails.roomType = result[0].roomType;
+            $scope.roomDetails.JId = result[0].JId;
+        }
+    });
+
     PMSubscribeSQLite.GetAllSubScribe().then(function(response){
         if(response != null && response.rows != null){
             $scope.allSubscribe = ConvertQueryResultToArray(response);
@@ -251,17 +226,6 @@ function PMMsgInitialProcess(PMMsgSQLite,PMSubscribeSQLite,$scope,APIService,vie
         }
         else APIService.HideLoading();
     });
-
-    //check this room is group/1:1
-    $scope.isGroup = false;
-    var url = APIService.hostname() + '/PM/GetEmpInRoom';
-    APIService.httpPost(url,{roomID:$scope.roomId},
-        function(response){
-            if(response.data != null) {
-                if(response.data.length > 2) $scope.isGroup = true;
-            }
-        },
-        function(error){});
 };
 
 function PMRoomInitialProcess($scope,PMRoomSQLite,APIService){
@@ -275,4 +239,17 @@ function PMRoomInitialProcess($scope,PMRoomSQLite,APIService){
                 FinalAction($scope, APIService);
             }
     },function(){FinalAction($scope, APIService);});
+};
+
+function SendNotifySeenAllNewMessage(roomId,PMMsgSQLite,XMPPService) {
+    PMMsgSQLite.GetAllUnSeenMessageByRoomId(roomId).then(function(response){
+        if(response != null){
+            var result = ConvertQueryResultToArray(response);
+            angular.forEach(result,function(value,key){
+                XMPPService.SendSeenMessage(roomId,value.MessageId,value.Empl_Code,window.localStorage.getItem("CurrentUserName"));
+            });
+            //update unseen = 1 in this room
+            PMMsgSQLite.UpdateSeenMessageInRoom(roomId);
+        }
+    });
 };

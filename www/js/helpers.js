@@ -136,3 +136,39 @@ function ConvertImgPNGToBase64(url,callback,outputFormat){
     };
     img.src = url;
 };
+
+function GetCurrentTSAPIFormat(){
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth()+1; //January is 0!
+    var yyyy = today.getFullYear();
+    if(dd<10) dd='0'+dd
+    if(mm<10) mm='0'+mm
+    today = dd.toString() + mm.toString() + yyyy.toString();
+
+    var currentdate = new Date(); 
+    var h = (currentdate.getHours() < 10) ? '0' + currentdate.getHours().toString() : currentdate.getHours().toString();
+    var mm = (currentdate.getMinutes() < 10) ? '0' + currentdate.getMinutes().toString() : currentdate.getMinutes().toString();
+    var s = (currentdate.getSeconds() < 10) ? '0' + currentdate.getSeconds().toString() : currentdate.getSeconds().toString();
+    var datetime = h + mm + s;
+    
+    return today + datetime;
+};
+
+function GetPicThumbBase64($q,APIService,empId) {
+    return $q(function(resolve,reject){
+        var directoryURL = APIService.hostname() + '/ContactDirectory/viewContactPaging';
+        var directoryData = {keyword:empId,start:1,retrieve:1};
+        APIService.httpPost(directoryURL,directoryData,
+           function(response){
+                if(response != null && response.data != null){
+                      var result = response.data[0];
+                      //convert picthumb to base64
+                      ConvertImgPNGToBase64(result.PictureThumb,function(base64){
+                          if(base64 && base64.length > 0) resolve(base64);
+                          else resolve(null);
+                      });
+                };
+           },function(error){console.log(error);reject(error);});
+    });
+}

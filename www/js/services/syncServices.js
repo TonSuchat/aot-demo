@@ -1,6 +1,6 @@
 angular.module('starter')
 
-.service('SyncService',function($q,AuthService,APIService,TestSyncSQLite,UserProfileSQLite,MedicalSQLite,TuitionSQLite,RoyalSQLite,TimeAttendanceSQLite,LeaveSQLite,CircularSQLite,NewsSQLite,PMRoomSQLite,PMMsgSQLite,PMSubscribeSQLite){
+.service('SyncService',function($q,APIService,TestSyncSQLite,UserProfileSQLite,MedicalSQLite,TuitionSQLite,RoyalSQLite,TimeAttendanceSQLite,LeaveSQLite,CircularSQLite,NewsSQLite,PMRoomSQLite,PMMsgSQLite,PMSubscribeSQLite,PMUserInRoomSQLite){
 
   enableSync = true;
 
@@ -18,7 +18,7 @@ angular.module('starter')
 	};
 
   this.SyncMedical = function(){
-    var myEmpId = '393028'; //AuthService.username() **Hard-Code**
+    var myEmpId = '393028'; // window.localStorage.getItem("CurrentUserName") AuthService.username() **Hard-Code**
     var apiDatas = {
       GetData:{ObjectID:1,SyncMedicalViewModel:{EmpID: myEmpId, FromDate: GetFiscalDate(), ToDate: GetCurrentDate().replace(/\//g,'')}},
       AddData:{ObjectID:1,ObjectMedicalEntity:{}},
@@ -29,7 +29,7 @@ angular.module('starter')
   };
 
   this.SyncTuition = function(){
-    var myEmpId = '409689'; //AuthService.username() **Hard-Code**
+    var myEmpId = '409689'; //window.localStorage.getItem("CurrentUserName") **Hard-Code**
     var apiDatas = {
       GetData:{ObjectID:6,SyncASSIViewModel:{Empl_Code: myEmpId, FromDate: GetFiscalDate(), ToDate: GetCurrentDate().replace(/\//g,'')}},
       AddData:{ObjectID:6,ObjectASSIEntity:{}},
@@ -40,7 +40,7 @@ angular.module('starter')
   };
 
   this.SyncTime = function(){
-    var myEmpId = '576222'; //AuthService.username() **Hard-Code**
+    var myEmpId = '576222'; //window.localStorage.getItem("CurrentUserName") **Hard-Code**
     var apiDatas = {
       GetData:{ObjectID:2,SyncTAViewModel:{EmpID: myEmpId, FromDate: GetFiscalDate(), ToDate: GetCurrentDate().replace(/\//g,'')}},
       AddData:{ObjectID:2,ObjectTAEntity:{}},
@@ -51,7 +51,7 @@ angular.module('starter')
   };
 
   this.SyncLeave = function(){
-    var myEmpId = '565888'; //AuthService.username() **Hard-Code**
+    var myEmpId = '565888'; //window.localStorage.getItem("CurrentUserName") **Hard-Code**
     var apiDatas = {
       GetData:{ObjectID:4,SyncLeaveViewModel:{Empl_Code: myEmpId, LeaveType:'', FromDate: GetFiscalDate(), ToDate: GetCurrentDate().replace(/\//g,'') }},
       AddData:{ObjectID:4,ObjectLeaveEntity:{}},
@@ -62,7 +62,7 @@ angular.module('starter')
   };
 
   this.SyncRoyal = function(){
-    var myEmpId = '221577'; //AuthService.username() **Hard-Code**
+    var myEmpId = '221577'; //window.localStorage.getItem("CurrentUserName") **Hard-Code**
     var apiDatas = {
       GetData:{ObjectID:5,SyncRoyalViewModel:{Empl_Code: myEmpId}},
       AddData:{ObjectID:5,ObjectRoyalEntity:{}},
@@ -92,19 +92,19 @@ angular.module('starter')
     return ProcessSyncData(APIService,NewsSQLite,$q,apiURLs,apiDatas,null);
   };
 
-  this.SyncPMRoom = function(){
-    var empcode = '484074'; //AuthService.username() **Hard-Code**
-    var apiDatas = {
-      GetData:{ObjectID:9,SyncPMRoomViewModel:{Empl_Code:empcode}},
-      AddData:{ObjectID:9,ObjectPMRoomEntity:{}},
-      UpdateData:{ObjectID:9,ObjectPMRoomEntity:{}}
-    };
-    console.log('SYNC-PMRoom');
-    return ProcessSyncData(APIService,PMRoomSQLite,$q,apiURLs,apiDatas,null);
-  };
+  // this.SyncPMRoom = function(){
+  //   var empcode = '484074'; //window.localStorage.getItem("CurrentUserName") **Hard-Code**
+  //   var apiDatas = {
+  //     GetData:{ObjectID:9,SyncPMRoomViewModel:{Empl_Code:empcode}},
+  //     AddData:{ObjectID:9,ObjectPMRoomEntity:{}},
+  //     UpdateData:{ObjectID:9,ObjectPMRoomEntity:{}}
+  //   };
+  //   console.log('SYNC-PMRoom');
+  //   return ProcessSyncData(APIService,PMRoomSQLite,$q,apiURLs,apiDatas,null);
+  // };
 
   this.SyncPMMsg = function(roomId){
-    var empcode = '484074'; //AuthService.username() **Hard-Code**
+    var empcode = '484074'; //window.localStorage.getItem("CurrentUserName") **Hard-Code**
     var apiDatas = {
       GetData:{ObjectID:10,SyncPMMsgViewModel:{roomId:roomId,Empl_Code:empcode}},
       AddData:{ObjectID:10,ObjectPMMsgEntity:{}},
@@ -117,20 +117,20 @@ angular.module('starter')
   this.SyncSubscribe = function(roomId){
     var counter = 0;
     return  $q(function(resolve,reject){
-      var url = APIService.hostname() + '/PM/GetEmpInRoom';
-      APIService.httpPost(url,{roomID:roomId},function(response){
-          if(response.data != null) {
-              var totalEmp = response.data.length;
+      PMUserInRoomSQLite.GetUserIdInRoom(roomId).then(function(response){
+          if(response != null) {
+              var result = ConvertQueryResultToArray(response);
+              var totalEmp = result.length;
               //sync subscribe
               var directoryURL = APIService.hostname() + '/ContactDirectory/viewContactPaging';
-              angular.forEach(response.data,function(value,key){
-                  PMSubscribeSQLite.CountSubscribeByEmpId(value.Empl_Code).then(
+              angular.forEach(result,function(value,key){
+                  PMSubscribeSQLite.CountSubscribeByEmpId(value.userId).then(
                       function(response){
                           if(response != null && response.rows != null){
                               var result = ConvertQueryResultToArray(response);
                               if(result[0].totalCount == 0){
                                   //get info & insert into pmsubsribe
-                                  var directoryData = {keyword:value.Empl_Code,start:1,retrieve:1};
+                                  var directoryData = {keyword:value.userId,start:1,retrieve:1};
                                   APIService.httpPost(directoryURL,directoryData,
                                       function(response){
                                           if(response != null && response.data != null){

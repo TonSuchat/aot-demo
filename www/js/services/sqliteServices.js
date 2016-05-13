@@ -1,5 +1,5 @@
 var db;
-var tableNames = ['userprofile','medical','tuition','royal','timeattendance','leave','circular','news','pmroom','pmmsg','pmsubscribe'];
+var tableNames = ['userprofile','medical','tuition','royal','timeattendance','leave','circular','news','pmroom','pmmsg','pmsubscribe','pmuserinroom','pmseenmessage'];
 
 angular.module('starter')
 .service('SQLiteService',function($cordovaSQLite,$q){
@@ -74,6 +74,8 @@ angular.module('starter')
 		this.CreatePMRoomTable();
 		this.CreatePMMsgTable();
 		this.CreatePMSubscribeTable();
+		this.CreatePMUserInRoomTable();
+		this.CreatePMSeenMessage();
 	};
 
 	//**Test-Sync-Code
@@ -109,16 +111,26 @@ angular.module('starter')
 		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS news(clientid integer primary key AUTOINCREMENT, Id int, Title text, PubDate text, FileName text, DL boolean,dirty boolean,TS text)");	
 	};
 
+	//roomtype : 1 = chat , 2 = groupchat
 	this.CreatePMRoomTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmroom(clientid integer primary key AUTOINCREMENT, Id int, roomName text, roomIcon text, totalNewMsg int, lastMsg text, DL boolean,dirty boolean,TS text)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmroom(Id text,roomType int, roomName text, roomIcon text, totalNewMsg int, lastMsg text, TS text, JId text)");
 	};
 
+	this.CreatePMUserInRoomTable = function(){
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmuserinroom(Id integer primary key AUTOINCREMENT, roomId int, userId text)");	
+	};
+
+	//unseen : 0 = unseen(in case when message coming but user didn't active in room, for select and resend to notify sender reciver seen message) , 1 = seen
 	this.CreatePMMsgTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmmsg(clientid integer primary key AUTOINCREMENT, Id int, Empl_Code text, message text, readTotal int, roomId text, DL boolean,dirty boolean,TS text)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmmsg(Id integer primary key AUTOINCREMENT,MessageId text, Empl_Code text, message text, readTotal int, roomId int, TS text, unseen int)");
 	};
 
 	this.CreatePMSubscribeTable = function(){
 		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmsubscribe(clientid integer primary key AUTOINCREMENT, Empl_Code text, Firstname text, Lastname text, PictureThumb text)");
+	};
+
+	this.CreatePMSeenMessage = function(){
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmseenmessage(Id integer primary key AUTOINCREMENT, Empl_Code text, MessageId text)");
 	};
 
 	this.DeleteAllTables = function(){
@@ -710,37 +722,17 @@ angular.module('starter')
 		return SQLiteService.DeleteDataIsFlagDeleted("pmroom");
 	};
 
-	this.Update = function(data,isDirty,clientUpdate){
+	this.Update = function(data){
 		var sql;
 		if(clientUpdate)
-			sql = "UPDATE pmroom SET Id = ?, roomName = ?, roomIcon = ?, totalNewMsg = ?, lastMsg = ?, DL = ?,dirty = ?,TS = ? WHERE clientid = " + data.clientid;	
-		else
-			sql = "UPDATE pmroom SET Id = ?, roomName = ?, roomIcon = ?, totalNewMsg = ?, lastMsg = ?, DL = ?,dirty = ?,TS = ? WHERE Id = " + data.Id;
-		var param = [data.Id,data.roomName,data.roomIcon,data.totalNewMsg,data.lastMsg,data.DL,isDirty,data.TS];
+			sql = "UPDATE pmroom SET roomType = ?, roomName = ?, roomIcon = ?, totalNewMsg = ?, lastMsg = ?, TS = ?, JId = ? WHERE Id = " + data.Id;	
+		var param = [data.roomType,data.roomName,data.roomIcon,data.totalNewMsg,data.lastMsg,data.TS,data.JId];
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
 	};
 
-	this.Add = function(data,createFromClient){
-		var sql = "INSERT INTO pmroom (Id, roomName, roomIcon, totalNewMsg, lastMsg, DL, dirty, TS) VALUES ";
-		var param = []; 
-		var rowArgs = [];
-		data.forEach(function(item){
-			rowArgs.push("(?,?,?,?,?,?,?,?)");
-			param.push(item.Id);
-			param.push(item.roomName);
-			param.push(item.roomIcon);
-			param.push(item.totalNewMsg);
-			param.push(item.lastMsg);
-			param.push(item.DL);
-			//dirty
-			if(createFromClient) param.push(true);
-			else param.push(false);
-			//TS
-			if(createFromClient) param.push(null);
-			else param.push(item.TS);
-		});
-		sql += rowArgs.join(', ');
-		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){console.log(error); return error;});
+	this.Add = function(data){
+		var sql = "INSERT INTO pmroom (Id, roomType, roomName, roomIcon, totalNewMsg, lastMsg, TS, JId) VALUES (?,?,?,?,?,?,?,?);";
+		return SQLiteService.Execute(sql,data).then(function(response){return response;},function(error){return error;});	
 	};
 	//***Necessary-Method
 	this.GetAll = function(){
@@ -752,7 +744,22 @@ angular.module('starter')
 	};
 
 	this.UpdateReadAllMsg = function(id){
-		return SQLiteService.Execute("UPDATE pmroom SET totalNewMsg = 0 WHERE Id = " + id).then(function(response){return response;},function(error){return error;});	
+		return SQLiteService.Execute("UPDATE pmroom SET totalNewMsg = 0, lastMsg = null WHERE Id = '" + id + "'").then(function(response){return response;},function(error){return error;});	
+	};
+
+	this.GetRoomIdTypeChat = function(empId){
+		return SQLiteService.Execute("SELECT pmroom.Id FROM pmroom inner join pmuserinroom on pmroom.Id = pmuserinroom.roomId WHERE pmroom.roomType = 1 and  pmuserinroom.userId = " + empId).then(function(response){return response;},function(error){return error;});	
+	};
+
+	this.GetRoomById = function(roomId){
+		return SQLiteService.Execute("SELECT * FROM pmroom WHERE Id = '" + roomId + "'").then(function(response){return response;},function(error){return error;});		
+	};
+	this.UpdateIncrementTotalNewMessage = function(roomId,lastMsg){
+		return SQLiteService.Execute("UPDATE pmroom SET totalNewMsg = (totalNewMsg + 1), lastMsg = '" + lastMsg + "' WHERE Id = '" + roomId + "'").then(function(response){return response;},function(error){return error;});
+	};
+
+	this.CheckRoomIdIsExist = function(roomId){
+		return SQLiteService.Execute("SELECT count(*) as totalCount FROM pmroom WHERE Id = '" + roomId + "'").then(function(response){return response;},function(error){return error;});
 	};
 })
 .service('PMMsgSQLite',function(SQLiteService){
@@ -781,37 +788,16 @@ angular.module('starter')
 		return SQLiteService.DeleteDataIsFlagDeleted("pmmsg");
 	};
 
-	this.Update = function(data,isDirty,clientUpdate){
+	this.Update = function(data){
 		var sql;
-		if(clientUpdate)
-			sql = "UPDATE pmmsg SET Id = ?, Empl_Code = ?, message = ?, readTotal = ?, roomId = ?, DL = ?,dirty = ?,TS = ? WHERE clientid = " + data.clientid;	
-		else
-			sql = "UPDATE pmmsg SET Id = ?, Empl_Code = ?, message = ?, readTotal = ?, roomId = ?, DL = ?,dirty = ?,TS = ? WHERE Id = " + data.Id;
-		var param = [data.Id,data.Empl_Code,data.message,data.readTotal,data.roomId,data.DL,isDirty,data.TS];
+		sql = "UPDATE pmmsg SET MessageId = ?, Empl_Code = ?, message = ?, readTotal = ?, roomId = ?, TS = ?, unseen = ? WHERE Id = " + data.Id;	
+		var param = [data.MessageId,data.Empl_Code,data.message,data.readTotal,data.roomId,data.TS,data.unseen];
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
 	};
 
-	this.Add = function(data,createFromClient){
-		var sql = "INSERT INTO pmmsg (Id, Empl_Code, message, readTotal, roomId, DL, dirty, TS) VALUES ";
-		var param = []; 
-		var rowArgs = [];
-		data.forEach(function(item){
-			rowArgs.push("(?,?,?,?,?,?,?,?)");
-			param.push(item.Id);
-			param.push(item.Empl_Code);
-			param.push(item.message);
-			param.push(item.readTotal);
-			param.push(item.roomId);
-			param.push(item.DL);
-			//dirty
-			if(createFromClient) param.push(true);
-			else param.push(false);
-			//TS
-			if(createFromClient) param.push(null);
-			else param.push(item.TS);
-		});
-		sql += rowArgs.join(', ');
-		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){console.log(error); return error;});
+	this.Add = function(data){
+		var sql = "INSERT INTO pmmsg (MessageId,Empl_Code, message, readTotal, roomId, TS, unseen) VALUES (?,?,?,?,?,?,?);";
+		return SQLiteService.Execute(sql,data).then(function(response){return response;},function(error){console.log(error); return error;});
 	};
 	//***Necessary-Method
 	
@@ -819,10 +805,25 @@ angular.module('starter')
 		return SQLiteService.Execute("select * FROM pmmsg WHERE roomId = '" + roomId + "' ORDER BY CAST(SUBSTR(ts,5,4) AS INT), CAST(SUBSTR(ts,3,2) AS INT), CAST(SUBSTR(ts,1,2) AS INT), CAST(SUBSTR(ts,9,2) AS INT), CAST(SUBSTR(ts,11,2) AS INT), CAST(SUBSTR(ts,13,2) AS INT), Id").then(function(response){return response;},function(error){return error;});	
 	};
 
-	this.UpdateReadTotal = function(msgId,readTotal){
-		sql = "UPDATE pmmsg SET readTotal = ? WHERE Id = " + msgId;
-		var param = [readTotal];
-		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
+	this.GetAllUnSeenMessageByRoomId = function(roomId){
+		return SQLiteService.Execute("select * FROM pmmsg WHERE unseen = 0 and roomId = '" + roomId + "' ORDER BY CAST(SUBSTR(ts,5,4) AS INT), CAST(SUBSTR(ts,3,2) AS INT), CAST(SUBSTR(ts,1,2) AS INT), CAST(SUBSTR(ts,9,2) AS INT), CAST(SUBSTR(ts,11,2) AS INT), CAST(SUBSTR(ts,13,2) AS INT), Id").then(function(response){return response;},function(error){return error;});	
+	};
+
+	this.GetReadTotalByMsgId = function(msgId){
+		return SQLiteService.Execute("select readTotal FROM pmmsg WHERE MessageId = '" + msgId + "'").then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.UpdateReadTotal = function(msgId){
+		sql = "UPDATE pmmsg SET readTotal = (readTotal + 1) WHERE MessageId = '" + msgId + "'";
+		return SQLiteService.Execute(sql,null).then(function(response){return response;},function(error){return error;});	
+	};
+
+	this.UpdateSeenMessageInRoom = function(roomId){
+		return SQLiteService.Execute("UPDATE pmmsg SET unseen = 1 WHERE roomId = '" + roomId + "'").then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.CheckMessageIdIsExsit = function(MessageId){
+		return SQLiteService.Execute("SELECT count(*) as totalCount FROM pmmsg  WHERE MessageId = '" + MessageId + "'").then(function(response){return response;},function(error){return error;});			
 	};
 })
 .service('PMSubscribeSQLite',function(SQLiteService){
@@ -848,6 +849,30 @@ angular.module('starter')
 
 	this.GetAllSubScribe = function(){
 		return SQLiteService.Execute("select * FROM pmsubscribe").then(function(response){return response;},function(error){return error;});	
+	};
+
+})
+.service('PMUserInRoomSQLite',function(SQLiteService){
+	this.Add = function(data){
+		var sql = "INSERT INTO pmuserinroom (roomId, userId) VALUES (?,?);";
+		return SQLiteService.Execute(sql,data).then(function(response){return response;},function(error){return error;});	
+	};
+	this.GetUserIdInRoom = function(roomId){
+		return SQLiteService.Execute("SELECT userId FROM pmuserinroom WHERE roomId = '" + roomId + "'").then(function(response){return response;},function(error){return error;});
+	};
+	this.GetRoomIdByUserId = function(userId){
+		return SQLiteService.Execute('SELECT roomId FROM pmuserinroom WHERE userId = ' + userId).then(function(response){return response;},function(error){return error;});
+	};
+})
+.service('PMSeenMessageSQLite',function(SQLiteService){
+
+	this.Add = function(data){
+		var sql = "INSERT INTO pmseenmessage (Empl_Code, MessageId) VALUES (?,?)";
+		return SQLiteService.Execute(sql,data).then(function(response){return response;},function(error){console.log(error); return error;});
+	};
+
+	this.CheckUserSeenMessage = function(empId,messageId){
+		return SQLiteService.Execute("select count(*) as totalCount FROM pmseenmessage where Empl_Code = '" + empId + "' and MessageId = '" + messageId + "'").then(function(response){return response;},function(error){return error;});	
 	};
 
 })
