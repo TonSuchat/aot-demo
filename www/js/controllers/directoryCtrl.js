@@ -123,7 +123,7 @@ angular.module('starter')
                                                 //create pmuserinroom
                                                 if(response != null){
                                                     //send message to create room at receiver side
-                                                    XMPPService.SendMessageCreateChatRoom(roomId,$scope.currentUserName,$scope.currentPerson.personId,window.localStorage.getItem("AuthServices_fullname"));
+                                                    XMPPService.SendMessageCreateChatRoom(roomId,$scope.currentUserName,$scope.currentPerson.personId,window.localStorage.getItem("AuthServices_fullname"),fullname);
                                                     PMUserInRoomSQLite.Add([roomId,$scope.currentPerson.personId]);
                                                     APIService.HideLoading();
                                                     $location.path('/app/pmsmsgs/' + roomId);  

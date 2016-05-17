@@ -809,6 +809,11 @@ angular.module('starter')
 		return SQLiteService.Execute("select * FROM pmmsg WHERE unseen = 0 and roomId = '" + roomId + "' ORDER BY CAST(SUBSTR(ts,5,4) AS INT), CAST(SUBSTR(ts,3,2) AS INT), CAST(SUBSTR(ts,1,2) AS INT), CAST(SUBSTR(ts,9,2) AS INT), CAST(SUBSTR(ts,11,2) AS INT), CAST(SUBSTR(ts,13,2) AS INT), Id").then(function(response){return response;},function(error){return error;});	
 	};
 
+	this.GetEmpIdByMessageAndRoomId = function(msgId,roomId){
+		console.log("SELECT Empl_Code FROM pmmsg  WHERE MessageId = '" + msgId + "' and roomId = '" + roomId + "'");
+		return SQLiteService.Execute("SELECT Empl_Code FROM pmmsg  WHERE MessageId = '" + msgId + "' and roomId = '" + roomId + "'").then(function(response){return response;},function(error){return error;});			
+	};
+
 	this.GetReadTotalByMsgId = function(msgId){
 		return SQLiteService.Execute("select readTotal FROM pmmsg WHERE MessageId = '" + msgId + "'").then(function(response){return response;},function(error){return error;});		
 	};
@@ -868,6 +873,7 @@ angular.module('starter')
 
 	this.Add = function(data){
 		var sql = "INSERT INTO pmseenmessage (Empl_Code, MessageId) VALUES (?,?)";
+		console.log(sql);
 		return SQLiteService.Execute(sql,data).then(function(response){return response;},function(error){console.log(error); return error;});
 	};
 

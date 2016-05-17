@@ -71,12 +71,12 @@ angular.module('starter')
         //append message
         $scope.$on('incomingMessage',function(env,args){
             $scope.allMsg.push({Id:0,MessageId:args.msgId,Empl_Code:args.ownerId,message:args.message,readTotal:0,roomId:args.roomId,TS:args.TS});
-            if(args.ownerId == window.localStorage.getItem("CurrentUserName")) $scope.msgDetails.push({msgId:args.msgId,side:'right',msg:args.message,TS:TransformServerTSToDateTimeStr(args.TS.toString()),readTotal:0});                
+            if(args.ownerId == window.localStorage.getItem("CurrentUserName")) $scope.msgDetails.push({msgId:args.msgId,side:'right',msg:args.message,TS:TransformServerTSToDateTimeStr(args.TS.toString()),readTotal:0});
             else{
                 var eachSubscribe =  $filter('filter')($scope.allSubscribe, { Empl_Code: args.ownerId });
                 $scope.msgDetails.push({msgId:args.msgId,side:'left',msg:args.message,PictureThumb:eachSubscribe[0].PictureThumb,Firstname:eachSubscribe[0].Firstname,TS:TransformServerTSToDateTimeStr(args.TS.toString()),readTotal:0});
                 //send back to sender for update readed
-                XMPPService.SendSeenMessage(args.roomId,args.msgId,args.ownerId,window.localStorage.getItem("CurrentUserName"));
+                XMPPService.SendSeenMessage(args.roomId,args.msgId);
             } 
             if(!$scope.$$phase) $scope.$apply();
             viewScroll.scrollBottom(true);
