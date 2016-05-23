@@ -49,7 +49,7 @@
           
       });
     })
-    .run(function($ionicPlatform, SQLiteService, AuthService, XMPPService, XMPPApiService){
+    .run(function($ionicPlatform, SQLiteService, AuthService, XMPPService, XMPPApiService, $rootScope){
       $ionicPlatform.ready(function(){
         //open db
         SQLiteService.OpenDB();
@@ -65,6 +65,24 @@
         window.onbeforeunload = function (event) {
             XMPPService.Disconnect();
         };
+
+        // listen for Online event
+        $rootScope.$on('$cordovaNetwork:online', function(event, networkState){
+          if(isNetworkDown){
+            //set flag enable sync room
+            xmppSyncRooms = true;
+            //connect xmpp server
+            XMPPService.Authentication(window.localStorage.getItem("AuthServices_username"),window.localStorage.getItem("AuthServices_password"));
+            isNetworkDown = false;
+          }
+        });
+
+        // listen for Offline event
+        $rootScope.$on('$cordovaNetwork:offline', function(event, networkState){
+          XMPPService.Disconnect();
+          xmppConnectionIsActive = false;
+          isNetworkDown = true;
+        });
 
         // SQLiteService.Execute('select * from userprofile',null).then(function(response){
         //     console.log(response.rows.item);

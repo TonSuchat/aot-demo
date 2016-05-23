@@ -118,7 +118,7 @@ angular.module('starter')
                                         //join room
                                         XMPPService.JoinRoom(roomId,$scope.currentUserName);
                                         //create pmroom
-                                        PMRoomSQLite.Add([roomId,1,fullname,roomIcon,0,'',GetCurrentTSAPIFormat(),$scope.currentPerson.personId]).then(
+                                        PMRoomSQLite.Add([roomId,1,fullname,roomIcon,0,'',GetCurrentTSAPIFormat()]).then(
                                             function(response){
                                                 //create pmuserinroom
                                                 if(response != null){

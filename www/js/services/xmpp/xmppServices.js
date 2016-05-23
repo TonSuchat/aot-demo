@@ -3,6 +3,7 @@ var xmppURLDetails = {prefix:'http://',domain:'10.74.17.109',port:':7070',bind:'
 var xmppFullPath = xmppURLDetails.prefix + xmppURLDetails.domain + xmppURLDetails.port + xmppURLDetails.bind;
 var xmppConnection;
 var xmppConnectionIsActive = false;
+var xmppSyncRooms = false;
 var dictUserSeenMessage = [];
 //**********VARIABLES**********
 
@@ -17,8 +18,12 @@ angular.module('starter').service('XMPPService',function($q,$rootScope,PMMsgSQLi
 	};
 
 	this.Disconnect = function(){
-		xmppConnection.flush();
-    	xmppConnection.disconnect();
+		try
+		{
+			xmppConnection.flush();
+    		xmppConnection.disconnect();
+		}
+		catch(err){};
     	return true;
 	};
 
@@ -33,8 +38,14 @@ angular.module('starter').service('XMPPService',function($q,$rootScope,PMMsgSQLi
 			//add handler and set online
 			xmppConnection.send($pres());
 			service.xmppAddHandlers();
-			//todo join all rooms that current user is memeber
-			service.JoinRoomsUsersIsMember();
+			//check need to sync rooms?
+			if(xmppSyncRooms){
+				//sync rooms (on new login, network online(after offline))
+				service.SyncPMRooms().then(function(response){
+					if(response) xmppSyncRooms = false;
+				}); 
+			}
+			else service.JoinRoomsUsersIsMember(); //todo join all rooms that current user is memeber
 			//set global connection state
 			xmppConnectionIsActive = true;
 			return true;
@@ -72,32 +83,18 @@ angular.module('starter').service('XMPPService',function($q,$rootScope,PMMsgSQLi
 		var senderId = message.getAttribute('empId');
 		var fullname = message.getAttribute('fullName');
 		var roomId = message.getAttribute('roomId');
-		//create data in pmroom if not exist
-		PMRoomSQLite.CheckRoomIdIsExist(roomId).then(function(response){
-			if(response != null){
-				var totalCount = ConvertQueryResultToArray(response)[0].totalCount;
-				if(totalCount == 0){
-					//save pmroom , pmuserinroom
-					GetPicThumbBase64($q,APIService,senderId).then(function(base64){
-						if(base64 != null && base64.length > 0){
-							var roomIcon = base64;
-							PMRoomSQLite.Add([roomId,1,fullname,roomIcon,0,'',GetCurrentTSAPIFormat(),senderId]).then(
-								function(response){
-									if(response != null){
-										PMUserInRoomSQLite.Add([roomId,senderId]);
-										//join room
-										service.JoinRoom(roomId,window.localStorage.getItem("CurrentUserName"));
-									} 
-								});
-							return true;
-						}
-						else return true;
-					});
-				}
-				else return true;
+		//get pic thumb for room icon
+		GetPicThumbBase64($q,APIService,senderId).then(function(base64){
+			if(base64 != null && base64.length > 0){
+				var roomDetails = {roomId:roomId,roomIcon:base64,roomName:fullname,roomType:1};
+				var memberDetails = [{empId:senderId}];
+				//create data in pmroom if not exist
+				service.ProcessCreateChatRoom(roomDetails,memberDetails).then(function(response){
+					return response;
+				});
 			}
 			else return true;
-		});	
+		});
 	};
 
 	this.OnChatMessage = function(message) {
@@ -118,7 +115,6 @@ angular.module('starter').service('XMPPService',function($q,$rootScope,PMMsgSQLi
  			//find ownerId by msgId
  			PMMsgSQLite.GetEmpIdByMessageAndRoomId(result.msgId,roomId).then(function(response){
  				if(response != null){
- 					console.log('response',ConvertQueryResultToArray(response));
  					var ownerId = ConvertQueryResultToArray(response)[0].Empl_Code;
  					if(ownerId == window.localStorage.getItem("CurrentUserName")){
 		 				//check user has already seen message(in other device)
@@ -168,7 +164,8 @@ angular.module('starter').service('XMPPService',function($q,$rootScope,PMMsgSQLi
 		   				if(ownerId == window.localStorage.getItem("CurrentUserName")) unseen = 1;
 		   				else unseen = (roomId == xmppSharedProperties.GetSharedProperties().ActiveRoomId) ? 1 : 0;
 		   				PMMsgSQLite.Add([result.msgId,ownerId,result.message,0,roomId,result.TS,unseen]);
-
+		   				//update lastmsg in pmroom
+		   				PMRoomSQLite.UpdateLastMsg(roomId,result.message);
 		   				//check for broadcast message
 			   			if(roomId == xmppSharedProperties.GetSharedProperties().ActiveRoomId){
 			   				console.log('active room');
@@ -178,7 +175,7 @@ angular.module('starter').service('XMPPService',function($q,$rootScope,PMMsgSQLi
 						else{
 							if(ownerId != window.localStorage.getItem("CurrentUserName")){
 								console.log('increment');
-								PMRoomSQLite.UpdateIncrementTotalNewMessage(roomId,result.message);
+								PMRoomSQLite.UpdateIncrementTotalNewMessage(roomId);
 							}
 						}
 		   			}
@@ -190,6 +187,7 @@ angular.module('starter').service('XMPPService',function($q,$rootScope,PMMsgSQLi
 
 	// this.OnPresence = function(presence){
 	// 	console.log(presence);
+	// 	return true;
 	// };
 
 	// this.OnIQ = function(iq){
@@ -200,7 +198,7 @@ angular.module('starter').service('XMPPService',function($q,$rootScope,PMMsgSQLi
 
 
 	//*************Message*************
-	this.SendChatMessage = function(toId,fromId,roomId,message){
+	this.SendChatMessage = function(fromId,roomId,message){
 		return $q(function(resolve, reject) {
 			var result = {msgId:GenerateMessageId(),TS:GetCurrentTSAPIFormat()};
 			//send xmpp message
@@ -239,7 +237,7 @@ angular.module('starter').service('XMPPService',function($q,$rootScope,PMMsgSQLi
 		xmppConnection.sendIQ(iq);
 		//send subscribe
 		var subscribe = $pres({to: toId + '@' + xmppURLDetails.domain, 'type': 'subscribe'});
-		xmppConnection.send(subscribe); 
+		xmppConnection.send(subscribe);
 	};
 
 	this.GetUniqueId = function(prefix){
@@ -247,28 +245,105 @@ angular.module('starter').service('XMPPService',function($q,$rootScope,PMMsgSQLi
 	};
 
 	this.JoinRoom = function(roomId,nickName){
-		var pres = $pres({to:roomId + '@' + xmppURLDetails.chatService + '.' + xmppURLDetails.domain + '/' + nickName})
-						.c('x',{xmlns:'http://jabber.org/protocol/muc#user'},null);
+		var pres = $pres({to:roomId + '@' + xmppURLDetails.chatService + '.' + xmppURLDetails.domain + '/' + nickName});
+						//.c('x',{xmlns:'http://jabber.org/protocol/muc#user'},null).c('history',{maxstanzas:100});
 		xmppConnection.send(pres.tree());
 	};
 
-	// this.CreateRoomOnetoOne = function(roomId,empId1,empId2){
-	// 	service.JoinRoom(roomId,empId1);
-	// 	//send config to set room to persistant
-	// 	var iq = $iq({to:roomId + '@' + xmppURLDetails.chatService + '.' + xmppURLDetails.domain,type:'set'})
-	// 			.c('query',{xmlns:'http://jabber.org/protocol/muc#owner'})
-	// 			.c('x',{xmlns:'jabber:x:data',type:'submit'})
-	// 			.c('field',{var:'muc#roomconfig_persistentroom'}).c('value').t(1)
-	// 			.up().up()
-	// 			.c('field',{var:'muc#roomconfig_enablelogging'}).c('value').t(1)
-	// 			.up().up()
-	// 			.c('field',{var:'muc#roomconfig_roomowners'}).c('value').t('admin@' + xmppURLDetails.domain)
-	// 			.up().up()
-	// 			.c('field',{var:'muc#roomconfig_roommembers'}).c('value').t(empId1 + '@' + xmppURLDetails.domain)
-	// 			.up().c('value').t(empId2 + '@' + xmppURLDetails.domain)
-	// 	console.log('config room',iq.tree());
-	// 	xmppConnection.send(iq.tree());
-	// };
+	this.SyncPMRooms = function(){
+		console.log('Start SyncPMRooms');
+		return $q(function(resolve,reject){
+			var jid = window.localStorage.getItem("CurrentUserName");
+			if(jid != null){
+				//get rooms from server
+				XMPPApiService.GetRoomsByJID(jid).then(function(response){
+					if(response != null){
+						var roomsDetail = ConvertQueryResultToArray(response);
+						var totalRows = roomsDetail.length;
+						var counter = 0;
+						angular.forEach(roomsDetail,function(value,key){
+							var roomDetails = {};
+							var memberDetails = [];
+							//create room by type(chat,groupchat)
+							if(value.members.length > 1){
+								//group chat
+								roomDetails.roomType = 2;roomDetails.roomName = '';roomDetails.roomIcon = '';roomDetails.JID;
+								//todo create room
+							}
+							else{
+								//ordinary chat(1:1)
+								roomDetails.roomId = value.roomName;roomDetails.roomType = 1;
+								memberDetails.push({empId:value.members[0]});
+								//get fullname for roomname
+								var url = APIService.hostname() + '/ContactDirectory/viewContactPaging';
+							    var data = { keyword: value.members[0], start: 1, retrieve: 1 };
+							    APIService.httpPost(url, data,
+							        function (response) {
+							            if(response != null && response.data != null){
+							            	var result = response.data[0];
+							            	var nickname = (result.Nickname && result.Nickname != null) ? '(' + result.Nickname + ')' : '';
+							            	var fullname = result.PrefixName + ' ' + result.Firstname + ' ' + result.Lastname + nickname;
+							            	roomDetails.roomName = fullname;
+							            	//base64 for roomicon
+							            	GetPicThumbBase64($q,APIService,members[0]).then(function(base64){
+												if(base64 != null && base64.length > 0){
+													roomDetails.roomIcon = base64;
+													//create chat room
+													ProcessCreateChatRoom(roomDetails,memberDetails).then(function(){
+														counter++;
+								                		if(counter == totalRows) resolve(true);	
+													});
+												}
+												else{
+													console.log('not found PicThumbBase64 data of ' + value.members[0]);
+													counter++;
+						                			if(counter == totalRows) resolve(true);	
+												}
+											});
+							            }
+							            else{
+							            	console.log('not found ContactDirectory data of ' + value.members[0]);
+							            	counter++;
+						                	if(counter == totalRows) resolve(true);	
+							            }
+							        });
+							}
+		            	});
+					}
+					else resolve(true);
+				});
+			}
+			else resolve(false);
+		});
+	};
+
+	//roomDetails:{roomId:'xxx',roomIcon:'xxx',roomName:'xxx',roomType:0,1} , memberDetails:[{empId:'xxx'},{empId:'xxx'}]
+	this.ProcessCreateChatRoom = function(roomDetails,memberDetails){
+		return $q(function(resolve,reject){
+			//create data in pmroom if not exist
+			PMRoomSQLite.CheckRoomIdIsExist(roomDetails.roomId).then(function(response){
+				if(response != null){
+					var totalCount = ConvertQueryResultToArray(response)[0].totalCount;
+					if(totalCount == 0){
+						//create room
+						PMRoomSQLite.Add([roomDetails.roomId,roomDetails.roomType,roomDetails.roomName,roomDetails.roomIcon,0,'',GetCurrentTSAPIFormat()]).then(
+						function(response){
+							if(response != null){
+								//create userinroom
+								angular.forEach(memberDetails,function(value,key){
+									PMUserInRoomSQLite.Add([roomDetails.roomId,value.empId]);
+								})
+								//join room
+								service.JoinRoom(roomDetails.roomId,window.localStorage.getItem("CurrentUserName"));
+							}
+						});
+					}
+					else resolve(true);
+				}
+				else resolve(true);
+			},function(response){console.log(response);resolve(false);});
+		});
+	};
 	//*************Utility*************
 	
 });
@@ -332,10 +407,10 @@ function GetTSFromDelayMessage(timestamp){
 	var day = timestamp.substring(8,10);
 	var month = timestamp.substring(5,7);
 	var year = timestamp.substring(0,4);
-	var hour = timestamp.substring(11,13);
+	var hour = (parseInt(timestamp.substring(11,13)) + 7).toString();
 	var minute = timestamp.substring(14,16);
-	var milisecond = timestamp.substring(17,19);
- 	return (day + month + year + hour + minute + milisecond);
+	var millisecond = timestamp.substring(17,19);
+ 	return (day + month + year + hour + minute + millisecond);
 };
 
 function CheckThisMessageIsReceivedType(body) {

@@ -113,7 +113,7 @@ angular.module('starter')
 
 	//roomtype : 1 = chat , 2 = groupchat
 	this.CreatePMRoomTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmroom(Id text,roomType int, roomName text, roomIcon text, totalNewMsg int, lastMsg text, TS text, JId text)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmroom(Id text,roomType int, roomName text, roomIcon text, totalNewMsg int, lastMsg text, TS text)");
 	};
 
 	this.CreatePMUserInRoomTable = function(){
@@ -725,13 +725,13 @@ angular.module('starter')
 	this.Update = function(data){
 		var sql;
 		if(clientUpdate)
-			sql = "UPDATE pmroom SET roomType = ?, roomName = ?, roomIcon = ?, totalNewMsg = ?, lastMsg = ?, TS = ?, JId = ? WHERE Id = " + data.Id;	
-		var param = [data.roomType,data.roomName,data.roomIcon,data.totalNewMsg,data.lastMsg,data.TS,data.JId];
+			sql = "UPDATE pmroom SET roomType = ?, roomName = ?, roomIcon = ?, totalNewMsg = ?, lastMsg = ?, TS = ? WHERE Id = " + data.Id;	
+		var param = [data.roomType,data.roomName,data.roomIcon,data.totalNewMsg,data.lastMsg,data.TS];
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
 	};
 
 	this.Add = function(data){
-		var sql = "INSERT INTO pmroom (Id, roomType, roomName, roomIcon, totalNewMsg, lastMsg, TS, JId) VALUES (?,?,?,?,?,?,?,?);";
+		var sql = "INSERT INTO pmroom (Id, roomType, roomName, roomIcon, totalNewMsg, lastMsg, TS) VALUES (?,?,?,?,?,?,?);";
 		return SQLiteService.Execute(sql,data).then(function(response){return response;},function(error){return error;});	
 	};
 	//***Necessary-Method
@@ -744,7 +744,7 @@ angular.module('starter')
 	};
 
 	this.UpdateReadAllMsg = function(id){
-		return SQLiteService.Execute("UPDATE pmroom SET totalNewMsg = 0, lastMsg = null WHERE Id = '" + id + "'").then(function(response){return response;},function(error){return error;});	
+		return SQLiteService.Execute("UPDATE pmroom SET totalNewMsg = 0 WHERE Id = '" + id + "'").then(function(response){return response;},function(error){return error;});	
 	};
 
 	this.GetRoomIdTypeChat = function(empId){
@@ -754,8 +754,12 @@ angular.module('starter')
 	this.GetRoomById = function(roomId){
 		return SQLiteService.Execute("SELECT * FROM pmroom WHERE Id = '" + roomId + "'").then(function(response){return response;},function(error){return error;});		
 	};
-	this.UpdateIncrementTotalNewMessage = function(roomId,lastMsg){
-		return SQLiteService.Execute("UPDATE pmroom SET totalNewMsg = (totalNewMsg + 1), lastMsg = '" + lastMsg + "' WHERE Id = '" + roomId + "'").then(function(response){return response;},function(error){return error;});
+	this.UpdateIncrementTotalNewMessage = function(roomId){
+		return SQLiteService.Execute("UPDATE pmroom SET totalNewMsg = (totalNewMsg + 1) WHERE Id = '" + roomId + "'").then(function(response){return response;},function(error){return error;});
+	};
+
+	this.UpdateLastMsg = function(roomId,lastMsg){
+		return SQLiteService.Execute("UPDATE pmroom SET lastMsg = '" + lastMsg + "' WHERE Id = '" + roomId + "'").then(function(response){return response;},function(error){return error;});
 	};
 
 	this.CheckRoomIdIsExist = function(roomId){
@@ -810,7 +814,6 @@ angular.module('starter')
 	};
 
 	this.GetEmpIdByMessageAndRoomId = function(msgId,roomId){
-		console.log("SELECT Empl_Code FROM pmmsg  WHERE MessageId = '" + msgId + "' and roomId = '" + roomId + "'");
 		return SQLiteService.Execute("SELECT Empl_Code FROM pmmsg  WHERE MessageId = '" + msgId + "' and roomId = '" + roomId + "'").then(function(response){return response;},function(error){return error;});			
 	};
 

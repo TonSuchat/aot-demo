@@ -57,7 +57,12 @@ angular.module('starter')
                         });
                         //check if user existed then connect xmpp server ,else create user and connect xmpp server
                         XMPPApiService.CheckAndCreateUserIfNotExist({username:window.localStorage.getItem("AuthServices_username"),password:window.localStorage.getItem("AuthServices_password"),name:window.localStorage.getItem('AuthServices_fullname')}).then(function(response){
-                            if(response) XMPPService.Authentication(window.localStorage.getItem("AuthServices_username"),window.localStorage.getItem("AuthServices_password"));
+                            if(response){
+                                //set flag enable sync room
+                                xmppSyncRooms = true;
+                                //connect xmpp
+                                XMPPService.Authentication(window.localStorage.getItem("AuthServices_username"),window.localStorage.getItem("AuthServices_password"));
+                            }
                         });
                         successAction();
                     },

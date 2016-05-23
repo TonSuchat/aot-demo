@@ -1,10 +1,11 @@
-angular.module('starter').service('XMPPApiService',function($http,$httpParamSerializerJQLike,$q){
+angular.module('starter').service('XMPPApiService',function($http,$httpParamSerializerJQLike,$q,APIService){
 
 	var service = this;
 	var xmppApiServiceConfig = {};
 	xmppApiServiceConfig.headers = {'Authorization' : 'IhJpIsSTFXSkXkAn','Content-Type': 'application/json'};
 	var xmppApiServiceURLDetails = {domain:'http://' + xmppURLDetails.domain,port:':9090',apiPrefix:'/plugins/restapi/v1'};
 	var xmppApiServiceFullUrl = xmppApiServiceURLDetails.domain + xmppApiServiceURLDetails.port + xmppApiServiceURLDetails.apiPrefix;
+	var xmppApiGetRoomsByJID = APIService.hostname() + '/pm/rooms'
 
 	this.httpPost = function(url,data){
 		return $q(function(resolve, reject) {
@@ -73,6 +74,18 @@ angular.module('starter').service('XMPPApiService',function($http,$httpParamSeri
 				function(response){resolve(true)},
 				function(response){resolve(false)})
 		})
+	};
+
+	this.GetRoomsByJID = function(jid){
+		return $q(function(resolve,reject){
+			service.httpPost(xmppApiGetRoomsByJID,{'Empl_Code':jid}).then(
+				function(response){
+					resolve(response);
+				},
+				function(response){
+					reject(response);
+				});
+		});
 	};
 
 });

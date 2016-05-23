@@ -107,10 +107,16 @@ angular.module('starter')
         };
 
         $scope.sendMessage = function(){
+            console.log('xmppConnectionIsActive',xmppConnectionIsActive);
             if($scope.noInternet) return;
-            if(!xmppConnectionIsActive) return;
-            XMPPService.SendChatMessage($scope.roomDetails.JId, $scope.empId, $scope.roomId, $scope.message);
-            $scope.message = '';
+            //todo check has network, If has network try to reconnect xmpp then go on process;
+            if(!xmppConnectionIsActive){
+
+            }
+            else{
+                XMPPService.SendChatMessage($scope.empId, $scope.roomId, $scope.message);    
+                $scope.message = '';
+            }
         };
 
         $rootScope.$on( "$stateChangeStart", function(e, toState, toParams, fromState, fromParams) {
@@ -165,7 +171,8 @@ function InitialPMMsgDetails($scope,data,myEmpId,allsubscribe,$filter){
             TS:(value.TS != null) ? TransformServerTSToDateTimeStr(value.TS.toString()) : '',
             readTotal:value.readTotal,
             Firstname:eachSubscribe[0].Firstname,
-            PictureThumb:eachSubscribe[0].PictureThumb 
+            PictureThumb:eachSubscribe[0].PictureThumb,
+            showExtraBtn:false
         });
     });
 };
@@ -242,6 +249,7 @@ function PMRoomInitialProcess($scope,PMRoomSQLite,APIService){
 };
 
 function SendNotifySeenAllNewMessage(roomId,PMMsgSQLite,XMPPService) {
+    if(!xmppConnectionIsActive) return;
     PMMsgSQLite.GetAllUnSeenMessageByRoomId(roomId).then(function(response){
         if(response != null){
             var result = ConvertQueryResultToArray(response);

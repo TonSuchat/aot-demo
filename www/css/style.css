@@ -24,6 +24,16 @@
   width: 100% !important;
 }
 
+.extraBtn{
+  color:white;
+  cursor:pointer;
+  text-decoration: underline;
+}
+
+.extraBtn:first-child{
+  margin-right: 20px;
+}
+
 .message-wrapper {
   position: relative;
 }
