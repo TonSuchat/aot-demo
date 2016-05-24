@@ -77,15 +77,23 @@ angular.module('starter').service('XMPPApiService',function($http,$httpParamSeri
 	};
 
 	this.GetRoomsByJID = function(jid){
+		// return $q(function(resolve,reject){
+		// 	service.httpPost(xmppApiGetRoomsByJID,{'Empl_Code':jid}).then(
+		// 		function(response){
+		// 			resolve(response);
+		// 		},
+		// 		function(response){
+		// 			reject(response);
+		// 		});
+		// });
+
 		return $q(function(resolve,reject){
-			service.httpPost(xmppApiGetRoomsByJID,{'Empl_Code':jid}).then(
-				function(response){
-					resolve(response);
-				},
-				function(response){
-					reject(response);
-				});
+			var result = {data:[
+					{roomName:'a36b3dc3-4810-43af-8044-0b977869f6da',members:['484134']}
+				]}
+			resolve(result);
 		});
+
 	};
 
 });

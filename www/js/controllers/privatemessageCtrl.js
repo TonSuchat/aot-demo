@@ -119,6 +119,7 @@ angular.module('starter')
 
         $scope.sendMessage = function(){
             if($scope.noInternet) return;
+            console.log('xmppConnectionIsActive',xmppConnectionIsActive);
             //todo check has network, If has network try to reconnect xmpp then go on process;
             if(!xmppConnectionIsActive) ProcessTryToReconnectAndSendMessage($scope,$filter,XMPPService,PMMsgSQLite,viewScroll,$scope.roomId,$scope.message); //try to reconnect(timer process)
             else XMPPService.SendChatMessage($scope.empId, $scope.roomId, $scope.message); //normal process

@@ -7,7 +7,7 @@ var xmppSyncRooms = false;
 var dictUserSeenMessage = [];
 //**********VARIABLES**********
 
-angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$rootScope,PMMsgSQLite,PMUserInRoomSQLite,PMRoomSQLite,APIService,xmppSharedProperties,PMSeenMessageSQLite){
+angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$rootScope,PMMsgSQLite,PMUserInRoomSQLite,PMRoomSQLite,APIService,XMPPApiService,xmppSharedProperties,PMSeenMessageSQLite){
 
 	var service = this;
 
@@ -273,8 +273,8 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 			if(jid != null){
 				//get rooms from server
 				XMPPApiService.GetRoomsByJID(jid).then(function(response){
-					if(response != null){
-						var roomsDetail = ConvertQueryResultToArray(response);
+					if(response != null && response.data != null){
+						var roomsDetail = response.data;
 						var totalRows = roomsDetail.length;
 						var counter = 0;
 						angular.forEach(roomsDetail,function(value,key){
@@ -301,11 +301,11 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 							            	var fullname = result.PrefixName + ' ' + result.Firstname + ' ' + result.Lastname + nickname;
 							            	roomDetails.roomName = fullname;
 							            	//base64 for roomicon
-							            	GetPicThumbBase64($q,APIService,members[0]).then(function(base64){
+							            	GetPicThumbBase64($q,APIService,value.members[0]).then(function(base64){
 												if(base64 != null && base64.length > 0){
 													roomDetails.roomIcon = base64;
 													//create chat room
-													ProcessCreateChatRoom(roomDetails,memberDetails).then(function(){
+													service.ProcessCreateChatRoom(roomDetails,memberDetails).then(function(){
 														counter++;
 								                		if(counter == totalRows) resolve(true);	
 													});
