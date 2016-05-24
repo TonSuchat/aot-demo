@@ -7,7 +7,7 @@ var xmppSyncRooms = false;
 var dictUserSeenMessage = [];
 //**********VARIABLES**********
 
-angular.module('starter').service('XMPPService',function($q,$rootScope,PMMsgSQLite,PMUserInRoomSQLite,PMRoomSQLite,APIService,xmppSharedProperties,PMSeenMessageSQLite){
+angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$rootScope,PMMsgSQLite,PMUserInRoomSQLite,PMRoomSQLite,APIService,xmppSharedProperties,PMSeenMessageSQLite){
 
 	var service = this;
 
@@ -29,11 +29,18 @@ angular.module('starter').service('XMPPService',function($q,$rootScope,PMMsgSQLi
 
 	this.xmppConnect = function(userid,password) {
 		xmppConnection = new Strophe.Connection(xmppFullPath);
-		xmppConnection.connect(userid + '@' + xmppURLDetails.domain,password, service.xmppOnConnect);
+		var resource = '';
+		//if mobile use serial number for resource
+		if (window.cordova){
+			var deviceInfo = $cordovaDevice.getDevice();
+			resource = '/' + deviceInfo.serial;		
+		}
+		xmppConnection.connect(userid + '@' + xmppURLDetails.domain + resource,password, service.xmppOnConnect);
 	};
 
 	this.xmppOnConnect = function(status) {
 		console.log(status);
+		console.log(Strophe.Status);
 		if(status == Strophe.Status.CONNECTED){
 			//add handler and set online
 			xmppConnection.send($pres());
@@ -48,12 +55,18 @@ angular.module('starter').service('XMPPService',function($q,$rootScope,PMMsgSQLi
 			else service.JoinRoomsUsersIsMember(); //todo join all rooms that current user is memeber
 			//set global connection state
 			xmppConnectionIsActive = true;
+			//check flag is trigger by timer reconnect?, Yes resend all message after reconnect
+			if(xmppTimerIsActive) service.ProcessResendMessages();
 			return true;
 		}
-		else if(status == Strophe.status.DISCONNECTED){
+		// else if(status == Strophe.status.DISCONNECTED){
+		// 	alert('DISCONNECTED');
+		// 	xmppConnectionIsActive = false;
+		// }
+		else{
 			xmppConnectionIsActive = false;
+			return true;
 		}
-		else xmppConnectionIsActive = false;
 	};
 
 	this.xmppAddHandlers = function() {
@@ -163,7 +176,7 @@ angular.module('starter').service('XMPPService',function($q,$rootScope,PMMsgSQLi
 		   				//if this message from owner itself unseen = 1 (in case use many devices on same time)
 		   				if(ownerId == window.localStorage.getItem("CurrentUserName")) unseen = 1;
 		   				else unseen = (roomId == xmppSharedProperties.GetSharedProperties().ActiveRoomId) ? 1 : 0;
-		   				PMMsgSQLite.Add([result.msgId,ownerId,result.message,0,roomId,result.TS,unseen]);
+		   				PMMsgSQLite.Add([result.msgId,ownerId,result.message,0,roomId,result.TS,unseen,0]);
 		   				//update lastmsg in pmroom
 		   				PMRoomSQLite.UpdateLastMsg(roomId,result.message);
 		   				//check for broadcast message
@@ -198,9 +211,12 @@ angular.module('starter').service('XMPPService',function($q,$rootScope,PMMsgSQLi
 
 
 	//*************Message*************
-	this.SendChatMessage = function(fromId,roomId,message){
+	this.SendChatMessage = function(fromId,roomId,message,optMsgId){
+		console.log('optMsgId',optMsgId);
 		return $q(function(resolve, reject) {
-			var result = {msgId:GenerateMessageId(),TS:GetCurrentTSAPIFormat()};
+			var result = {TS:GetCurrentTSAPIFormat()};
+			if(optMsgId != null && optMsgId.length > 0) result.msgId = optMsgId;
+			else result.msgId = service.GenerateMessageId();
 			//send xmpp message
 			var msg = CreateChatMessageXML(roomId,message,result.msgId,result.TS,fromId);
 			xmppConnection.send(msg);
@@ -271,7 +287,7 @@ angular.module('starter').service('XMPPService',function($q,$rootScope,PMMsgSQLi
 								//todo create room
 							}
 							else{
-								//ordinary chat(1:1)
+								//normal chat(1:1)
 								roomDetails.roomId = value.roomName;roomDetails.roomType = 1;
 								memberDetails.push({empId:value.members[0]});
 								//get fullname for roomname
@@ -344,7 +360,92 @@ angular.module('starter').service('XMPPService',function($q,$rootScope,PMMsgSQLi
 			},function(response){console.log(response);resolve(false);});
 		});
 	};
+
+	this.GenerateMessageId = function(){
+		var fullId = xmppConnection.getUniqueId();
+		return fullId.substring(24,36);
+	};
 	//*************Utility*************
+
+
+
+	//*************Timer***************
+	var xmppReconnectTimer;
+	var xmppTimerIsActive = false;
+	var xmppReconnectCounter = 1;
+	this.EnableTimerReconnect = function() {
+	    if(xmppTimerIsActive) return;
+	    console.log('EnableTimerReconnect');
+	    xmppReconnectTimer = setInterval(function(){service.xmppTimerTick()}, 15000);
+	    xmppTimerIsActive = true;
+	};
+
+	this.DisableTimerReconnect = function() {
+	    clearInterval(xmppReconnectTimer);
+	    xmppTimerIsActive = false;
+	    xmppReconnectCounter = 1;
+	    console.log('DisableTimerReconnect');
+	};
+
+	this.xmppTimerTick = function() {
+		console.log('xmppTimerTick');
+	    if(xmppReconnectCounter == 5){
+	    	console.log('xmppTimerTick 5 times');
+	        service.DisableTimerReconnect();
+	        //update all messages that have msgAct = 1 to msgAct = 2 , Show extra button if still in active room
+	        service.ProcessShowExtraButton();
+	    }
+	    else{
+	    	console.log('xmppTimerTick try to reconnect : ' + xmppReconnectCounter);
+	        //try to reconnect
+	        service.Authentication(window.localStorage.getItem("AuthServices_username"),window.localStorage.getItem("AuthServices_password"));
+	        xmppReconnectCounter++;
+	    }
+	};
+
+	this.ProcessResendMessages = function(){
+		console.log('ProcessResendMessages');
+		service.DisableTimerReconnect();
+		//loop resend message
+		PMMsgSQLite.GetAllResendMessage().then(function(response){
+			if(response != null){
+				var msgs = ConvertQueryResultToArray(response);
+				angular.forEach(msgs,function(value,key){
+					//send message
+					service.SendChatMessage(value.Empl_Code,value.roomId,value.message,value.MessageId);
+					//update this msgAct = 0
+					PMMsgSQLite.UpdateMsgAct(value.MessageId,0);
+				});
+				if(msgs.length > 0){
+					var lastIndex = msgs.length - 1;
+					//update lastmsg in pmroom
+		   			PMRoomSQLite.UpdateLastMsg(msgs[lastIndex].roomId,msgs[lastIndex].message);
+				}
+			}
+		})
+	};
+
+	this.ProcessShowExtraButton = function(){
+		console.log('ProcessShowExtraButton');
+		//get all msgAct = 1
+		PMMsgSQLite.GetAllResendMessage().then(function(response){
+			if(response != null){
+				var msgs = ConvertQueryResultToArray(response);
+				angular.forEach(msgs,function(value,key){
+					//update this msgAct = 2
+					PMMsgSQLite.UpdateMsgAct(value.MessageId,2);
+					//check if 
+					if(value.roomId == xmppSharedProperties.GetSharedProperties().ActiveRoomId){
+		   				console.log('active room -> show extra button');
+						//show extra button
+						$rootScope.$broadcast('showExtraBtn',{msgId:value.MessageId});
+					}
+				});
+			}
+		})
+	};
+	//*************Timer***************
+
 	
 });
 
@@ -443,8 +544,3 @@ function AddUserIdSeenMessageInList(msgId,empId) {
 	dictUserSeenMessage.push({msgId:msgId,empIds:[empId]});
 	return;
 }
-
-function GenerateMessageId(){
-	var fullId = xmppConnection.getUniqueId();
-	return fullId.substring(24,36);
-};

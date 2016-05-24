@@ -28,8 +28,8 @@
               </div>
             </div>
             <div ng-show="message.showExtraBtn">
-              <i ng-show="(message.side == 'right')" class='ion-ios-information-outline'> <span ng-click='resendMessage(message.msgId)' class='extraBtn'> Resend</span></a></i>
-              <i ng-show="(message.side == 'right')" class='ion-ios-trash-outline'> <span ng-click='deleteMessage(message.msgId)' class='extraBtn'> Delete</span></a></i>
+              <i ng-show="(message.side == 'right')" class='ion-ios-information-outline'><span ng-click='resendMessage(message.msgId,message.msg)' class='extraBtn'> Resend</span></a></i>
+              <i ng-show="(message.side == 'right')" class='ion-ios-trash-outline'><span ng-click='deleteMessage(message.msgId)' class='extraBtn'> Delete</span></a></i>
             </div>
         </div>
           <div class='cf'></div>

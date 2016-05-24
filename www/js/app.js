@@ -66,8 +66,23 @@
             XMPPService.Disconnect();
         };
 
-        // listen for Online event
+        // listen for Online event(mobile)
         $rootScope.$on('$cordovaNetwork:online', function(event, networkState){
+          onOnline();
+        });
+
+        // listen for Offline event(mobile)
+        $rootScope.$on('$cordovaNetwork:offline', function(event, networkState){
+          onOffline();
+        });
+
+        //network detect event handles for pc
+        if (!window.cordova){
+          addEvent(window, 'online', onOnline);
+          addEvent(window, 'offline', onOffline);  
+        };
+        
+        function onOnline() {  
           if(isNetworkDown){
             //set flag enable sync room
             xmppSyncRooms = true;
@@ -75,14 +90,14 @@
             XMPPService.Authentication(window.localStorage.getItem("AuthServices_username"),window.localStorage.getItem("AuthServices_password"));
             isNetworkDown = false;
           }
-        });
+        };
 
-        // listen for Offline event
-        $rootScope.$on('$cordovaNetwork:offline', function(event, networkState){
+        function onOffline() {
           XMPPService.Disconnect();
           xmppConnectionIsActive = false;
           isNetworkDown = true;
-        });
+        };
+
 
         // SQLiteService.Execute('select * from userprofile',null).then(function(response){
         //     console.log(response.rows.item);
@@ -272,4 +287,3 @@ function LogInAPI(AUTH_EVENTS,APIService,$http,$q){
       function(error){console.log(error);reject(error);});
   });
 };
-

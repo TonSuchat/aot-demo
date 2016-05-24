@@ -121,8 +121,9 @@ angular.module('starter')
 	};
 
 	//unseen : 0 = unseen(in case when message coming but user didn't active in room, for select and resend to notify sender reciver seen message) , 1 = seen
+	//msgAct : 0 = normal , 1 = resend , 2 = show resend | delete button
 	this.CreatePMMsgTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmmsg(Id integer primary key AUTOINCREMENT,MessageId text, Empl_Code text, message text, readTotal int, roomId int, TS text, unseen int)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmmsg(Id integer primary key AUTOINCREMENT,MessageId text, Empl_Code text, message text, readTotal int, roomId int, TS text, unseen int, msgAct int)");
 	};
 
 	this.CreatePMSubscribeTable = function(){
@@ -794,13 +795,13 @@ angular.module('starter')
 
 	this.Update = function(data){
 		var sql;
-		sql = "UPDATE pmmsg SET MessageId = ?, Empl_Code = ?, message = ?, readTotal = ?, roomId = ?, TS = ?, unseen = ? WHERE Id = " + data.Id;	
-		var param = [data.MessageId,data.Empl_Code,data.message,data.readTotal,data.roomId,data.TS,data.unseen];
+		sql = "UPDATE pmmsg SET MessageId = ?, Empl_Code = ?, message = ?, readTotal = ?, roomId = ?, TS = ?, unseen = ?, msgAct = ? WHERE Id = " + data.Id;	
+		var param = [data.MessageId,data.Empl_Code,data.message,data.readTotal,data.roomId,data.TS,data.unseen,data.msgAct];
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
 	};
 
 	this.Add = function(data){
-		var sql = "INSERT INTO pmmsg (MessageId,Empl_Code, message, readTotal, roomId, TS, unseen) VALUES (?,?,?,?,?,?,?);";
+		var sql = "INSERT INTO pmmsg (MessageId,Empl_Code, message, readTotal, roomId, TS, unseen, msgAct) VALUES (?,?,?,?,?,?,?,?);";
 		return SQLiteService.Execute(sql,data).then(function(response){return response;},function(error){console.log(error); return error;});
 	};
 	//***Necessary-Method
@@ -832,6 +833,18 @@ angular.module('starter')
 
 	this.CheckMessageIdIsExsit = function(MessageId){
 		return SQLiteService.Execute("SELECT count(*) as totalCount FROM pmmsg  WHERE MessageId = '" + MessageId + "'").then(function(response){return response;},function(error){return error;});			
+	};
+
+	this.GetAllResendMessage = function(){
+		return SQLiteService.Execute("SELECT * FROM pmmsg  WHERE msgAct = 1 ORDER BY CAST(SUBSTR(ts,5,4) AS INT), CAST(SUBSTR(ts,3,2) AS INT), CAST(SUBSTR(ts,1,2) AS INT), CAST(SUBSTR(ts,9,2) AS INT), CAST(SUBSTR(ts,11,2) AS INT), CAST(SUBSTR(ts,13,2) AS INT), Id").then(function(response){return response;},function(error){return error;});			
+	};
+
+	this.UpdateMsgAct = function(msgId,msgAct){
+		return SQLiteService.Execute("UPDATE pmmsg SET msgAct = " + msgAct + " WHERE MessageId = '" + msgId + "'").then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.DeleteMessage = function(msgId,roomId){
+		return SQLiteService.Execute("DELETE from pmmsg WHERE MessageId = '" + msgId + "' and roomId = '" + roomId + "'").then(function(response){return response;},function(error){return error;});			
 	};
 })
 .service('PMSubscribeSQLite',function(SQLiteService){

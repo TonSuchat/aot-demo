@@ -71,10 +71,10 @@ angular.module('starter')
         //append message
         $scope.$on('incomingMessage',function(env,args){
             $scope.allMsg.push({Id:0,MessageId:args.msgId,Empl_Code:args.ownerId,message:args.message,readTotal:0,roomId:args.roomId,TS:args.TS});
-            if(args.ownerId == window.localStorage.getItem("CurrentUserName")) $scope.msgDetails.push({msgId:args.msgId,side:'right',msg:args.message,TS:TransformServerTSToDateTimeStr(args.TS.toString()),readTotal:0});
+            if(args.ownerId == window.localStorage.getItem("CurrentUserName")) $scope.msgDetails.push({msgId:args.msgId,side:'right',msg:args.message,TS:TransformServerTSToDateTimeStr(args.TS.toString()),readTotal:0,showExtraBtn:false});
             else{
                 var eachSubscribe =  $filter('filter')($scope.allSubscribe, { Empl_Code: args.ownerId });
-                $scope.msgDetails.push({msgId:args.msgId,side:'left',msg:args.message,PictureThumb:eachSubscribe[0].PictureThumb,Firstname:eachSubscribe[0].Firstname,TS:TransformServerTSToDateTimeStr(args.TS.toString()),readTotal:0});
+                $scope.msgDetails.push({msgId:args.msgId,side:'left',msg:args.message,PictureThumb:eachSubscribe[0].PictureThumb,Firstname:eachSubscribe[0].Firstname,TS:TransformServerTSToDateTimeStr(args.TS.toString()),readTotal:0,showExtraBtn:false});
                 //send back to sender for update readed
                 XMPPService.SendSeenMessage(args.roomId,args.msgId);
             } 
@@ -87,6 +87,17 @@ angular.module('starter')
             for (var i = 0; i <= $scope.msgDetails.length - 1; i++) {
                 if($scope.msgDetails[i].msgId == args.msgId){
                     $scope.msgDetails[i].readTotal = args.readTotal;
+                    break;
+                }
+            };
+            if(!$scope.$$phase) $scope.$apply();
+        });
+
+        //show extra button
+        $scope.$on('showExtraBtn',function(env,args){
+            for (var i = 0; i <= $scope.msgDetails.length - 1; i++) {
+                if($scope.msgDetails[i].msgId == args.msgId){
+                    $scope.msgDetails[i].showExtraBtn = true;
                     break;
                 }
             };
@@ -107,15 +118,59 @@ angular.module('starter')
         };
 
         $scope.sendMessage = function(){
-            console.log('xmppConnectionIsActive',xmppConnectionIsActive);
             if($scope.noInternet) return;
             //todo check has network, If has network try to reconnect xmpp then go on process;
-            if(!xmppConnectionIsActive){
+            if(!xmppConnectionIsActive) ProcessTryToReconnectAndSendMessage($scope,$filter,XMPPService,PMMsgSQLite,viewScroll,$scope.roomId,$scope.message); //try to reconnect(timer process)
+            else XMPPService.SendChatMessage($scope.empId, $scope.roomId, $scope.message); //normal process
+            $scope.message = '';
+        };
 
+        $scope.resendMessage = function(msgId,msg){
+            if($scope.noInternet) return;
+            //if connection not active try to reconnect and resend message
+            if(!xmppConnectionIsActive){
+                //update this msAct = 1
+                PMMsgSQLite.UpdateMsgAct(msgId,1).then(function(){
+                    for (var i = 0; i <= $scope.msgDetails.length - 1; i++) {
+                        if($scope.msgDetails[i].msgId == msgId){
+                            $scope.msgDetails[i].showExtraBtn = false;
+                            break;
+                        }
+                    };
+                    if(!$scope.$$phase) $scope.$apply();
+                    //enable timer
+                    XMPPService.EnableTimerReconnect();
+                });
             }
             else{
-                XMPPService.SendChatMessage($scope.empId, $scope.roomId, $scope.message);    
-                $scope.message = '';
+                //if has connection resend message by normal process
+                //update this msgAct = 0
+                PMMsgSQLite.UpdateMsgAct(msgId,0).then(function(){
+                    //hide extra button
+                    for (var i = 0; i <= $scope.msgDetails.length - 1; i++) {
+                        if($scope.msgDetails[i].msgId == msgId){
+                            $scope.msgDetails[i].showExtraBtn = false;
+                            break;
+                        }
+                    };
+                    if(!$scope.$$phase) $scope.$apply();
+                });
+                //resend message
+                XMPPService.SendChatMessage($scope.empId, $scope.roomId, msg, msgId);    
+            }
+        };
+
+        $scope.deleteMessage = function(msgId){
+            if(confirm('ลบข้อความนี้ ?')){
+                PMMsgSQLite.DeleteMessage(msgId,$scope.roomId).then(function(response){
+                    for (var i = 0; i <= $scope.msgDetails.length - 1; i++) {
+                        if($scope.msgDetails[i].msgId == msgId){
+                            $scope.msgDetails.splice(i,1);
+                            break;
+                        }
+                    };
+                    if(!$scope.$$phase) $scope.$apply();
+                });
             }
         };
 
@@ -166,13 +221,14 @@ function InitialPMMsgDetails($scope,data,myEmpId,allsubscribe,$filter){
         var eachSubscribe =  $filter('filter')(allsubscribe, { Empl_Code: value.Empl_Code });
         $scope.msgDetails.unshift({
             Id:value.Id,
+            msgId:value.MessageId,
             side:(value.Empl_Code == myEmpId) ? 'right' : 'left',
             msg:value.message,
             TS:(value.TS != null) ? TransformServerTSToDateTimeStr(value.TS.toString()) : '',
             readTotal:value.readTotal,
             Firstname:eachSubscribe[0].Firstname,
             PictureThumb:eachSubscribe[0].PictureThumb,
-            showExtraBtn:false
+            showExtraBtn:(value.msgAct == 2) ? true : false
         });
     });
 };
@@ -260,4 +316,20 @@ function SendNotifySeenAllNewMessage(roomId,PMMsgSQLite,XMPPService) {
             PMMsgSQLite.UpdateSeenMessageInRoom(roomId);
         }
     });
+};
+
+function ProcessTryToReconnectAndSendMessage($scope,$filter,XMPPService,PMMsgSQLite,viewScroll,roomId,message){
+    console.log('ProcessTryToReconnectAndSendMessage');
+    var ownerId = window.localStorage.getItem("CurrentUserName");
+    var eachSubscribe =  $filter('filter')($scope.allSubscribe, { Empl_Code: ownerId });
+    var msgId = XMPPService.GenerateMessageId();
+    var ts = GetCurrentTSAPIFormat();
+    if(eachSubscribe == null || msgId == null) return;
+    //append in UI
+    $scope.msgDetails.push({msgId:msgId,side:'right',msg:message,PictureThumb:eachSubscribe[0].PictureThumb,Firstname:eachSubscribe[0].Firstname,TS:TransformServerTSToDateTimeStr(ts.toString()),readTotal:0,showExtraBtn:false});
+    //insert to pmMSG msgAct = 1
+    PMMsgSQLite.Add([msgId,ownerId,message,0,roomId,ts,1,1]);
+    viewScroll.scrollBottom(true);
+    //enable timer reconnect
+    XMPPService.EnableTimerReconnect();
 };
