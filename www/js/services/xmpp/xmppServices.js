@@ -351,10 +351,15 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 								})
 								//join room
 								service.JoinRoom(roomDetails.roomId,window.localStorage.getItem("CurrentUserName"));
+								resolve(true);
 							}
 						});
 					}
-					else resolve(true);
+					else{
+						//join room
+						service.JoinRoom(roomDetails.roomId,window.localStorage.getItem("CurrentUserName"));
+						resolve(true);
+					} 
 				}
 				else resolve(true);
 			},function(response){console.log(response);resolve(false);});
