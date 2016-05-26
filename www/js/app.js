@@ -81,13 +81,22 @@
           addEvent(window, 'online', onOnline);
           addEvent(window, 'offline', onOffline);  
         };
+
+        //enable timer maintain xmpp connection
+        XMPPService.TimerMaintainConnection();
         
         function onOnline() {  
           if(isNetworkDown){
             //set flag enable sync room
             xmppSyncRooms = true;
+            isAttempToConnect = true;
             //connect xmpp server
-            XMPPService.Authentication(window.localStorage.getItem("AuthServices_username"),window.localStorage.getItem("AuthServices_password"));
+            if(!xmppTimerIsActive){
+              if(!isAttempToConnect){
+                isAttempToConnect = true;
+                XMPPService.Authentication(window.localStorage.getItem("AuthServices_username"),window.localStorage.getItem("AuthServices_password"));
+              }
+            }
             isNetworkDown = false;
           }
         };

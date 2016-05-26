@@ -88,10 +88,18 @@ angular.module('starter').service('XMPPApiService',function($http,$httpParamSeri
 		// });
 
 		return $q(function(resolve,reject){
-			var result = {data:[
-					{roomName:'a36b3dc3-4810-43af-8044-0b977869f6da',members:['484134']}
-				]}
-			resolve(result);
+			if(jid == '484074'){
+				var result = {data:[
+						{roomName:'a36b3dc3-4810-43af-8044-0b977869f6da',members:['484134']}
+					]}
+				resolve(result);
+			}
+			else{
+				var result = {data:[
+						{roomName:'a36b3dc3-4810-43af-8044-0b977869f6da',members:['484074']}
+					]}
+				resolve(result);		
+			}
 		});
 
 	};

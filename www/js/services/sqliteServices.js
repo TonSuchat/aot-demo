@@ -889,7 +889,6 @@ angular.module('starter')
 
 	this.Add = function(data){
 		var sql = "INSERT INTO pmseenmessage (Empl_Code, MessageId) VALUES (?,?)";
-		console.log(sql);
 		return SQLiteService.Execute(sql,data).then(function(response){return response;},function(error){console.log(error); return error;});
 	};
 

@@ -5,6 +5,7 @@ var xmppConnection;
 var xmppConnectionIsActive = false;
 var xmppSyncRooms = false;
 var dictUserSeenMessage = [];
+var isAttempToConnect = true;
 //**********VARIABLES**********
 
 angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$rootScope,PMMsgSQLite,PMUserInRoomSQLite,PMRoomSQLite,APIService,XMPPApiService,xmppSharedProperties,PMSeenMessageSQLite){
@@ -49,20 +50,31 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 			if(xmppSyncRooms){
 				//sync rooms (on new login, network online(after offline))
 				service.SyncPMRooms().then(function(response){
-					if(response) xmppSyncRooms = false;
+					if(response){
+						xmppSyncRooms = false;
+						if(needResendMessages) service.ProcessResendMessages();
+						////check flag is trigger by timer reconnect?, Yes resend all message after reconnect
+						//if(xmppTimerIsActive) service.ProcessResendMessages();
+					} 
 				}); 
 			}
-			else service.JoinRoomsUsersIsMember(); //todo join all rooms that current user is memeber
+			else{
+				service.JoinRoomsUsersIsMember(); //todo join all rooms that current user is memeber	
+				//check flag is trigger by timer reconnect?, Yes resend all message after reconnect
+				if(needResendMessages) service.ProcessResendMessages();
+			} 
 			//set global connection state
 			xmppConnectionIsActive = true;
-			//check flag is trigger by timer reconnect?, Yes resend all message after reconnect
-			if(xmppTimerIsActive) service.ProcessResendMessages();
+			//set global attemp connect
+			isAttempToConnect = false;
 			return true;
 		}
-		// else if(status == Strophe.status.DISCONNECTED){
-		// 	alert('DISCONNECTED');
-		// 	xmppConnectionIsActive = false;
-		// }
+		else if(status == Strophe.Status.DISCONNECTED || status == Strophe.Status.DISCONNECTING){
+			console.log('DISCONNECTED || DISCONNECTING');
+			isAttempToConnect = false;
+			xmppConnectionIsActive = false;
+			return true;
+		}
 		else{
 			xmppConnectionIsActive = false;
 			return true;
@@ -119,7 +131,7 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 	};
 
 	this.OnGroupChatMessage = function(message) {
-		console.log(message);
+		//console.log(message);
  		var result = GetMessageObjectFromXML(message);
  		var roomId = result.from;
  		//receiver seen message and reply to sender
@@ -128,7 +140,8 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
  			//find ownerId by msgId
  			PMMsgSQLite.GetEmpIdByMessageAndRoomId(result.msgId,roomId).then(function(response){
  				if(response != null){
- 					var ownerId = ConvertQueryResultToArray(response)[0].Empl_Code;
+ 					var responseData = ConvertQueryResultToArray(response);
+ 					var ownerId = (responseData[0] != null && responseData[0].Empl_Code != null) ? responseData[0].Empl_Code : '';
  					if(ownerId == window.localStorage.getItem("CurrentUserName")){
 		 				//check user has already seen message(in other device)
 		 				var isUserSeenMessage = CheckUserIsSeenMessage(result.msgId,result.fromJID);
@@ -189,8 +202,12 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 							if(ownerId != window.localStorage.getItem("CurrentUserName")){
 								console.log('increment');
 								PMRoomSQLite.UpdateIncrementTotalNewMessage(roomId);
+								//todo if active on pmrooms view show lastmsg & numberOfNewMsg
 							}
 						}
+		   			}
+		   			else{
+		   				//todo update msgAct = 0 (ensure this message can resended)
 		   			}
 		   		}
 		   	});
@@ -219,7 +236,8 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 			else result.msgId = service.GenerateMessageId();
 			//send xmpp message
 			var msg = CreateChatMessageXML(roomId,message,result.msgId,result.TS,fromId);
-			xmppConnection.send(msg);
+			try {xmppConnection.send(msg);}
+			catch(err){};
 			resolve(result);
 		});
 	};
@@ -240,7 +258,9 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 		//send to self in case many devices
 		jid = fromId + '@' + xmppURLDetails.domain;
 		msg = $msg({to:jid, type:'chat', event:'createchatroom', empId:toId, fullName:receiverFullName, roomId:roomId}).c('body').t('create chat room');
-		xmppConnection.send(msg);
+		try{xmppConnection.send(msg);}
+		catch(err){};
+		
 	};
 	//*************Message*************
 
@@ -375,21 +395,51 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 
 
 	//*************Timer***************
-	var xmppReconnectTimer;
+	var xmppSetTimeout;
 	var xmppTimerIsActive = false;
 	var xmppReconnectCounter = 1;
-	this.EnableTimerReconnect = function() {
-	    if(xmppTimerIsActive) return;
-	    console.log('EnableTimerReconnect');
-	    xmppReconnectTimer = setInterval(function(){service.xmppTimerTick()}, 15000);
-	    xmppTimerIsActive = true;
+	this.TryToReconnect = function() {
+	    // if(xmppTimerIsActive) return;
+	    // console.log('EnableTimerReconnect');
+	    // xmppReconnectTimer = setInterval(function(){service.xmppTimerTick()}, 15000);
+	    // //change flag
+	    // xmppTimerIsActive = true;
+
+	    //if server down reconnect xmpp and didn't already attemp to reconnect
+	   	if(!isNetworkDown) {
+	   		if(!isAttempToConnect){
+	   			service.Authentication(window.localStorage.getItem("AuthServices_username"),window.localStorage.getItem("AuthServices_password"));
+	   			isAttempToConnect = true;
+	   		} 
+	   	}
+
+	   	//if reach 1:50 minute still can't connect then update msgAct = 2
+	   	xmppSetTimeout = setTimeout(function(){
+	   		if(!xmppConnectionIsActive){
+	   			//update all messages that have msgAct = 1 to msgAct = 2 , Show extra button if still in active room
+	        	service.ProcessShowExtraButton();
+	        	isAttempToConnect = false;
+	   		}
+	   	},110000)
 	};
 
-	this.DisableTimerReconnect = function() {
-	    clearInterval(xmppReconnectTimer);
-	    xmppTimerIsActive = false;
-	    xmppReconnectCounter = 1;
-	    console.log('DisableTimerReconnect');
+	this.TimerMaintainConnection = function(){
+		setInterval(function(){
+			console.log('xmppConnectionIsActive',xmppConnectionIsActive);
+			console.log('isAttempToConnect',isAttempToConnect);
+			if(!xmppConnectionIsActive && !isAttempToConnect){ 
+				console.log('TimerMaintainConnection');
+				isAttempToConnect = true;
+				service.Authentication(window.localStorage.getItem("AuthServices_username"),window.localStorage.getItem("AuthServices_password"));
+			}	
+		}, 15000);
+	};
+
+	this.DisableSetTimeout = function() {
+	    clearTimeout(xmppSetTimeout);
+	    // xmppTimerIsActive = false;
+	    // xmppReconnectCounter = 1;
+	    console.log('DisableSetTimeout');
 	};
 
 	this.xmppTimerTick = function() {
@@ -409,8 +459,9 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 	};
 
 	this.ProcessResendMessages = function(){
+		needResendMessages = false;
 		console.log('ProcessResendMessages');
-		service.DisableTimerReconnect();
+		service.DisableSetTimeout();
 		//loop resend message
 		PMMsgSQLite.GetAllResendMessage().then(function(response){
 			if(response != null){
@@ -420,6 +471,12 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 					service.SendChatMessage(value.Empl_Code,value.roomId,value.message,value.MessageId);
 					//update this msgAct = 0
 					PMMsgSQLite.UpdateMsgAct(value.MessageId,0);
+					//check if 
+					if(value.roomId == xmppSharedProperties.GetSharedProperties().ActiveRoomId){
+		   				console.log('active room -> resend completed');
+						//show extra button
+						$rootScope.$broadcast('resendCompleted',{msgId:value.MessageId});
+					}
 				});
 				if(msgs.length > 0){
 					var lastIndex = msgs.length - 1;
@@ -514,6 +571,7 @@ function GetTSFromDelayMessage(timestamp){
 	var month = timestamp.substring(5,7);
 	var year = timestamp.substring(0,4);
 	var hour = (parseInt(timestamp.substring(11,13)) + 7).toString();
+	hour = (hour.length == 1) ? '0' + hour : hour;
 	var minute = timestamp.substring(14,16);
 	var millisecond = timestamp.substring(17,19);
  	return (day + month + year + hour + minute + millisecond);

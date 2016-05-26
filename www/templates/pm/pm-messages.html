@@ -1,3 +1,12 @@
+<style type="text/css">
+.spinner svg {
+  width: 20px;
+  height: 20px;
+  fill:white;
+  stroke:white;
+}
+</style>
+
 <ion-view cache-view="false">
   <ion-nav-title>
     
@@ -27,9 +36,12 @@
                  <span>ส่งเมื่อ : {{message.TS}}</span>
               </div>
             </div>
-            <div ng-show="message.showExtraBtn">
-              <i ng-show="(message.side == 'right')" class='ion-ios-information-outline'><span ng-click='resendMessage(message.msgId,message.msg)' class='extraBtn'> Resend</span></a></i>
-              <i ng-show="(message.side == 'right')" class='ion-ios-trash-outline'><span ng-click='deleteMessage(message.msgId)' class='extraBtn'> Delete</span></a></i>
+            <div ng-show='message.msgAct == 1 && message.side == "right"'>
+              <ion-spinner icon='ios-small'></ion-spinner> <span>กำลังส่งข้อความ</span>
+            </div>
+            <div ng-show="message.msgAct == 2">
+              <i ng-show="(message.side == 'right')" class='ion-ios-information-outline'><span ng-click='resendMessage(message.msgId,message.msg)' class='extraBtn'> ส่งใหม่</span></a></i>
+              <i ng-show="(message.side == 'right')" class='ion-ios-trash-outline'><span ng-click='deleteMessage(message.msgId)' class='extraBtn'> ลบ</span></a></i>
             </div>
         </div>
           <div class='cf'></div>
