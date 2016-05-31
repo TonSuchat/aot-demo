@@ -82,8 +82,8 @@
           addEvent(window, 'offline', onOffline);  
         };
 
-        //enable timer maintain xmpp connection
-        XMPPService.TimerMaintainConnection();
+        // //enable timer maintain xmpp connection
+        // XMPPService.TimerMaintainConnection();
         
         function onOnline() {  
           if(isNetworkDown){
@@ -287,9 +287,10 @@ function LogInAPI(AUTH_EVENTS,APIService,$http,$q){
         var result = angular.fromJson(response.data);
         //get token_type("bearer") + one white space and token
         var token = result.token_type + ' ' + result.access_token;
+        console.log(token);
         window.localStorage.setItem(AUTH_EVENTS.LOCAL_TOKEN_KEY, token);
         //set header
-        //$http.defaults.headers.common['Authorization'] = token;
+        $http.defaults.headers.common['Authorization'] = token;
         resolve();
         //console.log(token);
       },

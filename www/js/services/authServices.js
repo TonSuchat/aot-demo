@@ -30,6 +30,8 @@ angular.module('starter')
                 window.localStorage.setItem("AuthServices_position", userData.Position); //userData.Position;
                 //connect xmpp server
                 XMPPService.Authentication(window.localStorage.getItem("AuthServices_username"),window.localStorage.getItem("AuthServices_password"));
+                //enable xmpp maintain timer
+                XMPPService.TimerMaintainConnection();
                 successAction();
             }
             //normal login
@@ -62,6 +64,8 @@ angular.module('starter')
                                 xmppSyncRooms = true;
                                 //connect xmpp
                                 XMPPService.Authentication(window.localStorage.getItem("AuthServices_username"),window.localStorage.getItem("AuthServices_password"));
+                                //enable xmpp maintain timer
+                                XMPPService.TimerMaintainConnection();
                             }
                         });
                         successAction();
@@ -77,8 +81,9 @@ angular.module('starter')
             username = '';
             isAuthenticated = false;
             //$http.defaults.headers.common['X-Auth-Token'] = undefined;
-            $http.defaults.headers.common['Authorization'] = undefined;
+            //$http.defaults.headers.common['Authorization'] = undefined;
             ClearAllUserLocalStorage(AUTH_EVENTS);
+
             // window.localStorage.removeItem(AUTH_EVENTS.LOCAL_TOKEN_KEY);
             // window.localStorage.removeItem(AUTH_EVENTS.LOCAL_USERNAME_KEY);
         }
@@ -139,6 +144,8 @@ angular.module('starter')
 
         var logout = function() {
             console.log('service logout');
+            //disable xmpp maintain timer
+            XMPPService.DisableTimerMaintainConnection();
             XMPPService.Disconnect();
             destroyUserCredentials();
 

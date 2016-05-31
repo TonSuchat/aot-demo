@@ -398,6 +398,7 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 	var xmppSetTimeout;
 	var xmppTimerIsActive = false;
 	var xmppReconnectCounter = 1;
+	var xmppMaintainTimer;
 	this.TryToReconnect = function() {
 	    // if(xmppTimerIsActive) return;
 	    // console.log('EnableTimerReconnect');
@@ -424,7 +425,7 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 	};
 
 	this.TimerMaintainConnection = function(){
-		setInterval(function(){
+		xmppMaintainTimer = setInterval(function(){
 			console.log('xmppConnectionIsActive',xmppConnectionIsActive);
 			console.log('isAttempToConnect',isAttempToConnect);
 			if(!xmppConnectionIsActive && !isAttempToConnect){ 
@@ -435,6 +436,11 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 		}, 15000);
 	};
 
+	this.DisableTimerMaintainConnection = function(){
+		console.log('DisableTimerMaintainConnection');
+		clearInterval(xmppMaintainTimer);
+	};
+
 	this.DisableSetTimeout = function() {
 	    clearTimeout(xmppSetTimeout);
 	    // xmppTimerIsActive = false;
@@ -442,21 +448,21 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 	    console.log('DisableSetTimeout');
 	};
 
-	this.xmppTimerTick = function() {
-		console.log('xmppTimerTick');
-	    if(xmppReconnectCounter == 5){
-	    	console.log('xmppTimerTick 5 times');
-	        service.DisableTimerReconnect();
-	        //update all messages that have msgAct = 1 to msgAct = 2 , Show extra button if still in active room
-	        service.ProcessShowExtraButton();
-	    }
-	    else{
-	    	console.log('xmppTimerTick try to reconnect : ' + xmppReconnectCounter);
-	        //try to reconnect
-	        service.Authentication(window.localStorage.getItem("AuthServices_username"),window.localStorage.getItem("AuthServices_password"));
-	        xmppReconnectCounter++;
-	    }
-	};
+	// this.xmppTimerTick = function() {
+	// 	console.log('xmppTimerTick');
+	//     if(xmppReconnectCounter == 5){
+	//     	console.log('xmppTimerTick 5 times');
+	//         service.DisableTimerReconnect();
+	//         //update all messages that have msgAct = 1 to msgAct = 2 , Show extra button if still in active room
+	//         service.ProcessShowExtraButton();
+	//     }
+	//     else{
+	//     	console.log('xmppTimerTick try to reconnect : ' + xmppReconnectCounter);
+	//         //try to reconnect
+	//         service.Authentication(window.localStorage.getItem("AuthServices_username"),window.localStorage.getItem("AuthServices_password"));
+	//         xmppReconnectCounter++;
+	//     }
+	// };
 
 	this.ProcessResendMessages = function(){
 		needResendMessages = false;

@@ -5,7 +5,7 @@ angular.module('starter').service('XMPPApiService',function($http,$httpParamSeri
 	xmppApiServiceConfig.headers = {'Authorization' : 'IhJpIsSTFXSkXkAn','Content-Type': 'application/json'};
 	var xmppApiServiceURLDetails = {domain:'http://' + xmppURLDetails.domain,port:':9090',apiPrefix:'/plugins/restapi/v1'};
 	var xmppApiServiceFullUrl = xmppApiServiceURLDetails.domain + xmppApiServiceURLDetails.port + xmppApiServiceURLDetails.apiPrefix;
-	var xmppApiGetRoomsByJID = APIService.hostname() + '/pm/rooms'
+	var xmppApiGetRoomsByJID = APIService.hostname() + '/PM/RoomByJID';
 
 	this.httpPost = function(url,data){
 		return $q(function(resolve, reject) {
@@ -77,31 +77,13 @@ angular.module('starter').service('XMPPApiService',function($http,$httpParamSeri
 	};
 
 	this.GetRoomsByJID = function(jid){
-		// return $q(function(resolve,reject){
-		// 	service.httpPost(xmppApiGetRoomsByJID,{'Empl_Code':jid}).then(
-		// 		function(response){
-		// 			resolve(response);
-		// 		},
-		// 		function(response){
-		// 			reject(response);
-		// 		});
-		// });
-
 		return $q(function(resolve,reject){
-			if(jid == '484074'){
-				var result = {data:[
-						{roomName:'a36b3dc3-4810-43af-8044-0b977869f6da',members:['484134']}
-					]}
-				resolve(result);
-			}
-			else{
-				var result = {data:[
-						{roomName:'a36b3dc3-4810-43af-8044-0b977869f6da',members:['484074']}
-					]}
-				resolve(result);		
-			}
+			APIService.httpPost(xmppApiGetRoomsByJID,{'Empl_Code':jid},function(response){
+				resolve(response);
+			},function(response){
+				reject(response);
+			});
 		});
-
 	};
 
 });
