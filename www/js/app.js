@@ -37,17 +37,17 @@
         // })
     })
     .run(function($ionicPlatform,AUTH_EVENTS,APIService,$http,$q,NotiService,$cordovaDevice){
-      $ionicPlatform.ready(function(){
-        //call login api
-        LogInAPI(AUTH_EVENTS,APIService,$http,$q).then(function(){
-          //post to gcm(google cloud messaging) for register device and get token from gcm
-          if (window.cordova){
-            pushNotification = window.plugins.pushNotification;
-            NotiService.Register(pushNotification);  
-          }
-        });
+      // $ionicPlatform.ready(function(){
+      //   //call login api
+      //   LogInAPI(AUTH_EVENTS,APIService,$http,$q).then(function(){
+      //     //post to gcm(google cloud messaging) for register device and get token from gcm
+      //     if (window.cordova){
+      //       pushNotification = window.plugins.pushNotification;
+      //       NotiService.Register(pushNotification);  
+      //     }
+      //   });
           
-      });
+      // });
     })
     .run(function($ionicPlatform, SQLiteService, AuthService, XMPPService, XMPPApiService, $rootScope){
       $ionicPlatform.ready(function(){
@@ -165,13 +165,21 @@
 
           .state('app.home', {
             url: '/home',
-              abstract: true,
+            abstract: true,
             views: {
               'menuContent': {
                 templateUrl: 'templates/home.html'
               }
             }
           })
+
+          //initial page
+          .state('landing', {
+            url: '/landing',
+            templateUrl: 'templates/landing.html',
+            controller: 'LandingCtrl'
+          })
+
           .state('app.home.news-feed', {
             url: '/news-feed',
             views: {
@@ -275,25 +283,43 @@
             }
           })
       // if none of the above states are matched, use this as the fallback
-      $urlRouterProvider.otherwise('/app/home/news-feed');
+      //$urlRouterProvider.otherwise('/app/home/news-feed');
+      $urlRouterProvider.otherwise('/landing');
     });
 
-function LogInAPI(AUTH_EVENTS,APIService,$http,$q){
-  return $q(function(resolve,reject){
-    var data = {grant_type:'password',username:'epayment@airportthai.co.th',password:'aotP@ssw0rd'};
-    var url = APIService.hostname() + '/Token';
-    APIService.httpPost(url,data,
-      function(response){
-        var result = angular.fromJson(response.data);
-        //get token_type("bearer") + one white space and token
-        var token = result.token_type + ' ' + result.access_token;
-        console.log(token);
-        window.localStorage.setItem(AUTH_EVENTS.LOCAL_TOKEN_KEY, token);
-        //set header
-        $http.defaults.headers.common['Authorization'] = token;
-        resolve();
-        //console.log(token);
-      },
-      function(error){console.log(error);reject(error);});
-  });
-};
+// function CheckIsAlreadyHasToken() {
+//   if(window.localStorage.getItem('yourTokenKey') != null && window.localStorage.getItem('yourTokenKey').length > 0) return true;
+//   else return false;
+// };
+
+// function LogInAPI(AUTH_EVENTS,APIService,$http,$q){
+//   return $q(function(resolve,reject){
+
+//     //if already has token, return;
+//     if(CheckIsAlreadyHasToken){
+//       SetAuthorizationHeader($http,window.localStorage.getItem('yourTokenKey'));
+//       resolve();
+//     } 
+//     else{
+//       var data = {grant_type:'password',username:'epayment@airportthai.co.th',password:'aotP@ssw0rd'};
+//       var url = APIService.hostname() + '/Token';
+//       APIService.httpPost(url,data,
+//         function(response){
+//           var result = angular.fromJson(response.data);
+//           //get token_type("bearer") + one white space and token
+//           var token = result.token_type + ' ' + result.access_token;
+//           console.log(token);
+//           window.localStorage.setItem(AUTH_EVENTS.LOCAL_TOKEN_KEY, token);
+//           //set header
+//           SetAuthorizationHeader($http,token);
+//           resolve();
+//         },
+//         function(error){console.log(error);reject(error);});
+//     }
+//   });
+// };
+
+// function SetAuthorizationHeader($http,value) {
+//   //set header
+//   $http.defaults.headers.common['Authorization'] = value;
+// };
