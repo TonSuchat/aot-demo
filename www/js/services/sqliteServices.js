@@ -117,13 +117,13 @@ angular.module('starter')
 	};
 
 	this.CreatePMUserInRoomTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmuserinroom(Id integer primary key AUTOINCREMENT, roomId int, userId text)");	
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmuserinroom(Id integer primary key AUTOINCREMENT, roomId text, userId text)");	
 	};
 
 	//unseen : 0 = unseen(in case when message coming but user didn't active in room, for select and resend to notify sender reciver seen message) , 1 = seen
 	//msgAct : 0 = normal , 1 = resend , 2 = show resend | delete button
 	this.CreatePMMsgTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmmsg(Id integer primary key AUTOINCREMENT,MessageId text, Empl_Code text, message text, readTotal int, roomId int, TS text, unseen int, msgAct int)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmmsg(Id integer primary key AUTOINCREMENT,MessageId text, Empl_Code text, message text, readTotal int, roomId text, TS text, unseen int, msgAct int)");
 	};
 
 	this.CreatePMSubscribeTable = function(){
@@ -131,7 +131,7 @@ angular.module('starter')
 	};
 
 	this.CreatePMSeenMessage = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmseenmessage(Id integer primary key AUTOINCREMENT, Empl_Code text, MessageId text)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmseenmessage(Id integer primary key AUTOINCREMENT, Empl_Code text, MessageId text, roomId text)");
 	};
 
 	this.DeleteAllTables = function(){
@@ -888,12 +888,12 @@ angular.module('starter')
 .service('PMSeenMessageSQLite',function(SQLiteService){
 
 	this.Add = function(data){
-		var sql = "INSERT INTO pmseenmessage (Empl_Code, MessageId) VALUES (?,?)";
+		var sql = "INSERT INTO pmseenmessage (Empl_Code, MessageId, roomId) VALUES (?,?,?)";
 		return SQLiteService.Execute(sql,data).then(function(response){return response;},function(error){console.log(error); return error;});
 	};
 
-	this.CheckUserSeenMessage = function(empId,messageId){
-		return SQLiteService.Execute("select count(*) as totalCount FROM pmseenmessage where Empl_Code = '" + empId + "' and MessageId = '" + messageId + "'").then(function(response){return response;},function(error){return error;});	
+	this.CheckUserSeenMessage = function(empId,messageId,roomId){
+		return SQLiteService.Execute("select count(*) as totalCount FROM pmseenmessage where Empl_Code = '" + empId + "' and MessageId = '" + messageId + "' and roomId = '" + roomId + "'").then(function(response){return response;},function(error){return error;});	
 	};
 
 })

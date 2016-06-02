@@ -22,33 +22,6 @@
         }
       });
     })
-    .run(function($ionicPlatform, $ionicPopup) {
-        // $ionicPlatform.onHardwareBackButton(function () {
-        //     if(true) { // your check here
-        //         $ionicPopup.confirm({
-        //             title: 'System warning',
-        //             template: 'are you sure you want to exit?'
-        //         }).then(function(res){
-        //             if( res ){
-        //                 navigator.app.exitApp();
-        //             }
-        //         })
-        //     }
-        // })
-    })
-    .run(function($ionicPlatform,AUTH_EVENTS,APIService,$http,$q,NotiService,$cordovaDevice){
-      // $ionicPlatform.ready(function(){
-      //   //call login api
-      //   LogInAPI(AUTH_EVENTS,APIService,$http,$q).then(function(){
-      //     //post to gcm(google cloud messaging) for register device and get token from gcm
-      //     if (window.cordova){
-      //       pushNotification = window.plugins.pushNotification;
-      //       NotiService.Register(pushNotification);  
-      //     }
-      //   });
-          
-      // });
-    })
     .run(function($ionicPlatform, SQLiteService, AuthService, XMPPService, XMPPApiService, $rootScope){
       $ionicPlatform.ready(function(){
         //open db
@@ -106,28 +79,7 @@
           xmppConnectionIsActive = false;
           isNetworkDown = true;
         };
-
-
-        // SQLiteService.Execute('select * from userprofile',null).then(function(response){
-        //     console.log(response.rows.item);
-        //   },
-        // function(error){console.log(error);});
-
-        // APIService.httpPost('http://localhost:51754/api/TestSync/UpdateData',{Id:99,field1:"a",field2:"b",field3:"c"},
-        //   function(response){console.log(response.data);},function(error){console.log(error);});
-
-        // var apiDatas = {
-        //   GetData:{ObjectID:1,SyncMedicalViewModel:{EmpID: '484074', FromDate: '4444', ToDate: '55555'}},
-        //   AddData:{},
-        //   UpdateData:{}
-        // };
-
-        // var tmpJson = {ObjectID:1,MedicalObject:{}};
-        // var jsonData = {Id:1,HospType:'รัฐบาล',HospName:'Name'};
-
-        // apiDatas.GetData[Object.keys(apiDatas.GetData)[1]].TS = "9999999";
-        // console.log(apiDatas.GetData);
-
+        
       });
     })
     .run(function($rootScope, $ionicPlatform, $ionicHistory){

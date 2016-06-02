@@ -144,11 +144,9 @@ angular.module('starter')
 
         var logout = function() {
             console.log('service logout');
-            //disable xmpp maintain timer
-            XMPPService.DisableTimerMaintainConnection();
+            //disconnect xmpp
             XMPPService.Disconnect();
             destroyUserCredentials();
-
         };
 
         var isAuthorized = function(authorizedRoles) {

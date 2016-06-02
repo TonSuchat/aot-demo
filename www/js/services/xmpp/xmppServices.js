@@ -21,6 +21,10 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 	this.Disconnect = function(){
 		try
 		{
+			//disable xmpp maintain timer
+            service.DisableTimerMaintainConnection();
+			//clear other variables
+            dictUserSeenMessage = [];
 			xmppConnection.flush();
     		xmppConnection.disconnect();
 		}
@@ -130,19 +134,21 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
  		}
 	};
 
-	this.OnGroupChatMessage = function(message) {
-		//console.log(message);
+	this.OnGroupChatMessage = function(message) {	
+		console.log(message);
  		var result = GetMessageObjectFromXML(message);
  		var roomId = result.from;
  		//receiver seen message and reply to sender
  		//if(result.received == 'true' && result.msgId != null && result.ownerId != null && result.fromJID != null){
+ 		console.log(result);
  		if(result.received == 'true' && result.msgId != null && result.fromJID != null){
  			//find ownerId by msgId
- 			PMMsgSQLite.GetEmpIdByMessageAndRoomId(result.msgId,roomId).then(function(response){
- 				if(response != null){
- 					var responseData = ConvertQueryResultToArray(response);
- 					var ownerId = (responseData[0] != null && responseData[0].Empl_Code != null) ? responseData[0].Empl_Code : '';
- 					if(ownerId == window.localStorage.getItem("CurrentUserName")){
+ 			//PMMsgSQLite.GetEmpIdByMessageAndRoomId(result.msgId,roomId).then(function(response){
+ 				//if(response != null){
+ 					//var responseData = ConvertQueryResultToArray(response);
+ 					//var ownerId = (responseData[0] != null && responseData[0].Empl_Code != null) ? responseData[0].Empl_Code : '';
+ 					//if(result.fromJID != window.localStorage.getItem("CurrentUserName")){
+
 		 				//check user has already seen message(in other device)
 		 				var isUserSeenMessage = CheckUserIsSeenMessage(result.msgId,result.fromJID);
 		 				console.log('isUserSeenMessage',isUserSeenMessage);
@@ -150,20 +156,21 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 		 					//add user seen this message to list
 			 				AddUserIdSeenMessageInList(result.msgId,result.fromJID);
 				 			//check this user is seen message?
-							PMSeenMessageSQLite.CheckUserSeenMessage(result.fromJID,result.msgId).then(function(response){
+							PMSeenMessageSQLite.CheckUserSeenMessage(result.fromJID,result.msgId,roomId).then(function(response){
 								if(response != null){
 									var totalCount = ConvertQueryResultToArray(response)[0].totalCount;
 									if(totalCount == 0){
 										//add this user has seen message
-										PMSeenMessageSQLite.Add([result.fromJID,result.msgId]);
+										PMSeenMessageSQLite.Add([result.fromJID,result.msgId,roomId]);
 										//update +1 readtotal
 							 			PMMsgSQLite.UpdateReadTotal(result.msgId).then(function(){
 							 				//get readtotal
 							 				PMMsgSQLite.GetReadTotalByMsgId(result.msgId).then(function(response){
 							 					if(response != null){
-							 						var readTotal = ConvertQueryResultToArray(response)[0].readTotal;
+							 						var dataReadTotal = ConvertQueryResultToArray(response);
+							 						var readTotal = (dataReadTotal.length > 0 ? dataReadTotal[0].readTotal : null);
 							 						//broadcast to update sender readtotal in UI if is active room
-							 						if(roomId == xmppSharedProperties.GetSharedProperties().ActiveRoomId) $rootScope.$broadcast('seenMessage',{msgId:result.msgId,readTotal:readTotal});
+							 						if(readTotal != null && (result.fromJID != window.localStorage.getItem("CurrentUserName")) && (roomId == xmppSharedProperties.GetSharedProperties().ActiveRoomId)) $rootScope.$broadcast('seenMessage',{msgId:result.msgId,readTotal:readTotal});
 							 					}
 							 				});
 							 			});				
@@ -171,9 +178,10 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 								}
 							}); 	
 		 				}
-		 			} 			
- 				}
- 			})
+
+		 			//} 			
+ 				//}
+ 			//})
  		}
  		//incomming message
 	    else if(result.to != null && result.from != null && result.message != null){

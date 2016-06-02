@@ -31,7 +31,7 @@ angular.module('starter')
 
     });
 })
-.controller('PrivateMessagesCtrl',function($scope,$ionicScrollDelegate,$stateParams,PMMsgSQLite,$filter,APIService,$ionicPlatform,AuthService,SyncService,socketFactory,$rootScope,PMRoomSQLite,$ionicPopover,$cordovaNetwork,$ionicPopup,PMSubscribeSQLite,XMPPService,xmppSharedProperties){
+.controller('PrivateMessagesCtrl',function($scope,$ionicScrollDelegate,$stateParams,PMMsgSQLite,$filter,APIService,$ionicPlatform,AuthService,SyncService,socketFactory,$rootScope,PMRoomSQLite,$ionicPopover,$cordovaNetwork,$ionicPopup,PMSubscribeSQLite,XMPPService,PMSeenMessageSQLite,xmppSharedProperties){
     $ionicPlatform.ready(function(){
 
         $scope.roomId = $stateParams.roomId
@@ -60,7 +60,7 @@ angular.module('starter')
             //resend all message that msgAct = 1
             if(xmppConnectionIsActive) XMPPService.ProcessResendMessages();
             //resend all new message to notify sender that you seen message
-            SendNotifySeenAllNewMessage($scope.roomId,PMMsgSQLite,XMPPService);
+            SendNotifySeenAllNewMessage($scope.roomId,PMMsgSQLite,PMSeenMessageSQLite,XMPPService);
             //update read all message , lastmsg = null in this room
             PMRoomSQLite.UpdateReadAllMsg($scope.roomId);
             //sync subscribe
@@ -79,6 +79,15 @@ angular.module('starter')
                 $scope.msgDetails.push({msgId:args.msgId,side:'left',msg:args.message,PictureThumb:eachSubscribe[0].PictureThumb,Firstname:eachSubscribe[0].Firstname,TS:TransformServerTSToDateTimeStr(args.TS.toString()),readTotal:0,msgAct:0});
                 //send back to sender for update readed
                 XMPPService.SendSeenMessage(args.roomId,args.msgId);
+                // //todo check is already seen message(in case many devices other devices may seen this message already) if not seen then send acknowledge
+                // PMSeenMessageSQLite.CheckUserSeenMessage(window.localStorage.getItem("CurrentUserName"),args.msgId,args.roomId).then(function(response){
+                //     if(response != null){
+                //         var totalCount = ConvertQueryResultToArray(response)[0].totalCount;
+                //         console.log('totalCount',totalCount);
+                //         //send back to sender for update readed
+                //         if(totalCount == 0) XMPPService.SendSeenMessage(args.roomId,args.msgId);
+                //     }
+                // });
             } 
             if(!$scope.$$phase) $scope.$apply();
             viewScroll.scrollBottom(true);
@@ -321,13 +330,20 @@ function PMRoomInitialProcess($scope,PMRoomSQLite,APIService){
     },function(){FinalAction($scope, APIService);});
 };
 
-function SendNotifySeenAllNewMessage(roomId,PMMsgSQLite,XMPPService) {
+function SendNotifySeenAllNewMessage(roomId,PMMsgSQLite,PMSeenMessageSQLite,XMPPService) {
     if(!xmppConnectionIsActive) return;
     PMMsgSQLite.GetAllUnSeenMessageByRoomId(roomId).then(function(response){
         if(response != null){
             var result = ConvertQueryResultToArray(response);
             angular.forEach(result,function(value,key){
-                XMPPService.SendSeenMessage(roomId,value.MessageId,value.Empl_Code,window.localStorage.getItem("CurrentUserName"));
+                //check this message is exist in pmseenmessage if not then send acknowledge this message, if exist go next round
+                PMSeenMessageSQLite.CheckUserSeenMessage(window.localStorage.getItem("CurrentUserName"),value.MessageId,roomId).then(function(response){
+                    if(response != null){
+                        var totalCount = ConvertQueryResultToArray(response)[0].totalCount;
+                        //if not seend then send acknowledge this message
+                        if(totalCount == 0) XMPPService.SendSeenMessage(roomId,value.MessageId,value.Empl_Code,window.localStorage.getItem("CurrentUserName"));
+                    }
+                });
             });
             //update unseen = 1 in this room
             PMMsgSQLite.UpdateSeenMessageInRoom(roomId);
