@@ -73,21 +73,12 @@ angular.module('starter')
         //append message
         $scope.$on('incomingMessage',function(env,args){
             $scope.allMsg.push({Id:0,MessageId:args.msgId,Empl_Code:args.ownerId,message:args.message,readTotal:0,roomId:args.roomId,TS:args.TS});
-            if(args.ownerId == window.localStorage.getItem("CurrentUserName")) $scope.msgDetails.push({msgId:args.msgId,side:'right',msg:args.message,TS:TransformServerTSToDateTimeStr(args.TS.toString()),readTotal:0,msgAct:0});
+            if(args.ownerId == window.localStorage.getItem("CurrentUserName")) $scope.msgDetails.push({msgId:args.msgId,side:'right',msg:args.message,DateStamp:TransformServerTSToDateStr(args.TS.toString()),TimeStamp:TransformServerTSToTimeStr(args.TS.toString()),readTotal:0,msgAct:0});
             else{
                 var eachSubscribe =  $filter('filter')($scope.allSubscribe, { Empl_Code: args.ownerId });
-                $scope.msgDetails.push({msgId:args.msgId,side:'left',msg:args.message,PictureThumb:eachSubscribe[0].PictureThumb,Firstname:eachSubscribe[0].Firstname,TS:TransformServerTSToDateTimeStr(args.TS.toString()),readTotal:0,msgAct:0});
+                $scope.msgDetails.push({msgId:args.msgId,side:'left',msg:args.message,PictureThumb:eachSubscribe[0].PictureThumb,Firstname:eachSubscribe[0].Firstname,DateStamp:TransformServerTSToDateStr(args.TS.toString()),TimeStamp:TransformServerTSToTimeStr(args.TS.toString()),readTotal:0,msgAct:0});
                 //send back to sender for update readed
                 XMPPService.SendSeenMessage(args.roomId,args.msgId);
-                // //todo check is already seen message(in case many devices other devices may seen this message already) if not seen then send acknowledge
-                // PMSeenMessageSQLite.CheckUserSeenMessage(window.localStorage.getItem("CurrentUserName"),args.msgId,args.roomId).then(function(response){
-                //     if(response != null){
-                //         var totalCount = ConvertQueryResultToArray(response)[0].totalCount;
-                //         console.log('totalCount',totalCount);
-                //         //send back to sender for update readed
-                //         if(totalCount == 0) XMPPService.SendSeenMessage(args.roomId,args.msgId);
-                //     }
-                // });
             } 
             if(!$scope.$$phase) $scope.$apply();
             viewScroll.scrollBottom(true);
@@ -250,7 +241,8 @@ function InitialPMMsgDetails($scope,data,myEmpId,allsubscribe,$filter){
             msgId:value.MessageId,
             side:(value.Empl_Code == myEmpId) ? 'right' : 'left',
             msg:value.message,
-            TS:(value.TS != null) ? TransformServerTSToDateTimeStr(value.TS.toString()) : '',
+            DateStamp:(value.TS != null) ? TransformServerTSToDateStr(value.TS.toString()) : '',
+            TimeStamp:(value.TS != null) ? TransformServerTSToTimeStr(value.TS.toString()) : '',
             readTotal:value.readTotal,
             Firstname:eachSubscribe[0].Firstname,
             PictureThumb:eachSubscribe[0].PictureThumb,

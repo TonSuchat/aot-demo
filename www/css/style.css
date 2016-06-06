@@ -20,6 +20,17 @@
 
 /*chat-css*/
 
+.date-notice{
+  border:2px solid;
+  width:100px;
+  padding:5px;
+  margin:10px auto 10px auto;
+  border-radius: 5px;
+  color: white;
+  background-color: gray;
+  border-color: #6d6d6d;
+}
+
 .bar.item-input-inset .item-input-wrapper input {
   width: 100% !important;
 }

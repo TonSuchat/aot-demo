@@ -19,6 +19,11 @@
       </ion-refresher>
 
       <div class='message-wrapper' ng-repeat='message in msgDetails'>
+
+        <div ng-show='msgDetails[$index - 1].DateStamp != message.DateStamp' class='text-center date-notice'>
+          <span class='text-center'>{{message.DateStamp}}</span>
+        </div>
+
         <div ng-show='message.side == "left"' class='chat-name'>
           <img  src="{{message.PictureThumb}}" class='profile-pic left' />
           <span class='chat-name'>{{message.Firstname}}</span>
@@ -32,8 +37,11 @@
               <div ng-show='(message.side == "right")'>
                 <span ng-show="(message.readTotal > 0)">(อ่านแล้ว) <span ng-show="roomDetails.roomType == 2">{{message.readTotal}}</span> | </span>
               </div>
-              <div>
-                 <span>ส่งเมื่อ : {{message.TS}}</span>
+              <div ng-show='message.side == "left"'>
+                 <span>รับเมื่อ : {{message.TimeStamp}}</span>
+              </div>
+              <div ng-show='message.side == "right"'>
+                 <span>ส่งเมื่อ : {{message.TimeStamp}}</span>
               </div>
             </div>
             <div ng-show='message.msgAct == 1 && message.side == "right"'>

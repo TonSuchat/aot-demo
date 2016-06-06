@@ -141,7 +141,7 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
  		//receiver seen message and reply to sender
  		//if(result.received == 'true' && result.msgId != null && result.ownerId != null && result.fromJID != null){
  		console.log(result);
- 		if(result.received == 'true' && result.msgId != null && result.fromJID != null){
+ 		if(result.received == true && result.msgId != null && result.fromJID != null){
  			//find ownerId by msgId
  			//PMMsgSQLite.GetEmpIdByMessageAndRoomId(result.msgId,roomId).then(function(response){
  				//if(response != null){
@@ -185,8 +185,10 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
  		}
  		//incomming message
 	    else if(result.to != null && result.from != null && result.message != null){
+	    	//ignored when didn't had msgId
+	    	if(result.msgId == null || result.msgId.length <= 0) return true;
+	    	//check this message is exist
 		    var ownerId = result.fromJID;
-		   	//check this message is exist
 		   	PMMsgSQLite.CheckMessageIdIsExsit(result.msgId).then(function(response){
 		   		if(response != null){
 		   			var totalCount = ConvertQueryResultToArray(response)[0].totalCount;
@@ -213,9 +215,6 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 								//todo if active on pmrooms view show lastmsg & numberOfNewMsg
 							}
 						}
-		   			}
-		   			else{
-		   				//todo update msgAct = 0 (ensure this message can resended)
 		   			}
 		   		}
 		   	});
@@ -251,7 +250,8 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 	};
 
 	this.SendSeenMessage = function(roomId,msgId){
-		xmppConnection.send($msg({to:roomId + '@' + xmppURLDetails.chatService + '.' + xmppURLDetails.domain, type:'groupchat', receive:true}).c('body').t(msgId + 'r'));
+		//xmppConnection.send($msg({to:roomId + '@' + xmppURLDetails.chatService + '.' + xmppURLDetails.domain, type:'groupchat', receive:true}).c('body').t(msgId + 'r'));
+		xmppConnection.send($msg({to:roomId + '@' + xmppURLDetails.chatService + '.' + xmppURLDetails.domain, type:'groupchat'}).c('acknowledged',{xmlns:'urn:xmpp:chat-markers:0',id:msgId}));
 	};
 
 	//todo implement
@@ -541,14 +541,15 @@ function GetMessageObjectFromXML(xml){
 	if(bodyelem != null && bodyelem.length > 0){
 		bodyTxt = Strophe.getText(bodyelem[0]);
 		//find message txt from body after 12 digit
-		result.message = GetMessageFromBody(bodyTxt);
+		result.message = bodyTxt; //GetMessageFromBody(bodyTxt);
 	}
 	//find msgId from body first 12 digit
-	result.msgId = (bodyTxt != null) ? GetMsgIdFromBody(bodyTxt) : null;
+	var acknowledged = xml.getElementsByTagName('acknowledged')[0];
+	result.received = (acknowledged != null) ? true : null //(bodyTxt != null) ? CheckThisMessageIsReceivedType(bodyTxt) : null;
+	result.msgId = (result.received == null) ? xml.getAttribute('id') : acknowledged.getAttribute('id'); //(bodyTxt != null) ? GetMsgIdFromBody(bodyTxt) : null;
 	result.to = (xml.getAttribute('to') != null) ? GetJIDFromAttribute(xml.getAttribute('to')) : null;
     result.from = (xml.getAttribute('from') != null) ? GetJIDFromAttribute(xml.getAttribute('from')) : null;
     result.fromJID = (xml.getAttribute('from') != null) ? GetOwnerIdByFrom(xml.getAttribute('from')) : null; 
-    result.received = (bodyTxt != null) ? CheckThisMessageIsReceivedType(bodyTxt) : null;
     result.event = (xml.getAttribute('event') != null) ? xml.getAttribute('event') : null;
     //if delay message get ts from timestamp attribute
     if(xml.getElementsByTagName('delay') != null && xml.getElementsByTagName('delay').length > 0) result.TS = GetTSFromDelayMessage(xml.getElementsByTagName('delay')[0].getAttribute('stamp'));
@@ -560,9 +561,11 @@ function GetMessageObjectFromXML(xml){
 
 function CreateChatMessageXML(roomId,message,msgId,TS,ownerId) {
 	var jid = roomId + '@' + xmppURLDetails.chatService + '.' + xmppURLDetails.domain;
-	var msg = $msg({to:jid, type:'groupchat', receive:false,TS:TS, ownerId:ownerId, roomId:roomId}).c('body').t(msgId + 's' + message);
+	//var msg = $msg({to:jid, type:'groupchat', receive:false,TS:TS, ownerId:ownerId, roomId:roomId}).c('body').t(msgId + 's' + message);
+	var msg = $msg({to:jid, type:'groupchat', receive:false,TS:TS, ownerId:ownerId, roomId:roomId, id:msgId}).c('body').t(message);
 	return msg.tree();
 };
+
 
 function GetOwnerIdByFrom(from) {
 	var index = from.indexOf('/');
