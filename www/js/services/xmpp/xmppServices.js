@@ -212,7 +212,9 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 							if(ownerId != window.localStorage.getItem("CurrentUserName")){
 								console.log('increment');
 								PMRoomSQLite.UpdateIncrementTotalNewMessage(roomId);
-								//todo if active on pmrooms view show lastmsg & numberOfNewMsg
+								//if active on pmrooms view show lastmsg & numberOfNewMsg
+								if(xmppSharedProperties.GetSharedProperties().ActiveRoomId == 'pmrooms')
+									$rootScope.$broadcast('UpdateRoomDetails',{message:result.message, roomId:roomId, ownerId:ownerId});
 							}
 						}
 		   			}

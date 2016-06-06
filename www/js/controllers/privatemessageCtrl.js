@@ -1,6 +1,6 @@
 angular.module('starter')
 
-.controller('PrivateMessageRoomsCtrl',function($scope,$ionicPlatform,SyncService,PMRoomSQLite,APIService,$cordovaNetwork,$ionicPopup,XMPPService,xmppSharedProperties){
+.controller('PrivateMessageRoomsCtrl',function($rootScope,$scope,$ionicPlatform,SyncService,PMRoomSQLite,APIService,$cordovaNetwork,$ionicPopup,XMPPService,xmppSharedProperties){
     
     $ionicPlatform.ready(function(){
         
@@ -17,6 +17,9 @@ angular.module('starter')
         //select all rooms from sqlite and bind to roomsDetail        
         PMRoomInitialProcess($scope,PMRoomSQLite,APIService);
 
+        //set active room id = pmroom for update room details on 'UpdateRoomDetails' event
+        xmppSharedProperties.SetSharedProperties({ActiveRoomId:'pmrooms'});
+
         //this function trigger by ng-infinite-scroll (when scrolled to bottom)
         $scope.loadMoreData = function () {
             if ($scope.isfirstLoad) { $scope.isfirstLoad = false; $scope.$broadcast('scroll.infiniteScrollComplete'); return; }
@@ -28,6 +31,28 @@ angular.module('starter')
             $scope.haveMoreData = (($scope.scrollDetails.start + $scope.scrollDetails.retrieve) < $scope.allRooms.length) ? true : false;
             FinalAction($scope, APIService);
         };
+
+        //update room details such as notification numbers, New messages
+        $scope.$on('UpdateRoomDetails',function(env,args){
+             for (var i = 0; i <= $scope.roomsDetail.length - 1; i++) {
+                 if($scope.roomsDetail[i].Id == args.roomId){
+                    //increment totalnewmsg number if other people send this message
+                    if(args.ownerId != window.localStorage.getItem("CurrentUserName")) $scope.roomsDetail[i].totalNewMsg += 1;
+                    //set last message
+                    $scope.roomsDetail[i].lastMsg = args.message;
+                    break;
+                 }
+             };
+             if(!$scope.$$phase) $scope.$apply();
+        });
+
+        //when leave this view set activeroomid to null
+        $rootScope.$on( "$stateChangeStart", function(e, toState, toParams, fromState, fromParams) {
+            if(fromState.url == '/pmsrooms'){
+                //clear active room
+                xmppSharedProperties.SetSharedProperties({ActiveRoomId:null});
+            }
+        });
 
     });
 })
