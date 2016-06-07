@@ -145,7 +145,7 @@ angular.module('starter')
         var logout = function() {
             console.log('service logout');
             //disconnect xmpp
-            XMPPService.Disconnect();
+            XMPPService.Disconnect(true);
             destroyUserCredentials();
         };
 

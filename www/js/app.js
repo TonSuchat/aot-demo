@@ -64,12 +64,12 @@
             xmppSyncRooms = true;
             isAttempToConnect = true;
             //connect xmpp server
-            if(!xmppTimerIsActive){
-              if(!isAttempToConnect){
-                isAttempToConnect = true;
-                XMPPService.Authentication(window.localStorage.getItem("AuthServices_username"),window.localStorage.getItem("AuthServices_password"));
-              }
+            //if(!xmppTimerIsActive){
+            if(!isAttempToConnect){
+              isAttempToConnect = true;
+              XMPPService.Authentication(window.localStorage.getItem("AuthServices_username"),window.localStorage.getItem("AuthServices_password"));
             }
+            //}
             isNetworkDown = false;
           }
         };

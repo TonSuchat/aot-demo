@@ -18,11 +18,11 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 		service.xmppConnect(userid,password);
 	};
 
-	this.Disconnect = function(){
+	this.Disconnect = function(needStopTimer){
 		try
 		{
 			//disable xmpp maintain timer
-            service.DisableTimerMaintainConnection();
+			if(needStopTimer != null && needStopTimer) service.DisableTimerMaintainConnection();
 			//clear other variables
             dictUserSeenMessage = [];
 			xmppConnection.flush();
@@ -555,7 +555,7 @@ function GetMessageObjectFromXML(xml){
     result.event = (xml.getAttribute('event') != null) ? xml.getAttribute('event') : null;
     //if delay message get ts from timestamp attribute
     if(xml.getElementsByTagName('delay') != null && xml.getElementsByTagName('delay').length > 0) result.TS = GetTSFromDelayMessage(xml.getElementsByTagName('delay')[0].getAttribute('stamp'));
-    else result.TS = (xml.getAttribute('TS') != null) ? xml.getAttribute('TS') : null;
+    else result.TS = GetCurrentTSAPIFormat(); //(xml.getAttribute('TS') != null) ? xml.getAttribute('TS') : null;
     //result.roomId = (xml.getAttribute('roomId') != null) ? xml.getAttribute('roomId') : null;
     //result.ownerId = (xml.getAttribute('from') != null) ? GetOwnerIdByFrom(xml.getAttribute('from')) : null; 
     return result;

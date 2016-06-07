@@ -121,17 +121,22 @@ angular.module('starter')
     })
     .controller('TimeCtrl', function($scope, $filter, TimeAttendanceSQLite, SyncService, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup) {
         $ionicPlatform.ready(function(){
-            APIService.ShowLoading();
-            //if disable sync, Get new data when page load.
-            SyncService.SyncTime().then(function(){
-                FinalActionInfo($scope,APIService);
-            });
-            //if(!enableSync) ProcessSyncTimeData($scope,TimeAttendanceSQLite,APIService,AuthService,$filter);
 
-            // //get all data only one times for use with $filter
-            TimeAttendanceSQLite.GetTimeAttendances().then(function(response){
-                $scope.allTADatas = ConvertQueryResultToArray(response);
-            });
+            APIService.ShowLoading();
+
+            //have internet connection
+            if(CheckNetwork($cordovaNetwork)){
+                SyncService.SyncTime().then(function(){
+                    FinalActionInfo($scope,APIService);
+                    GetAllTimes($scope,TimeAttendanceSQLite);
+                    InitialTimeInfo($scope,$filter);
+                });    
+            }
+            else{
+                //no internet connection
+                GetAllTimes($scope,TimeAttendanceSQLite);
+                InitialTimeInfo($scope,$filter);  
+            } 
 
             $scope.BindList = function(){
                 var selectedVal = $scope.ddlMonthsData.selectedOptions.val;
@@ -158,7 +163,7 @@ angular.module('starter')
                 });
             };
 
-            InitialTimeInfo($scope,$filter);
+            
 
             $scope.Refresh = function(){
                 //if no internet connection
@@ -190,10 +195,19 @@ angular.module('starter')
     .controller('LeaveCtrl', function($scope, $filter, LeaveSQLite, SyncService, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup) {
         $ionicPlatform.ready(function(){
             APIService.ShowLoading();
-            SyncService.SyncLeave().then(function(){
+
+            //have internet connection
+            if(CheckNetwork($cordovaNetwork)){
+                SyncService.SyncLeave().then(function(){
+                    InitialLeaveInfo($scope,$filter,LeaveSQLite);
+                    FinalActionInfo($scope,APIService);
+                });
+            }
+            else{
+                //no internet connection
                 InitialLeaveInfo($scope,$filter,LeaveSQLite);
                 FinalActionInfo($scope,APIService);
-            });
+            }
 
             $scope.Refresh = function(){
                 //if no internet connection
@@ -238,23 +252,35 @@ angular.module('starter')
 
             var syncCompleted = 0;
             APIService.ShowLoading();
-            //***Medical
-            SyncService.SyncMedical().then(function(numberOfNewData){
-                syncCompleted++;
-                 //get current data from sqlite
-                 InitialMedicalInfo($scope,MedicalSQLite,numberOfNewData);
-                 if(syncCompleted == 2) FinalActionInfo($scope,APIService);
-            });
-            //***Medical
 
-            //***tuition
-            SyncService.SyncTuition().then(function(numberOfNewData){
-                syncCompleted++;
-                //get current data from sqlite
-                InitialTuitionInfo($scope,TuitionSQLite,numberOfNewData);
-                if(syncCompleted == 2) FinalActionInfo($scope,APIService);
-            });   
-            //***tuition
+            //have internet connection
+             if(CheckNetwork($cordovaNetwork)){
+                //***Medical
+                SyncService.SyncMedical().then(function(numberOfNewData){
+                    syncCompleted++;
+                     //get current data from sqlite
+                     InitialMedicalInfo($scope,MedicalSQLite,numberOfNewData);
+                     if(syncCompleted == 2) FinalActionInfo($scope,APIService);
+                });
+                //***Medical
+
+                //***tuition
+                SyncService.SyncTuition().then(function(numberOfNewData){
+                    syncCompleted++;
+                    //get current data from sqlite
+                    InitialTuitionInfo($scope,TuitionSQLite,numberOfNewData);
+                    if(syncCompleted == 2) FinalActionInfo($scope,APIService);
+                });   
+                //***tuition
+             }
+             else{
+                //no internet connection
+                //get current Medical data from sqlite
+                InitialMedicalInfo($scope,MedicalSQLite,0);
+                //get current Tuition data from sqlite
+                InitialTuitionInfo($scope,TuitionSQLite,0);
+                FinalActionInfo($scope,APIService);
+             }
 
             //pull to sync data
             $scope.Refresh = function(){
@@ -616,6 +642,12 @@ function CreateFinanceInfoGroupByDate(distinctPaidDate,$filter,shareData,type){
         result.push(newData);
     };
     return result;
+};
+
+function GetAllTimes($scope,TimeAttendanceSQLite) {
+    TimeAttendanceSQLite.GetTimeAttendances().then(function(response){
+        $scope.allTADatas = ConvertQueryResultToArray(response);
+    });
 };
 
 function GetTimeDDLOptions($filter){

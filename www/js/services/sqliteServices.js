@@ -807,7 +807,8 @@ angular.module('starter')
 	//***Necessary-Method
 	
 	this.GetAllMsgByRoomId = function(roomId){
-		return SQLiteService.Execute("select * FROM pmmsg WHERE roomId = '" + roomId + "' ORDER BY CAST(SUBSTR(ts,5,4) AS INT), CAST(SUBSTR(ts,3,2) AS INT), CAST(SUBSTR(ts,1,2) AS INT), CAST(SUBSTR(ts,9,2) AS INT), CAST(SUBSTR(ts,11,2) AS INT), CAST(SUBSTR(ts,13,2) AS INT), Id").then(function(response){return response;},function(error){return error;});	
+		//return SQLiteService.Execute("select * FROM pmmsg WHERE roomId = '" + roomId + "' ORDER BY CAST(SUBSTR(ts,5,4) AS INT), CAST(SUBSTR(ts,3,2) AS INT), CAST(SUBSTR(ts,1,2) AS INT), CAST(SUBSTR(ts,9,2) AS INT), CAST(SUBSTR(ts,11,2) AS INT), CAST(SUBSTR(ts,13,2) AS INT), Id").then(function(response){return response;},function(error){return error;});	
+		return SQLiteService.Execute("select * FROM pmmsg WHERE roomId = '" + roomId + "' ORDER BY Id").then(function(response){return response;},function(error){return error;});	
 	};
 
 	this.GetAllUnSeenMessageByRoomId = function(roomId){

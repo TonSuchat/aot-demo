@@ -191,7 +191,7 @@ angular.module('starter')
                     //hide extra button
                     for (var i = 0; i <= $scope.msgDetails.length - 1; i++) {
                         if($scope.msgDetails[i].msgId == msgId){
-                            $scope.msgDetails[i].msgAct = 1;
+                            $scope.msgDetails[i].msgAct = 0;
                             break;
                         }
                     };
@@ -378,7 +378,7 @@ function ProcessTryToReconnectAndSendMessage($scope,$filter,XMPPService,PMMsgSQL
     var ts = GetCurrentTSAPIFormat();
     if(eachSubscribe == null || msgId == null) return;
     //append in UI
-    $scope.msgDetails.push({msgId:msgId,side:'right',msg:message,PictureThumb:eachSubscribe[0].PictureThumb,Firstname:eachSubscribe[0].Firstname,TS:TransformServerTSToDateTimeStr(ts.toString()),readTotal:0,msgAct:1});
+    $scope.msgDetails.push({msgId:msgId,side:'right',msg:message,PictureThumb:eachSubscribe[0].PictureThumb,Firstname:eachSubscribe[0].Firstname,DateStamp:TransformServerTSToDateStr(ts.toString()),TimeStamp:TransformServerTSToTimeStr(ts.toString()),readTotal:0,msgAct:1});
     //insert to pmMSG msgAct = 1
     PMMsgSQLite.Add([msgId,ownerId,message,0,roomId,ts,1,1]);
     viewScroll.scrollBottom(true);

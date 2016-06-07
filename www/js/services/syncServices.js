@@ -18,7 +18,7 @@ angular.module('starter')
 	};
 
   this.SyncMedical = function(){
-    var myEmpId = '393028'; // window.localStorage.getItem("CurrentUserName") AuthService.username() **Hard-Code**
+    var myEmpId = window.localStorage.getItem("CurrentUserName"); //'393028';  **Hard-Code**
     var apiDatas = {
       GetData:{ObjectID:1,SyncMedicalViewModel:{EmpID: myEmpId, FromDate: GetFiscalDate(), ToDate: GetCurrentDate().replace(/\//g,'')}},
       AddData:{ObjectID:1,ObjectMedicalEntity:{}},
@@ -29,7 +29,7 @@ angular.module('starter')
   };
 
   this.SyncTuition = function(){
-    var myEmpId = '409689'; //window.localStorage.getItem("CurrentUserName") **Hard-Code**
+    var myEmpId = window.localStorage.getItem("CurrentUserName"); //'409689'; **Hard-Code**
     var apiDatas = {
       GetData:{ObjectID:6,SyncASSIViewModel:{Empl_Code: myEmpId, FromDate: GetFiscalDate(), ToDate: GetCurrentDate().replace(/\//g,'')}},
       AddData:{ObjectID:6,ObjectASSIEntity:{}},
@@ -40,7 +40,7 @@ angular.module('starter')
   };
 
   this.SyncTime = function(){
-    var myEmpId = '576222'; //window.localStorage.getItem("CurrentUserName") **Hard-Code**
+    var myEmpId = window.localStorage.getItem("CurrentUserName"); // '576222' **Hard-Code**
     var apiDatas = {
       GetData:{ObjectID:2,SyncTAViewModel:{EmpID: myEmpId, FromDate: GetFiscalDate(), ToDate: GetCurrentDate().replace(/\//g,'')}},
       AddData:{ObjectID:2,ObjectTAEntity:{}},
@@ -51,7 +51,7 @@ angular.module('starter')
   };
 
   this.SyncLeave = function(){
-    var myEmpId = '565888'; //window.localStorage.getItem("CurrentUserName") **Hard-Code**
+    var myEmpId = window.localStorage.getItem("CurrentUserName"); //'565888'; **Hard-Code**
     var apiDatas = {
       GetData:{ObjectID:4,SyncLeaveViewModel:{Empl_Code: myEmpId, LeaveType:'', FromDate: GetFiscalDate(), ToDate: GetCurrentDate().replace(/\//g,'') }},
       AddData:{ObjectID:4,ObjectLeaveEntity:{}},
@@ -62,7 +62,7 @@ angular.module('starter')
   };
 
   this.SyncRoyal = function(){
-    var myEmpId = '221577'; //window.localStorage.getItem("CurrentUserName") **Hard-Code**
+    var myEmpId = window.localStorage.getItem("CurrentUserName"); //'221577'; **Hard-Code**
     var apiDatas = {
       GetData:{ObjectID:5,SyncRoyalViewModel:{Empl_Code: myEmpId}},
       AddData:{ObjectID:5,ObjectRoyalEntity:{}},
@@ -104,7 +104,7 @@ angular.module('starter')
   // };
 
   this.SyncPMMsg = function(roomId){
-    var empcode = '484074'; //window.localStorage.getItem("CurrentUserName") **Hard-Code**
+    var empcode = window.localStorage.getItem("CurrentUserName"); //'484074'; **Hard-Code**
     var apiDatas = {
       GetData:{ObjectID:10,SyncPMMsgViewModel:{roomId:roomId,Empl_Code:empcode}},
       AddData:{ObjectID:10,ObjectPMMsgEntity:{}},
