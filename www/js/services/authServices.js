@@ -23,6 +23,7 @@ angular.module('starter')
 
             //bypass login
             if(userData != null){
+                console.log('bypass-login');
                 isAuthenticated = window.localStorage.setItem("AuthServices_isAuthenticated", true); //true;
                 var nickname = (userData.Nickname && userData.Nickname != null) ? '(' + userData.Nickname + ')' : '';
                 window.localStorage.setItem("AuthServices_fullname", userData.PrefixName + ' ' + userData.Firstname + ' ' + userData.Lastname + nickname); //userData.PrefixName + ' ' + userData.Firstname + ' ' + userData.Lastname;
@@ -36,6 +37,7 @@ angular.module('starter')
             }
             //normal login
             else{
+                console.log('normal-login');
                 var url = APIService.hostname() + '/ContactDirectory/viewContactPaging';
                 var data = {keyword:username,start:1,retrieve:1};
                 APIService.httpPost(url,data,
@@ -103,7 +105,7 @@ angular.module('starter')
                     function(response){
                         var result = response.data;
                         if(result == null || result.length == 0) return reject('Login Failed.');
-                        if (result) {
+                        if (result._successField) {
                             username = user;
                             window.localStorage.setItem("AuthServices_username", user);
                             window.localStorage.setItem("AuthServices_password", pw);
