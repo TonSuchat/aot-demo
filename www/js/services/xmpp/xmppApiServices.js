@@ -2,7 +2,7 @@ angular.module('starter').service('XMPPApiService',function($http,$httpParamSeri
 
 	var service = this;
 	var xmppApiServiceConfig = {};
-	xmppApiServiceConfig.headers = {'Authorization' : 'IhJpIsSTFXSkXkAn','Content-Type': 'application/json'};
+	xmppApiServiceConfig.headers = {'Authorization' : 'E58ubx7zf7038taO','Content-Type': 'application/json'};
 	var xmppApiServiceURLDetails = {domain:'http://' + xmppURLDetails.domain,port:':9090',apiPrefix:'/plugins/restapi/v1'};
 	var xmppApiServiceFullUrl = xmppApiServiceURLDetails.domain + xmppApiServiceURLDetails.port + xmppApiServiceURLDetails.apiPrefix;
 	var xmppApiGetRoomsByJID = APIService.hostname() + '/PM/RoomByJID';
