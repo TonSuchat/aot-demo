@@ -192,7 +192,7 @@ angular.module('starter')
 
 
     function ClearAllUserLocalStorage(AUTH_EVENTS){
-        window.localStorage.removeItem(AUTH_EVENTS.LOCAL_TOKEN_KEY);
+        //window.localStorage.removeItem(AUTH_EVENTS.LOCAL_TOKEN_KEY);
         window.localStorage.removeItem(AUTH_EVENTS.LOCAL_USERNAME_KEY);
         window.localStorage.removeItem("AuthServices_isAuthenticated");
         window.localStorage.removeItem("AuthServices_fullname");

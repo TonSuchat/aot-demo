@@ -149,6 +149,7 @@ angular.module('starter')
         };
 
         $scope.OpenPDF = function(link){
+          //window.open('https://eservice.airportthai.co.th/AOTWebAPI/CircularLetters/PDF/0106201600009215.pdf','_system','location=no');
           window.open(link,'_system','location=no');
         };
 
@@ -279,16 +280,15 @@ angular.module('starter')
       };
       
       $scope.sendFeedback = function(){
-        var url = APIService.hostname() + '/Feedback';
+        var url = APIService.hostname() + '/UserFeedbacks/Feedback';
         var data = {Msg:$scope.feedbackMSG,Rating:$scope.rating.rate};
-        console.log(data);
         APIService.ShowLoading();
         APIService.httpPost(url,data,
           function(response){
             APIService.HideLoading();
-            if(response != null && response.data){
+            if(response != null && response.data.length > 0){
               alert('ระบบได้ทำการส่งความคิดเห็นของคุณแล้ว ขอบคุณที่ร่วมเป็นส่วนหนึ่งในการพัฒนาแอพพลิเคชั่น');
-              $location.path('#/app/home/news-feed');
+              $location.path('/app/home/news-feed');  
             }
           },
           function(error){APIService.HideLoading();console.log(error);});

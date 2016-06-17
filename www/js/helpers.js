@@ -1,4 +1,5 @@
- var shortnessThaiMonth = [
+
+var shortnessThaiMonth = [
     {monthValue:'01',monthName:'ม.ค.'},
     {monthValue:'02',monthName:'ก.พ.'},
     {monthValue:'03',monthName:'มี.ค.'},
@@ -11,6 +12,21 @@
     {monthValue:'10',monthName:'ต.ค.'},
     {monthValue:'11',monthName:'พ.ย.'},
     {monthValue:'12',monthName:'ธ.ค.'},
+];
+
+var shortnessEngMonth = [
+    {monthValue:'01',monthName:'Jan'},
+    {monthValue:'02',monthName:'Feb'},
+    {monthValue:'03',monthName:'Mar'},
+    {monthValue:'04',monthName:'Apr'},
+    {monthValue:'05',monthName:'May'},
+    {monthValue:'06',monthName:'Jun'},
+    {monthValue:'07',monthName:'Jul'},
+    {monthValue:'08',monthName:'Aug'},
+    {monthValue:'09',monthName:'Sep'},
+    {monthValue:'10',monthName:'Oct'},
+    {monthValue:'11',monthName:'Nov'},
+    {monthValue:'12',monthName:'Dec'},
 ];
 
  function GetCurrentDate(){
@@ -42,6 +58,12 @@ function GetThaiDateByDate($filter,inputDate){
 function TransformDateToddMMyyyyFormat(inputDate){
     if(!inputDate || inputDate.length == 0) return;
     return inputDate.substring(0,10).replace(/\./g,'');
+};
+
+//change date format from '15062016' to 15/06/2016
+function TransformDateHasSlashFormat (inputDate) {
+    if(!inputDate || inputDate.length == 0) return;
+    return inputDate.substring(0,2) + '/' + inputDate.substring(2,4) + '/' + inputDate.substring(4,8);
 };
 
 function GetThaiMonthNameByMonth($filter,monthVal){

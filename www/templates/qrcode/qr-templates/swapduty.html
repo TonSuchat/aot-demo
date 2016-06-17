@@ -1,0 +1,40 @@
+<ion-view cache-view="false" view-title="สร้าง QR-Code">
+    <ion-content>
+  		
+  		<div class='list'>
+
+  			<div class='item item-divider'>
+  				เลือก แลก/แทน เวร
+  			</div>
+
+  			<div class='item'>
+  				<ion-radio ng-model='swapDuty.type' ng-value="1">แลกเวร</ion-radio>
+            	<ion-radio ng-model='swapDuty.type' ng-value="2">แทนเวร</ion-radio>
+  			</div>
+
+  			<div class='item item-divider'>
+  				รายละเอียด
+  			</div>
+
+  			<div class='card padding'>
+  				<button ng-click='OpenDatePicker(true)' class='button button-block button-balanced'><i class='icon ion-calendar'></i>&nbsp;&nbsp;วันที่ปฏิบัติ งาน/แทน เวร</button>
+  				<div class='text-center'>
+  					{{dutyDate1}}
+  				</div>
+  			</div>
+
+  			<div class='card padding'>
+  				<button ng-click='OpenDatePicker(false)' class='button button-block button-balanced'><i class='icon ion-calendar'></i>&nbsp;&nbsp;วันที่ต้องการแลกเวร</button>
+  				<div class='text-center'>
+  					{{dutyDate2}}
+  				</div>
+  			</div>
+
+  			<div>
+  				<input type='button' class='button button-block button-calm' value='ตกลง' />
+  			</div>
+
+  		</div>
+
+    </ion-content>
+</ion-view>

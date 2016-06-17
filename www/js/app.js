@@ -5,7 +5,7 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js
 // angular.module('starter', ['ionic','ngCordova','ngMockE2E','btford.socket-io','ionic.rating'])
- angular.module('starter', ['ionic','ngCordova','btford.socket-io','ionic.rating'])
+ angular.module('starter', ['ionic','ngCordova','btford.socket-io','ionic.rating','ui.rCalendar','ionic-datepicker'])
 
     .run(function($ionicPlatform) {
       $ionicPlatform.ready(function() {
@@ -202,8 +202,35 @@
             url: '/qrcode',
             views: {
               'menuContent': {
-                templateUrl: 'templates/qrcode.html',
+                templateUrl: 'templates/qrcode/qrcode.html',
                 controller:'QRCodeCtrl'
+              }
+            }
+          })
+          .state('app.genqrcode', {
+            url: '/genqrcode',
+            views: {
+              'menuContent': {
+                templateUrl: 'templates/qrcode/genqrcode.html',
+                controller:'GenQRCodeCtrl'
+              }
+            }
+          })
+                .state('app.genqrswapduty', {
+                  url: '/genqrswapduty',
+                  views: {
+                    'menuContent': {
+                      templateUrl: 'templates/qrcode/qr-templates/swapduty.html',
+                      controller:'GenQRCodeCtrl'
+                    }
+                  }
+                })
+          .state('app.readqrcode', {
+            url: '/readqrcode',
+            views: {
+              'menuContent': {
+                templateUrl: 'templates/qrcode/readqrcode.html',
+                controller:'ReadQRCodeCtrl'
               }
             }
           })
@@ -231,6 +258,15 @@
               'menuContent': {
                 templateUrl: 'templates/feedback.html',
                 controller:'FeedbackCtrl'
+              }
+            }
+          })
+          .state('app.duty', {
+            url: '/duty',
+            views: {
+              'menuContent': {
+                templateUrl: 'templates/duty.html',
+                controller:'DutyCtrl'
               }
             }
           })

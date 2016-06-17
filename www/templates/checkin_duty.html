@@ -1,0 +1,40 @@
+<ion-modal-view>
+  <ion-header-bar>
+    <h1 class="title">รายงานตัวเวรประจำวัน</h1>
+    <div class="buttons">
+      <button class="button button-clear" ng-click="closeCheckIn()">ปิด</button>
+    </div>
+  </ion-header-bar>
+  <ion-content>
+    <form ng-submit="doCheckIn()">
+      <div class="list">
+
+        <div class='item item-divider'>
+          ประจำวันที่
+        </div>
+        <div class='item'>
+          {{selectedDate.displayFormat}}
+        </div>
+
+        <div class='item item-divider'>
+          ประเภท
+        </div>
+        <div class='item'>
+          <ion-list>
+            <ion-radio ng-model='dutyCheckInForm.type' ng-value="1">หัวหน้าเวร</ion-radio>
+            <ion-radio ng-model='dutyCheckInForm.type' ng-value="2">ลูกเวร</ion-radio>
+          </ion-list>  
+        </div>
+
+        <label class="item item-input item-stacked-label">
+          <span class="input-label">หมายเหตุ</span>
+          <input ng-model='dutyCheckInForm.remark' type="text" placeholder="หมายเหตุ...">
+        </label>
+
+        <label class="item">
+          <button class="button button-block button-positive" type="submit">รายงานตัว</button>
+        </label>
+      </div>
+    </form>
+  </ion-content>
+</ion-modal-view>

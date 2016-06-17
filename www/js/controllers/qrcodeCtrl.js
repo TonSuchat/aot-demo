@@ -3,8 +3,44 @@ var standardPrefix = ['http://','https://','mailto:','tel:','sms:','geo:','mecar
 angular.module('starter')
 
 .controller('QRCodeCtrl',function($scope,$cordovaBarcodeScanner){
-   	//active when ready
-   	ActiveBarcodeScanner($cordovaBarcodeScanner);
+   	
+   	
+})
+
+.controller('GenQRCodeCtrl',function($scope,ionicDatePicker){
+
+	//*******************Duty*******************
+   	$scope.swapDuty = {type:1};
+   	$scope.selectedDate = {dutyDate1:'',dutyDate2:''};
+
+   	var datePicker1 = {callback: function (val) { 
+		SetSelectedDate(val,true);
+	}};
+
+	var datePicker2 = {callback: function (val) { 
+		SetSelectedDate(val,false);
+	}};
+
+	$scope.OpenDatePicker = function(isDutyDate1){
+		if(isDutyDate1) ionicDatePicker.openDatePicker(datePicker1);
+		else ionicDatePicker.openDatePicker(datePicker2);
+	};
+
+	function SetSelectedDate (val,isDutyDate1) {
+		var selectedDate = new Date(val);
+		var day = selectedDate.getDate();
+		var month = (selectedDate.getUTCMonth() + 1);
+		month = (month.length == 1 ? '0' + month.toString() : month);
+		var year = selectedDate.getFullYear();
+		var result = day + '/' + month + '/' + year;
+		if(isDutyDate1) $scope.selectedDate.dutyDate1 = result;
+		else $scope.selectedDate.dutyDate2 = result;
+	};
+	//*******************Duty*******************
+
+})
+
+.controller('ReadQRCodeCtrl',function($scope,$cordovaBarcodeScanner){
    	$scope.Scan = function(){
     	ActiveBarcodeScanner($cordovaBarcodeScanner);
    	};
