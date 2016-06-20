@@ -36,13 +36,14 @@ angular.module('starter')
 			Empl_Code:window.localStorage.getItem("CurrentUserName"),
 			dutyDate:$scope.selectedDate.plainFormat,
 			Leader:$scope.dutyCheckInForm.type,
-			Remark:$scope.dutyCheckInForm.remark,
+			Remark:((!$scope.dutyCheckInForm.remark || $scope.dutyCheckInForm.remark.length == 0) ? '-' : $scope.dutyCheckInForm.remark),
 			Action:1
 		};
+		console.log(param);
 		APIService.ShowLoading();
 		POSTCheckInDuty(APIService,$q,param,$scope).then(
 			function(response){
-				if(response == 'Successfull.'){
+				if(response == 'OK'){
 					$scope.modalCheckIn.hide();
 					APIService.HideLoading();
 					DisplayDutyDatas($scope.selectedDate.plainFormat,APIService,$q,$scope);	
@@ -50,7 +51,7 @@ angular.module('starter')
 				else{
 					$scope.modalCheckIn.hide();
 					APIService.HideLoading();
-					alert(response);
+					alert(response.statusText);
 				}
 			});
 	};
@@ -63,9 +64,9 @@ angular.module('starter')
 			APIService.ShowLoading();
 			POSTCheckInDuty(APIService,$q,param,$scope).then(
 				function(response){
-					if(response == 'Successfull.'){
+					if(response == 'OK'){
 						APIService.HideLoading();
-						DisplayDutyDatas($scope.selectedDate.plainFormat,APIService,$q,$scope);	
+						DisplayDutyDatas($scope.selectedDate.plainFormat,APIService,$q,$scope);
 					}
 					else APIService.HideLoading();
 				});
@@ -204,7 +205,7 @@ function POSTAPIDuty (url,data,APIService,$q) {
 				}
 				else{resolve(null);}
 			},
-			function(error){console.log(error);return resolve(null);});	
+			function(error){console.log(error);return resolve(error);});	
 	});
 };
 

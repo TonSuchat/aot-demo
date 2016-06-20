@@ -207,4 +207,45 @@ function GetPicThumbBase64($q,APIService,empId) {
                 };
            },function(error){console.log(error);reject(error);});
     });
-}
+};
+
+function PadString(str,prefix) {
+    return prefix.substring(0,prefix.length - str.length) + str;
+};
+
+function OpenConfirmDialog($ionicPopup,$scope,titleTxt,contentTxt,OKCB,CancelCB) {
+    var confirmPopup = $ionicPopup.confirm({
+     title: titleTxt,
+     template: contentTxt,
+     scope: $scope,
+   });
+
+   confirmPopup.then(function(res) {
+     if(res) OKCB();
+     else CancelCB();
+   });
+};
+
+function b64toBlob(b64Data, contentType, sliceSize) {
+  contentType = contentType || '';
+  sliceSize = sliceSize || 512;
+
+  var byteCharacters = atob(b64Data);
+  var byteArrays = [];
+
+  for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+    var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+    var byteNumbers = new Array(slice.length);
+    for (var i = 0; i < slice.length; i++) {
+      byteNumbers[i] = slice.charCodeAt(i);
+    }
+
+    var byteArray = new Uint8Array(byteNumbers);
+
+    byteArrays.push(byteArray);
+  }
+
+  var blob = new Blob(byteArrays, {type: contentType});
+  return blob;
+};

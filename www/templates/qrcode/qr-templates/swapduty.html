@@ -8,33 +8,54 @@
   			</div>
 
   			<div class='item'>
-  				<ion-radio ng-model='swapDuty.type' ng-value="1">แลกเวร</ion-radio>
-            	<ion-radio ng-model='swapDuty.type' ng-value="2">แทนเวร</ion-radio>
+  				  <ion-radio ng-model='redeemDuty.type' name='type' ng-value="1">แลกเวร</ion-radio>
+            <ion-radio ng-model='redeemDuty.type' name='type' ng-value="2">แทนเวร</ion-radio>
   			</div>
+
+        <div class='item item-divider'>
+            ประเภทที่ต้องการ แลก/แทน
+        </div>
+
+        <div class='item'>
+            <ion-radio ng-model='redeemDuty.leader' name='leader' ng-value="1">หัวหน้าเวร</ion-radio>
+            <ion-radio ng-model='redeemDuty.leader' name='leader' ng-value="2">ลูกเวร</ion-radio>
+        </div>
 
   			<div class='item item-divider'>
   				รายละเอียด
   			</div>
 
   			<div class='card padding'>
-  				<button ng-click='OpenDatePicker(true)' class='button button-block button-balanced'><i class='icon ion-calendar'></i>&nbsp;&nbsp;วันที่ปฏิบัติ งาน/แทน เวร</button>
+  				<button ng-click='OpenRedeemDutyDatePicker(true)' class='button button-block button-balanced'><i class='icon ion-calendar'></i>&nbsp;&nbsp;วันที่ปฏิบัติ งาน/แทน เวร</button>
   				<div class='text-center'>
-  					{{dutyDate1}}
+  					{{selectedDate.dutyDate1}}
   				</div>
   			</div>
 
-  			<div class='card padding'>
-  				<button ng-click='OpenDatePicker(false)' class='button button-block button-balanced'><i class='icon ion-calendar'></i>&nbsp;&nbsp;วันที่ต้องการแลกเวร</button>
+  			<div ng-show='redeemDuty.type == 1' class='card padding'>
+  				<button ng-click='OpenRedeemDutyDatePicker(false)' class='button button-block button-balanced'><i class='icon ion-calendar'></i>&nbsp;&nbsp;วันที่ต้องการแลกเวร</button>
   				<div class='text-center'>
-  					{{dutyDate2}}
+  					{{selectedDate.dutyDate2}}
   				</div>
   			</div>
 
   			<div>
-  				<input type='button' class='button button-block button-calm' value='ตกลง' />
+  				<input type='button' ng-click='doRedeemDuty()' class='button button-block button-calm' value='ตกลง' />
   			</div>
 
+        <hr />
+
+        <div class='item item-divider'>
+          QR-Code
+        </div>
+
+        <div class='item item-image padding'>
+          <img src="{{QRSrc}}" />
+        </div>
+
   		</div>
+
+
 
     </ion-content>
 </ion-view>
