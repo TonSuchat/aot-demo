@@ -1,0 +1,35 @@
+<ion-view view-title="ข้อมูลภาษี">
+    <ion-content>
+
+        <div class="list">
+          <label class="item item-input item-select">
+            <div class="input-label">
+              ปีภาษี
+            </div>
+            <select ng-options='option.name for option in ddlTaxYear.options track by option.val' ng-model='ddlTaxYear.selectedOptions'>
+            </select>
+          </label>
+        </div>
+
+        <div class="list">
+
+            <div class="item item-divider">
+                ข้อมูลภาษี
+            </div>
+            <div ng-click='OpenTax91()' class="item">
+                ภงด.91
+            </div>
+            
+            <div ng-click='OpenTax50()' class="item">
+                ภงด.50 ทวิ
+            </div>     
+
+            <form id="formTax" method="post" action="{{actionTaxURL}}" target="targetTax">
+                <input type="hidden" name="Empl_Code" value="{{formData.Empl_Code}}" />
+                <input type="hidden" name="Empl_Password" value="{{formData.Empl_Password}}" />
+                <input type="hidden" name="Year" value="{{formData.Year}}" />
+            </form>       
+
+        </div>
+    </ion-content>
+</ion-view>

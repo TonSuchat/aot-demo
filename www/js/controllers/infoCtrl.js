@@ -115,6 +115,15 @@ angular.module('starter')
                     }
                 }
             })
+            .state('app.info.tax', {
+                url: '/tax',
+                views: {
+                    'finance': {
+                        templateUrl: 'templates/info/tax.html',
+                        controller: 'TaxCtrl'
+                    }
+                }
+            })
     })
 
     .controller('InfoCtrl', function($scope, $stateParams) {
@@ -317,8 +326,24 @@ angular.module('starter')
         CheckNeedToReload($rootScope,'/finance');
 
     })
-    .controller('HrCtrl', function($scope, $stateParams) {
+    .controller('HrCtrl', function($scope, $stateParams, APIService) {
 
+        //window.open('', 'targetTax');
+        //document.getElementById('myform').submit();
+
+        // APIService.httpPost(APIService.hostname() + '/Tax_910',{"Empl_Code": "484074","TaxYear": 2015},
+        //     function(response){
+        //         window.open(response.data,'_system','location=yes');
+        //         // var blob = b64toBlob(response.data, 'application/pdf');
+        //         // var blobUrl = URL.createObjectURL(blob);
+        //         // console.log(blobUrl);
+        //         // window.open(blobUrl,'_system','location=yes');
+        //     },
+        //     function(){})
+
+    })
+    .controller('TaxCtrl',function($scope){
+        InitialTaxDetails($scope);
     })
     .controller('TuitionCtrl', function($scope, $filter, TuitionSQLite, SyncService) {
         // shareTuitionData = tmpTuitionData;
@@ -443,6 +468,28 @@ function InitialTuitionDetails($scope,$filter,$stateParams){
     $scope.TuitionDetails.vatAmnt = currentTuition[0].Vat_Amnt;
     $scope.TuitionDetails.grandTotal = currentTuition[0].Grand_Total;
     $scope.TuitionDetails.bankName = currentTuition[0].BankName;
+};
+
+function InitialTaxDetails ($scope) {
+    $scope.actionTaxURL = '';
+    $scope.formData = {Empl_Code:window.localStorage.getItem('CurrentUserName'),Empl_Password:window.localStorage.getItem('CurrentPassword'),Year:''};
+    
+    BindDDLTaxYears($scope);
+};
+
+function BindDDLTaxYears($scope) {
+    var result = [];
+    var currentYear = new Date().getFullYear();
+    var defaultYear = currentYear;
+    result.push({val:currentYear,name:currentYear.toString()});
+    for (var i = 1; i <= 2; i++) {
+        currentYear--;
+        result.push({val:currentYear,name:currentYear.toString()});
+    };
+    $scope.ddlTaxYear = {
+        options:result,
+        selectedOptions: {val: defaultYear, name: defaultYear.toString()}
+    };
 };
 
 function ProcessSyncMedicalData($scope,MedicalSQLite,APIService,AuthService){
