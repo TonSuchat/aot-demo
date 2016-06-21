@@ -72,7 +72,7 @@ angular.module('starter')
                         });
                         successAction();
                     },
-                    function(){});
+                    function(error){console.log(error);successAction();});
             }
             // Set the token as header for your requests!
             //$http.defaults.headers.common['X-Auth-Token'] = token;

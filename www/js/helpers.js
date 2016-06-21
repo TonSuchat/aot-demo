@@ -156,7 +156,7 @@ function OpenIonicAlertPopup($ionicPopup,title,content){
 };
 
 function ConvertImgPNGToBase64(url,callback,outputFormat){
-    url = url.replace('10.74.29.166/','http://eservice2.airportthai.co.th/');
+    url = 'http://' + url //url.replace('10.74.29.166/','http://eservice2.airportthai.co.th/');
     var img = new Image();
     img.crossOrigin = 'Anonymous';
     img.onload = function(){

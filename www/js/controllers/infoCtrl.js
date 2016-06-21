@@ -353,23 +353,30 @@ angular.module('starter')
             APIService.httpPost(url,data,function(response){
                 if(response != null){
                     var blob = b64toBlob(response.data, 'application/pdf');
-                    var pathFile = '';
-
-                    if (ionic.Platform.isIOS()) pathFile = cordova.file.documentsDirectory
-                    else pathFile = cordova.file.externalDataDirectory
-
-                    $cordovaFile.writeFile(pathFile, fileName, blob, true).then(function(success){
-                        $cordovaFileOpener2.open(
-                            pathFile + fileName,
-                            'application/pdf'
-                          ).then(function() {
-                            APIService.HideLoading();
-                            console.log('file opened successfully');
-                          });
-                    }, function(error) {APIService.HideLoading();console.log(error);});
+                    if(!window.cordova){
+                        //pc process
+                        var blobURL = URL.createObjectURL(blob);
+                        window.open(blobURL,'_blank');
+                        APIService.HideLoading();
+                    }
+                    else{
+                        //mobile process
+                        var pathFile = '';
+                        if (ionic.Platform.isIOS()) pathFile = cordova.file.documentsDirectory
+                        else pathFile = cordova.file.externalDataDirectory
+                        $cordovaFile.writeFile(pathFile, fileName, blob, true).then(function(success){
+                            $cordovaFileOpener2.open(
+                                pathFile + fileName,
+                                'application/pdf'
+                              ).then(function() {
+                                APIService.HideLoading();
+                                console.log('file opened successfully');
+                              });
+                        }, function(error) {APIService.HideLoading();console.log(error);});
+                    }
                 }
                 else APIService.HideLoading();
-            },function(){APIService.HideLoading();});
+            },function(error){APIService.HideLoading();console.log(error);});
         };
 
     })
