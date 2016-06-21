@@ -328,22 +328,50 @@ angular.module('starter')
     })
     .controller('HrCtrl', function($scope, $stateParams, APIService) {
 
-        //window.open('', 'targetTax');
-        //document.getElementById('myform').submit();
-
-        // APIService.httpPost(APIService.hostname() + '/Tax_910',{"Empl_Code": "484074","TaxYear": 2015},
-        //     function(response){
-        //         window.open(response.data,'_system','location=yes');
-        //         // var blob = b64toBlob(response.data, 'application/pdf');
-        //         // var blobUrl = URL.createObjectURL(blob);
-        //         // console.log(blobUrl);
-        //         // window.open(blobUrl,'_system','location=yes');
-        //     },
-        //     function(){})
-
     })
-    .controller('TaxCtrl',function($scope){
+    .controller('TaxCtrl',function($scope,APIService,$cordovaFile,$cordovaFileOpener2){
+
         InitialTaxDetails($scope);
+        $scope.empCode = window.localStorage.getItem("CurrentUserName");
+
+        $scope.OpenTax91 = function(){
+            var taxYear = $scope.ddlTaxYear.selectedOptions.val;
+            this.DisplayPDFTax('Tax_91',taxYear);
+        };
+
+        $scope.OpenTax50 = function(){
+            var taxYear = $scope.ddlTaxYear.selectedOptions.val;
+            this.DisplayPDFTax('Tax_50',taxYear);
+        };
+
+        $scope.DisplayPDFTax = function (methodName,taxYear) {
+            APIService.ShowLoading();
+            var url = APIService.hostname() + '/' + methodName;
+            var data = {Empl_Code:$scope.empCode,TaxYear:taxYear};
+            var fileName = methodName + '_' + $scope.empCode + '_' + taxYear + '.pdf';
+            console.log(fileName);
+            APIService.httpPost(url,data,function(response){
+                if(response != null){
+                    var blob = b64toBlob(response.data, 'application/pdf');
+                    var pathFile = '';
+
+                    if (ionic.Platform.isIOS()) pathFile = cordova.file.documentsDirectory
+                    else pathFile = cordova.file.externalDataDirectory
+
+                    $cordovaFile.writeFile(pathFile, fileName, blob, true).then(function(success){
+                        $cordovaFileOpener2.open(
+                            pathFile + fileName,
+                            'application/pdf'
+                          ).then(function() {
+                            APIService.HideLoading();
+                            console.log('file opened successfully');
+                          });
+                    }, function(error) {APIService.HideLoading();console.log(error);});
+                }
+                else APIService.HideLoading();
+            },function(){APIService.HideLoading();});
+        };
+
     })
     .controller('TuitionCtrl', function($scope, $filter, TuitionSQLite, SyncService) {
         // shareTuitionData = tmpTuitionData;
@@ -438,8 +466,8 @@ function InitialLeaveInfo($scope,$filter,LeaveSQLite){
         if(result == null || result.length == 0) return;
         $scope.leaveInfo = {};
         $scope.leaveInfo.sickLeave = GetLeaveDetails('1',result,$filter);
-        $scope.leaveInfo.annualLeave = GetLeaveDetails('2',result,$filter);
-        $scope.leaveInfo.personalLeave = GetLeaveDetails('4',result,$filter);
+        $scope.leaveInfo.annualLeave = GetLeaveDetails('4',result,$filter);
+        $scope.leaveInfo.personalLeave = GetLeaveDetails('2',result,$filter);
     });
 };
 
@@ -471,9 +499,6 @@ function InitialTuitionDetails($scope,$filter,$stateParams){
 };
 
 function InitialTaxDetails ($scope) {
-    $scope.actionTaxURL = '';
-    $scope.formData = {Empl_Code:window.localStorage.getItem('CurrentUserName'),Empl_Password:window.localStorage.getItem('CurrentPassword'),Year:''};
-    
     BindDDLTaxYears($scope);
 };
 

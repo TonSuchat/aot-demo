@@ -168,5 +168,5 @@ function ProcessApproveRedeemDuty (qrresult,$ionicPopup,$scope,APIService) {
 function POSTCheckQR (APIService,data,SuccessCB,ErrorCB) {
 	APIService.ShowLoading();
 	var url = APIService.hostname() + '/CheckQR';
-	APIService.httpPut(url,data,function(response){SuccessCB(response);APIService.HideLoading();},function(error){ErrorCB(error);APIService.HideLoading();});
+	APIService.httpPost(url,data,function(response){SuccessCB(response);APIService.HideLoading();},function(error){ErrorCB(error);APIService.HideLoading();});
 };
