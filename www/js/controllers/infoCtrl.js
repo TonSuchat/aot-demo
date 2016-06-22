@@ -52,6 +52,15 @@ angular.module('starter')
                     }
                 }
             })
+            .state('app.info.tax', {
+                url: '/tax',
+                views: {
+                    'hr': {
+                        templateUrl: 'templates/info/tax.html',
+                        controller: 'TaxCtrl'
+                    }
+                }
+            })
             .state('app.info.royal', {
                 url: '/royal',
                 views: {
@@ -115,15 +124,7 @@ angular.module('starter')
                     }
                 }
             })
-            .state('app.info.tax', {
-                url: '/tax',
-                views: {
-                    'finance': {
-                        templateUrl: 'templates/info/tax.html',
-                        controller: 'TaxCtrl'
-                    }
-                }
-            })
+            
     })
 
     .controller('InfoCtrl', function($scope, $stateParams) {
@@ -237,7 +238,7 @@ angular.module('starter')
         CheckNeedToReload($rootScope,'/leave');
 
     })
-    .controller('MedicalCtrl', function($scope, $stateParams, $filter, MedicalSQLite, SyncService) {
+    .controller('MedicalCtrl', function($scope, $stateParams, $filter, MedicalSQLite, SyncService, $rootScope) {
         MedicalSQLite.GetMedicals().then(function(response){
             shareMedicalData = response;
             //get distinct paiddate for group data by paiddate
@@ -245,9 +246,11 @@ angular.module('starter')
                 $scope.MedicalInfo = CreateFinanceInfoGroupByDate(resultDistinct,$filter,shareMedicalData,'medical');
             });
         });
- 
+        //set new medical info = 0 on financial view
+        $rootScope.$broadcast('seenMedicalInfo',null);
     })
     .controller('MedicalDetailCtrl', function($scope, $stateParams, $filter) {
+        
         InitialMedicalDetails($scope,$filter,$stateParams);
     })
     .controller('FuelCtrl', function($scope, $stateParams) {
@@ -255,7 +258,7 @@ angular.module('starter')
     .controller('FuelDetailCtrl', function($scope, $stateParams) {
 
     })
-    .controller('FinanceCtrl', function($scope, MedicalSQLite, TuitionSQLite, SyncService, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup) {
+    .controller('FinanceCtrl', function($scope, MedicalSQLite, TuitionSQLite, SyncService, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup, $rootScope) {
 
         $ionicPlatform.ready(function(){
 
@@ -321,6 +324,16 @@ angular.module('starter')
                 }
             };
 
+            //set medical notification = 0 when user go to medical view
+            $rootScope.$on('seenMedicalInfo',function(){
+                $scope.medicalInfo.notification = 0;
+            });
+
+            //set medical notification = 0 when user go to medical view
+            $rootScope.$on('seenTuitionInfo',function(){
+                $scope.tuitionInfo.notification = 0;
+            });
+
         });
 
         CheckNeedToReload($rootScope,'/finance');
@@ -376,11 +389,13 @@ angular.module('starter')
                     }
                 }
                 else APIService.HideLoading();
-            },function(error){APIService.HideLoading();console.log(error);});
+            },function(error){APIService.HideLoading();console.log(error);alert('ไม่พบไฟล์');});
         };
 
     })
-    .controller('TuitionCtrl', function($scope, $filter, TuitionSQLite, SyncService) {
+    .controller('TuitionCtrl', function($scope, $filter, TuitionSQLite, SyncService, $rootScope) {
+        //set new tuition info = 0 on financial view
+        $rootScope.$broadcast('seenTuitionInfo',null);
         // shareTuitionData = tmpTuitionData;
         // $scope.TuitionInfo = CreateFinanceInfoGroupByDate(tmpDistinctTuitionData,$filter,shareTuitionData,'tuition');
         TuitionSQLite.GetTuitions().then(function(response){

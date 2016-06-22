@@ -97,6 +97,12 @@ function GetCurrentTime(){
     return datetime;
 };
 
+function GetCurrentTimeWithoutMillisecond(){
+    var currentdate = new Date(); 
+    var datetime = currentdate.getHours() + ":" + currentdate.getMinutes();
+    return datetime;  
+};
+
 function CheckNeedToReload($rootScope,checkedURL){
     $rootScope.$on( "$stateChangeSuccess", function(event, next, current) {
         if(next.url == checkedURL){

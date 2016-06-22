@@ -51,7 +51,7 @@ angular.module('starter')
 				else{
 					$scope.modalCheckIn.hide();
 					APIService.HideLoading();
-					alert(response.statusText);
+					alert(response);
 				}
 			});
 	};
@@ -64,6 +64,8 @@ angular.module('starter')
 			APIService.ShowLoading();
 			POSTCheckInDuty(APIService,$q,param,$scope).then(
 				function(response){
+					console.log(param);
+					console.log(response);
 					if(response == 'OK'){
 						APIService.HideLoading();
 						DisplayDutyDatas($scope.selectedDate.plainFormat,APIService,$q,$scope);
@@ -245,7 +247,7 @@ function POSTCheckInDuty (APIService,$q,param,$scope) {
 		var url = $scope.DutyApiDetails.checkInDutyURL;
 		var data = {} 
 		if(param.Action == 1) data = {Empl_Code:param.Empl_Code,DutyDate:param.dutyDate,Leader:param.Leader,Remark:param.Remark,Action:param.Action};
-		else data = {Empl_Code:param.Empl_Code,DutyDate:param.dutyDate,Action:param.Action};		
+		else data = {Empl_Code:param.Empl_Code,DutyDate:param.dutyDate,Action:param.Action,Leader:0,Remark:'-'};		
 		POSTAPIDuty(url,data,APIService,$q).then(function(response){resolve(response)});
 	});
 };

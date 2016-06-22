@@ -21,7 +21,7 @@ angular.module('starter')
       });
     })
 
-    .controller('AppCtrl', function($scope, $ionicModal, $timeout, AuthService, $ionicPopup,$location,SQLiteService,NotiService,SyncService) {
+    .controller('AppCtrl', function($scope, $ionicModal, $timeout, AuthService, $ionicPopup,$location,$ionicHistory,SQLiteService,NotiService,SyncService) {
 
       // With the new view caching in Ionic, Controllers are only called
       // when they are recreated or on app start, instead of every page change.
@@ -92,6 +92,11 @@ angular.module('starter')
           AuthService.logout();
           checkAuthen();
           $location.path('/app/home/news-feed');  
+          //clear cache
+          $timeout(function () {
+            $ionicHistory.clearCache();
+            $ionicHistory.clearHistory();
+          },300);
         });
       };
 
@@ -428,7 +433,7 @@ function InitialStockProcess($scope,$filter,data){
     $scope.stockInfo.color = 'gray'; 
     $scope.stockInfo.type = '';
   }
-  $scope.stockInfo.currentDate = (data == null) ? 'ไม่สามารถถึงข้อมูลล่าสุดได้' : GetThaiDateByDate($filter,GetCurrentDate().replace(/\//g,'')) + ' เวลา ' + GetCurrentTime() + ' น.';
+  $scope.stockInfo.currentDate = (data == null) ? 'ไม่สามารถถึงข้อมูลล่าสุดได้' : GetThaiDateByDate($filter,GetCurrentDate().replace(/\//g,'')) + ' เวลา ' + GetCurrentTimeWithoutMillisecond() + ' น.';
 };
 
 function LogInAPI(AUTH_EVENTS,APIService,$http,$q){
