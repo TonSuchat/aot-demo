@@ -1,6 +1,7 @@
 //***config
 var enableSync = false;
 var isNetworkDown = false;
+var itConnection = false;
 //***config
 
 angular.module('starter')

@@ -18,7 +18,7 @@
         </div>
         <div class='row'>
             <div class='col'>
-                <button ng-disabled='noInternet' type='submit' class='button button-positive button-block'>
+                <button ng-disabled='noInternet || searchData.keyword.length <= 1'  type='submit' class='button button-positive button-block'>
                     <i class='icon ion-search'></i>
                     ค้นหา
                 </button>
@@ -33,6 +33,11 @@
                 <p>{{person.Section}} {{person.Department}}</p>
             </ion-item>
         </ion-list>
+        <div ng-show='notFoundData' class='card'>
+            <div class='item'>
+                ไม่พบข้อมูล
+            </div>
+        </div>
         <ion-infinite-scroll on-infinite="loadMoreData()" ng-if="haveMoreData" distanct="1%">
         </ion-infinite-scroll>
     </ion-content>

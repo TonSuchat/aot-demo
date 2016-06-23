@@ -129,7 +129,7 @@ angular.module('starter')
 
     .controller('InfoCtrl', function($scope, $stateParams) {
     })
-    .controller('TimeCtrl', function($scope, $filter, TimeAttendanceSQLite, SyncService, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup) {
+    .controller('TimeCtrl', function($scope, $q, $filter, TimeAttendanceSQLite, SyncService, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup) {
         $ionicPlatform.ready(function(){
 
             APIService.ShowLoading();
@@ -139,18 +139,18 @@ angular.module('starter')
                 SyncService.SyncTime().then(function(){
                     FinalActionInfo($scope,APIService);
                     GetAllTimes($scope,TimeAttendanceSQLite);
-                    InitialTimeInfo($scope,$filter);
+                    InitialTimeInfo($scope,$q,$filter,TimeAttendanceSQLite);
                 });    
             }
             else{
                 //no internet connection
                 GetAllTimes($scope,TimeAttendanceSQLite);
-                InitialTimeInfo($scope,$filter);  
+                InitialTimeInfo($scope,$q,$filter,TimeAttendanceSQLite);  
             } 
 
             $scope.BindList = function(){
                 var selectedVal = $scope.ddlMonthsData.selectedOptions.val;
-                if(!selectedVal || selectedVal.length == 0) return;
+                if(!selectedVal || selectedVal.length == 0) return APIService.HideLoading();
                 TimeAttendanceSQLite.GetDistinctStampDateByFromDateAndToDate(selectedVal).then(
                     function(response){
                         var distinctStampDateArr = ConvertQueryResultToArray(response);
@@ -170,6 +170,7 @@ angular.module('starter')
                             }
                             else $scope.listTimeInfo = [];
                         }
+                        APIService.HideLoading();
                 });
             };
 
@@ -193,7 +194,7 @@ angular.module('starter')
                     TimeAttendanceSQLite.GetTimeAttendances().then(function(response){
                         $scope.allTADatas = ConvertQueryResultToArray(response);
                     });
-                    InitialTimeInfo($scope,$filter);    
+                    InitialTimeInfo($scope,$q,$filter,TimeAttendanceSQLite);    
                 }
             };
 
@@ -205,6 +206,19 @@ angular.module('starter')
     .controller('LeaveCtrl', function($scope, $filter, LeaveSQLite, SyncService, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup) {
         $ionicPlatform.ready(function(){
             APIService.ShowLoading();
+
+            $scope.toggleGroup = function(group) {
+                if ($scope.isGroupShown(group)) {
+                    $scope.shownGroup = null;
+                } 
+                else {
+                    $scope.shownGroup = group;
+                }
+            };
+
+            $scope.isGroupShown = function(group) {
+                return $scope.shownGroup == group;
+            };
 
             //have internet connection
             if(CheckNetwork($cordovaNetwork)){
@@ -342,55 +356,58 @@ angular.module('starter')
     .controller('HrCtrl', function($scope, $stateParams, APIService) {
 
     })
-    .controller('TaxCtrl',function($scope,APIService,$cordovaFile,$cordovaFileOpener2){
+    .controller('TaxCtrl',function($scope,APIService,$cordovaFile,$cordovaFileOpener2,$cordovaNetwork,$ionicPopup){
 
-        InitialTaxDetails($scope);
-        $scope.empCode = window.localStorage.getItem("CurrentUserName");
+        if(!CheckNetwork($cordovaNetwork)) return OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+        else{
+            InitialTaxDetails($scope);
+            $scope.empCode = window.localStorage.getItem("CurrentUserName");
 
-        $scope.OpenTax91 = function(){
-            var taxYear = $scope.ddlTaxYear.selectedOptions.val;
-            this.DisplayPDFTax('Tax_91',taxYear);
-        };
+            $scope.OpenTax91 = function(){
+                var taxYear = $scope.ddlTaxYear.selectedOptions.val;
+                this.DisplayPDFTax('Tax_91',taxYear);
+            };
 
-        $scope.OpenTax50 = function(){
-            var taxYear = $scope.ddlTaxYear.selectedOptions.val;
-            this.DisplayPDFTax('Tax_50',taxYear);
-        };
+            $scope.OpenTax50 = function(){
+                var taxYear = $scope.ddlTaxYear.selectedOptions.val;
+                this.DisplayPDFTax('Tax_50',taxYear);
+            };
 
-        $scope.DisplayPDFTax = function (methodName,taxYear) {
-            APIService.ShowLoading();
-            var url = APIService.hostname() + '/' + methodName;
-            var data = {Empl_Code:$scope.empCode,TaxYear:taxYear};
-            var fileName = methodName + '_' + $scope.empCode + '_' + taxYear + '.pdf';
-            console.log(fileName);
-            APIService.httpPost(url,data,function(response){
-                if(response != null){
-                    var blob = b64toBlob(response.data, 'application/pdf');
-                    if(!window.cordova){
-                        //pc process
-                        var blobURL = URL.createObjectURL(blob);
-                        window.open(blobURL,'_blank');
-                        APIService.HideLoading();
+            $scope.DisplayPDFTax = function (methodName,taxYear) {
+                APIService.ShowLoading();
+                var url = APIService.hostname() + '/' + methodName;
+                var data = {Empl_Code:$scope.empCode,TaxYear:taxYear};
+                var fileName = methodName + '_' + $scope.empCode + '_' + taxYear + '.pdf';
+                console.log(fileName);
+                APIService.httpPost(url,data,function(response){
+                    if(response != null){
+                        var blob = b64toBlob(response.data, 'application/pdf');
+                        if(!window.cordova){
+                            //pc process
+                            var blobURL = URL.createObjectURL(blob);
+                            window.open(blobURL,'_blank');
+                            APIService.HideLoading();
+                        }
+                        else{
+                            //mobile process
+                            var pathFile = '';
+                            if (ionic.Platform.isIOS()) pathFile = cordova.file.documentsDirectory
+                            else pathFile = cordova.file.externalDataDirectory
+                            $cordovaFile.writeFile(pathFile, fileName, blob, true).then(function(success){
+                                $cordovaFileOpener2.open(
+                                    pathFile + fileName,
+                                    'application/pdf'
+                                  ).then(function() {
+                                    APIService.HideLoading();
+                                    console.log('file opened successfully');
+                                  });
+                            }, function(error) {APIService.HideLoading();console.log(error);});
+                        }
                     }
-                    else{
-                        //mobile process
-                        var pathFile = '';
-                        if (ionic.Platform.isIOS()) pathFile = cordova.file.documentsDirectory
-                        else pathFile = cordova.file.externalDataDirectory
-                        $cordovaFile.writeFile(pathFile, fileName, blob, true).then(function(success){
-                            $cordovaFileOpener2.open(
-                                pathFile + fileName,
-                                'application/pdf'
-                              ).then(function() {
-                                APIService.HideLoading();
-                                console.log('file opened successfully');
-                              });
-                        }, function(error) {APIService.HideLoading();console.log(error);});
-                    }
-                }
-                else APIService.HideLoading();
-            },function(error){APIService.HideLoading();console.log(error);alert('ไม่พบไฟล์');});
-        };
+                    else APIService.HideLoading();
+                },function(error){APIService.HideLoading();console.log(error);alert('ไม่พบข้อมูล');});
+            };    
+        }
 
     })
     .controller('TuitionCtrl', function($scope, $filter, TuitionSQLite, SyncService, $rootScope) {
@@ -463,9 +480,11 @@ function InitialTuitionInfo($scope,TuitionSQLite,totalNotification){
 };
 
 function InitialRoyalInfo($scope,RoyalSQLite,$filter){
+    $scope.notFoundData = true;
     $scope.RoyalInfo = [];
     RoyalSQLite.GetRoyals().then(function(response){
         if(response.rows.length > 0){
+            $scope.notFoundData = false;
             for (var i = 0; i <= response.rows.length - 1; i++) {
                 var currentRoyal = {};
                 currentRoyal.royalName = response.rows.item(i).Roya_Name;
@@ -477,19 +496,33 @@ function InitialRoyalInfo($scope,RoyalSQLite,$filter){
     })
 };
 
-function InitialTimeInfo($scope,$filter){
-    $scope.ddlMonthsData = GetTimeDDLOptions($filter);
-    $scope.BindList();
+function InitialTimeInfo($scope,$q,$filter,TimeAttendanceSQLite){
+    GetTimeDDLOptionsOnlyHaveData($filter,$q,TimeAttendanceSQLite).then(
+        function(response){
+            $scope.ddlMonthsData = response;
+            $scope.BindList();
+        });
 };
 
 function InitialLeaveInfo($scope,$filter,LeaveSQLite){
     LeaveSQLite.GetLeaves().then(function(response){
         var result = ConvertQueryResultToArray(response);
         if(result == null || result.length == 0) return;
+
+        //get leave datas
         $scope.leaveInfo = {};
         $scope.leaveInfo.sickLeave = GetLeaveDetails('1',result,$filter);
         $scope.leaveInfo.annualLeave = GetLeaveDetails('4',result,$filter);
         $scope.leaveInfo.personalLeave = GetLeaveDetails('2',result,$filter);
+
+        //bind into accordion
+        $scope.leaveGroups = [];
+        $scope.leaveGroups.push({name:'ลาป่วย',items:$scope.leaveInfo.sickLeave.leaveDate,totalLeave:$scope.leaveInfo.sickLeave.totalLeave});
+        $scope.leaveGroups.push({name:'ลาพักผ่อน',items:$scope.leaveInfo.annualLeave.leaveDate,totalLeave:$scope.leaveInfo.annualLeave.totalLeave});
+        $scope.leaveGroups.push({name:'ลากิจ',items:$scope.leaveInfo.personalLeave.leaveDate,totalLeave:$scope.leaveInfo.personalLeave.totalLeave});
+
+        //show first group by default
+        $scope.shownGroup = $scope.leaveGroups[0];
     });
 };
 
@@ -527,9 +560,9 @@ function InitialTaxDetails ($scope) {
 function BindDDLTaxYears($scope) {
     var result = [];
     var currentYear = new Date().getFullYear();
-    var defaultYear = currentYear;
-    result.push({val:currentYear,name:currentYear.toString()});
-    for (var i = 1; i <= 2; i++) {
+    var defaultYear = currentYear - 1;
+    //result.push({val:currentYear,name:currentYear.toString()});
+    for (var i = 1; i <= 3; i++) {
         currentYear--;
         result.push({val:currentYear,name:currentYear.toString()});
     };
@@ -776,6 +809,30 @@ function GetTimeDDLOptions($filter){
         }
     }
     return result;
+};
+
+function GetTimeDDLOptionsOnlyHaveData($filter,$q,TimeAttendanceSQLite){
+    return $q(function(resolve){
+        var currentYear;
+        var currentMonth;
+        var result = {selectedOptions:{}};
+        result.options = [];
+        TimeAttendanceSQLite.GetDistinctMonthYear().then(
+            function(response){
+                if(response != null){
+                    var dbResult = ConvertQueryResultToArray(response);
+                    angular.forEach(dbResult,function(value,key){
+                        currentYear = value.monthyear.substring(2,6);
+                        currentMonth = GetStringNumber2Digits(value.monthyear.substring(1,2));
+                        result.options.push({val:value.monthyear,name:GetThaiMonthNameByMonth($filter,currentMonth) + ' ' + (+currentYear + 543)});
+                    });
+                    if(dbResult.length > 0) result.selectedOptions = {val:result.options[0].val,name:result.options[0].name}
+                    resolve(result);
+                }
+                else resolve(null);
+            },
+            function(error){console.log(error);});
+    });
 };
 
 function GetTimeInfo(distinctStampDate,$filter,allTADatas){

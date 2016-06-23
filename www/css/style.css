@@ -208,8 +208,8 @@ ul.rating li i {
 /* accordion */
 .list .item.item-accordion {
   line-height: 38px;
-  padding-top: 0;
-  padding-bottom: 0;
+  padding-top: 3px;
+  padding-bottom: 3px;
   transition: 0.09s all linear;
 }
 .list .item.item-accordion.ng-hide {

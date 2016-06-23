@@ -1,7 +1,17 @@
 angular.module('starter')
 
-.controller('DutyCtrl', function($scope,APIService,$filter,$q,$ionicModal){
+.controller('DutyCtrl', function($scope,APIService,$filter,$q,$ionicModal,$cordovaNetwork, $ionicPopup){
 	
+	$scope.noInternet = false;
+	if(!CheckNetwork($cordovaNetwork)) {
+		OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+		$scope.noInternet = true;
+	}
+	else{
+		//display current date duty data
+		DisplayDutyDatas($scope.currentDate,APIService,$q,$scope);
+	}
+
 	$scope.dutyGroups = [];
 	
 	$scope.currentDate = GetCurrentDate().toString().replace(new RegExp('/','g'),'');
@@ -108,15 +118,14 @@ angular.module('starter')
 		$scope.selectedDate.displayFormat = TransformDateHasSlashFormat(dutyDate);
 
 		//display all duty datas
-		DisplayDutyDatas(dutyDate,APIService,$q,$scope);
+		if(!$scope.noInternet) DisplayDutyDatas(dutyDate,APIService,$q,$scope);
 	};
 	
 	$scope.onViewTitleChanged = function (title) {
 		$scope.viewTitle = title;
 	};
 
-	//display current date duty data
-	DisplayDutyDatas($scope.currentDate,APIService,$q,$scope);
+	
 
 });
 

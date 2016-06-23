@@ -45,6 +45,8 @@ angular.module('starter')
     .controller('DirectoryCtrl', function ($scope, APIService, $stateParams, $cordovaNetwork, $ionicPopup) {
         
         $scope.noInternet = false;
+        $scope.notFoundData = false;
+
         //if no internet connection
         if(!CheckNetwork($cordovaNetwork)){
             $scope.noInternet = true;
@@ -167,12 +169,13 @@ function GetDirectories($scope, APIService) {
     APIService.httpPost(url, data,
         function (response) {
             var result = response.data;
-            if (result == null || result.length == 0) $scope.haveMoreData = false;
+            if (result == null || result.length == 0)$scope.haveMoreData = false;
             else {
                 (result.length < 20) ? $scope.haveMoreData = false : $scope.haveMoreData = true;
                 $scope.directoryList = ($scope.directoryList.length > 0) ? $scope.directoryList.concat(result) : result;
                 sharePersonData = $scope.directoryList
             }
+            $scope.notFoundData = ($scope.directoryList.length > 0 ? false : true);
             FinalAction($scope, APIService);
         },
         function () {

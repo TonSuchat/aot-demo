@@ -1,6 +1,11 @@
 <ion-view view-title="ข่าวสาร ทอท.">
   <ion-tabs class="tabs-calm tabs-icon-left tabs-color-active-light">
 
+  <ion-tab title="หนังสือเวียน" ui-sref="app.home.circular-letter" icon-on="ion-paper-airplane" icon-off="ion-paper-airplane">
+      <ion-nav-view name="circular-letter">
+      </ion-nav-view>
+    </ion-tab>
+
     <ion-tab title="ข่าวประกาศ" ui-sref="app.home.news-feed" icon-on="ion-speakerphone" icon-off="ion-speakerphone">
 
       <ion-nav-view name="news-feed">
@@ -8,10 +13,7 @@
 
     </ion-tab>
 
-    <ion-tab title="หนังสือเวียน" ui-sref="app.home.circular-letter" icon-on="ion-paper-airplane" icon-off="ion-paper-airplane">
-      <ion-nav-view name="circular-letter">
-      </ion-nav-view>
-    </ion-tab>
+    
 
   </ion-tabs>
 </ion-view>

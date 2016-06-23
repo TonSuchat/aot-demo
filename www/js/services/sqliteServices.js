@@ -490,6 +490,10 @@ angular.module('starter')
 	this.GetDistinctStampDateByFromDateAndToDate = function(date){
 		return SQLiteService.Execute("SELECT DISTINCT stampdate FROM timeattendance WHERE REPLACE(SUBSTR(StampTime,3,8),'.','')  = '" + date + "'  ORDER BY StampTime DESC").then(function(response){return response;},function(error){return error;});
 	};
+
+	this.GetDistinctMonthYear = function(){
+		return SQLiteService.Execute("select distinct substr(stampdate,3,6) as monthyear from timeattendance order by substr(stampdate,3,6) desc").then(function(response){return response;},function(error){ return error;});
+	};
 })
 .service('LeaveSQLite',function(SQLiteService){
 	//***Necessary-Method

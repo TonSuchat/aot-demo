@@ -54,12 +54,10 @@
           addEvent(window, 'online', onOnline);
           addEvent(window, 'offline', onOffline);  
         };
-
-        // //enable timer maintain xmpp connection
-        // XMPPService.TimerMaintainConnection();
         
-        function onOnline() {  
+        function onOnline() {
           if(isNetworkDown){
+            console.log('onOnline');
             //set flag enable sync room
             xmppSyncRooms = true;
             isAttempToConnect = true;
@@ -75,6 +73,7 @@
         };
 
         function onOffline() {
+          console.log('onOffline');
           XMPPService.Disconnect();
           xmppConnectionIsActive = false;
           isNetworkDown = true;
@@ -126,10 +125,14 @@
           })
 
           //initial page
-          .state('landing', {
+          .state('app.landing', {
             url: '/landing',
-            templateUrl: 'templates/landing.html',
-            controller: 'LandingCtrl'
+            views:{
+              'menuContent':{
+                templateUrl: 'templates/landing.html',
+                controller: 'LandingCtrl'    
+              }
+            }
           })
 
           .state('app.home.news-feed', {
@@ -211,8 +214,7 @@
             url: '/genqrcode',
             views: {
               'menuContent': {
-                templateUrl: 'templates/qrcode/genqrcode.html',
-                controller:'GenQRCodeCtrl'
+                templateUrl: 'templates/qrcode/genqrcode.html'
               }
             }
           })
@@ -272,7 +274,7 @@
           })
       // if none of the above states are matched, use this as the fallback
       //$urlRouterProvider.otherwise('/app/home/news-feed');
-      $urlRouterProvider.otherwise('/landing');
+      $urlRouterProvider.otherwise('app/landing');
     });
 
 // function CheckIsAlreadyHasToken() {

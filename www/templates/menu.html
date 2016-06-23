@@ -45,7 +45,11 @@
           </div>
         </a>
 
-        <a href="#/app/home/news-feed" menu-close class='item'>
+        <a href="#/app/landing" menu-close class='item'>
+          <i class="icon ion-ios-home"></i>&nbsp;&nbsp;หน้าแรก
+        </a>
+
+        <a href="#/app/home/circular-letter" menu-close class='item'>
           <i class="icon ion-clipboard"></i>&nbsp;&nbsp;ข่าวสาร ทอท.
         </a>
 
@@ -65,7 +69,7 @@
            <i class='icon ion-qr-scanner'></i>&nbsp;&nbsp;QR-Code
         </a>
 
-        <a href="#/app/duty" menu-close class='item'>
+        <a href="#/app/duty" ng-show="isAuthen" menu-close class='item'>
            <i class='icon ion-ios-body-outline'></i>&nbsp;&nbsp;จัดการเวร 
         </a>
 

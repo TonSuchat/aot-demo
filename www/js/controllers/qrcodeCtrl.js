@@ -6,9 +6,16 @@ angular.module('starter')
    	//$scope.isAuthen = AuthService.isAuthenticated();
 })
 
-.controller('GenQRCodeCtrl',function($scope,ionicDatePicker,APIService,$ionicPopup){
+.controller('GenQRCodeCtrl',function($scope,ionicDatePicker,APIService,$ionicPopup,$cordovaNetwork){
 
 	$scope.QRSrc = '';
+	$scope.noInternet = false;
+
+	//if no internet connection
+	if(!CheckNetwork($cordovaNetwork)){
+	  $scope.noInternet = true;
+	  OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+	};
 
 	//*******************Duty*******************
 	//swapDutyType : 1 = แลก , 2 = แทน
@@ -58,9 +65,16 @@ angular.module('starter')
 
 })
 
-.controller('ReadQRCodeCtrl',function($scope,$cordovaBarcodeScanner,$ionicPopup,APIService){
+.controller('ReadQRCodeCtrl',function($scope,$cordovaBarcodeScanner,$ionicPopup,APIService,$cordovaNetwork){
 
 	$scope.dialog = {remark:''};
+	$scope.noInternet = false;
+
+	//if no internet connection
+	if(!CheckNetwork($cordovaNetwork)){
+	  $scope.noInternet = true;
+	  OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+	};
 	
    	$scope.Scan = function(){
     	ActiveBarcodeScanner($cordovaBarcodeScanner,$ionicPopup,$scope,APIService);

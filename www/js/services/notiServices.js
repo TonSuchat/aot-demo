@@ -25,6 +25,7 @@ angular.module('starter')
     };
 
     this.StoreTokenOnServer = function(token,empid,isUpdate){
+        console.log('StoreTokenOnServer');
         var deviceInfo = $cordovaDevice.getDevice();
         var url = '';
         if(!isUpdate) url = APIService.hostname() + '/DeviceRegistered/Register'

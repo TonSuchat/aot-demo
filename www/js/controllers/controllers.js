@@ -1,27 +1,30 @@
 angular.module('starter')
 
-    .controller('LandingCtrl',function($scope, $ionicPlatform, $http, $q, APIService, $state, AUTH_EVENTS, NotiService){
+    .controller('LandingCtrl',function($scope, $ionicPlatform, $http, $q, APIService, $state, AUTH_EVENTS, NotiService, $cordovaNetwork, $ionicPopup){
       
       console.log('Landing-Page');
 
       $ionicPlatform.ready(function(){
+        //if no internet connection
+        if(!CheckNetwork($cordovaNetwork)) OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
         APIService.ShowLoading();
         //call login api
-        LogInAPI(AUTH_EVENTS,APIService,$http,$q).then(function(){
+        LogInAPI(AUTH_EVENTS,APIService,$http,$q,$cordovaNetwork, $ionicPopup).then(function(){
+          APIService.HideLoading();
           //post to gcm(google cloud messaging) for register device and get token from gcm
           if (window.cordova){
             pushNotification = window.plugins.pushNotification;
             NotiService.Register(pushNotification);
-            $state.go('app.home.news-feed');
+            //$state.go('app.home.circular-letter');
           }
-          else $state.go('app.home.news-feed');
+          //else APIService.HideLoading(); //$state.go('app.home.circular-letter');
           //console.log($http.defaults.headers.common);
         });
-          
+        
       });
     })
 
-    .controller('AppCtrl', function($scope, $ionicModal, $timeout, AuthService, $ionicPopup,$location,$ionicHistory,SQLiteService,NotiService,SyncService) {
+    .controller('AppCtrl', function($scope, $ionicModal, $timeout, AuthService, $ionicPopup,$location,$ionicHistory,SQLiteService,NotiService,SyncService,$cordovaNetwork) {
 
       // With the new view caching in Ionic, Controllers are only called
       // when they are recreated or on app start, instead of every page change.
@@ -30,6 +33,7 @@ angular.module('starter')
       //$scope.$on('$ionicView.enter', function(e) {
       //});
 
+      $scope.noInternet = false;
       $scope.PMNumber = 509;
 
       // Form data for the login modal
@@ -57,6 +61,10 @@ angular.module('starter')
       // Open the login modal
       $scope.login = function() {
         $scope.modal.show();
+        if(!CheckNetwork($cordovaNetwork)) {
+          OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+          $scope.noInternet = true;
+        };
         //console.log(AuthService.isAuthenticated());
       };
 
@@ -91,7 +99,7 @@ angular.module('starter')
           //logout logic
           AuthService.logout();
           checkAuthen();
-          $location.path('/app/home/news-feed');  
+          $location.path('/app/landing');  
           //clear cache
           $timeout(function () {
             $ionicHistory.clearCache();
@@ -274,7 +282,7 @@ angular.module('starter')
     .controller('FeedbackCtrl',function($scope,APIService,$cordovaNetwork,$ionicPopup,$location){
       // set the rate and max variables
       $scope.rating = {};
-      $scope.rating.rate = 1;
+      $scope.rating.rate = 5;
       $scope.feedbackMSG = '';
       $scope.noInternet = false;
 
@@ -292,7 +300,7 @@ angular.module('starter')
           function(response){
             APIService.HideLoading();
             if(response != null && response.data.length > 0){
-              alert('ระบบได้ทำการส่งความคิดเห็นของคุณแล้ว ขอบคุณที่ร่วมเป็นส่วนหนึ่งในการพัฒนาแอพพลิเคชั่น');
+              alert('ระบบได้ส่งความคิดเห็นของท่านแล้ว ทางทีมงาน สสน.ฝรส.ขอขอบคุณที่ร่วมแสดงความคิดเห็น ให้เราได้นำไปปรับปรุงและพัฒนาต่อไป');
               $location.path('/app/home/news-feed');  
             }
           },
@@ -436,8 +444,8 @@ function InitialStockProcess($scope,$filter,data){
   $scope.stockInfo.currentDate = (data == null) ? 'ไม่สามารถถึงข้อมูลล่าสุดได้' : GetThaiDateByDate($filter,GetCurrentDate().replace(/\//g,'')) + ' เวลา ' + GetCurrentTimeWithoutMillisecond() + ' น.';
 };
 
-function LogInAPI(AUTH_EVENTS,APIService,$http,$q){
-  return $q(function(resolve,reject){
+function LogInAPI(AUTH_EVENTS,APIService,$http,$q,$cordovaNetwork, $ionicPopup){
+  return $q(function(resolve){
     //if already has token, return;
     if(window.localStorage.getItem('yourTokenKey') != null && window.localStorage.getItem('yourTokenKey').length > 0){
       SetAuthorizationHeader($http,window.localStorage.getItem('yourTokenKey'));
@@ -457,7 +465,7 @@ function LogInAPI(AUTH_EVENTS,APIService,$http,$q){
           SetAuthorizationHeader($http,token);
           resolve();
         },
-        function(error){console.log(error);reject(error);});
+        function(error){console.log(error);resolve(error);});    
     }
   });
 };
