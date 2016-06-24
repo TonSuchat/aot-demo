@@ -20,6 +20,12 @@ angular.module('starter').service('XMPPApiService',function($http,$httpParamSeri
 		});
 	};
 
+	this.httpPut = function(url,data){
+		return $q(function(resolve, reject) {
+			$http.put(url,data,xmppApiServiceConfig).then(function(response){resolve(response);},function(response){reject(response);});
+		});	
+	};
+
 	this.CheckAndCreateUserIfNotExist = function(userDatas){
 		return $q(function(resolve,reject){
 			service.CheckUserIsExist(userDatas.username).then(function(response){
@@ -83,6 +89,18 @@ angular.module('starter').service('XMPPApiService',function($http,$httpParamSeri
 			},function(response){
 				reject(response);
 			});
+		});
+	};
+
+	this.ChangePassword = function(username,newpassword){
+		return $q(function(resolve){
+			var url = xmppApiServiceFullUrl + '/users/' + username;
+			var data = {password:newpassword};
+			service.httpPut(url,data).then(
+				function(response){
+					console.log(response);
+					resolve(true);
+				});
 		});
 	};
 

@@ -46,6 +46,7 @@ angular.module('starter').service('APIService',function($http,$httpParamSerializ
 	};
 
 	this.ShowLoading = function () {
+        console.log('show-loading');
         // Setup the loader
         $ionicLoading.show({
             content: 'Loading',

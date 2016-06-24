@@ -5,16 +5,17 @@ angular.module('starter')
       console.log('Landing-Page');
 
       $ionicPlatform.ready(function(){
+
         //if no internet connection
         if(!CheckNetwork($cordovaNetwork)) OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
-        APIService.ShowLoading();
+        //APIService.ShowLoading();
         //call login api
         LogInAPI(AUTH_EVENTS,APIService,$http,$q,$cordovaNetwork, $ionicPopup).then(function(){
-          APIService.HideLoading();
+          //APIService.HideLoading();
           //post to gcm(google cloud messaging) for register device and get token from gcm
           if (window.cordova){
-            pushNotification = window.plugins.pushNotification;
-            NotiService.Register(pushNotification);
+            //pushNotification = window.plugins.pushNotification;
+            NotiService.Register();
             //$state.go('app.home.circular-letter');
           }
           //else APIService.HideLoading(); //$state.go('app.home.circular-letter');
@@ -99,7 +100,7 @@ angular.module('starter')
           //logout logic
           AuthService.logout();
           checkAuthen();
-          $location.path('/app/landing');  
+          $location.path('/app/home/landing');  
           //clear cache
           $timeout(function () {
             $ionicHistory.clearCache();
@@ -208,12 +209,12 @@ angular.module('starter')
           });
         });
 
-      // //delete data
-      $scope.DeleteData = function(clientId){
-        if(confirm('You want to delete data clientId : ' + clientId + ' ?')){
-            //TestSyncSQLite.DeleteById(clientId).then(function(){window.location.reload();});
-        }
-      };
+        // //delete data
+        $scope.DeleteData = function(clientId){
+          if(confirm('You want to delete data clientId : ' + clientId + ' ?')){
+              //TestSyncSQLite.DeleteById(clientId).then(function(){window.location.reload();});
+          }
+        };
     })
     .controller('TestDetailSyncCtrl',function($scope,$stateParams,TestSyncSQLite,$location){
         var clientId = $stateParams.Id;
@@ -308,7 +309,38 @@ angular.module('starter')
       };
 
     })    
+    .controller('ChangePasswordCtrl',function($scope,APIService,$cordovaNetwork,$ionicPopup,XMPPApiService){
 
+      $scope.changePassword = {oldPassword:'',newPassword:'',confirmNewPassword:''};
+
+      $scope.noInternet = false;
+      //if no internet connection
+      if(!CheckNetwork($cordovaNetwork)){
+        $scope.noInternet = true;
+        OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+      };
+
+      $scope.changePassword = function(form){
+        console.log(form.$valid);
+        if(form.$valid) {
+          var url = APIService.hostname() + '/Authen/ChangePassword';
+          var data = {userName: window.localStorage.getItem("CurrentUserName"),password_old: $scope.changePassword.oldPassword,password_new: $scope.changePassword.newPassword};
+          console.log(data);
+          APIService.ShowLoading();
+          //post to change password AD
+          APIService.httpPost(url,data,function(response){
+            //change password openfire
+            XMPPApiService.ChangePassword(window.localStorage.getItem("CurrentUserName"),$scope.changePassword.newPassword).then(function(response){
+              if(response) alert('เปลี่ยนรหัสผ่านเรียบร้อย');
+              //keep new password in localstorage
+              window.localStorage.setItem("AuthServices_password",$scope.changePassword.newPassword);
+              APIService.HideLoading();
+            });
+          },function(error){alert(error.data);console.log(error);APIService.HideLoading();});
+        }
+      };
+
+    })
      
 
 function InitialCirculars(distinctCircularDate,$filter,allData,start,retrieve){
@@ -448,10 +480,12 @@ function LogInAPI(AUTH_EVENTS,APIService,$http,$q,$cordovaNetwork, $ionicPopup){
   return $q(function(resolve){
     //if already has token, return;
     if(window.localStorage.getItem('yourTokenKey') != null && window.localStorage.getItem('yourTokenKey').length > 0){
+      console.log('have-token');
       SetAuthorizationHeader($http,window.localStorage.getItem('yourTokenKey'));
       resolve();
     } 
     else{
+      console.log('no-token');
       var data = {grant_type:'password',username:'epayment@airportthai.co.th',password:'aotP@ssw0rd'};
       var url = APIService.hostname() + '/Token';
       APIService.httpPost(url,data,
@@ -471,6 +505,7 @@ function LogInAPI(AUTH_EVENTS,APIService,$http,$q,$cordovaNetwork, $ionicPopup){
 };
 
 function SetAuthorizationHeader($http,value) {
+  console.log('set-header');
   //set header
   $http.defaults.headers.common['Authorization'] = value;
 };
