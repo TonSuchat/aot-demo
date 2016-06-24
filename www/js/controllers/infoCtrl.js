@@ -374,38 +374,42 @@ angular.module('starter')
             };
 
             $scope.DisplayPDFTax = function (methodName,taxYear) {
-                APIService.ShowLoading();
                 var url = APIService.hostname() + '/' + methodName;
                 var data = {Empl_Code:$scope.empCode,TaxYear:taxYear};
                 var fileName = methodName + '_' + $scope.empCode + '_' + taxYear + '.pdf';
-                console.log(fileName);
-                APIService.httpPost(url,data,function(response){
-                    if(response != null){
-                        var blob = b64toBlob(response.data, 'application/pdf');
-                        if(!window.cordova){
-                            //pc process
-                            var blobURL = URL.createObjectURL(blob);
-                            window.open(blobURL,'_blank');
-                            APIService.HideLoading();
-                        }
-                        else{
-                            //mobile process
-                            var pathFile = '';
-                            if (ionic.Platform.isIOS()) pathFile = cordova.file.documentsDirectory
-                            else pathFile = cordova.file.externalDataDirectory
-                            $cordovaFile.writeFile(pathFile, fileName, blob, true).then(function(success){
-                                $cordovaFileOpener2.open(
-                                    pathFile + fileName,
-                                    'application/pdf'
-                                  ).then(function() {
-                                    APIService.HideLoading();
-                                    console.log('file opened successfully');
-                                  });
-                            }, function(error) {APIService.HideLoading();console.log(error);});
-                        }
-                    }
-                    else APIService.HideLoading();
-                },function(error){APIService.HideLoading();console.log(error);alert('ไม่พบข้อมูล');});
+                DisplayPDF($cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName)
+                // APIService.ShowLoading();
+                // var url = APIService.hostname() + '/' + methodName;
+                // var data = {Empl_Code:$scope.empCode,TaxYear:taxYear};
+                // var fileName = methodName + '_' + $scope.empCode + '_' + taxYear + '.pdf';
+                // console.log(fileName);
+                // APIService.httpPost(url,data,function(response){
+                //     if(response != null){
+                //         var blob = b64toBlob(response.data, 'application/pdf');
+                //         if(!window.cordova){
+                //             //pc process
+                //             var blobURL = URL.createObjectURL(blob);
+                //             window.open(blobURL,'_blank');
+                //             APIService.HideLoading();
+                //         }
+                //         else{
+                //             //mobile process
+                //             var pathFile = '';
+                //             if (ionic.Platform.isIOS()) pathFile = cordova.file.documentsDirectory
+                //             else pathFile = cordova.file.externalDataDirectory
+                //             $cordovaFile.writeFile(pathFile, fileName, blob, true).then(function(success){
+                //                 $cordovaFileOpener2.open(
+                //                     pathFile + fileName,
+                //                     'application/pdf'
+                //                   ).then(function() {
+                //                     APIService.HideLoading();
+                //                     console.log('file opened successfully');
+                //                   });
+                //             }, function(error) {APIService.HideLoading();console.log(error);});
+                //         }
+                //     }
+                //     else APIService.HideLoading();
+                // },function(error){APIService.HideLoading();console.log(error);alert('ไม่พบข้อมูล');});
             };    
         }
 

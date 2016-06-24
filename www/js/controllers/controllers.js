@@ -112,7 +112,7 @@ angular.module('starter')
       checkAuthen();
     })
 
-    .controller('NewsFeedCtrl', function($scope, $stateParams, SyncService, NewsSQLite, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup) {
+    .controller('NewsFeedCtrl', function($scope, $stateParams, SyncService, NewsSQLite, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup, $cordovaFile,$cordovaFileOpener2) {
 
       $ionicPlatform.ready(function(){
         InitialNewsFeedProcess($scope, $stateParams, SyncService, NewsSQLite, $ionicPlatform, APIService);
@@ -120,8 +120,12 @@ angular.module('starter')
 
       CheckNeedToReload($rootScope,'/news-feed');
 
-      $scope.OpenPDF = function(link){
-        window.open(link,'_system','location=no');
+      $scope.OpenPDF = function(Id){
+        //window.open(link,'_system','location=no');
+        var url = APIService.hostname() + '/AOTNews/PdfNews';
+        var data = {Id:Id};
+        var fileName = 'AOTNews.pdf';
+        DisplayPDF($cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName);
       };
 
       $scope.Refresh = function(){
@@ -137,7 +141,7 @@ angular.module('starter')
     .controller('NewsCtrl', function($scope, $stateParams) {
       console.log('news click');
     })
-    .controller('CircularLetterCtrl', function($scope, $filter, SyncService, CircularSQLite, APIService, $ionicPlatform, $rootScope, $cordovaNetwork, $ionicPopup) {
+    .controller('CircularLetterCtrl', function($scope, $filter, SyncService, CircularSQLite, APIService, $ionicPlatform, $rootScope, $cordovaNetwork, $ionicPopup, $cordovaFile,$cordovaFileOpener2) {
       $ionicPlatform.ready(function(){
 
         InitialCircularProcess($scope, $filter, SyncService, CircularSQLite, APIService);
@@ -162,9 +166,12 @@ angular.module('starter')
           $scope.haveMoreData = (($scope.start + $scope.retrieve) < $scope.distinctDate.rows.length) ? true : false;
         };
 
-        $scope.OpenPDF = function(link){
-          //window.open('https://eservice.airportthai.co.th/AOTWebAPI/CircularLetters/PDF/0106201600009215.pdf','_system','location=no');
-          window.open(link,'_system','location=no');
+        $scope.OpenPDF = function(Id){
+          //window.open(link,'_system','location=no');
+          var url = APIService.hostname() + '/CircularLetter/PdfDocCir';
+          var data = {Id:Id};
+          var fileName = 'circular-letter.pdf';
+          DisplayPDF($cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName);
         };
 
       });
@@ -370,7 +377,8 @@ function InitialCirculars(distinctCircularDate,$filter,allData,start,retrieve){
         newData.circularDate = GetThaiDateByDate($filter,currentCircularDate);
         newData.circularDetails = [];
         for (var z = 0; z <= currentDetailsByDate.length -1; z++) {
-            newData.circularDetails.push({link:currentDetailsByDate[z].Link,header:currentDetailsByDate[z].Description,description:currentDetailsByDate[z].DocNumber});    
+            //newData.circularDetails.push({link:currentDetailsByDate[z].Link,header:currentDetailsByDate[z].Description,description:currentDetailsByDate[z].DocNumber});    
+            newData.circularDetails.push({Id:currentDetailsByDate[z].Id,header:currentDetailsByDate[z].Description,description:currentDetailsByDate[z].DocNumber});    
         };
         result.push(newData);
         counter++;
@@ -419,7 +427,8 @@ function InitialNewsFeedProcess($scope, $stateParams, SyncService, NewsSQLite, $
     NewsSQLite.GetAll().then(function(allData){
       if(allData.rows != null && allData.rows.length > 0){
           for (var i = 0; i <= allData.rows.length - 1; i++) {
-            $scope.listNews.push({link:allData.rows.item(i).FileName,title:allData.rows.item(i).Title});
+            //$scope.listNews.push({link:allData.rows.item(i).FileName,title:allData.rows.item(i).Title});
+            $scope.listNews.push({Id:allData.rows.item(i).Id,title:allData.rows.item(i).Title});
           };
       }
       FinalCtrlAction($scope,APIService);
