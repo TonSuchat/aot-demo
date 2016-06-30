@@ -62,12 +62,18 @@ angular.module('starter')
                         //check if user existed then connect xmpp server ,else create user and connect xmpp server
                         XMPPApiService.CheckAndCreateUserIfNotExist({username:window.localStorage.getItem("AuthServices_username"),password:window.localStorage.getItem("AuthServices_password"),name:window.localStorage.getItem('AuthServices_fullname')}).then(function(response){
                             if(response){
-                                //set flag enable sync room
-                                xmppSyncRooms = true;
-                                //connect xmpp
-                                XMPPService.Authentication(window.localStorage.getItem("AuthServices_username"),window.localStorage.getItem("AuthServices_password"));
-                                //enable xmpp maintain timer
-                                XMPPService.TimerMaintainConnection();
+                                //update openfire password same as AD password
+                                XMPPApiService.ChangePassword(username,window.localStorage.getItem("AuthServices_password")).then(function(response){
+                                  if(response){
+                                    console.log('update-password-openfire');
+                                    //set flag enable sync room
+                                    xmppSyncRooms = true;
+                                    //connect xmpp
+                                    XMPPService.Authentication(window.localStorage.getItem("AuthServices_username"),window.localStorage.getItem("AuthServices_password"));
+                                    //enable xmpp maintain timer
+                                    XMPPService.TimerMaintainConnection();
+                                  }
+                                });
                             }
                         });
                         successAction();

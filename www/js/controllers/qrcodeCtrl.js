@@ -4,64 +4,10 @@ angular.module('starter')
 
 .controller('QRCodeCtrl',function($scope,$cordovaBarcodeScanner){
    	//$scope.isAuthen = AuthService.isAuthenticated();
+   	$scope.empId = window.localStorage.getItem("CurrentUserName");
 })
 
 .controller('GenQRCodeCtrl',function($scope,ionicDatePicker,APIService,$ionicPopup,$cordovaNetwork){
-
-	$scope.QRSrc = '';
-	$scope.noInternet = false;
-
-	//if no internet connection
-	if(!CheckNetwork($cordovaNetwork)){
-	  $scope.noInternet = true;
-	  OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
-	};
-
-	//*******************Duty*******************
-	//swapDutyType : 1 = แลก , 2 = แทน
-   	$scope.redeemDuty = {type:1,leader:1};
-   	$scope.selectedDate = {dutyDate1:GetCurrentDate().toString(),dutyDate2:GetCurrentDate().toString()};
-
-   	var datePicker1 = {callback: function (val) { 
-		SetSelectedDate(val,true);
-	}};
-
-	var datePicker2 = {callback: function (val) { 
-		SetSelectedDate(val,false);
-	}};
-
-	$scope.doRedeemDuty = function(){
-		var url = APIService.hostname() + '/RenderQRAndBarcode';
-		var emplCode = PadString(window.localStorage.getItem("CurrentUserName"),"0000000000");
-		var data = {"ContentCode":2,DataTpe:14,BindingDataType14:{"Empl_Code":emplCode,"Leader":$scope.redeemDuty.leader,"RedeemType":$scope.redeemDuty.type,"DutyDate1":$scope.selectedDate.dutyDate1.replace(new RegExp('/','g'),'')}};
-		if($scope.redeemDuty.type == 1) data.BindingDataType14.DutyDate2 = $scope.selectedDate.dutyDate2.replace(new RegExp('/','g'),'');
-		APIService.ShowLoading();
-		APIService.httpPost(url,data,function(response){
-			if(response != null){
-				var base64Str = response.data;
-				$scope.QRSrc = 'data:image/png;base64,' + base64Str;
-				APIService.HideLoading();
-			}
-			else APIService.HideLoading();				
-		},function(error){console.log(error);APIService.HideLoading();});
-	};
-
-	$scope.OpenRedeemDutyDatePicker = function(isDutyDate1){
-		if(isDutyDate1) ionicDatePicker.openDatePicker(datePicker1);
-		else ionicDatePicker.openDatePicker(datePicker2);
-	};
-
-	function SetSelectedDate (val,isDutyDate1) {
-		var selectedDate = new Date(val);
-		var day = selectedDate.getDate();
-		var month = (selectedDate.getUTCMonth() + 1).toString();
-		month = (month.length == 1 ? '0' + month : month);
-		var year = selectedDate.getFullYear();
-		var result = day + '/' + month + '/' + year;
-		if(isDutyDate1) $scope.selectedDate.dutyDate1 = result;
-		else $scope.selectedDate.dutyDate2 = result;
-	};
-	//*******************Duty*******************
 
 })
 

@@ -5,7 +5,6 @@ angular.module('starter')
       console.log('Landing-Page');
 
       $ionicPlatform.ready(function(){
-
         //if no internet connection
         if(!CheckNetwork($cordovaNetwork)) OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
         //APIService.ShowLoading();
@@ -16,16 +15,16 @@ angular.module('starter')
           if (window.cordova){
             //pushNotification = window.plugins.pushNotification;
             NotiService.Register();
-            //$state.go('app.home.circular-letter');
+            $state.go('app.firstpage');
           }
-          //else APIService.HideLoading(); //$state.go('app.home.circular-letter');
+          else $state.go('app.firstpage');
           //console.log($http.defaults.headers.common);
         });
         
       });
     })
 
-    .controller('AppCtrl', function($scope, $ionicModal, $timeout, AuthService, $ionicPopup,$location,$ionicHistory,SQLiteService,NotiService,SyncService,$cordovaNetwork) {
+    .controller('AppCtrl', function($scope, $ionicModal, $timeout, $state, AuthService, $ionicPopup, $location, $ionicHistory, SQLiteService, NotiService, SyncService, $cordovaNetwork, APIService) {
 
       // With the new view caching in Ionic, Controllers are only called
       // when they are recreated or on app start, instead of every page change.
@@ -94,22 +93,61 @@ angular.module('starter')
         //  disableBack: true
         //});
       };
+
       $scope.logout = function () {
-        //delete all datas and all tables
-        SQLiteService.DeleteAllTables().then(function(){
-          //logout logic
-          AuthService.logout();
-          checkAuthen();
-          $location.path('/app/home/landing');  
-          //clear cache
-          $timeout(function () {
-            $ionicHistory.clearCache();
-            $ionicHistory.clearHistory();
-          },300);
-        });
+        //if no internet connection
+        if(!CheckNetwork($cordovaNetwork)) OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถออกจากระบบได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+        else{
+          APIService.ShowLoading();
+          //pc logout
+          if (!window.cordova){
+            //delete all datas and all tables
+            SQLiteService.DeleteAllTables().then(function(){
+              //logout logic
+              AuthService.logout();
+              checkAuthen();
+              APIService.HideLoading();
+              $state.go('app.firstpage');
+              //clear cache
+              $timeout(function () {
+                $ionicHistory.clearCache();
+                $ionicHistory.clearHistory();
+              },300);
+            });
+          }
+          else{
+            //mobile logout
+            var url = APIService.hostname() + '/DeviceRegistered/LogOut';
+            var data = {RegisterID:window.localStorage.getItem('GCMToken')};
+            //post to api for logout process
+            APIService.httpPost(url,data,
+            function(response){
+              //delete all datas and all tables
+              SQLiteService.DeleteAllTables().then(function(){
+                //logout logic
+                AuthService.logout();
+                checkAuthen();
+                APIService.HideLoading();
+                $state.go('app.firstpage');
+                //clear cache
+                $timeout(function () {
+                  $ionicHistory.clearCache();
+                  $ionicHistory.clearHistory();
+                },300);
+              });
+            },
+            function(error){
+              APIService.HideLoading();
+              console.log(error);
+              alert('ไม่สามารถออกจากระบบได้/โปรดลองอีกครั้ง');
+            });
+          }
+
+        }
       };
 
       checkAuthen();
+
     })
 
     .controller('NewsFeedCtrl', function($scope, $stateParams, SyncService, NewsSQLite, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup, $cordovaFile,$cordovaFileOpener2) {
@@ -309,45 +347,14 @@ angular.module('starter')
             APIService.HideLoading();
             if(response != null && response.data.length > 0){
               alert('ระบบได้ส่งความคิดเห็นของท่านแล้ว ทางทีมงาน สสน.ฝรส.ขอขอบคุณที่ร่วมแสดงความคิดเห็น ให้เราได้นำไปปรับปรุงและพัฒนาต่อไป');
-              $location.path('/app/home/news-feed');  
+              $location.path('/app/home/circular-letter');  
             }
           },
           function(error){APIService.HideLoading();console.log(error);});
       };
 
     })    
-    .controller('ChangePasswordCtrl',function($scope,APIService,$cordovaNetwork,$ionicPopup,XMPPApiService){
-
-      $scope.changePassword = {oldPassword:'',newPassword:'',confirmNewPassword:''};
-
-      $scope.noInternet = false;
-      //if no internet connection
-      if(!CheckNetwork($cordovaNetwork)){
-        $scope.noInternet = true;
-        OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
-      };
-
-      $scope.changePassword = function(form){
-        console.log(form.$valid);
-        if(form.$valid) {
-          var url = APIService.hostname() + '/Authen/ChangePassword';
-          var data = {userName: window.localStorage.getItem("CurrentUserName"),password_old: $scope.changePassword.oldPassword,password_new: $scope.changePassword.newPassword};
-          console.log(data);
-          APIService.ShowLoading();
-          //post to change password AD
-          APIService.httpPost(url,data,function(response){
-            //change password openfire
-            XMPPApiService.ChangePassword(window.localStorage.getItem("CurrentUserName"),$scope.changePassword.newPassword).then(function(response){
-              if(response) alert('เปลี่ยนรหัสผ่านเรียบร้อย');
-              //keep new password in localstorage
-              window.localStorage.setItem("AuthServices_password",$scope.changePassword.newPassword);
-              APIService.HideLoading();
-            });
-          },function(error){alert(error.data);console.log(error);APIService.HideLoading();});
-        }
-      };
-
-    })
+    
      
 
 function InitialCirculars(distinctCircularDate,$filter,allData,start,retrieve){

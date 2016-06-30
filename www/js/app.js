@@ -104,7 +104,12 @@
       },101);
     })
 
-    .config(function($stateProvider, $urlRouterProvider) {
+    .config(function($stateProvider, $urlRouterProvider, $ionicConfigProvider, $sceDelegateProvider) {
+
+      $ionicConfigProvider.backButton.text('').icon('ion-chevron-left').previousTitleText(false);
+
+      $sceDelegateProvider.resourceUrlWhitelist(['self', new RegExp('^(http[s]?):\/\/(w{3}.)?youtube\.com/.+$')]);
+
       $stateProvider
 
           .state('app', {
@@ -124,15 +129,21 @@
             }
           })
 
-          //initial page
-          .state('app.landing', {
-            url: '/landing',
+          //aot-home-page
+          .state('app.firstpage', {
+            url: '/firstpage',
             views:{
-              'menuContent':{
-                templateUrl: 'templates/landing.html',
-                controller: 'LandingCtrl'    
+              "menuContent":{
+                templateUrl: 'templates/firstpage.html'
               }
             }
+          })
+
+          //initial page
+          .state('landing', {
+            url: '/landing',
+            templateUrl: 'templates/landing.html',
+            controller: 'LandingCtrl'
           })
 
           .state('app.home.news-feed', {
@@ -214,19 +225,11 @@
             url: '/genqrcode',
             views: {
               'menuContent': {
-                templateUrl: 'templates/qrcode/genqrcode.html'
+                templateUrl: 'templates/qrcode/genqrcode.html',
+                controller:'QRCodeCtrl'
               }
             }
           })
-                .state('app.genqrswapduty', {
-                  url: '/genqrswapduty',
-                  views: {
-                    'menuContent': {
-                      templateUrl: 'templates/qrcode/qr-templates/swapduty.html',
-                      controller:'GenQRCodeCtrl'
-                    }
-                  }
-                })
           .state('app.readqrcode', {
             url: '/readqrcode',
             views: {
@@ -272,18 +275,53 @@
               }
             }
           })
+          .state('app.aotlive', {
+            url: '/aotlive',
+            views: {
+              'menuContent': {
+                templateUrl: 'templates/aotlive.html'
+              }
+            }
+          })
+          .state('app.selfservice', {
+            url: '/selfservice',
+            views: {
+              'menuContent': {
+                templateUrl: 'templates/selfservice/selfservice_menu.html',
+                controller:'SelfServiceCtrl'
+              }
+            }
+          })
           .state('app.changepassword', {
             url: '/changepassword',
             views: {
               'menuContent': {
-                templateUrl: 'templates/changepassword.html',
+                templateUrl: 'templates/selfservice/changepassword.html',
                 controller:'ChangePasswordCtrl'
+              }
+            }
+          })
+          .state('app.genqrswapduty', {
+            url: '/genqrswapduty',
+            views: {
+              'menuContent': {
+                templateUrl: 'templates/selfservice/swapduty.html',
+                controller:'SwapDutyCtrl'
+              }
+            }
+          })
+          .state('app.cardrequest', {
+            url: '/cardrequest',
+            views: {
+              'menuContent': {
+                templateUrl: 'templates/selfservice/cardrequest.html',
+                controller:'CardRequestCtrl'
               }
             }
           })
       // if none of the above states are matched, use this as the fallback
       //$urlRouterProvider.otherwise('/app/home/news-feed');
-      $urlRouterProvider.otherwise('app/landing');
+      $urlRouterProvider.otherwise('landing');
     });
 
 // function CheckIsAlreadyHasToken() {

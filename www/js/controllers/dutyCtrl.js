@@ -1,7 +1,23 @@
 angular.module('starter')
 
 .controller('DutyCtrl', function($scope,APIService,$filter,$q,$ionicModal,$cordovaNetwork, $ionicPopup){
-	
+		
+	InitialDutyGroups($scope);
+
+	$scope.currentDate = GetCurrentDate().toString().replace(new RegExp('/','g'),'');
+	$scope.selectedDate = {plainFormat:$scope.currentDate,displayFormat:TransformDateHasSlashFormat($scope.currentDate)};
+	$scope.canCheckIn = false;
+
+	$scope.DutyApiDetails = {
+		getDutyEmpsURL:APIService.hostname() + '/duty/GetEmp',
+		getDutyInfoBeforeURL:APIService.hostname() + '/duty/Info/GetBefore',
+		getdutyInfoOperationURL:APIService.hostname() + '/duty/Info/GetOperate',
+		checkInDutyURL:APIService.hostname() + '/duty/Emp'
+	};
+
+	//set default checkin type
+	$scope.dutyCheckInForm = {type:2,remark:''};
+
 	$scope.noInternet = false;
 	if(!CheckNetwork($cordovaNetwork)) {
 		OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
@@ -11,17 +27,6 @@ angular.module('starter')
 		//display current date duty data
 		DisplayDutyDatas($scope.currentDate,APIService,$q,$scope);
 	}
-
-	$scope.dutyGroups = [];
-	
-	$scope.currentDate = GetCurrentDate().toString().replace(new RegExp('/','g'),'');
-	$scope.selectedDate = {plainFormat:$scope.currentDate,displayFormat:TransformDateHasSlashFormat($scope.currentDate)};
-	$scope.canCheckIn = false;
-
-	InitialDutyGroups($scope);
-
-	//set default checkin type
-	$scope.dutyCheckInForm = {type:2,remark:''};
 
 	// Create the checked in modal
     $ionicModal.fromTemplateUrl('templates/checkin_duty.html', {
@@ -103,12 +108,7 @@ angular.module('starter')
     	return $scope.shownGroup == group;
   	};
 
-	$scope.DutyApiDetails = {
-		getDutyEmpsURL:APIService.hostname() + '/duty/GetEmp',
-		getDutyInfoBeforeURL:APIService.hostname() + '/duty/Info/GetBefore',
-		getdutyInfoOperationURL:APIService.hostname() + '/duty/Info/GetOperate',
-		checkInDutyURL:APIService.hostname() + '/duty/Emp'
-	};
+	
 
 	$scope.onTimeSelected = function (selectedTime) {
 		$scope.canCheckIn = false;
@@ -125,11 +125,10 @@ angular.module('starter')
 		$scope.viewTitle = title;
 	};
 
-	
-
 });
 
 function InitialDutyGroups ($scope) {
+	$scope.dutyGroups = [];
 	$scope.dutyGroups[0] = {name: 'ข้อมูลผู้ปฎิบัติงานเวรประจำวัน',items: []};
 	$scope.dutyGroups[1] = {name: 'ข้อมูลทั่วไปที่ต้องทราบก่อนปฎิบัติงาน',items: []};
 	$scope.dutyGroups[2] = {name: 'ข้อมูลระหว่างปฎิบัติงาน',items: []};

@@ -1,12 +1,16 @@
-<ion-side-menus enable-menu-with-back-views="false">
+<ion-side-menus enable-menu-with-back-views="true">
 
   <ion-side-menu-content>
     <!-- <ion-nav-bar class="bar-positive" align-title='center'> -->
     <ion-nav-bar class='bar-calm' align-title='center'>
       <!-- <ion-nav-back-button>
       </ion-nav-back-button> -->
-      <ion-nav-back-button class="button-clear">
+
+      <!-- <ion-nav-back-button class="button-clear">
         <i class="ion-arrow-left-c"></i> กลับ
+      </ion-nav-back-button> -->
+
+      <ion-nav-back-button>
       </ion-nav-back-button>
 
       <ion-nav-buttons side="left">
@@ -45,8 +49,12 @@
           </div>
         </a>
 
-        <a href="#/app/landing" menu-close class='item'>
+        <a href="#/app/firstpage" menu-close class='item'>
           <i class="icon ion-ios-home"></i>&nbsp;&nbsp;หน้าแรก
+        </a>
+
+        <a href="#/app/selfservice" ng-show="isAuthen" menu-close class='item'>
+          <i class="icon ion-ios-person"></i>&nbsp;&nbsp;SelfService
         </a>
 
         <a href="#/app/home/circular-letter" menu-close class='item'>
@@ -73,12 +81,12 @@
            <i class='icon ion-ios-body-outline'></i>&nbsp;&nbsp;จัดการเวร 
         </a>
 
-        <a href="#" ng-hide="isAuthen" ng-click="login()" menu-close class='item'>
-           <i class='icon ion-log-in'></i>&nbsp;&nbsp;เข้าสู่ระบบ
+        <a href="#/app/aotlive" menu-close class='item'>
+           <i class='icon ion-social-youtube'></i>&nbsp;&nbsp;AOT-Live 
         </a>
 
-        <a href="#/app/changepassword" ng-show="isAuthen" menu-close class='item'>
-           <i class='icon ion-android-lock'></i>&nbsp;&nbsp;เปลี่ยนรหัสผ่าน
+        <a href="#" ng-hide="isAuthen" ng-click="login()" menu-close class='item'>
+           <i class='icon ion-log-in'></i>&nbsp;&nbsp;เข้าสู่ระบบ
         </a>
 
         <a href="#" ng-show="isAuthen" menu-close ng-click="logout()" class='item'>
