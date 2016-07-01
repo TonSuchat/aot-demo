@@ -230,6 +230,15 @@
               }
             }
           })
+              .state('app.genqremployee', {
+                url: '/genqremployee',
+                views: {
+                  'menuContent': {
+                    templateUrl: 'templates/qrcode/qr-templates/employeeqr.html',
+                    controller:'GenQRCodeCtrl'
+                  }
+                }
+              })
           .state('app.readqrcode', {
             url: '/readqrcode',
             views: {

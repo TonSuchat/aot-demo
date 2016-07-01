@@ -8,7 +8,24 @@ angular.module('starter')
 })
 
 .controller('GenQRCodeCtrl',function($scope,ionicDatePicker,APIService,$ionicPopup,$cordovaNetwork){
+	$scope.QRSrc = '';
+	
+	//employee-number//
+	var employeeNumber = PadString(window.localStorage.getItem("CurrentUserName"),"0000000000");
+	var employeeNumberdata = {"ContentCode":2,DataTpe:2,BindingDataType02:{EmployeeID: employeeNumber}};
+	POSTRenderQRCode(employeeNumberdata,function(response){
+		$scope.QRSrc = 'data:image/png;base64,' + response.data;
+	},function(error){});
+	//employee-number//
 
+	function POSTRenderQRCode(data,SuccessCB,ErrorCB) {
+		var url = APIService.hostname() + '/RenderQRAndBarcode';
+		APIService.ShowLoading();
+		APIService.httpPost(url,data,function(response){
+			APIService.HideLoading();
+			SuccessCB(response);
+		},function(error){console.log(error);APIService.HideLoading();ErrorCB(ErrorCB)});
+	};
 })
 
 .controller('ReadQRCodeCtrl',function($scope,$cordovaBarcodeScanner,$ionicPopup,APIService,$cordovaNetwork){
@@ -97,7 +114,7 @@ function ProcessStandardPrefix(prefixType,qrresult){
 function ProcessAOTPrefix(prefixType,qrresult,$ionicPopup,$scope,APIService){
 	console.log(prefixType,qrresult);
 	//redeemDuty
-	if(prefixType == 14) ProcessApproveRedeemDuty(qrresult,$ionicPopup,$scope,APIService);
+	//if(prefixType == 14) ProcessApproveRedeemDuty(qrresult,$ionicPopup,$scope,APIService);
 };
 
 //redeem duty
@@ -130,3 +147,4 @@ function POSTCheckQR (APIService,data,SuccessCB,ErrorCB) {
 	var url = APIService.hostname() + '/CheckQR';
 	APIService.httpPost(url,data,function(response){SuccessCB(response);APIService.HideLoading();},function(error){ErrorCB(error);APIService.HideLoading();});
 };
+
