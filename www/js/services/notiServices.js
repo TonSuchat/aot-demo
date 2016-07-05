@@ -1,29 +1,48 @@
 var needReload = false;
 
 angular.module('starter')
-.service('NotiService',function($q,APIService,$cordovaDevice,$rootScope,$cordovaPush){
+.service('NotiService',function($q,APIService,$cordovaDevice,$rootScope,$cordovaPushV5){
 
-    var isAndroid = ionic.Platform.isAndroid();
-    var isIOS = ionic.Platform.isIOS();
-    var androidConfig = {"senderID": "211415803371"};
-    var iosConfig = { "badge": true,"sound": true,"alert": true };
-    var cordovaPushConfig = (isAndroid ? androidConfig : iosConfig);
+    // var isAndroid = ionic.Platform.isAndroid();
+    // var isIOS = ionic.Platform.isIOS();
+    //var androidConfig = {"senderID": "211415803371"};
+    //var iosConfig = { "badge": true,"sound": true,"alert": true };
+    var options = {
+        android: {senderID: "211415803371"},
+        ios: {alert: "true",badge: "true",sound: "true"},
+        windows: {}
+    };
+    //var cordovaPushConfig = (isAndroid ? androidConfig : iosConfig);
     var serviceObj = this;
 
     this.Register = function(){
-        $cordovaPush.register(cordovaPushConfig).then(function(result) {
-          // Success
-          //if ios this result is device token
-          if(isIOS){
-            //set token to localStorage
-            window.localStorage.setItem('GCMToken',result);
-            //save token without empid ,Update empid when login completed
-            serviceObj.StoreTokenOnServer(result,'',false);
-          };
-          console.log('register-success');
-        }, function(err) {
-          console.log('register-error',err);
-        })
+        // initialize
+        $cordovaPushV5.initialize(options).then(function(){
+          // start listening for new notifications
+          $cordovaPushV5.onNotification();
+          // start listening for errors
+          $cordovaPushV5.onError();
+          // register to get registrationId
+          $cordovaPushV5.register().then(function(data) {
+            // `data.registrationId` save it somewhere;
+            console.log('GCM Token : ' + data);
+            serviceObj.StoreTokenOnServer(data,'',false);
+          })
+        });
+
+        // $cordovaPush.register(cordovaPushConfig).then(function(result) {
+        //   // Success
+        //   //if ios this result is device token
+        //   if(isIOS){
+        //     //set token to localStorage
+        //     window.localStorage.setItem('GCMToken',result);
+        //     //save token without empid ,Update empid when login completed
+        //     serviceObj.StoreTokenOnServer(result,'',false);
+        //   };
+        //   console.log('register-success');
+        // }, function(err) {
+        //   console.log('register-error',err);
+        // })
     };
 
     this.StoreTokenOnServer = function(token,empid,isUpdate){
@@ -39,52 +58,61 @@ angular.module('starter')
         APIService.httpPost(url,data,function(response){},function(error){console.log(error);});
     };
 
-    $rootScope.$on('$cordovaPush:notificationReceived', function(event, notification) {
+    $rootScope.$on('$cordovaPushV5:notificationReceived', function(event, notification) {
       console.log(notification);
-      //android part
-      if(isAndroid){
-          switch(notification.event) {
-            case 'registered':
-              if (notification.regid.length > 0 ) {
-                console.log('gcmtoken : ' + notification.regid)
-                //set token to localStorage
-                window.localStorage.setItem('GCMToken',notification.regid);
-                //save token without empid ,Update empid when login completed
-                serviceObj.StoreTokenOnServer(notification.regid,'',false);
-              }
-              break;
-            case 'message':
-              // this is the actual push notification. its format depends on the data model from the push server
-              console.log(notification);
-              ProcessNotification(notification.payload);
-              break;
-            case 'error':
-              console.log('GCM error = ' + notification.msg);
-              break;
+      ProcessNotification(notification);
 
-            default:
-              console.log('An unknown GCM event has occurred');
-              break;
-          }
-      }
-      else if(isIOS){
-        //ios part
-        if (notification.alert) {
-          alert(notification.alert);
-        }
-        if (notification.sound) {
-          var snd = new Media(event.sound);
-          snd.play();
-        }
-        if (notification.badge) {
-          $cordovaPush.setBadgeNumber(notification.badge).then(function(result) {
-            // Success!
-          }, function(err) {
-            // An error occurred. Show a message to the user
-          });
-        }
-      }
+      // //android part
+      // if(isAndroid){
+      //     switch(notification.event) {
+      //       case 'registered':
+      //         if (notification.regid.length > 0 ) {
+      //           console.log('gcmtoken : ' + notification.regid)
+      //           //set token to localStorage
+      //           window.localStorage.setItem('GCMToken',notification.regid);
+      //           //save token without empid ,Update empid when login completed
+      //           serviceObj.StoreTokenOnServer(notification.regid,'',false);
+      //         }
+      //         break;
+      //       case 'message':
+      //         // this is the actual push notification. its format depends on the data model from the push server
+      //         console.log(notification);
+      //         ProcessNotification(notification.payload);
+      //         break;
+      //       case 'error':
+      //         console.log('GCM error = ' + notification.msg);
+      //         break;
+
+      //       default:
+      //         console.log('An unknown GCM event has occurred');
+      //         break;
+      //     }
+      // }
+      // else if(isIOS){
+      //   //ios part
+      //   if (notification.alert) {
+      //     alert(notification.alert);
+      //   }
+      //   if (notification.sound) {
+      //     var snd = new Media(event.sound);
+      //     snd.play();
+      //   }
+      //   if (notification.badge) {
+      //     $cordovaPush.setBadgeNumber(notification.badge).then(function(result) {
+      //       // Success!
+      //     }, function(err) {
+      //       // An error occurred. Show a message to the user
+      //     });
+      //   }
+      // }
+
     });
+
+    //triggered every time error occurs
+    $rootScope.$on('$cordovaPushV5:errorOcurred', function(event, e){
+      console.log(e.message);
+    });
+
 
 });
 // /**
@@ -164,16 +192,16 @@ angular.module('starter')
 
 function ProcessNotification(data){
   //check if messageType is hyperlink
-  if(data.messageType.type == "1"){
-    if(confirm('ต้องการเปิด link : ' + data.messageType.optData + ' ?'))
-      window.open(data.messageType.optData,'_system','location=no');
+  if(data.additionalData.messageType.type == "1"){
+    if(confirm('ต้องการเปิด link : ' + data.additionalData.messageType.optData + ' ?'))
+      window.open(data.additionalData.messageType.optData,'_system','location=no');
   }
   else{
     //check if need to confirm and redirect to specific path
-    if(data.alertType == "1"){
+    if(data.additionalData.alertType == "1"){
       if(confirm('ต้องการดูข้อมูล : ' + data.title + ' ?')){
         needReload = true;
-        window.location.href = '#/app' + data.menu;
+        window.location.href = '#/app' + data.additionalData.menu;
       }
     }
     //just show message
