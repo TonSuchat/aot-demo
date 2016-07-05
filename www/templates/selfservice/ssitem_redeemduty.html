@@ -1,0 +1,70 @@
+<ion-view cache-view="false" view-title="รายละเอียด แลก/แทนเวร">
+
+    <ion-content>
+
+      <div class='list'>
+
+        <!-- section-details -->
+        <div class='item item-divider'>
+          <h2><b>รายละเอียดคำขอ</b></h2>
+        </div>
+
+        <div class='item'>
+          <p><b>ผู้ที่ต้องการ แลก/แทนเวร</b></p>
+          <p>{{redeemDutyDetails.Emp1}}</p>
+        </div>
+
+        <div class='item'>
+          <p><b>ผู้ที่รับ แลก/แทนเวร</b></p>
+          <p>{{redeemDutyDetails.Emp2}}</p>
+        </div>
+
+        <div class='item'>
+          <p style='text-decoration:underline;'><b>รายละเอียด</b></p>
+          <p>ประเภท : {{redeemDutyDetails.type}}</p>
+          <p ng-show='redeemDutyDetails.type == "แลกเวร"'>วันที่ : {{redeemDutyDetails.dutyDate1}} กับ {{redeemDutyDetails.dutyDate2}}</p>
+          <p ng-show='redeemDutyDetails.type == "แทนเวร"'>วันที่ : {{redeemDutyDetails.dutyDate1}}</p>
+          <p>ตำแหน่ง : {{redeemDutyDetails.leader}}</p>
+          <p>หมายเหตุ : {{redeemDutyDetails.remark}}</p>
+        </div>
+        <!-- section-details -->
+
+        <!-- section-history -->
+        <div class='item item-divider'>
+          <h2><b>ประวัติ</b></h2>
+        </div>
+
+        <div class='item' ng-repeat='history in redeemDutyHistories'>
+          <p>รายการ : {{history.RouteName}}</p>
+          <p>โดย : {{history.UpdateBy}}</p>
+          <p>วันที่ เวลา : {{history.UpdateDate}}</p>
+        </div>
+        <!-- section-history -->
+
+        <!-- section-button -->
+        <label ng-show='showBtnApprove || showBtnAcknowledgment' class="item item-input item-stacked-label padding">
+          <span class="input-label">หมายเหตุ</span>
+          <textarea placeholder='หมายเหตุ' ng-model='action.remark'></textarea>
+        </label>
+        
+        <div ng-show='showBtnAcknowledgment' class='row padding'>
+          <div class='col'>
+            <input type='button' ng-click='doAcknowledge()' class='button button-block button-balanced' value='รับทราบ' />
+          </div>
+        </div>
+
+        <div ng-show='showBtnApprove' class='row padding'>
+          <div class='col col-50'>
+            <input type='button' ng-click='doApproveOrReject(true)' class='button button-block button-positive' value='อนุมัติ' />
+          </div>
+          <div class='col col-50'>
+            <input type='button' ng-click='doApproveOrReject(false)' class='button button-block button-assertive' value='ไม่อนุมัติ' />
+          </div>
+        </div>
+        <!-- section-button -->
+
+      </div>
+
+    </ion-content>
+
+</ion-view>

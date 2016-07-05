@@ -353,7 +353,33 @@ angular.module('starter')
           function(error){APIService.HideLoading();console.log(error);});
       };
 
-    })    
+    })
+    
+    .controller('AOTLiveCtrl',function($scope,APIService,$cordovaNetwork,$ionicPopup){
+      $scope.noInternet = false;
+      //if no internet connection
+      if(!CheckNetwork($cordovaNetwork)){
+        $scope.noInternet = true;
+        OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+      }
+      else{
+        //get youtube url
+        var url = APIService.hostname() + '/AOTLiveConfig/AOTLive';
+        var data = {ConfigKeys:'AOTLive1'};
+        APIService.ShowLoading();
+        APIService.httpPost(url,data,
+          function(response){
+            if(response != null && response.data != null) $scope.youtubeURL = response.data + '?rel=0';
+            else $scope.youtubeURL = '';
+            APIService.HideLoading();
+          },
+          function(error){
+            APIService.HideLoading();
+            alert('ไม่พบ URL/ลองใหม่อีกครั้ง');
+        });
+      }
+
+    })
     
      
 

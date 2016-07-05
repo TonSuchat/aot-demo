@@ -1,0 +1,33 @@
+  
+<ion-view cache-view="false" view-title="{{title}}">
+
+    <ion-content>
+
+      <a ng-show='selfserviceRequestButton.show' href='{{selfserviceRequestButton.requestURL}}' class="button button-icon icon ion-plus-circled"></a>
+
+	    <div class='list' >
+
+        <a ng-href="{{itemDetailURL}}?documentId={{ssItem.DocumentId}}&nextLevel={{ssItem.NextLevel}}" class='item' ng-repeat='ssItem in SSList'>
+          <h2>{{ssItem.DocumentTitle}}</h2>
+          <h2>หมายเหตุ : {{ssItem.Note}}</h2>
+          <p>แก้ไขล่าสุด : {{ssItem.LastUpdate}}</p>
+        </a>
+
+      </div>
+
+      <div ng-show='noItems' class='card'>
+        <div class="item item-text-wrap">
+          ไม่พบข้อมูล
+        </div>
+      </div>
+
+    </ion-content>
+
+</ion-view>
+
+<style type="text/css">
+  .delete-checkin-button{
+    position:relative;
+    float: right;
+  }
+</style>

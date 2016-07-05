@@ -10,11 +10,7 @@ angular.module('starter')
     var cordovaPushConfig = (isAndroid ? androidConfig : iosConfig);
     var serviceObj = this;
 
-    console.log('isAndroid',isAndroid);
-    console.log('isIOS',isIOS);
-
     this.Register = function(){
-        console.log('register-gcm');
         $cordovaPush.register(cordovaPushConfig).then(function(result) {
           // Success
           //if ios this result is device token

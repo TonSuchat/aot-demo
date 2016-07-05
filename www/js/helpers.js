@@ -285,4 +285,9 @@ function DisplayPDF($cordovaFile,$cordovaFileOpener2,APIService,url,data,fileNam
         }
         else APIService.HideLoading();
     },function(error){APIService.HideLoading();console.log(error);alert('ไม่พบข้อมูล');});
-}
+};
+
+function RedirectAndReloadView(url){
+    window.location = url;
+    window.location.reload();
+};

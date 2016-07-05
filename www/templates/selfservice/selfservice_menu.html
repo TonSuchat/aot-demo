@@ -1,5 +1,5 @@
 
-<ion-view view-title="SelfService">
+<ion-view cache-view="false" view-title="Self Services">
 
     <ion-content>
 	     <div class='list'>
@@ -8,13 +8,14 @@
              <i class='icon ion-locked'></i> เปลี่ยนรหัสผ่าน
           </a>
 
-          <a class="item item-icon-left" href="#/app/genqrswapduty">
-            <i class="icon ion-arrow-swap"></i> แลก/แทนเวร
-          </a>
-
           <a class="item item-icon-left" href="#/app/cardrequest">
             <i class="icon ion-card"></i> ขอทำบัตร
           </a>          
+
+          <a class="item item-icon-left" href="#/app/selfservicelist/{{category.id}}" ng-repeat='category in categories'>
+            <i class="icon {{category.icon}}"></i> {{category.name}}
+            <span class='badge badge-assertive' ng-show='category.unreadNumber > 0'>{{category.unreadNumber}}</span>
+          </a>
 
        </div>
     </ion-content>
