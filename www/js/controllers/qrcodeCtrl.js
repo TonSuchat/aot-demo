@@ -29,7 +29,6 @@ angular.module('starter')
 })
 
 .controller('ReadQRCodeCtrl',function($scope,$cordovaBarcodeScanner,$ionicPopup,APIService,$cordovaNetwork){
-
 	$scope.dialog = {remark:''};
 	$scope.noInternet = false;
 

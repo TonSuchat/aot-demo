@@ -2,25 +2,23 @@ angular.module('starter')
 
     .controller('LandingCtrl',function($scope, $ionicPlatform, $http, $q, APIService, $state, AUTH_EVENTS, NotiService, $cordovaNetwork, $ionicPopup){
       
-      console.log('Landing-Page');
-
       $ionicPlatform.ready(function(){
+        APIService.HideLoading();
         //if no internet connection
-        if(!CheckNetwork($cordovaNetwork)) OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+        //if(!CheckNetwork($cordovaNetwork)) OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
         //APIService.ShowLoading();
         //call login api
-        LogInAPI(AUTH_EVENTS,APIService,$http,$q,$cordovaNetwork, $ionicPopup).then(function(){
-          //APIService.HideLoading();
-          //post to gcm(google cloud messaging) for register device and get token from gcm
-          if (window.cordova){
-            //pushNotification = window.plugins.pushNotification;
-            NotiService.Register();
-            $state.go('app.firstpage');
-          }
-          else $state.go('app.firstpage');
-          //console.log($http.defaults.headers.common);
-        });
-        
+        // LogInAPI(AUTH_EVENTS,APIService,$http,$q,$cordovaNetwork, $ionicPopup).then(function(){
+        //   //APIService.HideLoading();
+        //   //post to gcm(google cloud messaging) for register device and get token from gcm
+        //   if (window.cordova){
+        //     //pushNotification = window.plugins.pushNotification;
+        //     NotiService.Register();
+        //$state.go('app.firstpage');
+        //   }
+        //   else $state.go('app.firstpage');
+        //   //console.log($http.defaults.headers.common);
+        // });
       });
     })
 
@@ -518,36 +516,3 @@ function InitialStockProcess($scope,$filter,data){
   $scope.stockInfo.currentDate = (data == null) ? 'ไม่สามารถถึงข้อมูลล่าสุดได้' : GetThaiDateByDate($filter,GetCurrentDate().replace(/\//g,'')) + ' เวลา ' + GetCurrentTimeWithoutMillisecond() + ' น.';
 };
 
-function LogInAPI(AUTH_EVENTS,APIService,$http,$q,$cordovaNetwork, $ionicPopup){
-  return $q(function(resolve){
-    //if already has token, return;
-    if(window.localStorage.getItem('yourTokenKey') != null && window.localStorage.getItem('yourTokenKey').length > 0){
-      console.log('have-token');
-      SetAuthorizationHeader($http,window.localStorage.getItem('yourTokenKey'));
-      resolve();
-    } 
-    else{
-      console.log('no-token');
-      var data = {grant_type:'password',username:'epayment@airportthai.co.th',password:'aotP@ssw0rd'};
-      var url = APIService.hostname() + '/Token';
-      APIService.httpPost(url,data,
-        function(response){
-          var result = angular.fromJson(response.data);
-          //get token_type("bearer") + one white space and token
-          var token = result.token_type + ' ' + result.access_token;
-          console.log(token);
-          window.localStorage.setItem(AUTH_EVENTS.LOCAL_TOKEN_KEY, token);
-          //set header
-          SetAuthorizationHeader($http,token);
-          resolve();
-        },
-        function(error){console.log(error);resolve(error);});    
-    }
-  });
-};
-
-function SetAuthorizationHeader($http,value) {
-  console.log('set-header');
-  //set header
-  $http.defaults.headers.common['Authorization'] = value;
-};

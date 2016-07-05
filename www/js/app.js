@@ -22,7 +22,7 @@
         }
       });
     })
-    .run(function($ionicPlatform, SQLiteService, AuthService, XMPPService, XMPPApiService, $rootScope){
+    .run(function($ionicPlatform, SQLiteService, AuthService, XMPPService, XMPPApiService, $rootScope, AUTH_EVENTS, APIService, $http, $q, $cordovaNetwork, $ionicPopup,$state, NotiService){
       $ionicPlatform.ready(function(){
         //open db
         SQLiteService.OpenDB();
@@ -31,9 +31,13 @@
         //bypass login if still loging in.
         AuthService.bypassLogIn();
 
-        //XMPPApiService.CreateUser('tonabcdef','tonabcdefg');
-
-        // XMPPService.Authentication('ton','ton');
+        //log in to api and set header authorization
+        APIService.ShowLoading();
+        LogInAPI(AUTH_EVENTS,APIService,$http,$q,$cordovaNetwork, $ionicPopup).then(function(){
+          APIService.HideLoading();
+          //post to gcm(google cloud messaging) for register device and get token from gcm
+          if (window.cordova) NotiService.Register();
+        });
 
         window.onbeforeunload = function (event) {
             XMPPService.Disconnect();
@@ -134,7 +138,8 @@
             url: '/firstpage',
             views:{
               "menuContent":{
-                templateUrl: 'templates/firstpage.html'
+                templateUrl: 'templates/firstpage.html',
+                controller:'LandingCtrl'
               }
             }
           })
@@ -349,7 +354,7 @@
           })
       // if none of the above states are matched, use this as the fallback
       //$urlRouterProvider.otherwise('/app/home/news-feed');
-      $urlRouterProvider.otherwise('landing');
+      $urlRouterProvider.otherwise('/app/firstpage');
     });
 
 // function CheckIsAlreadyHasToken() {

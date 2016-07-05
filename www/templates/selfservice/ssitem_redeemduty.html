@@ -20,7 +20,7 @@
         </div>
 
         <div class='item'>
-          <p style='text-decoration:underline;'><b>รายละเอียด</b></p>
+          <p><b>รายละเอียด</b></p>
           <p>ประเภท : {{redeemDutyDetails.type}}</p>
           <p ng-show='redeemDutyDetails.type == "แลกเวร"'>วันที่ : {{redeemDutyDetails.dutyDate1}} กับ {{redeemDutyDetails.dutyDate2}}</p>
           <p ng-show='redeemDutyDetails.type == "แทนเวร"'>วันที่ : {{redeemDutyDetails.dutyDate1}}</p>
@@ -35,7 +35,8 @@
         </div>
 
         <div class='item' ng-repeat='history in redeemDutyHistories'>
-          <p>รายการ : {{history.RouteName}}</p>
+          <p>ชื่อรายการ : {{history.RouteName}}</p>
+          <p>การตอบรับ : {{history.ActionTypeName}}</p>
           <p>โดย : {{history.UpdateBy}}</p>
           <p>วันที่ เวลา : {{history.UpdateDate}}</p>
         </div>
