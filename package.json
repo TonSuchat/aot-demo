@@ -1,7 +1,7 @@
 {
-  "name": "aot-demo",
+  "name": "AOTMobile",
   "version": "1.1.1",
-  "description": "aot-demo: An Ionic project",
+  "description": "AOTMobile: Mobile Application for AOT Employee",
   "dependencies": {
     "angular-socket-io": "^0.7.0",
     "gulp": "^3.5.6",
@@ -28,10 +28,17 @@
     "org.apache.cordova.dialogs",
     "org.apache.cordova.file",
     "org.apache.cordova.media",
-    "phonegap-plugin-barcodescanner"
+    "phonegap-plugin-barcodescanner",
+    {
+      "variables": {
+        "SENDER_ID": "211415803371"
+      },
+      "locator": "phonegap-plugin-push",
+      "id": "phonegap-plugin-push"
+    }
   ],
   "cordovaPlatforms": [
-    "ios",
-    "android"
+    "android",
+    "ios"
   ]
 }
