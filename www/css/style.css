@@ -18,6 +18,16 @@
     margin-right:-6px;
 }
 
+.col-33 .badge{
+    float: right;
+    position: fixed;
+    display: block;
+    right: 5px;
+}
+.col-33 .item{
+    padding: 10px 0px 10px 0px;
+}
+
 /*chat-css*/
 
 .date-notice{
@@ -186,9 +196,10 @@ color: #F0F1F1;*/
   /*color: black;*/
 /*}*/
 
-.dark .scroll {
+.dark .scroll .list {
 background-color: #004A99 !important;
-color: black;
+    /*background-image: url("../img/MobileBG.jpg");*/
+    color: #cccccc;
 }
 .dark .scroll a{
 color: #ffffff;
@@ -253,18 +264,23 @@ ul.rating li i {
     background-image: url("../img/transparent.png");
 }
 
-
+/*Customize Card*/
 
 .card{
     border-radius: 10px;
+    margin: 5px;
 
     background: none;
 
     background-image: url("../img/transparent.png");
+    border: outset #777 0.5px;
 
 }
 .card .item{
     background: none;
+    color: #FFFFFF;
+}
+.card h4{
     color: #FFFFFF;
 }
 
@@ -272,13 +288,13 @@ ul.rating li i {
     border-color: #aaaaaa;
 }
 .item p{
-    color: #000000;
+    color: #cccccc;
 }
 .item h2{
     color: #ffffff;
 }
 .item-divider h2{
-    color: #000000;
+    color: #cccccc;
 }
 
 .img-circle{
@@ -332,3 +348,15 @@ ul.rating li i {
     border-bottom: 3px solid green;
 }
 /*form-validation*/
+
+
+/*customize*/
+
+.col{
+    padding:0px;
+    margin: 0px;
+}
+
+.larger{
+    font-size: 50px;
+}

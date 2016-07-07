@@ -2,22 +2,53 @@
 <ion-view cache-view="false" view-title="Self Services">
 
     <ion-content>
-	     <div class='list'>
+        <!--<div class='list'>-->
 
-          <a class='item item-icon-left' href="#/app/changepassword">
-             <i class='icon ion-locked'></i> เปลี่ยนรหัสผ่าน
-          </a>
+            <!--<div class="card">-->
+                <!--<a class='item item-icon-left' href="#/app/changepassword">-->
+                    <!--<i class='icon ion-locked'></i> เปลี่ยนรหัสผ่าน-->
+                <!--</a>-->
+            <!--</div>-->
+            <!--<div class="card">-->
+                <!--<a class="item item-icon-left" href="#/app/cardrequest">-->
+                    <!--<i class="icon ion-card"></i> ขอทำบัตร-->
+                <!--</a>-->
+            <!--</div>-->
+            <!--<div class="card">-->
+                <!--<a class="item item-icon-left" href="#/app/selfservicelist/{{category.id}}" ng-repeat='category in categories'>-->
+                    <!--<i class="icon {{category.icon}}"></i> {{category.name}}-->
+                    <!--<span class='badge badge-assertive' ng-show='category.unreadNumber > 0'>{{category.unreadNumber}}</span>-->
+                <!--</a>-->
+            <!--</div>-->
+        <!--</div>-->
 
-          <a class="item item-icon-left" href="#/app/cardrequest">
-            <i class="icon ion-card"></i> ขอทำบัตร
-          </a>          
-
-          <a class="item item-icon-left" href="#/app/selfservicelist/{{category.id}}" ng-repeat='category in categories'>
-            <i class="icon {{category.icon}}"></i> {{category.name}}
-            <span class='badge badge-assertive' ng-show='category.unreadNumber > 0'>{{category.unreadNumber}}</span>
-          </a>
-
-       </div>
+        <div class="row">
+            <div class="col col-33 text-center">
+                <div class="card">
+                    <a class='item' href="#/app/changepassword">
+                        <i class='icon larger ion-locked'></i>
+                        <div class="item-text-wrap">เปลี่ยนรหัสผ่าน</div>
+                    </a>
+                </div>
+            </div>
+            <div class="col col-33 text-center">
+                <div class="card">
+                    <a class="item" href="#/app/cardrequest">
+                        <i class="icon larger ion-card"></i>
+                        <div class="item-text-wrap">ขอทำบัตร</div>
+                    </a>
+                </div>
+            </div>
+            <div class="col col-33 text-center" ng-repeat='category in categories'>
+                <span class='badge badge-assertive' ng-show='category.unreadNumber > 0'>{{category.unreadNumber}}</span>
+                <div class="card">
+                    <a class="item" href="#/app/selfservicelist/{{category.id}}">
+                        <i class="icon larger {{category.icon}}"></i>
+                        <div class="item-text-wrap">{{category.name}}</div>
+                    </a>
+                </div>
+            </div>
+        </div>
     </ion-content>
 
 </ion-view>
