@@ -1,4 +1,4 @@
-<ion-side-menus enable-menu-with-back-views="true">
+<ion-side-menus enable-menu-with-back-views="false">
 
   <ion-side-menu-content>
     <!-- <ion-nav-bar class="bar-positive" align-title='center'> -->
@@ -12,6 +12,8 @@
 
       <ion-nav-back-button>
       </ion-nav-back-button>
+
+
 
       <ion-nav-buttons side="left">
         <button class="button button-icon button-clear ion-navicon" menu-toggle="left">
@@ -40,10 +42,10 @@
       <ul class='list'>
 
         <a href='#/app/profile' ng-show="isAuthen" class='item' menu-close>
-          <div class='text-center'>
+          <div class='text-left'>
             <img src="{{'http://' + userPicturethumb}}" class='img-circle' alt="Profile Picture" />
           </div>
-          <div class='item-text-wrap text-center'>
+          <div class='item-text-wrap text-left'>
             <h2>{{fullname}}</h2>
             <p>{{userPosition}}</p>
           </div>

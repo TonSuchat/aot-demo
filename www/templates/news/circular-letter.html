@@ -15,7 +15,7 @@
         </div> -->
 
         <ion-list>
-            <ion-item ng-repeat='circular in Circulars'>
+            <div class="card" ng-repeat='circular in Circulars'>
                 <div class="item item-divider">
                     <h2>วันที่ {{circular.circularDate}}</h2>
                 </div>
@@ -23,7 +23,7 @@
                     <h2>{{circularDetail.header}}</h2>
                     <p>{{circularDetail.description}}</p>
                 </a>
-            </ion-item>
+            </div>
         </ion-list>
 
         <ion-infinite-scroll on-infinite="loadMoreData()" ng-if="haveMoreData" distanct="1%">

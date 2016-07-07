@@ -1,5 +1,6 @@
 //**********VARIABLES**********
-var xmppURLDetails = {prefix:'http://',domain:'10.74.29.175',port:':7070',bind:'/http-bind/',resource:'/PM',chatService:'conference'};
+//var xmppURLDetails = {prefix:'http://',domain:'10.74.17.109',port:':7070',bind:'/http-bind/',resource:'/PM',chatService:'conference'};
+var xmppURLDetails = {prefix:'http://',domain:'eservice.airportthai.co.th',port:':7070',bind:'/http-bind/',resource:'/PM',chatService:'conference'};
 var xmppFullPath = xmppURLDetails.prefix + xmppURLDetails.domain + xmppURLDetails.port + xmppURLDetails.bind;
 var xmppConnection;
 var xmppConnectionIsActive = false;
@@ -38,7 +39,7 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 		//if mobile use serial number for resource
 		if (window.cordova){
 			var deviceInfo = $cordovaDevice.getDevice();
-			resource = '/' + deviceInfo.serial;		
+			resource = '/' + deviceInfo.serial;
 		}
 		xmppConnection.connect(userid + '@' + xmppURLDetails.domain + resource,password, service.xmppOnConnect);
 	};
@@ -59,14 +60,14 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
 						if(needResendMessages) service.ProcessResendMessages();
 						////check flag is trigger by timer reconnect?, Yes resend all message after reconnect
 						//if(xmppTimerIsActive) service.ProcessResendMessages();
-					} 
-				}); 
+					}
+				});
 			}
 			else{
-				service.JoinRoomsUsersIsMember(); //todo join all rooms that current user is memeber	
+				service.JoinRoomsUsersIsMember(); //todo join all rooms that current user is memeber
 				//check flag is trigger by timer reconnect?, Yes resend all message after reconnect
 				if(needResendMessages) service.ProcessResendMessages();
-			} 
+			}
 			//set global connection state
 			xmppConnectionIsActive = true;
 			//set global attemp connect
@@ -134,12 +135,13 @@ angular.module('starter').service('XMPPService',function($q,$cordovaDevice,$root
  		}
 	};
 
-	this.OnGroupChatMessage = function(message) {	
+	this.OnGroupChatMessage = function(message) {
 		console.log(message);
  		var result = GetMessageObjectFromXML(message);
  		var roomId = result.from;
  		//receiver seen message and reply to sender
  		//if(result.received == 'true' && result.msgId != null && result.ownerId != null && result.fromJID != null){
+ 		console.log(result);
  		if(result.received == true && result.msgId != null && result.fromJID != null){
  			//find ownerId by msgId
  			//PMMsgSQLite.GetEmpIdByMessageAndRoomId(result.msgId,roomId).then(function(response){
