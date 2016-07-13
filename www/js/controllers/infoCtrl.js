@@ -272,7 +272,7 @@ angular.module('starter')
     .controller('FuelDetailCtrl', function($scope, $stateParams) {
 
     })
-    .controller('FinanceCtrl', function($scope, MedicalSQLite, TuitionSQLite, SyncService, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup, $rootScope) {
+    .controller('FinanceCtrl', function($scope, MedicalSQLite, TuitionSQLite, SyncService, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup, $rootScope, $q) {
 
         $ionicPlatform.ready(function(){
 
@@ -282,21 +282,31 @@ angular.module('starter')
             //have internet connection
              if(CheckNetwork($cordovaNetwork)){
                 //***Medical
-                SyncService.SyncMedical().then(function(numberOfNewData){
-                    syncCompleted++;
-                     //get current data from sqlite
-                     InitialMedicalInfo($scope,MedicalSQLite,numberOfNewData);
-                     if(syncCompleted == 2) FinalActionInfo($scope,APIService);
+                SyncService.SyncMedical().then(function(){
+                    //get numberofNewDate from count column IsRead = false
+                    MedicalSQLite.CountNewItem().then(function(response){
+                        var result = ConvertQueryResultToArray(response);
+                        var numberOfNewData = result[0].newItem;
+                        syncCompleted++;
+                        //get current data from sqlite
+                        InitialMedicalInfo($scope,MedicalSQLite,numberOfNewData);
+                        if(syncCompleted == 2) FinalActionInfo($scope,APIService);
+                    });
                 });
                 //***Medical
 
                 //***tuition
-                SyncService.SyncTuition().then(function(numberOfNewData){
-                    syncCompleted++;
-                    //get current data from sqlite
-                    InitialTuitionInfo($scope,TuitionSQLite,numberOfNewData);
-                    if(syncCompleted == 2) FinalActionInfo($scope,APIService);
-                });   
+                SyncService.SyncTuition().then(function(){
+                    //get numberofNewDate from count column IsRead = false
+                    TuitionSQLite.CountNewItem().then(function(response){
+                        var result = ConvertQueryResultToArray(response);
+                        var numberOfNewData = result[0].newItem;
+                        syncCompleted++;
+                        //get current data from sqlite
+                        InitialTuitionInfo($scope,TuitionSQLite,numberOfNewData);
+                        if(syncCompleted == 2) FinalActionInfo($scope,APIService);
+                    });
+                });
                 //***tuition
              }
              else{
@@ -340,17 +350,35 @@ angular.module('starter')
 
             //set medical notification = 0 when user go to medical view
             $rootScope.$on('seenMedicalInfo',function(){
-                $scope.medicalInfo.notification = 0;
+                //update isread = true at API and sqliteDB
+                UpdateIsRead(1,window.localStorage.getItem("CurrentUserName"),MedicalSQLite).then(function(response){
+                    if(response) $scope.medicalInfo.notification = 0;
+                });
             });
 
             //set medical notification = 0 when user go to medical view
             $rootScope.$on('seenTuitionInfo',function(){
-                $scope.tuitionInfo.notification = 0;
+                UpdateIsRead(6,window.localStorage.getItem("CurrentUserName"),TuitionSQLite).then(function(response){
+                    if(response) $scope.tuitionInfo.notification = 0; 
+                });
             });
 
         });
 
         CheckNeedToReload($rootScope,'/finance');
+
+        function  UpdateIsRead(objectId,empl_code,sqliteService) {
+            return $q(function(resolve){
+                //post to api for update isread
+                var url = APIService.hostname() + '/SyncData/SyncIsRead';
+                var data = {ObjectID:objectId,Empl_Code:empl_code};
+                APIService.ShowLoading();
+                APIService.httpPost(url,data,function(){
+                    //update isread in sqliteDB
+                    sqliteService.UpdateIsRead().then(function(){APIService.HideLoading();resolve(true);},function(){APIService.HideLoading();resolve(false);})
+                },function(){APIService.HideLoading();resolve(false);});
+            });
+        };
 
     })
     .controller('HrCtrl', function($scope, $stateParams, APIService) {

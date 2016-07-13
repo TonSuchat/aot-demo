@@ -29,6 +29,8 @@ var shortnessEngMonth = [
     {monthValue:'12',monthName:'Dec'},
 ];
 
+var _MS_PER_DAY = 1000 * 60 * 60 * 24;
+
  function GetCurrentDate(){
     var today = new Date();
     var dd = today.getDate();
@@ -50,8 +52,15 @@ function GetFiscalDate(){
 };
 
 function GetThaiDateByDate($filter,inputDate){
-    var currentMonth = $filter('filter')(shortnessThaiMonth, { monthValue: inputDate.substring(2,4) });
-    return inputDate.substring(0,2) + ' ' + currentMonth[0].monthName + ' ' + (parseInt(inputDate.substring(4,8)) + 543);
+  var currentMonth = $filter('filter')(shortnessThaiMonth, { monthValue: inputDate.substring(2,4) });
+  return inputDate.substring(0,2) + ' ' + currentMonth[0].monthName + ' ' + (parseInt(inputDate.substring(4,8)) + 543);
+};
+
+//05072016161000
+function GetThaiDateTimeByDate ($filter,inputDate) {
+  var result = GetThaiDateByDate($filter,inputDate);
+  result = result + ' เวลา ' + inputDate.substring(8,10) + '.' + inputDate.substring(10,12);
+  return result;
 };
 
 //change date format from such as '04.02.2016 07:48:48' to '04022016'
@@ -122,6 +131,7 @@ function TransformServerTSToDateTimeStr(ts){
     else return result = ts.substring(0,2) + '/' + ts.substring(2,4) + '/' + ts.substring(4,8) + ' ' + ts.substring(8,10) + ':' + ts.substring(10,12);
 };
 
+//eg. '31032016152800' -> '31/032016'
 function TransformServerTSToDateStr(ts) {
     if(!ts || ts.length == 0) return '';
     var result = '';
@@ -129,6 +139,7 @@ function TransformServerTSToDateStr(ts) {
     else return result = ts.substring(0,2) + '/' + ts.substring(2,4) + '/' + ts.substring(4,8);  
 };
 
+//eg. '31032016152800' -> '15:28'
 function TransformServerTSToTimeStr(ts) {
     if(!ts || ts.length == 0) return '';
     var result = '';
@@ -324,4 +335,34 @@ function SetAuthorizationHeader($http,value) {
   console.log('set-header');
   //set header
   $http.defaults.headers.common['Authorization'] = value;
+};
+
+function DateDiff (date1) {
+  var date2 = new Date();
+  var utc1 = Date.UTC(date1.getFullYear(), date1.getMonth(), date1.getDate());
+  var utc2 = Date.UTC(date2.getFullYear(), date2.getMonth(), date2.getDate());
+  return Math.floor((utc2 - utc1) / _MS_PER_DAY);
+};
+
+function CheckSessionIsExpire(APIService,$q){
+  return $q(function(resolve){
+    if(window.localStorage.getItem('lastLogInDate') == null) return resolve(false);
+    var lastLogInDate = new Date(parseInt(window.localStorage.getItem('lastLogInDate')));
+    var diffDay = DateDiff(lastLogInDate);
+    //get number of expire day from api
+    var url = APIService.hostname() + '/AOTLiveConfig/AOTLive';
+    var data = {ConfigKeys:'Timeout'};
+    APIService.httpPost(url,data,
+      function(response){
+        console.log(diffDay);
+        if(response != null && response.data != null){
+          var numberOfExpireDay = +response.data;
+          if(diffDay >= numberOfExpireDay) resolve(true);
+          else resolve(false);
+        }
+        else resolve(false);
+      },
+      function(error){console.log(error);resolve(false);});
+  });
+  
 };

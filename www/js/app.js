@@ -8,6 +8,15 @@
  angular.module('starter', ['ionic','ngCordova','btford.socket-io','ionic.rating','ui.rCalendar','ionic-datepicker','ngMessages'])
 
     .run(function($ionicPlatform) {
+
+
+      // var date1 = new Date(2016,6,1);
+
+      // var date3 = new Date(parseInt(window.localStorage.getItem('myDate')));
+      // console.log(date3);
+
+      // console.log(DateDiff(date3));
+
       $ionicPlatform.ready(function() {
         // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
         // for form inputs)
@@ -37,6 +46,15 @@
           APIService.HideLoading();
           //post to gcm(google cloud messaging) for register device and get token from gcm
           if (window.cordova) NotiService.Register();
+
+          //check session is expire?,Yes force logout.
+          CheckSessionIsExpire(APIService,$q).then(function(response){
+            if(response){
+              //force logout
+              alert('คุณไม่ได้ออกจากระบบนานเกินไป กรุณาเข้าสู่ระบบใหม่');
+              AuthService.logout();
+            }
+          });
         });
 
         window.onbeforeunload = function (event) {

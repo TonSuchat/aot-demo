@@ -73,15 +73,24 @@ angular.module('starter')
 	   	//if no internet connection
 	    if(!CheckNetwork($cordovaNetwork)) OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
 	    else{
-			$scope.InitialSSList();
+	    	$scope.InitialSSList();
 	    	//get list of items by categoryId
 	    	WorkFlowService.ViewMyTask($scope.categoryId).then(function(response){
+	    		console.log(response.data);
 	    		if(response != null && response.data != null && response.data.length > 0) {
-	    			$scope.SSList = response.data;
+	    			//$scope.SSList = response.data;
+	    			$scope.BindSSList(response.data); 
 	    			$scope.noItems = false;
 	    		}
 	    	});
 	    };
+
+	    $scope.BindSSList = function(data){
+	    	angular.forEach(data,function(value,key){
+	    		$scope.SSList.push({DocumentId:value.DocumentId,NextLevel:value.NextLevel,DocumentTitle:value.DocumentTitle,Note:value.Note,LastUpdate:GetThaiDateTimeByDate($filter,value.LastUpdate),IsRead:value.IsRead});
+	    	});
+	    };
+
 	});
 
 	
@@ -141,13 +150,13 @@ angular.module('starter')
 	   	$scope.selectedDate = {dutyDate1:GetCurrentDate().toString(),dutyDate2:GetCurrentDate().toString()};
 	   	$scope.Empl_Code = window.localStorage.getItem("CurrentUserName");
 
-	   	var datePicker1 = {callback: function (val) { 
-			SetSelectedDate(val,true);
-		}};
+	   	var datePicker1 = {callback: function (val) { SetSelectedDate(val,true);},
+			from:new Date()
+		};
 
-		var datePicker2 = {callback: function (val) { 
-			SetSelectedDate(val,false);
-		}};
+		var datePicker2 = {callback: function (val) { SetSelectedDate(val,false);},
+			from: new Date()
+		};
 
 		$scope.doRedeemDuty = function(){
 			if(!CheckRedeemDutyValidation()) return;
@@ -165,7 +174,7 @@ angular.module('starter')
 									  DutyDate2: $scope.selectedDate.dutyDate2.toString().replace(new RegExp('/','g'),''),
 									  Leader: $scope.redeemDuty.leader,
 									  RedeemType: $scope.redeemDuty.type,
-									  Remark: $scope.redeemDuty.remark
+									  Remark: ($scope.redeemDuty.remark && $scope.redeemDuty.remark.length > 0 ? $scope.redeemDuty.remark : '-')
 									};
 						//var data = {Empl_Code:$scope.Empl_Code,Empl_Code2:$scope.searchEmp.searchTxt,DutyDate:$scope.selectedDate.dutyDate1.toString().replace(new RegExp('/','g'),''),DutyType: $scope.redeemDuty.type,DutyDate2:$scope.selectedDate.dutyDate2.toString().replace(new RegExp('/','g'),''),Remark: "sample string 6"}
 						console.log(data);
@@ -241,9 +250,13 @@ angular.module('starter')
 	
 })
 
-.controller('ItemRedeemDutyCtrl',function($scope,$ionicPopup,$cordovaNetwork,$stateParams,WorkFlowService,$ionicPlatform,$location){
+.controller('ItemRedeemDutyCtrl',function($scope,$ionicPopup,$cordovaNetwork,$stateParams,WorkFlowService,$ionicPlatform,$location,$filter){
 
 	$ionicPlatform.ready(function(){
+
+		//actiontype : 2 = approve , 5 = reject , 3 = acknowledge
+		$scope.popUpDetails = {title:'',subtitle:'',actiontype:0}
+
 		$scope.InititalRedeemDutyDetails = function(data){
     		//RedeemDutyType : 1 = แลก , 2 = แทน
 	    	$scope.redeemDutyDetails = {
@@ -268,7 +281,7 @@ angular.module('starter')
 	        	$scope.redeemDutyHistories.push({
 		    		RouteName:value.RouteName,
 		    		UpdateBy:value.UpdateBy,
-		    		UpdateDate:value.UpdateDate,
+		    		UpdateDate:GetThaiDateTimeByDate($filter,value.UpdateDate),
 		    		ActionTypeName:value.ActionTypeName
 		    	});	
 	      	});
@@ -296,31 +309,68 @@ angular.module('starter')
 	    	});
 	    }
 
-	    $scope.doAcknowledge = function(){
-	    	if(confirm('รับทราบรายการนี้')){
-	    		WorkFlowService.ApproveWorkflow($scope.documentId,window.localStorage.getItem("CurrentUserName"),$scope.action.remark,3).then(function(response){
-	    			if(response) $location.path('/app/selfservicelist/1');
-	    		});
-	    	}
+	    $scope.confirmAcknowledge = function(){
+	    	$scope.popUpDetails.title = 'รับทราบ';
+	    	$scope.popUpDetails.subtitle = 'รับทราบรายการนี้ ?';
+	    	$scope.popUpDetails.actiontype = 3;
+	    	$scope.showPopUp();
 	    };
 
-	    $scope.doApproveOrReject = function(isApprove){
+	    $scope.doAcknowledge = function(){
+    		WorkFlowService.ApproveWorkflow($scope.documentId,window.localStorage.getItem("CurrentUserName"),$scope.action.remark,3).then(function(response){
+    			if(response) $location.path('/app/selfservicelist/1');
+    		});
+	    };
+
+	    $scope.confirmApproveOrReject = function(isApprove){
 	    	var confirmMessage = '';
+	    	var title = '';
 	    	var actionType = 0;
 	    	if(isApprove){
+	    		title = 'อนุมัติ';
 	    		confirmMessage = 'คุณแน่ใจที่จะอนุมัติรายการนี้ ?';
 	    		actionType = 2;
 	    	}
 	    	else{
+	    		title = 'ไม่อนุมัติ'
 	    		confirmMessage = 'คุณแน่ใจที่จะไม่อนุมัติรายการนี้ ?';
 	    		actionType = 5;
 	    	}
-	    	if(confirm(confirmMessage)){
-	    		WorkFlowService.ApproveWorkflow($scope.documentId,window.localStorage.getItem("CurrentUserName"),$scope.action.remark,actionType).then(function(response){
-	    			if(response) $location.path('/app/selfservicelist/1');
-	    		});
-	    	}
+	    	$scope.popUpDetails.title = title;
+	    	$scope.popUpDetails.subtitle = confirmMessage;
+	    	$scope.popUpDetails.actiontype = actionType;
+
+	    	$scope.showPopUp();
 	    };
+
+	    $scope.doApproveOrReject = function(isApprove,actionType){
+	    	console.log('doApproveOrReject');
+    		WorkFlowService.ApproveWorkflow($scope.documentId,window.localStorage.getItem("CurrentUserName"),$scope.action.remark,actionType).then(function(response){
+    			if(response) $location.path('/app/selfservicelist/1');
+    		});
+	    };
+
+	    $scope.showPopUp = function(){
+	    	$scope.action.remark = '';
+	    	//popup when clicked approve/reject , acknowledge
+		    var popUp = $ionicPopup.show({
+		    	template: "<textarea placeholder='หมายเหตุ' rows='5' cols='50' ng-model='action.remark'></textarea>",
+		    	title:$scope.popUpDetails.title,
+		    	subTitle:$scope.popUpDetails.subtitle,
+		    	scope:$scope,
+		    	buttons:[
+		    		{text:'ตกลง',type:'button-positive',onTap:function(e){
+		    			if($scope.popUpDetails.actiontype == 2) $scope.doApproveOrReject(true,2);
+		    			else if($scope.popUpDetails.actiontype == 5) $scope.doApproveOrReject(false,5);
+		    			else if($scope.popUpDetails.actiontype == 3) $scope.doAcknowledge();
+		    		}},
+		    		{text:'ยกเลิก'}
+		    	]
+		    });
+	    };
+ 
+	    
+
 	});
 
 })

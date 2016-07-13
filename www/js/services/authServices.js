@@ -1,6 +1,6 @@
 angular.module('starter')
 
-    .service('AuthService', function($q, $http,AUTH_EVENTS,APIService,UserProfileSQLite,PMSubscribeSQLite,XMPPService,XMPPApiService) {
+    .service('AuthService', function($q, $http,AUTH_EVENTS,APIService,UserProfileSQLite,PMSubscribeSQLite,XMPPService,XMPPApiService,$cordovaNetwork,SQLiteService,$state,$timeout,$ionicHistory,$ionicPopup,$rootScope) {
         //var LOCAL_TOKEN_KEY = 'yourTokenKey';
         var username = '';
         var isAuthenticated = false;
@@ -150,11 +150,72 @@ angular.module('starter')
             });
         };
 
+        // var logout = function() {
+        //     console.log('service logout');
+        //     //disconnect xmpp
+        //     XMPPService.Disconnect(true);
+        //     destroyUserCredentials();
+        // };
+
         var logout = function() {
-            console.log('service logout');
-            //disconnect xmpp
-            XMPPService.Disconnect(true);
-            destroyUserCredentials();
+            return $q(function(resolve){
+                console.log('service logout');
+                if(!CheckNetwork($cordovaNetwork)){
+                    OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถออกจากระบบได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+                    resolve(false);
+                }
+                else{
+                    APIService.ShowLoading();
+                    //pc logout
+                    if (!window.cordova){
+                        //delete all datas and all tables
+                        SQLiteService.DeleteAllTables().then(function(){
+                            //disconnect xmpp
+                            XMPPService.Disconnect(true);
+                            destroyUserCredentials();
+                            APIService.HideLoading();
+                            $state.go('app.firstpage');
+                            //clear cache
+                            $timeout(function () {
+                                $ionicHistory.clearCache();
+                                $ionicHistory.clearHistory();
+                            },300);
+                            $rootScope.$broadcast('checkAuthen', null);
+                            resolve(true);
+                        });
+                    }
+                    else{
+                        //mobile logout
+                        var url = APIService.hostname() + '/DeviceRegistered/LogOut';
+                        var data = {RegisterID:window.localStorage.getItem('GCMToken')};
+                        //post to api for logout process
+                        APIService.httpPost(url,data,
+                        function(response){
+                          //delete all datas and all tables
+                          SQLiteService.DeleteAllTables().then(function(){
+                            //disconnect xmpp
+                            XMPPService.Disconnect(true);
+                            destroyUserCredentials();
+                            APIService.HideLoading();
+                            $state.go('app.firstpage');
+                            //clear cache
+                            $timeout(function () {
+                                $ionicHistory.clearCache();
+                                $ionicHistory.clearHistory();
+                            },300);
+                            $rootScope.$broadcast('checkAuthen', null);
+                            resolve(true);
+                          });
+                        },
+                        function(error){
+                          APIService.HideLoading();
+                          console.log(error);
+                          alert('ไม่สามารถออกจากระบบได้/โปรดลองอีกครั้ง');
+                          resolve(false);
+                        });
+                    }
+                }
+            });
         };
 
         var isAuthorized = function(authorizedRoles) {
@@ -206,4 +267,5 @@ angular.module('starter')
         window.localStorage.removeItem("AuthServices_position");
         window.localStorage.removeItem("AuthServices_username");
         window.localStorage.removeItem("AuthServices_password");
+        window.localStorage.removeItem("lastLogInDate");
     };

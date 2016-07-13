@@ -35,31 +35,32 @@
         </div>
 
         <div class='item' ng-repeat='history in redeemDutyHistories'>
-          <p>ชื่อรายการ : {{history.RouteName}}</p>
+          <p>{{history.ActionTypeName}} , {{history.UpdateBy}} , {{history.UpdateDate}}</p>
+          <!-- <p>ชื่อรายการ : {{history.RouteName}}</p>
           <p>การตอบรับ : {{history.ActionTypeName}}</p>
           <p>โดย : {{history.UpdateBy}}</p>
-          <p>วันที่ เวลา : {{history.UpdateDate}}</p>
-        </div>
+          <p>วันที่ เวลา : {{history.UpdateDate}}</p> -->
+        </div>        
         <!-- section-history -->
 
         <!-- section-button -->
-        <label ng-show='showBtnApprove || showBtnAcknowledgment' class="item item-input item-stacked-label padding">
+        <!-- <label ng-show='showBtnApprove || showBtnAcknowledgment' class="item item-input item-stacked-label padding">
           <span class="input-label">หมายเหตุ</span>
           <textarea placeholder='หมายเหตุ' ng-model='action.remark'></textarea>
-        </label>
+        </label> -->
         
         <div ng-show='showBtnAcknowledgment' class='row padding'>
           <div class='col'>
-            <input type='button' ng-click='doAcknowledge()' class='button button-block button-balanced' value='รับทราบ' />
+            <input type='button' ng-click='confirmAcknowledge()' class='button button-block button-balanced' value='รับทราบ' />
           </div>
         </div>
 
         <div ng-show='showBtnApprove' class='row padding'>
           <div class='col col-50'>
-            <input type='button' ng-click='doApproveOrReject(true)' class='button button-block button-positive' value='อนุมัติ' />
+            <input type='button' ng-click='confirmApproveOrReject(true)' class='button button-block button-positive' value='อนุมัติ' />
           </div>
           <div class='col col-50'>
-            <input type='button' ng-click='doApproveOrReject(false)' class='button button-block button-assertive' value='ไม่อนุมัติ' />
+            <input type='button' ng-click='confirmApproveOrReject(false)' class='button button-block button-assertive' value='ไม่อนุมัติ' />
           </div>
         </div>
         <!-- section-button -->

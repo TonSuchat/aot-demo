@@ -22,7 +22,7 @@ angular.module('starter')
       });
     })
 
-    .controller('AppCtrl', function($scope, $ionicModal, $timeout, $state, AuthService, $ionicPopup, $location, $ionicHistory, SQLiteService, NotiService, SyncService, $cordovaNetwork, APIService) {
+    .controller('AppCtrl', function($scope, $ionicModal, $timeout, $state, AuthService, $ionicPopup, $location, $ionicHistory, SQLiteService, NotiService, SyncService, $cordovaNetwork, APIService, $rootScope) {
 
       // With the new view caching in Ionic, Controllers are only called
       // when they are recreated or on app start, instead of every page change.
@@ -35,15 +35,14 @@ angular.module('starter')
       $scope.PMNumber = 509;
 
       // Form data for the login modal
-      function checkAuthen(){
-
+      $scope.$on('checkAuthen',function(event,data){
         $scope.loginData = {};
         $scope.isAuthen = AuthService.isAuthenticated();
         $scope.fullname = AuthService.fullname();
         $scope.userPicturethumb = AuthService.picThumb();
         $scope.userPosition = AuthService.position();
+      });
 
-      }
       // Create the login modal that we will use later
       $ionicModal.fromTemplateUrl('templates/login.html', {
         scope: $scope
@@ -70,7 +69,7 @@ angular.module('starter')
       $scope.doLogin = function() {
         var currentUserName = $scope.loginData.username;
         AuthService.login($scope.loginData.username, $scope.loginData.password).then(function() {
-          checkAuthen();
+          $rootScope.$broadcast('checkAuthen', null);
           //update register device -> empid to server
           if(window.localStorage.getItem('GCMToken') != null && window.localStorage.getItem('GCMToken').length > 0) 
             NotiService.StoreTokenOnServer(window.localStorage.getItem('GCMToken'),currentUserName,true);
@@ -79,6 +78,10 @@ angular.module('starter')
           // SyncService.SyncInitialPM();
 
           $scope.closeLogin();
+
+          //save login date to local storage for check expire to force logout(security process)
+          var currentDate = new Date();
+          window.localStorage.setItem('lastLogInDate',+currentDate);
 
         }, function(err) {
           var alertPopup = $ionicPopup.alert({
@@ -94,57 +97,13 @@ angular.module('starter')
 
       $scope.logout = function () {
         //if no internet connection
-        if(!CheckNetwork($cordovaNetwork)) OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถออกจากระบบได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+        if(!CheckNetwork($cordovaNetwork)) return; //OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถออกจากระบบได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
         else{
-          APIService.ShowLoading();
-          //pc logout
-          if (!window.cordova){
-            //delete all datas and all tables
-            SQLiteService.DeleteAllTables().then(function(){
-              //logout logic
-              AuthService.logout();
-              checkAuthen();
-              APIService.HideLoading();
-              $state.go('app.firstpage');
-              //clear cache
-              $timeout(function () {
-                $ionicHistory.clearCache();
-                $ionicHistory.clearHistory();
-              },300);
-            });
-          }
-          else{
-            //mobile logout
-            var url = APIService.hostname() + '/DeviceRegistered/LogOut';
-            var data = {RegisterID:window.localStorage.getItem('GCMToken')};
-            //post to api for logout process
-            APIService.httpPost(url,data,
-            function(response){
-              //delete all datas and all tables
-              SQLiteService.DeleteAllTables().then(function(){
-                //logout logic
-                AuthService.logout();
-                checkAuthen();
-                APIService.HideLoading();
-                $state.go('app.firstpage');
-                //clear cache
-                $timeout(function () {
-                  $ionicHistory.clearCache();
-                  $ionicHistory.clearHistory();
-                },300);
-              });
-            },
-            function(error){
-              APIService.HideLoading();
-              console.log(error);
-              alert('ไม่สามารถออกจากระบบได้/โปรดลองอีกครั้ง');
-            });
-          }
-
+          AuthService.logout();
         }
       };
 
-      checkAuthen();
+      $rootScope.$broadcast('checkAuthen', null);
 
     })
 

@@ -52,7 +52,8 @@ angular.module('starter').service('APIService',function($http,$httpParamSerializ
             animation: 'fade-in',
             showBackdrop: true,
             maxWidth: 200,
-            showDelay: 0
+            showDelay: 0,
+            template:'<img src="img/loading.gif" />'
         });
     };
 

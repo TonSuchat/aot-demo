@@ -89,10 +89,10 @@ angular.module('starter')
 		$cordovaSQLite.execute(db, "CREATE TABLE IF NOT EXISTS userprofile (clientid integer primary key AUTOINCREMENT, UserID text, PrefixName text, Firstname text, Lastname text, Nickname text, Position text, Section text, Department text, CitizenID text, PicturePath text,PictureThumb text, posi_name_gover text, orga_gover text, changeDate text, OfficeTel text, OfficeFax text, MobilePhone text, eMailAddress text, Line text, Facebook text, DL boolean, dirty boolean, TS text)");
 	};
 	this.CreateMedicalTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS medical(clientid integer primary key AUTOINCREMENT, Id int,EmpID text, HospType text, HospName text, PatientType text, Family text, PatientName text, Disease text, Total int, DocDate text, PaidDate text, BankName text, DL boolean,dirty boolean,TS text)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS medical(clientid integer primary key AUTOINCREMENT, Id int,EmpID text, HospType text, HospName text, PatientType text, Family text, PatientName text, Disease text, Total int, DocDate text, PaidDate text, BankName text, IsRead boolean, DL boolean,dirty boolean,TS text)");
 	};
 	this.CreateTuitionTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS tuition(clientid integer primary key AUTOINCREMENT, Id int,Empl_Code text, Paid_Date text, Total_Amnt int, Vat_Amnt int, Grand_Total int, BankName text, DL boolean,dirty boolean,TS text)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS tuition(clientid integer primary key AUTOINCREMENT, Id int,Empl_Code text, Paid_Date text, Total_Amnt int, Vat_Amnt int, Grand_Total int, BankName text, IsRead boolean, DL boolean,dirty boolean,TS text)");
 	};
 	this.CreateRoyalTable = function(){
 		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS royal(clientid integer primary key AUTOINCREMENT, Id int,Empl_Code text, Roya_Code text, Roya_Name int, Roya_Date text, DL boolean,dirty boolean,TS text)");
@@ -203,19 +203,19 @@ angular.module('starter')
 	this.Update = function(data,isDirty,clientUpdate){
 		var sql;
 		if(clientUpdate)
-			sql = "UPDATE medical SET Id = ?,EmpID = ?, HospType = ?, HospName = ?, PatientType = ?, Family = ?, PatientName = ?, Disease = ?, Total = ?, DocDate = ?, PaidDate = ?, BankName = ?, DL = ?,dirty = ?,TS = ? WHERE clientid = " + data.clientid;	
+			sql = "UPDATE medical SET Id = ?,EmpID = ?, HospType = ?, HospName = ?, PatientType = ?, Family = ?, PatientName = ?, Disease = ?, Total = ?, DocDate = ?, PaidDate = ?, BankName = ?, IsRead = ?, DL = ?,dirty = ?,TS = ? WHERE clientid = " + data.clientid;	
 		else
-			sql = "UPDATE medical SET Id = ?,EmpID = ?, HospType = ?, HospName = ?, PatientType = ?, Family = ?, PatientName = ?, Disease = ?, Total = ?, DocDate = ?, PaidDate = ?, BankName = ?, DL = ?,dirty = ?,TS = ? WHERE Id = " + data.Id;
-		var param = [data.Id,data.EmpID,data.HospType,data.HospName,data.PatientType,data.Family,data.PatientName,data.Disease,data.Total,data.DocDate,data.PaidDate,data.BankName,data.DL,isDirty,data.TS];
+			sql = "UPDATE medical SET Id = ?,EmpID = ?, HospType = ?, HospName = ?, PatientType = ?, Family = ?, PatientName = ?, Disease = ?, Total = ?, DocDate = ?, PaidDate = ?, BankName = ?, IsRead = ?, DL = ?,dirty = ?,TS = ? WHERE Id = " + data.Id;
+		var param = [data.Id,data.EmpID,data.HospType,data.HospName,data.PatientType,data.Family,data.PatientName,data.Disease,data.Total,data.DocDate,data.PaidDate,data.BankName,data.IsRead,data.DL,isDirty,data.TS];
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
 	};
 
 	this.Add = function(data,createFromClient){
-		var sql = "INSERT INTO medical (id, empid, hosptype, hospname, patienttype, family, patientname, disease, total, docdate, paiddate, bankname, DL, dirty, TS) VALUES ";
+		var sql = "INSERT INTO medical (id, empid, hosptype, hospname, patienttype, family, patientname, disease, total, docdate, paiddate, bankname, isread, DL, dirty, TS) VALUES ";
 		var param = []; 
 		var rowArgs = [];
 		data.forEach(function(item){
-			rowArgs.push("(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+			rowArgs.push("(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 			param.push(item.Id);
 			param.push(item.EmpID);
 			param.push(item.HospType);
@@ -228,6 +228,7 @@ angular.module('starter')
 			param.push(item.DocDate);
 			param.push(item.PaidDate);
 			param.push(item.BankName);
+			param.push(item.IsRead);
 			param.push(item.DL);
 			//dirty
 			if(createFromClient) param.push(true);
@@ -238,6 +239,14 @@ angular.module('starter')
 		});
 		sql += rowArgs.join(', ');
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){console.log(error); return error;});
+	};
+
+	this.CountNewItem = function(){
+		return SQLiteService.Execute("SELECT count(*) AS newItem FROM medical where IsRead = 'false'").then(function(response){return response;},function(error){return error;});
+	};
+
+	this.UpdateIsRead = function(){
+		return SQLiteService.Execute("UPDATE tuition set IsRead = 'true'").then(function(response){return response;},function(error){return error;});
 	};
 	//***Necessary-Method
 
@@ -286,19 +295,19 @@ angular.module('starter')
 	this.Update = function(data,isDirty,clientUpdate){
 		var sql;
 		if(clientUpdate)
-			sql = "UPDATE tuition SET Id = ?, Empl_Code = ?, Paid_Date = ?, Total_Amnt = ?, Vat_Amnt = ?, Grand_Total = ?, BankName = ?, DL = ?, dirty = ?, TS = ? WHERE clientid = " + data.clientid;
+			sql = "UPDATE tuition SET Id = ?, Empl_Code = ?, Paid_Date = ?, Total_Amnt = ?, Vat_Amnt = ?, Grand_Total = ?, BankName = ?, IsRead = ?, DL = ?, dirty = ?, TS = ? WHERE clientid = " + data.clientid;
 		else
-			sql = "UPDATE tuition SET Id = ?, Empl_Code = ?, Paid_Date = ?, Total_Amnt = ?, Vat_Amnt = ?, Grand_Total = ?, BankName = ?, DL = ?, dirty = ?, TS = ? WHERE Id = " + data.Id;
-		var param = [data.Id,data.Empl_Code,data.Paid_Date,data.Total_Amnt,data.Vat_Amnt,data.Grand_Total,data.BankName,data.DL,isDirty,data.TS];
+			sql = "UPDATE tuition SET Id = ?, Empl_Code = ?, Paid_Date = ?, Total_Amnt = ?, Vat_Amnt = ?, Grand_Total = ?, BankName = ?, IsRead = ?, DL = ?, dirty = ?, TS = ? WHERE Id = " + data.Id;
+		var param = [data.Id,data.Empl_Code,data.Paid_Date,data.Total_Amnt,data.Vat_Amnt,data.Grand_Total,data.BankName,data.IsRead,data.DL,isDirty,data.TS];
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
 	};
 
 	this.Add = function(data,createFromClient){
-		var sql = "INSERT INTO tuition (Id, Empl_Code, Paid_Date, Total_Amnt, Vat_Amnt, Grand_Total, BankName, DL, dirty, TS) VALUES ";
+		var sql = "INSERT INTO tuition (Id, Empl_Code, Paid_Date, Total_Amnt, Vat_Amnt, Grand_Total, BankName, IsRead, DL, dirty, TS) VALUES ";
 		var param = []; 
 		var rowArgs = [];
 		data.forEach(function(item){
-			rowArgs.push("(?,?,?,?,?,?,?,?,?,?)");
+			rowArgs.push("(?,?,?,?,?,?,?,?,?,?,?)");
 			param.push(item.Id);
 			param.push(item.Empl_Code);
 			param.push(item.Paid_Date);
@@ -306,6 +315,7 @@ angular.module('starter')
 			param.push(item.Vat_Amnt);
 			param.push(item.Grand_Total);
 			param.push(item.BankName);
+			param.push(item.IsRead);
 			param.push(item.DL);
 			//dirty
 			if(createFromClient) param.push(true);
@@ -316,6 +326,14 @@ angular.module('starter')
 		});
 		sql += rowArgs.join(', ');
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){console.log(error); return error;});
+	};
+
+	this.CountNewItem = function(){
+		return SQLiteService.Execute("SELECT count(*) AS newItem FROM tuition where IsRead = 'false'").then(function(response){return response;},function(error){return error;});
+	};
+
+	this.UpdateIsRead = function(){
+		return SQLiteService.Execute("UPDATE tuition set IsRead = 'true'").then(function(response){return response;},function(error){return error;});
 	};
 	//***Necessary-Method
 

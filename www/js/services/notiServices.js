@@ -200,11 +200,34 @@ function ProcessNotification(data){
     //check if need to confirm and redirect to specific path
     if(data.additionalData.alertType == "1"){
       if(confirm('ต้องการดูข้อมูล : ' + data.title + ' ?')){
-        needReload = true;
-        window.location.href = '#/app' + data.additionalData.menu;
+        //check is selfservice menu, Yes redirect with other logic, No redirect by link
+        if(CheckURLIsSelfService(data.additionalData.menu)) RedirectSelfServiceMenu(data.additionalData.menu);
+        else{
+          needReload = true;
+          window.location.href = '#/app' + data.additionalData.menu;  
+        }
       }
     }
     //just show message
-    else alert(data.message);  
+    else alert(data.message);
+  }
+};
+
+function CheckURLIsSelfService (url) {
+  if(url.toString().indexOf('/ess/') >= 0) return true;
+  else return false;
+};
+
+function RedirectSelfServiceMenu (url) {
+  var urlDetails = url.split('/');
+  if(urlDetails.length > 0){
+    var categoryId = urlDetails[2];
+    var documentId = urlDetails[3];
+    var nextLevel = urlDetails[4];
+    switch(+categoryId){
+      case 1:
+        window.location.href = '#/app/ssitem_redeemduty?documentId=' + documentId + '&nextLevel=' + nextLevel;
+        break;
+    }
   }
 };
