@@ -22,7 +22,7 @@ angular.module('starter')
       });
     })
 
-    .controller('AppCtrl', function($scope, $ionicModal, $timeout, $state, AuthService, $ionicPopup, $location, $ionicHistory, SQLiteService, NotiService, SyncService, $cordovaNetwork, APIService, $rootScope) {
+    .controller('AppCtrl', function($scope, $ionicModal, $timeout, $state, AuthService, $ionicPopup, $location, $ionicHistory, SQLiteService, NotiService, SyncService, $cordovaNetwork, APIService, $rootScope, $ionicPlatform) {
 
       // With the new view caching in Ionic, Controllers are only called
       // when they are recreated or on app start, instead of every page change.
@@ -31,79 +31,106 @@ angular.module('starter')
       //$scope.$on('$ionicView.enter', function(e) {
       //});
 
-      $scope.noInternet = false;
-      $scope.PMNumber = 509;
+      $ionicPlatform.ready(function(){
+        APIService.HideLoading();
 
-      // Form data for the login modal
-      $scope.$on('checkAuthen',function(event,data){
-        $scope.loginData = {};
-        $scope.isAuthen = AuthService.isAuthenticated();
-        $scope.fullname = AuthService.fullname();
-        $scope.userPicturethumb = AuthService.picThumb();
-        $scope.userPosition = AuthService.position();
-      });
-
-      // Create the login modal that we will use later
-      $ionicModal.fromTemplateUrl('templates/login.html', {
-        scope: $scope
-      }).then(function(modal) {
-        $scope.modal = modal;
-      });
-
-      // Triggered in the login modal to close it
-      $scope.closeLogin = function() {
-        $scope.modal.hide();
-      };
-
-      // Open the login modal
-      $scope.login = function() {
-        $scope.modal.show();
-        if(!CheckNetwork($cordovaNetwork)) {
-          OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
-          $scope.noInternet = true;
-        };
-        //console.log(AuthService.isAuthenticated());
-      };
-
-      // Perform the login action when the user submits the login form
-      $scope.doLogin = function() {
-        var currentUserName = $scope.loginData.username;
-        AuthService.login($scope.loginData.username, $scope.loginData.password).then(function() {
-          $rootScope.$broadcast('checkAuthen', null);
-          //update register device -> empid to server
-          if(window.localStorage.getItem('GCMToken') != null && window.localStorage.getItem('GCMToken').length > 0) 
-            NotiService.StoreTokenOnServer(window.localStorage.getItem('GCMToken'),currentUserName,true);
-
-          // //sync private message data (rooms/messages/subscribe)
-          // SyncService.SyncInitialPM();
-
-          $scope.closeLogin();
-
-          //save login date to local storage for check expire to force logout(security process)
-          var currentDate = new Date();
-          window.localStorage.setItem('lastLogInDate',+currentDate);
-
-        }, function(err) {
-          var alertPopup = $ionicPopup.alert({
-            title: 'Login failed!',
-            template: 'Please check your credentials!'
-          });
+        $scope.noInternet = false;
+        $scope.PMNumber = 509;
+        
+        // Form data for the login modal
+        $scope.$on('checkAuthen',function(event,data){
+          $scope.loginData = {};
+          $scope.isAuthen = AuthService.isAuthenticated();
+          $scope.fullname = AuthService.fullname();
+          $scope.userPicturethumb = AuthService.picThumb();
+          $scope.userPosition = AuthService.position();
+          //bind menus
+          $scope.InitialMenus($scope.isAuthen);
         });
-        //
-        //$ionicHistory.nextViewOptions({
-        //  disableBack: true
-        //});
-      };
 
-      $scope.logout = function () {
-        //if no internet connection
-        if(!CheckNetwork($cordovaNetwork)) return; //OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถออกจากระบบได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
-        else{
-          AuthService.logout();
-        }
-      };
+        $scope.InitialMenus = function(isAuthen){
+          console.log(isAuthen);
+          $scope.menus = [];
+          if(isAuthen){
+            $scope.menus.push({link:'#/app/selfservice',text:'Self Services',icon:'ion-ios-person'});
+            $scope.menus.push({link:'#/app/information/finance',text:'ตรวจสอบข้อมูล',icon:'ion-information'});
+            $scope.menus.push({link:'#/app/directory?pmroomid=0',text:'สมุดโทรศัพท์',icon:'ion-android-call'});
+            $scope.menus.push({link:'#/app/qrcode',text:'QR-Code',icon:'ion-qr-scanner'});
+            $scope.menus.push({link:'#/app/duty',text:'จัดการเวร',icon:'ion-ios-body-outline'});
+          }
+          $scope.menus.push({link:'#/app/home/circular-letter',text:'ข่าวสาร ทอท.',icon:'ion-clipboard'});
+          $scope.menus.push({link:'#/app/stock',text:'ราคาหุ้น',icon:'ion-ios-pulse-strong'});
+          $scope.menus.push({link:'#/app/aotlive',text:'AOT-Live',icon:'ion-social-youtube'});
+          $scope.menus.push({link:'#/app/feedback',text:'เสนอความคิดเห็น',icon:'ion-paper-airplane'});
+        };
 
-      $rootScope.$broadcast('checkAuthen', null);
+        // Create the login modal that we will use later
+        $ionicModal.fromTemplateUrl('templates/login.html', {
+          scope: $scope
+        }).then(function(modal) {
+          $scope.modal = modal;
+        });
+
+        // Triggered in the login modal to close it
+        $scope.closeLogin = function() {
+          $scope.modal.hide();
+        };
+
+        // Open the login modal
+        $scope.login = function() {
+          $scope.modal.show();
+          if(!CheckNetwork($cordovaNetwork)) {
+            OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+            $scope.noInternet = true;
+          };
+          //console.log(AuthService.isAuthenticated());
+        };
+
+        // Perform the login action when the user submits the login form
+        $scope.doLogin = function() {
+          var currentUserName = $scope.loginData.username;
+          AuthService.login($scope.loginData.username, $scope.loginData.password).then(function() {
+            $rootScope.$broadcast('checkAuthen', null);
+            //update register device -> empid to server
+            if(window.localStorage.getItem('GCMToken') != null && window.localStorage.getItem('GCMToken').length > 0) {
+              if (window.cordova) NotiService.StoreTokenOnServer(window.localStorage.getItem('GCMToken'),currentUserName,true);
+            }
+            //bind full menus
+            $scope.InitialMenus(true);
+            // //sync private message data (rooms/messages/subscribe)
+            // SyncService.SyncInitialPM();
+
+            $scope.closeLogin();
+
+            //save login date to local storage for check expire to force logout(security process)
+            var currentDate = new Date();
+            window.localStorage.setItem('lastLogInDate',+currentDate);
+
+          }, function(err) {
+            var alertPopup = $ionicPopup.alert({
+              title: 'Login failed!',
+              template: 'Please check your credentials!'
+            });
+          });
+          //
+          //$ionicHistory.nextViewOptions({
+          //  disableBack: true
+          //});
+        };
+
+        $scope.logout = function () {
+          //if no internet connection
+          if(!CheckNetwork($cordovaNetwork)) return; //OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถออกจากระบบได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+          else{
+            AuthService.logout();
+          }
+        };
+
+
+
+        $rootScope.$broadcast('checkAuthen', null);
+
+      });
 
     })
 

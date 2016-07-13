@@ -46,6 +46,7 @@ angular.module('starter')
     };
 
     this.StoreTokenOnServer = function(token,empid,isUpdate){
+        window.localStorage.setItem('GCMToken',token);
         console.log('StoreTokenOnServer');
         var deviceInfo = $cordovaDevice.getDevice();
         var url = '';

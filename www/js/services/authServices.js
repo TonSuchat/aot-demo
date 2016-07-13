@@ -188,6 +188,7 @@ angular.module('starter')
                         //mobile logout
                         var url = APIService.hostname() + '/DeviceRegistered/LogOut';
                         var data = {RegisterID:window.localStorage.getItem('GCMToken')};
+                        console.log(data);
                         //post to api for logout process
                         APIService.httpPost(url,data,
                         function(response){

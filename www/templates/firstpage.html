@@ -11,7 +11,7 @@
 
     </div>
 
-    <div class="row">
+    <!-- <div class="row">
       <div class="col col-33 text-center">
         <div class='card'>
           <a class="item" href="#/app/selfservice">
@@ -88,7 +88,37 @@
           </a>
         </div>
       </div>
+    </div> -->
+
+    <div class='row' ng-if='$index % 3 == 0' ng-repeat='menu in menus'>
+      <div class="col col-33 text-center">
+        <div class='card'>
+          <a class="item" href="{{menus[$index].link}}">
+            <i class="icon larger {{menus[$index].icon}}"></i>
+            <h4 class="item-text-wrap">{{menus[$index].text}} </h4>
+          </a>
+        </div>
+      </div>
+      <div class="col col-33 text-center" ng-if='($index + 1) < menus.length'>
+        <div class='card'>
+          <a class="item" href="{{menus[$index + 1].link}}">
+            <i class="icon larger {{menus[$index + 1].icon}}"></i>
+            <h4 class="item-text-wrap">{{menus[$index + 1].text}} </h4>
+          </a>
+        </div>
+      </div>
+      <div class="col col-33 text-center" ng-if='($index + 2) < menus.length'>
+        <div class='card'>
+          <a class="item" href="{{menus[$index + 2].link}}">
+            <i class="icon larger {{menus[$index + 2].icon}}"></i>
+            <h4 class="item-text-wrap">{{menus[$index + 2].text}} </h4>
+          </a>
+        </div>
+      </div>
     </div>
+
+       
+    
 
   </ion-content>
     
