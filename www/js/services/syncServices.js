@@ -217,7 +217,6 @@ function SyncDownloadFromServer(APIService,GenericSQLite,$q,apiURLs,apiDatas,opt
           function(response){
             var result = response.data;
             if(result != null && result.length > 0){
-                console.log(result);
                 //if disable sync, Delete current data before then insert new data.
                 if(!enableSync){
                     GenericSQLite.DeleteAll().then(function(){

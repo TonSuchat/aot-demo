@@ -270,32 +270,48 @@ function b64toBlob(b64Data, contentType, sliceSize) {
 function DisplayPDF($cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName) {
     APIService.ShowLoading();
     APIService.httpPost(url,data,function(response){
-        if(response != null){
-            var blob = b64toBlob(response.data, 'application/pdf');
-            if(!window.cordova){
-                //pc process
-                var blobURL = URL.createObjectURL(blob);
-                window.open(blobURL,'_blank');
-                APIService.HideLoading();
-            }
-            else{
-                //mobile process
-                var pathFile = '';
-                if (ionic.Platform.isIOS()) pathFile = cordova.file.documentsDirectory
-                else pathFile = cordova.file.externalDataDirectory
-                $cordovaFile.writeFile(pathFile, fileName, blob, true).then(function(success){
-                    $cordovaFileOpener2.open(
-                        pathFile + fileName,
-                        'application/pdf'
-                      ).then(function() {
-                        APIService.HideLoading();
-                        console.log('file opened successfully');
-                      });
-                }, function(error) {APIService.HideLoading();console.log(error);});
-            }
+        if(response != null && response.data != null){
+          console.log(response.data[0]);
+          var extension = response.data[0].ContentType;
+          var base64Str = response.data[0].ContentData;
+          var contentType = GetContentTypeByExtension(extension);
+          fileName = fileName + extension;
+          var blob = b64toBlob(base64Str, contentType);
+          if(!window.cordova){
+            //pc process
+            var blobURL = URL.createObjectURL(blob);
+            window.open(blobURL,'_blank');
+            APIService.HideLoading();
+          }
+          else{
+            //mobile process
+            var pathFile = '';
+            if (ionic.Platform.isIOS()) pathFile = cordova.file.documentsDirectory
+            else pathFile = cordova.file.externalDataDirectory
+            $cordovaFile.writeFile(pathFile, fileName, blob, true).then(function(success){
+                $cordovaFileOpener2.open(
+                    pathFile + fileName,
+                    contentType
+                  ).then(function() {
+                    APIService.HideLoading();
+                    console.log('file opened successfully');
+                  });
+            }, function(error) {APIService.HideLoading();console.log(error);});
+          }
         }
         else APIService.HideLoading();
     },function(error){APIService.HideLoading();console.log(error);alert('ไม่พบข้อมูล');});
+};
+
+function GetContentTypeByExtension (extension) {
+  switch(extension) {
+    case 'jpg':
+        return 'image/jpeg';
+        break;
+    case 'pdf':
+        return 'application/pdf';
+        break;
+  };
 };
 
 function RedirectAndReloadView(url){

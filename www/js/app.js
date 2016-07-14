@@ -31,8 +31,9 @@
         }
       });
     })
-    .run(function($ionicPlatform, SQLiteService, AuthService, XMPPService, XMPPApiService, $rootScope, AUTH_EVENTS, APIService, $http, $q, $cordovaNetwork, $ionicPopup,$state, NotiService){
+    .run(function($cordovaFile,$cordovaFileOpener2,$ionicPlatform, SQLiteService, AuthService, XMPPService, XMPPApiService, $rootScope, AUTH_EVENTS, APIService, $http, $q, $cordovaNetwork, $ionicPopup,$state, NotiService){
       $ionicPlatform.ready(function(){
+        
         //open db
         SQLiteService.OpenDB();
         //initial all tables

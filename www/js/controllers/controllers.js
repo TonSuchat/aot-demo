@@ -146,7 +146,7 @@ angular.module('starter')
         //window.open(link,'_system','location=no');
         var url = APIService.hostname() + '/AOTNews/PdfNews';
         var data = {Id:Id};
-        var fileName = 'AOTNews.pdf';
+        var fileName = 'AOTNews';
         DisplayPDF($cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName);
       };
 
@@ -192,7 +192,7 @@ angular.module('starter')
           //window.open(link,'_system','location=no');
           var url = APIService.hostname() + '/CircularLetter/PdfDocCir';
           var data = {Id:Id};
-          var fileName = 'circular-letter.pdf';
+          var fileName = 'circular-letter';
           DisplayPDF($cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName);
         };
 

@@ -97,33 +97,56 @@ angular.module('starter')
         }
 
         var login = function(user, pw) {
-            
-            
+
             return $q(function(resolve, reject) {
                 if(!user || user.length == 0 || !pw || pw.length == 0){
                     APIService.HideLoading();
                     return reject('Login Failed.');
                 };
-                var url = APIService.hostname() + '/Authen/AuthenUser';
-                var data = {username:user,password:pw};
+                var url = ''; 
+                var data = ''; 
+                if(window.cordova){
+                    if(window.localStorage.getItem('GCMToken') == null){
+                        APIService.HideLoading();
+                        return reject('LogIn Failed - No GCM Token');
+                    }
+                    var url = APIService.hostname() + '/DeviceRegistered/LogIn';
+                    var data = {Username:user,Password:pw,RegisterID:window.localStorage.getItem('GCMToken')};
+                }
+                else{
+                    var url = APIService.hostname() + '/Authen/AuthenUser';
+                    var data = {username:user,password:pw};
+                }
                 APIService.ShowLoading();
                 APIService.httpPost(url,data,
                     function(response){
-                        var result = response.data;
-                        if(result == null || result.length == 0) return reject('Login Failed.');
-                        if (result._successField) {
+                        if(window.cordova){
                             username = user;
                             window.localStorage.setItem("AuthServices_username", user);
                             window.localStorage.setItem("AuthServices_password", pw);
                             window.localStorage.setItem(AUTH_EVENTS.LOCAL_USERNAME_KEY, username);
                             useCredentials(function () { APIService.HideLoading(); resolve('Login success.'); },null);
                         }
-                        else {
-                            APIService.HideLoading();
-                            reject('Login Failed.');
+                        else{
+                            var result = response.data;
+                            if(result == null || result.length == 0) return reject('Login Failed.');
+                            if (result._successField) {
+                                username = user;
+                                window.localStorage.setItem("AuthServices_username", user);
+                                window.localStorage.setItem("AuthServices_password", pw);
+                                window.localStorage.setItem(AUTH_EVENTS.LOCAL_USERNAME_KEY, username);
+                                useCredentials(function () { APIService.HideLoading(); resolve('Login success.'); },null);
+                            }
+                            else {
+                                APIService.HideLoading();
+                                reject('Login Failed.');
+                            }    
                         }
                     },
-                    function(response){});
+                    function(response){
+                        APIService.HideLoading();
+                        reject('Login Failed.');
+                    });
 
                 // if ((user == '484134' && pw == '1') || (user == '484074' && pw == '1')) {
                 //     // Make a request and receive your auth token from your server

@@ -404,8 +404,8 @@ angular.module('starter')
             $scope.DisplayPDFTax = function (methodName,taxYear) {
                 var url = APIService.hostname() + '/' + methodName;
                 var data = {Empl_Code:$scope.empCode,TaxYear:taxYear};
-                var fileName = methodName + '_' + $scope.empCode + '_' + taxYear + '.pdf';
-                DisplayPDF($cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName)
+                var fileName = methodName + '_' + $scope.empCode + '_' + taxYear;
+                DisplayPDF($cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName);
                 // APIService.ShowLoading();
                 // var url = APIService.hostname() + '/' + methodName;
                 // var data = {Empl_Code:$scope.empCode,TaxYear:taxYear};
