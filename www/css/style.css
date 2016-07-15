@@ -18,9 +18,13 @@
     margin-right:-6px;
 }
 
+.ssmenu-container{
+    position: relative;
+}
+
 .col-33 .badge{
     float: right;
-    position: fixed;
+    position: absolute;
     display: block;
     right: 5px;
 }
