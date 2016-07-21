@@ -49,7 +49,6 @@ angular.module('starter')
         });
 
         $scope.InitialMenus = function(isAuthen){
-          console.log(isAuthen);
           $scope.menus = [];
           if(isAuthen){
             $scope.menus.push({link:'#/app/selfservice',text:'Self Services',icon:'ion-ios-person'});

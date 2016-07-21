@@ -371,6 +371,15 @@
               }
             }
           })
+          .state('app.ssitemcardrequest', {
+            url: '/ssitem_cardrequest?documentId&nextLevel',
+            views: {
+              'menuContent': {
+                templateUrl: 'templates/selfservice/ssitem_cardrequest.html',
+                controller:'ItemCardRequestCtrl'
+              }
+            }
+          })
       // if none of the above states are matched, use this as the fallback
       //$urlRouterProvider.otherwise('/app/home/news-feed');
       $urlRouterProvider.otherwise('/app/firstpage');

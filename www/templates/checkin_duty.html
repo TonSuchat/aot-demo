@@ -26,15 +26,27 @@
           </ion-list>  
         </div>
 
-        <label class="item item-input item-stacked-label">
+        <div class='item item-divider'>
+          หมายเหตุ
+        </div>
+        <div class='item item-input padding'>
+            <textarea rows='4' placeholder='หมายเหตุ' ng-model='dutyCheckInForm.remark'></textarea>
+        </div>
+        
+
+       <!--  <label class="item item-input item-stacked-label">
           <span class="input-label">หมายเหตุ</span>
-          <input ng-model='dutyCheckInForm.remark' type="text" placeholder="หมายเหตุ...">
-        </label>
+          <text ng-model='dutyCheckInForm.remark' type="text" placeholder="หมายเหตุ...">
+        </label> -->
 
         <label class="item">
           <button class="button button-block button-positive" type="submit">รายงานตัว</button>
         </label>
+
       </div>
+
+
+
     </form>
   </ion-content>
 </ion-modal-view>

@@ -31,15 +31,15 @@
                     </a>
                 </div>
             </div>
-            <div class="col col-33 text-center">
+            <!-- <div class="col col-33 text-center">
                 <div class="card">
                     <a class="item" href="#/app/cardrequest">
                         <i class="icon larger ion-card"></i>
                         <div class="item-text-wrap">ขอทำบัตรพนักงาน</div>
                     </a>
                 </div>
-            </div>
-            <div class="col col-33 text-center" ng-repeat='category in categories'>
+            </div> -->
+            <div class="col col-33 text-center ssmenu-container" ng-repeat='category in categories'>
                 <span class='badge badge-assertive' ng-show='category.unreadNumber > 0'>{{category.unreadNumber}}</span>
                 <div class="card">
                     <a class="item" href="#/app/selfservicelist/{{category.id}}">
@@ -49,6 +49,7 @@
                 </div>
             </div>
         </div>
+
     </ion-content>
 
 </ion-view>

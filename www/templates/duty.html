@@ -12,8 +12,7 @@
     	</div>
 		
 	   <ion-list>
-
-
+ 
         <div ng-repeat="group in dutyGroups">
           <ion-item class="item-stable"
                     ng-click="toggleGroup(group)"
@@ -32,11 +31,21 @@
             </div>
             
             <div ng-show='$index == 0'>
+
+              <div class='card'>
+                <div class='item item-text-wrap'>
+                  <button class='button button-positive button-small delete-checkin-button' ng-click='copyDutyEmp()'><i class='icon ion-ios-copy-outline'></i> คัดลอก</button>
+                  <div>
+                    ประจำวันที่ {{selectedThaiDate}}
+                  </div>
+                </div>
+              </div>
+
               <div ng-repeat="item in group.items" class='card'>
                 <div  class='item item-text-wrap'>
                   <button ng-show='item.showDeleteBtn' ng-click='deleteCheckIn()' class='button button-assertive button-small delete-checkin-button'><i class='icon ion-close-circled'></i></button>
                   <div><b>{{item.type}}</b> : {{item.name}}</div>
-                  <div><b>ตำแหน่ง : </b> {{item.position}}</div>
+                  <!-- <div><b>ตำแหน่ง : </b> {{item.position}}</div> -->
                   <div><b>หมายเหตุ : </b> {{item.remark}}</div>
                 </div>  
               </div>

@@ -1,22 +1,22 @@
 
 var selfServiceCategory = [
-	{id:1,name:'รายการแลก/แทนเวร',requestURL:'#/app/createredeemduty',showRequestButton:true}
+	{id:1,name:'แลก/แทนเวร',requestURL:'#/app/createredeemduty',showRequestButton:true,icon:'ion-arrow-swap',unreadNumber:0},
+	{id:2,name:'ขอทำบัตรพนักงาน',requestURL:'#/app/cardrequest',showRequestButton:true,icon:'ion-card',unreadNumber:0},
 ];
 
 angular.module('starter')
  
-.controller('SelfServiceCtrl',function($scope,$cordovaNetwork,$ionicPopup,WorkFlowService,$filter,$ionicPlatform){
+.controller('SelfServiceCtrl',function($scope,$cordovaNetwork,$ionicPopup,WorkFlowService,$filter,$ionicPlatform,$ionicPopup,$rootScope){
 
 	$ionicPlatform.ready(function(){
+
 		$scope.InitialSSMenu = function(){
-	    	$scope.categories = [
-				{id:1,name:'แลก/แทนเวร',icon:'ion-arrow-swap',unreadNumber:0}
-			];
+			$scope.categories = selfServiceCategory;
 	    };
 
 	    $scope.SetUnReadNumber = function(categoryId,unreadNumber){
 	    	for (var i = 0; i <= $scope.categories.length - 1; i++) {
-	    		if($scope.categories[i].id == categoryId){
+	    		if(+$scope.categories[i].id == +categoryId){
 	    			$scope.categories[i].unreadNumber = unreadNumber;
 	    			break;
 	    		}
@@ -39,11 +39,13 @@ angular.module('starter')
 	    		if(response != null && response.data != null) $scope.BindCategoryUnreadNumber(response.data);
 	    	});
 	    }
+
 	});
+
 
 })
 
-.controller('SelfServiceListCtrl',function($scope,$stateParams,$cordovaNetwork,$ionicPopup,$filter,WorkFlowService,$ionicPlatform){
+.controller('SelfServiceListCtrl',function($scope,$stateParams,$cordovaNetwork,$ionicPopup,$filter,WorkFlowService,$ionicPlatform,$rootScope){
 
 	$ionicPlatform.ready(function(){
 
@@ -65,6 +67,9 @@ angular.module('starter')
 			    case 1:
 			        $scope.itemDetailURL = '#/app/ssitem_redeemduty';
 			        break;
+			    case 2:
+			    	$scope.itemDetailURL = '#/app/ssitem_cardrequest';
+			    	break;
 			    default:
 			        $scope.itemDetailURL = '#';
 			}
@@ -76,7 +81,6 @@ angular.module('starter')
 	    	$scope.InitialSSList();
 	    	//get list of items by categoryId
 	    	WorkFlowService.ViewMyTask($scope.categoryId).then(function(response){
-	    		console.log(response.data);
 	    		if(response != null && response.data != null && response.data.length > 0) {
 	    			//$scope.SSList = response.data;
 	    			$scope.BindSSList(response.data); 
@@ -168,13 +172,18 @@ angular.module('starter')
 					else message = 'คุณต้องการแทนเวรกับ ' + $scope.searchEmp.result + ' ในตำแหน่ง ' + leaderTxt + ' ในวันที่ ' + $scope.selectedDate.dutyDate1;
 					if(confirm(message)){
 						var data = {
-									  CategoryId: 1,DocumentTitle: "แลก/แทนเวร",DocumentDescription: "รายการแลก/แทนเวร",
-									  Empl_Code: $scope.Empl_Code,Empl_Code2: $scope.searchEmp.searchTxt,
-									  DutyDate: $scope.selectedDate.dutyDate1.toString().replace(new RegExp('/','g'),''),
-									  DutyDate2: $scope.selectedDate.dutyDate2.toString().replace(new RegExp('/','g'),''),
-									  Leader: $scope.redeemDuty.leader,
-									  RedeemType: $scope.redeemDuty.type,
-									  Remark: ($scope.redeemDuty.remark && $scope.redeemDuty.remark.length > 0 ? $scope.redeemDuty.remark : '-')
+									  CategoryId: 1,
+									  DutyModel:{
+									  	DocumentTitle: "แลก/แทนเวร",
+									  	DocumentDescription: "รายการแลก/แทนเวร",
+									  	Empl_Code: $scope.Empl_Code,
+									  	Empl_Code2: $scope.searchEmp.searchTxt,
+									  	DutyDate: $scope.selectedDate.dutyDate1.toString().replace(new RegExp('/','g'),''),
+									  	DutyDate2: $scope.selectedDate.dutyDate2.toString().replace(new RegExp('/','g'),''),
+									  	Leader: $scope.redeemDuty.leader,
+									  	RedeemType: $scope.redeemDuty.type,
+									  	Remark: ($scope.redeemDuty.remark && $scope.redeemDuty.remark.length > 0 ? $scope.redeemDuty.remark : '-')
+									  }
 									};
 						//var data = {Empl_Code:$scope.Empl_Code,Empl_Code2:$scope.searchEmp.searchTxt,DutyDate:$scope.selectedDate.dutyDate1.toString().replace(new RegExp('/','g'),''),DutyType: $scope.redeemDuty.type,DutyDate2:$scope.selectedDate.dutyDate2.toString().replace(new RegExp('/','g'),''),Remark: "sample string 6"}
 						console.log(data);
@@ -250,12 +259,14 @@ angular.module('starter')
 	
 })
 
-.controller('ItemRedeemDutyCtrl',function($scope,$ionicPopup,$cordovaNetwork,$stateParams,WorkFlowService,$ionicPlatform,$location,$filter){
+
+.controller('ItemRedeemDutyCtrl',function($scope,$ionicPopup,$cordovaNetwork,$stateParams,WorkFlowService,$ionicPlatform,$location,$filter,$rootScope){
 
 	$ionicPlatform.ready(function(){
 
 		//actiontype : 2 = approve , 5 = reject , 3 = acknowledge
-		$scope.popUpDetails = {title:'',subtitle:'',actiontype:0}
+		$scope.popUpDetails = {title:'',subtitle:'',actiontype:0};
+		$scope.action = {remark:''};
 
 		$scope.InititalRedeemDutyDetails = function(data){
     		//RedeemDutyType : 1 = แลก , 2 = แทน
@@ -275,8 +286,7 @@ angular.module('starter')
 
 	    	$scope.showBtnApprove = data.Approve;
 	    	$scope.showBtnAcknowledgment = data.Acknowledgment;
-	    	$scope.action = {remark:''};
-
+	    	
 	    	angular.forEach(data.HistoryWorkflow,function(value,key){
 	        	$scope.redeemDutyHistories.push({
 		    		RouteName:value.RouteName,
@@ -308,74 +318,74 @@ angular.module('starter')
 	    		}
 	    	});
 	    }
-
+ 
 	    $scope.confirmAcknowledge = function(){
-	    	$scope.popUpDetails.title = 'รับทราบ';
-	    	$scope.popUpDetails.subtitle = 'รับทราบรายการนี้ ?';
-	    	$scope.popUpDetails.actiontype = 3;
-	    	$scope.showPopUp();
+	    	// $scope.popUpDetails.title = 'รับทราบ';
+	    	// $scope.popUpDetails.subtitle = 'รับทราบรายการนี้ ?';
+	    	// $scope.popUpDetails.actiontype = 3;
+	    	// $scope.showPopUp();
+	    	WorkFlowService.confirmAcknowledge($scope);
 	    };
 
-	    $scope.doAcknowledge = function(){
-    		WorkFlowService.ApproveWorkflow($scope.documentId,window.localStorage.getItem("CurrentUserName"),$scope.action.remark,3).then(function(response){
-    			if(response) $location.path('/app/selfservicelist/1');
-    		});
-	    };
+	    // $scope.doAcknowledge = function(){
+    	// 	WorkFlowService.ApproveWorkflow($scope.documentId,window.localStorage.getItem("CurrentUserName"),$scope.action.remark,3).then(function(response){
+    	// 		if(response) $location.path('/app/selfservicelist/1');
+    	// 	});
+	    // };
 
 	    $scope.confirmApproveOrReject = function(isApprove){
-	    	var confirmMessage = '';
-	    	var title = '';
-	    	var actionType = 0;
-	    	if(isApprove){
-	    		title = 'อนุมัติ';
-	    		confirmMessage = 'คุณแน่ใจที่จะอนุมัติรายการนี้ ?';
-	    		actionType = 2;
-	    	}
-	    	else{
-	    		title = 'ไม่อนุมัติ'
-	    		confirmMessage = 'คุณแน่ใจที่จะไม่อนุมัติรายการนี้ ?';
-	    		actionType = 5;
-	    	}
-	    	$scope.popUpDetails.title = title;
-	    	$scope.popUpDetails.subtitle = confirmMessage;
-	    	$scope.popUpDetails.actiontype = actionType;
+	    	// var confirmMessage = '';
+	    	// var title = '';
+	    	// var actionType = 0;
+	    	// if(isApprove){
+	    	// 	title = 'อนุมัติ';
+	    	// 	confirmMessage = 'คุณแน่ใจที่จะอนุมัติรายการนี้ ?';
+	    	// 	actionType = 2;
+	    	// }
+	    	// else{
+	    	// 	title = 'ไม่อนุมัติ'
+	    	// 	confirmMessage = 'คุณแน่ใจที่จะไม่อนุมัติรายการนี้ ?';
+	    	// 	actionType = 5;
+	    	// }
+	    	// $scope.popUpDetails.title = title;
+	    	// $scope.popUpDetails.subtitle = confirmMessage;
+	    	// $scope.popUpDetails.actiontype = actionType;
 
-	    	$scope.showPopUp();
+	    	// $scope.showPopUp();
+	    	WorkFlowService.confirmApproveOrReject(isApprove,$scope);
 	    };
 
-	    $scope.doApproveOrReject = function(isApprove,actionType){
-	    	console.log('doApproveOrReject');
-    		WorkFlowService.ApproveWorkflow($scope.documentId,window.localStorage.getItem("CurrentUserName"),$scope.action.remark,actionType).then(function(response){
-    			if(response) $location.path('/app/selfservicelist/1');
-    		});
-	    };
+	    // $scope.doApproveOrReject = function(isApprove,actionType){
+	    // 	console.log('doApproveOrReject');
+    	// 	WorkFlowService.ApproveWorkflow($scope.documentId,window.localStorage.getItem("CurrentUserName"),$scope.action.remark,actionType).then(function(response){
+    	// 		if(response) $location.path('/app/selfservicelist/1');
+    	// 	});
+	    // };
 
-	    $scope.showPopUp = function(){
-	    	$scope.action.remark = '';
-	    	//popup when clicked approve/reject , acknowledge
-		    var popUp = $ionicPopup.show({
-		    	template: "<textarea placeholder='หมายเหตุ' rows='5' cols='50' ng-model='action.remark'></textarea>",
-		    	title:$scope.popUpDetails.title,
-		    	subTitle:$scope.popUpDetails.subtitle,
-		    	scope:$scope,
-		    	buttons:[
-		    		{text:'ตกลง',type:'button-positive',onTap:function(e){
-		    			if($scope.popUpDetails.actiontype == 2) $scope.doApproveOrReject(true,2);
-		    			else if($scope.popUpDetails.actiontype == 5) $scope.doApproveOrReject(false,5);
-		    			else if($scope.popUpDetails.actiontype == 3) $scope.doAcknowledge();
-		    		}},
-		    		{text:'ยกเลิก'}
-		    	]
-		    });
-	    };
+	    // $scope.showPopUp = function(){
+	    // 	$scope.action.remark = '';
+	    // 	//popup when clicked approve/reject , acknowledge
+		   //  var popUp = $ionicPopup.show({
+		   //  	template: "<textarea placeholder='หมายเหตุ' rows='5' cols='50' ng-model='action.remark'></textarea>",
+		   //  	title:$scope.popUpDetails.title,
+		   //  	subTitle:$scope.popUpDetails.subtitle,
+		   //  	scope:$scope,
+		   //  	buttons:[
+		   //  		{text:'ตกลง',type:'button-positive',onTap:function(e){
+		   //  			if($scope.popUpDetails.actiontype == 2) $scope.doApproveOrReject(true,2);
+		   //  			else if($scope.popUpDetails.actiontype == 5) $scope.doApproveOrReject(false,5);
+		   //  			else if($scope.popUpDetails.actiontype == 3) $scope.doAcknowledge();
+		   //  		}},
+		   //  		{text:'ยกเลิก'}
+		   //  	]
+		   //  });
+	    // };
  
-	    
-
 	});
 
 })
 
-.controller('CardRequestCtrl',function($scope,$cordovaNetwork,$ionicPopup,APIService,$ionicPlatform){
+.controller('CardRequestCtrl',function($scope,$cordovaNetwork,$ionicPopup,APIService,$ionicPlatform,WorkFlowService,$location){
 
 	$ionicPlatform.ready(function(){
 		$scope.noInternet = false;
@@ -386,16 +396,78 @@ angular.module('starter')
 		};
 
 		$scope.cardRequest = function(){
-			var url = APIService.hostname() + '/EmployeeCardRequest/CardRequest';
-			var data = {EmplCode:window.localStorage.getItem("CurrentUserName")};
-			APIService.ShowLoading();
-			APIService.httpPost(url,data,
-				function(response){
-					if(response.data && response.data.length > 0) OpenIonicAlertPopup($ionicPopup,'ขอทำบัตร','หมายเลขคำขอเลขที่ ' + response.data + ' ได้ถูกจัดส่งให้ผู้ดำเนินการแล้ว กรุณาติดต่อ 1449 คุณจำปูน');
-					APIService.HideLoading();	
-				},
-				function(error){APIService.HideLoading();console.log(error);});
+			// var url = APIService.hostname() + '/EmployeeCardRequest/CardRequest';
+			// var data = {EmplCode:window.localStorage.getItem("CurrentUserName")};
+			// APIService.ShowLoading();
+			// APIService.httpPost(url,data,
+			// 	function(response){
+			// 		if(response.data && response.data.length > 0) OpenIonicAlertPopup($ionicPopup,'ขอทำบัตร','หมายเลขคำขอเลขที่ ' + response.data + ' ได้ถูกจัดส่งให้ผู้ดำเนินการแล้ว กรุณาติดต่อ 1449 คุณจำปูน');
+			// 		APIService.HideLoading();	
+			// 	},
+			// 	function(error){APIService.HideLoading();console.log(error);});
+			var data = {CategoryId:2,REQCardModel:{
+				DocumentTitle:'ขอทำบัตรพนักงาน',
+				DocumentDescription:window.localStorage.getItem("CurrentUserName") + ' ขอทำบัตรพนักงาน',
+				Empl_Code:window.localStorage.getItem("CurrentUserName")
+			}};
+			WorkFlowService.CreateWorkFlow(data).then(function(response){
+				if(response != null && response.data != null && response.data != 'Error'){
+					OpenIonicAlertPopup($ionicPopup,'ขอทำบัตร','หมายเลขคำขอเลขที่ ' + response.data + ' ได้ถูกจัดส่งให้ผู้ดำเนินการแล้ว กรุณาติดต่อ 1449 คุณจำปูน');
+					$location.path('/app/selfservicelist/2');
+				}
+			},function(error){console.log(error);});
 		};
+	});
+
+})
+
+.controller('ItemCardRequestCtrl',function($scope,$cordovaNetwork,$stateParams,$ionicPopup,$ionicPlatform,WorkFlowService,$filter){
+	$ionicPlatform.ready(function(){
+
+		$scope.cardRequestDetails = {};
+		$scope.cardRequestHistories = [];
+		//actiontype : 2 = approve , 5 = reject , 3 = acknowledge
+		$scope.popUpDetails = {title:'',subtitle:'',actiontype:0};
+		$scope.action = {remark:''};
+
+		//if no internet connection
+		if(!CheckNetwork($cordovaNetwork)){
+		 	$scope.noInternet = true;
+		 	OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+		}
+		else{
+			$scope.documentId = $stateParams.documentId;
+	    	$scope.nextLevel = $stateParams.nextLevel;
+	    	$scope.EmplCode = window.localStorage.getItem("CurrentUserName");
+			WorkFlowService.ViewHistoryMyTask($scope.documentId,$scope.nextLevel,$scope.EmplCode).then(function(response){
+				if(response != null && response.data != null){
+					$scope.InitialCardRequestDetails(response.data);
+					//post to mark readed this document
+					WorkFlowService.UpdateReadMytask($scope.EmplCode,$scope.documentId);
+				};
+			});
+		}
+
+		$scope.InitialCardRequestDetails = function(data){
+			$scope.showBtnAcknowledgment = data.Acknowledgment;
+			$scope.showBtnApprove = data.Approve;
+
+			$scope.cardRequestDetails.DocumentTitle = data.HistoryWorkflow[0].DocumentTitle;
+			$scope.cardRequestDetails.DocumentDescription = data.HistoryWorkflow[0].DocumentDescription;
+
+			angular.forEach(data.HistoryWorkflow,function(value,key){
+	        	$scope.cardRequestHistories.push({
+		    		UpdateBy:value.UpdateBy,
+		    		UpdateDate:GetThaiDateTimeByDate($filter,value.UpdateDate),
+		    		ActionTypeName:value.ActionTypeName
+		    	});	
+	      	});
+		};
+
+		$scope.confirmAcknowledge = function(){
+	    	WorkFlowService.confirmAcknowledge($scope);
+	    };
+
 	});
 
 })

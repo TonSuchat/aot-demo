@@ -1,11 +1,12 @@
 angular.module('starter')
 
-.controller('DutyCtrl', function($scope,APIService,$filter,$q,$ionicModal,$cordovaNetwork, $ionicPopup){
-		
+.controller('DutyCtrl', function($scope,APIService,$filter,$q,$ionicModal,$cordovaNetwork,$ionicPopup,$cordovaClipboard){
+	
 	InitialDutyGroups($scope);
 
 	$scope.currentDate = GetCurrentDate().toString().replace(new RegExp('/','g'),'');
 	$scope.selectedDate = {plainFormat:$scope.currentDate,displayFormat:TransformDateHasSlashFormat($scope.currentDate)};
+	$scope.selectedThaiDate = GetThaiDateByDate($filter,$scope.selectedDate.plainFormat);
 	$scope.canCheckIn = false;
 
 	$scope.DutyApiDetails = {
@@ -108,14 +109,13 @@ angular.module('starter')
     	return $scope.shownGroup == group;
   	};
 
-	
-
 	$scope.onTimeSelected = function (selectedTime) {
 		$scope.canCheckIn = false;
 		var dutyDate = ConvertCalendarDateToAPIFormat(selectedTime,$filter);
 		if(dutyDate == null) return;
 		$scope.selectedDate.plainFormat = dutyDate;
 		$scope.selectedDate.displayFormat = TransformDateHasSlashFormat(dutyDate);
+		$scope.selectedThaiDate = GetThaiDateByDate($filter,$scope.selectedDate.plainFormat);
 
 		//display all duty datas
 		if(!$scope.noInternet) DisplayDutyDatas(dutyDate,APIService,$q,$scope);
@@ -123,6 +123,35 @@ angular.module('starter')
 	
 	$scope.onViewTitleChanged = function (title) {
 		$scope.viewTitle = title;
+	};
+
+	$scope.copyDutyEmp = function(){
+		console.log(GetDutyEmpsClipboardText());
+		if(window.cordova){
+			$cordovaClipboard.copy(GetDutyEmpsClipboardText()).then(function () {
+		      alert('copy ข้อมูลเรียบร้อยแล้ว');
+		    }, function () {
+		      // error
+		    });
+
+			$cordovaClipboard.paste().then(function (result) {
+			      console.log(result);
+			    }, function (err) {
+			      console.log(err);
+			    });
+
+		}
+	};
+
+	function GetDutyEmpsClipboardText () {
+		var data = $scope.dutyGroups[0].items;
+		var str = 'รายงานผู้ปฏิบัติงานเวร ประจำวันที่ ' + $scope.selectedThaiDate + '\n\n';
+		angular.forEach(data,function(value,key){
+			str += '-' + value.type + '\n';
+			str += value.name + '\n';
+			str += value.remark + '\n\n';
+		});
+		return str;
 	};
 
 });
@@ -152,11 +181,10 @@ function DisplayDutyDatas (dutyDate,APIService,$q,$scope) {
 	POSTGetDutyByDate(dutyDate,APIService,$q,$scope).then(
 		function(response){
 			completedProcessCount++;
-			console.log(response);
 			if(response != null){
 				//render
 				angular.forEach(response,function(value,key){
-					$scope.dutyGroups[0].items.push({type:value.type,name:value.name,position:value.position,remark:value.remark,showDeleteBtn:(window.localStorage.getItem("CurrentUserName") == value.empl_code ? true : false)});
+					$scope.dutyGroups[0].items.push({type:value.type,name:value.name,remark:value.remark,showDeleteBtn:(window.localStorage.getItem("CurrentUserName") == value.empl_code ? true : false)});
 				});
 			}
 			if(completedProcessCount == totalProcess) APIService.HideLoading();
