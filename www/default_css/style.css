@@ -13,6 +13,16 @@
     /*white-space: normal;*/
 /*}*/
 
+body{
+    color: #ffffff;
+}
+.scroll .button{
+    border: outset #ccc 0.5px !important;
+}
+.icon .ion-ios-location{
+    border: outset #ccc 0.5px !important;
+}
+
 .header-badge{
     display:inline-table !important;
     margin-right:-6px;
@@ -234,6 +244,9 @@ ul.rating li i {
     border-bottom-left-radius: 3px;
     border-bottom-right-radius: 3px;
 }
+textarea{
+    background-color: #009cde;
+}
 
 /* accordion */
 .list .item.item-accordion {
@@ -255,7 +268,8 @@ ul.rating li i {
 /*background*/
 
 .scroll-content{
-    background-image: url("../img/MobileBG.jpg");
+    /*background-image: url("../img/MobileBG.jpg");*/
+    background-color: #004A99;
 }
 .scroll .list .item{
     background: none;
@@ -288,9 +302,31 @@ ul.rating li i {
     color: #FFFFFF;
 }
 
-.item{
+
+/*input */
+.input-label{
+    color: #ffffff;
     border-color: #aaaaaa;
 }
+
+label input[type="text"],input[type="password"]{
+    border-color: #aaaaaa;
+    color: #ffffff;
+}
+input[type="radio"]{
+    background-color: #002e5f;
+    color: #002e5f;
+}
+
+
+/*item*/
+
+.item{
+    background-color: inherit;
+    color: #ffffff;
+    border-color: #aaaaaa;
+}
+
 .item p{
     color: #cccccc;
 }
@@ -299,7 +335,23 @@ ul.rating li i {
 }
 .item-divider h2{
     color: #cccccc;
+
 }
+.item-divider{
+    background-color: #002e5f !important;
+}
+
+.item .item-stable{
+    color: #ffffff;
+}
+
+.item .item-radio{
+    color: #002e5f;
+    background-color: #62c69e;
+    border-radius: 10px;
+}
+
+
 
 .img-circle{
     border: 0px;
@@ -307,13 +359,45 @@ ul.rating li i {
 
 .bar {
     background: none;
-
 }
+.bar.bar-stable{
+    background-color: #62c6e9;
+    background-image: linear-gradient(0deg, #009cde, #009cde 50%, transparent 50%);
+    color: #ffffff;
+}
+.bar.bar-stable .title{
+
+    color: #002e5f;
+}
+
+.monthview-selected{
+    background-color: #9f8d00 !important;
+}
+.monthview-current{
+    background-color: #a1a5a7 !important;
+}
+
 .item-input-wrapper{
     background: none;
     background-image: url("../img/transparent.png");
     border-radius: 20px;
     color: #ffffff;
+}
+
+.item-select select {
+    background-color: #004A99;
+    color: #ffffff;
+}
+
+
+/*list*/
+
+.list .item-stable{
+    color: #ffffff;
+}
+
+.radio-content{
+padding:0px;
 }
 
 /*form-validation*/
