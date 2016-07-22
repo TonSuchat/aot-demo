@@ -317,66 +317,12 @@
               }
             }
           })
-          .state('app.selfservice', {
-            url: '/selfservice',
+          .state('app.notification_history', {
+            url: '/notihistory',
             views: {
               'menuContent': {
-                templateUrl: 'templates/selfservice/selfservice_menu.html',
-                controller:'SelfServiceCtrl'
-              }
-            }
-          })
-          .state('app.selfservicelist', {
-            url: '/selfservicelist/:CategoryId',
-            views: {
-              'menuContent': {
-                templateUrl: 'templates/selfservice/selfservice_list.html',
-                controller:'SelfServiceListCtrl'
-              }
-            }
-          })    
-                .state('app.createredeemduty', {
-                  url: '/createredeemduty',
-                  views: {
-                    'menuContent': {
-                      templateUrl: 'templates/selfservice/create_redeemduty.html',
-                      controller:'CreateRedeemDutyCtrl'
-                    }
-                  }
-                })
-                .state('app.ssitemredeemduty', {
-                  url: '/ssitem_redeemduty?documentId&nextLevel',
-                  views: {
-                    'menuContent': {
-                      templateUrl: 'templates/selfservice/ssitem_redeemduty.html',
-                      controller:'ItemRedeemDutyCtrl'
-                    }
-                  }
-                })
-          .state('app.changepassword', {
-            url: '/changepassword',
-            views: {
-              'menuContent': {
-                templateUrl: 'templates/selfservice/changepassword.html',
-                controller:'ChangePasswordCtrl'
-              }
-            }
-          })
-          .state('app.cardrequest', {
-            url: '/cardrequest',
-            views: {
-              'menuContent': {
-                templateUrl: 'templates/selfservice/cardrequest.html',
-                controller:'CardRequestCtrl'
-              }
-            }
-          })
-          .state('app.ssitemcardrequest', {
-            url: '/ssitem_cardrequest?documentId&nextLevel',
-            views: {
-              'menuContent': {
-                templateUrl: 'templates/selfservice/ssitem_cardrequest.html',
-                controller:'ItemCardRequestCtrl'
+                templateUrl: 'templates/notification_history.html',
+                controller:'NotiHistoryCtrl'
               }
             }
           })

@@ -230,16 +230,26 @@ function ProcessNotification(data){
     //check if need to confirm and redirect to specific path
     if(data.additionalData.alertType == "1"){
       if(confirm('ต้องการดูข้อมูล : ' + data.title + ' ?')){
-        //check is selfservice menu, Yes redirect with other logic, No redirect by link
-        if(CheckURLIsSelfService(data.additionalData.menu)) RedirectSelfServiceMenu(data.additionalData.menu);
-        else{
-          needReload = true;
-          window.location.href = '#/app' + data.additionalData.menu;  
-        }
+        // //check is selfservice menu, Yes redirect with other logic, No redirect by link
+        // if(CheckURLIsSelfService(data.additionalData.menu)) RedirectSelfServiceMenu(data.additionalData.menu);
+        // else{
+        //   needReload = true;
+        //   window.location.href = '#/app' + data.additionalData.menu;  
+        // }
+        ProcessRedirect(data.additionalData.menu);
       }
     }
     //just show message
     else alert(data.message);
+  }
+};
+
+function ProcessRedirect(url) {
+  //check is selfservice menu, Yes redirect with other logic, No redirect by link
+  if(CheckURLIsSelfService(url)) RedirectSelfServiceMenu(url);
+  else{
+    needReload = true;
+    window.location.href = '#/app' + url;  
   }
 };
 
@@ -257,6 +267,9 @@ function RedirectSelfServiceMenu (url) {
     switch(+categoryId){
       case 1:
         window.location.href = '#/app/ssitem_redeemduty?documentId=' + documentId + '&nextLevel=' + nextLevel;
+        break;
+      case 2:
+        window.location.href = '#/app/ssitem_cardrequest?documentId=' + documentId + '&nextLevel=' + nextLevel;
         break;
     }
   }

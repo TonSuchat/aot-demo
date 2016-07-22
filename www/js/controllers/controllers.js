@@ -56,6 +56,7 @@ angular.module('starter')
             $scope.menus.push({link:'#/app/directory?pmroomid=0',text:'สมุดโทรศัพท์',icon:'ion-android-call'});
             $scope.menus.push({link:'#/app/qrcode',text:'QR-Code',icon:'ion-qr-scanner'});
             $scope.menus.push({link:'#/app/duty',text:'จัดการเวร',icon:'ion-ios-body-outline'});
+            $scope.menus.push({link:'#/app/notihistory',text:'ประวัติแจ้งเตือน',icon:'ion-android-refresh'});
           }
           $scope.menus.push({link:'#/app/home/circular-letter',text:'ข่าวสาร ทอท.',icon:'ion-clipboard'});
           $scope.menus.push({link:'#/app/stock',text:'ราคาหุ้น',icon:'ion-ios-pulse-strong'});
@@ -363,6 +364,101 @@ angular.module('starter')
             alert('ไม่พบ URL/ลองใหม่อีกครั้ง');
         });
       }
+
+    })
+
+    .controller('NotiHistoryCtrl',function($scope,$cordovaNetwork,SyncService,APIService,$ionicPopup,NotiHistorySQLite,$ionicPlatform){
+
+      $ionicPlatform.ready(function() {
+
+        APIService.ShowLoading();
+        //have internet connection
+        if(CheckNetwork($cordovaNetwork)){
+            SyncService.SyncNotiHistory().then(function(){
+                InitialNotiHistory();
+            });
+        }
+        else{
+            //no internet connection
+            InitialNotiHistory();  
+        }
+
+        $scope.Refresh = function(){
+          //if no internet connection
+          if(!CheckNetwork($cordovaNetwork)){
+              OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+              FinalActionInfo($scope,APIService);
+          }
+          else{
+            APIService.ShowLoading();
+            SyncService.SyncNotiHistory().then(function(){
+                InitialNotiHistory();
+            });  
+          }
+        };
+
+        $scope.Redirect = function(url){
+          if(!url || url.length <= 0) return;
+          //use ProcessRedirect method on NotiService
+          ProcessRedirect(url);
+        };
+
+        function InitialNotiHistory () {
+          $scope.AllData = [];
+          $scope.NotiHistoryDetails = [];
+          NotiHistorySQLite.GetNotiHistories().then(function(response){
+            if(response != null){
+              var result = ConvertQueryResultToArray(response);
+              console.log(result);
+              angular.forEach(result,function(value,key){
+                var eachNotiHistory = {};
+                eachNotiHistory.NotiType = GetNotiTypeText(value.NotiType);
+                eachNotiHistory.Priority = GetPriorityText(value.NotiPriority);
+                eachNotiHistory.Message = value.Message;
+                eachNotiHistory.MenuPath = value.MenuPath
+                $scope.NotiHistoryDetails.push(eachNotiHistory);
+              });
+              FinalActionInfo($scope,APIService);
+            }
+            else FinalActionInfo($scope,APIService);
+          })
+        };
+
+        function GetNotiTypeText (notiType) {
+          switch(+notiType) {
+            case 1:
+                return 'ข่าวประชาสัมพันธ์';
+                break;
+            case 2:
+                return 'ข้อมูลด้านการเงิน';
+                break;
+            case 3:
+                return 'รออนุมัติ/รับทราบ';
+                break;
+            case 9:
+                return 'PrivateMessage';
+                break;
+          };
+        };
+
+        function GetPriorityText (priority) {
+          switch(+priority) {
+            case 1:
+                return 'ปกติ';
+                break;
+            case 2:
+                return 'ด่วน';
+                break;
+            case 3:
+                return 'ด่วนมาก';
+                break;
+            case 4:
+                return 'ด่วนที่สุด';
+                break;
+          };
+        };
+
+      });
 
     })
  

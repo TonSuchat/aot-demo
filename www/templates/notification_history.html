@@ -1,0 +1,19 @@
+<ion-view view-title="ประวัติแจ้งเตือน">
+
+  <ion-content>
+
+    <ion-refresher pulling-text="โหลดข้อมูลใหม่" on-refresh="Refresh()">
+    </ion-refresher>
+  	
+  	<div class='list'>
+  		<div ng-click='Redirect(notiHistory.MenuPath)' class='item' ng-repeat='notiHistory in NotiHistoryDetails'>
+  			<h2>{{notiHistory.NotiType}}</h2>
+  			<p>{{notiHistory.Message}}</p>
+  			<p>{{notiHistory.Priority}}</p>
+  		</div>
+  	</div>
+
+  </ion-content>
+    
+</ion-view>
+

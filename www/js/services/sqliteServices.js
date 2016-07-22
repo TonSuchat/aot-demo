@@ -1,5 +1,5 @@
 var db;
-var tableNames = ['userprofile','medical','tuition','royal','timeattendance','leave','circular','news','pmroom','pmmsg','pmsubscribe','pmuserinroom','pmseenmessage'];
+var tableNames = ['userprofile','medical','tuition','royal','timeattendance','leave','circular','news','pmroom','pmmsg','pmsubscribe','pmuserinroom','pmseenmessage','notihistory'];
 
 angular.module('starter')
 .service('SQLiteService',function($cordovaSQLite,$q){
@@ -78,7 +78,8 @@ angular.module('starter')
 		this.CreatePMSubscribeTable();
 		this.CreatePMUserInRoomTable();
 		this.CreatePMSeenMessage();
-		this.CreateMobileConfigTable();
+		this.CreateNotiHistoryTable();
+		//this.CreateMobileConfigTable();
 	};
 
 	//**Test-Sync-Code
@@ -121,6 +122,11 @@ angular.module('starter')
 
 	this.CreatePMUserInRoomTable = function(){
 		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmuserinroom(Id integer primary key AUTOINCREMENT, roomId text, userId text)");	
+	};
+
+	this.CreateNotiHistoryTable = function(){
+		console.log('create notihistory');
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS notihistory(clientid integer primary key AUTOINCREMENT,Id int, Empl_Code text, NotiType int, NotiPriority int, Message text, MenuPath text, DL boolean, dirty boolean, TS text)");	
 	};
 
 	this.CreateMobileConfigTable = function(){
@@ -963,6 +969,71 @@ angular.module('starter')
 		return SQLiteService.Execute("SELECT value FROM mobileconfig WHERE key = '" + key + "'").then(function(response){return response;},function(error){return error;});
 	};
 
+})
+.service('NotiHistorySQLite',function(SQLiteService){
+	//***Necessary-Method
+	this.GetLatestTS = function(){
+		return SQLiteService.BaseGetLatestTS('notihistory').then(function(response){return response;},function(error){return error;});
+	};
+
+	this.CountByServerId = function(serverid){
+		return SQLiteService.CountByServerId(serverid,'notihistory').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.CountIsNotDirtyById = function(id){
+		return SQLiteService.CountIsNotDirtyById(id,'notihistory').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.GetDataByTSIsNull = function(){
+		return SQLiteService.GetDataByTSIsNull('notihistory');
+	};
+
+	this.GetDataIsDirty = function(){
+		return SQLiteService.GetDataIsDirty("notihistory");
+	};
+
+	this.DeleteDataIsFlagDeleted = function(){
+		return SQLiteService.DeleteDataIsFlagDeleted("notihistory");
+	};
+
+	this.Update = function(data,isDirty,clientUpdate){
+		var sql;
+		if(clientUpdate)
+			sql = "UPDATE notihistory SET Id = ?, Empl_Code = ?, NotiType = ?, NotiPriority = ?, Message = ?, MenuPath = ?, DL = ?, dirty = ?, TS = ? WHERE clientid = " + data.clientid;
+		else
+			sql = "UPDATE notihistory SET Id = ?, Empl_Code = ?, NotiType = ?, NotiPriority = ?, Message = ?, MenuPath = ?, DL = ?, dirty = ?, TS = ? WHERE Id = " + data.Id;
+		var param = [data.Id,data.Empl_Code,data.NotiType,data.NotiPriority,data.Message,data.MenuPath,data.DL,isDirty,data.TS];
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
+	};
+
+	this.Add = function(data,createFromClient){
+		var sql = "INSERT INTO notihistory (Id, Empl_Code, NotiType, NotiPriority, Message, MenuPath, DL, dirty, TS) VALUES ";
+		var param = []; 
+		var rowArgs = [];
+		data.forEach(function(item){
+			rowArgs.push("(?,?,?,?,?,?,?,?,?)");
+			param.push(item.Id);
+			param.push(item.Empl_Code);
+			param.push(item.NotiType);
+			param.push(item.NotiPriority);
+			param.push(item.Message);
+			param.push(item.MenuPath);
+			param.push(item.DL);
+			//dirty
+			if(createFromClient) param.push(true);
+			else param.push(false);
+			//TS
+			if(createFromClient) param.push(null);
+			else param.push(item.TS);
+		});
+		sql += rowArgs.join(', ');
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){console.log(error); return error;});
+	};
+	//***Necessary-Method
+
+	this.GetNotiHistories = function(){
+		return SQLiteService.Execute("SELECT * FROM notihistory ORDER BY TS DESC").then(function(response){return response;},function(error){return error;});
+	};
 })
 
 //***Test-Sync-Code

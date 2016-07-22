@@ -1,6 +1,6 @@
 angular.module('starter')
 
-.service('SyncService',function($q,APIService,TestSyncSQLite,UserProfileSQLite,MedicalSQLite,TuitionSQLite,RoyalSQLite,TimeAttendanceSQLite,LeaveSQLite,CircularSQLite,NewsSQLite,PMRoomSQLite,PMMsgSQLite,PMSubscribeSQLite,PMUserInRoomSQLite){
+.service('SyncService',function($q,APIService,TestSyncSQLite,UserProfileSQLite,MedicalSQLite,TuitionSQLite,RoyalSQLite,TimeAttendanceSQLite,LeaveSQLite,CircularSQLite,NewsSQLite,PMRoomSQLite,PMMsgSQLite,PMSubscribeSQLite,PMUserInRoomSQLite,NotiHistorySQLite){
 
   enableSync = true;
 
@@ -90,6 +90,17 @@ angular.module('starter')
     };
     console.log('SYNC-NEWS');
     return ProcessSyncData(APIService,NewsSQLite,$q,apiURLs,apiDatas,null);
+  };
+
+  this.SyncNotiHistory = function(){
+    var myEmpId = window.localStorage.getItem("CurrentUserName");
+    var apiDatas = {
+      GetData:{ObjectID:9,SyncNotiHistoryViewModel:{Empl_Code: myEmpId}},
+      AddData:{ObjectID:9,ObjectNotiHistoryEntity:{}},
+      UpdateData:{ObjectID:9,ObjectNotiHistoryEntity:{}}
+    };
+    console.log('SYNC-NotiHistory');
+    return ProcessSyncData(APIService,NotiHistorySQLite,$q,apiURLs,apiDatas,null);
   };
 
   // this.SyncPMRoom = function(){
