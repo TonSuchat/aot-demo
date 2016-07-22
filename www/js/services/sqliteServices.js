@@ -4,6 +4,8 @@ var tableNames = ['userprofile','medical','tuition','royal','timeattendance','le
 angular.module('starter')
 .service('SQLiteService',function($cordovaSQLite,$q){
 
+	var service = this;
+
 	this.OpenDB = function(){
 		if (window.cordova) db = $cordovaSQLite.openDB({ name: "AOTMobileDB.db" }); //device
         else db = window.openDatabase("AOTMobileDB.db", '1', 'my', 1024 * 1024 * 100); // browser
@@ -76,6 +78,7 @@ angular.module('starter')
 		this.CreatePMSubscribeTable();
 		this.CreatePMUserInRoomTable();
 		this.CreatePMSeenMessage();
+		this.CreateMobileConfigTable();
 	};
 
 	//**Test-Sync-Code
@@ -120,6 +123,23 @@ angular.module('starter')
 		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmuserinroom(Id integer primary key AUTOINCREMENT, roomId text, userId text)");	
 	};
 
+	this.CreateMobileConfigTable = function(){
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS mobileconfig(Id integer primary key AUTOINCREMENT, key text, value text)").then(function(response){
+			//check if first time insert default configs
+			$cordovaSQLite.execute(db,"select count(*) as totalConfig from mobileconfig").then(function(response){
+				if(response != null){
+					var count = ConvertQueryResultToArray(response)[0].totalConfig;
+					if(+count == 0){
+						//notification sound
+						$cordovaSQLite.execute(db,"insert into mobileconfig(key,value) values('notification_sound','true') ");
+						//theme
+						$cordovaSQLite.execute(db,"insert into mobileconfig(key,value) values('theme','default') ");
+					}
+				}
+			});
+		},function(err){});
+	};	
+
 	//unseen : 0 = unseen(in case when message coming but user didn't active in room, for select and resend to notify sender reciver seen message) , 1 = seen
 	//msgAct : 0 = normal , 1 = resend , 2 = show resend | delete button
 	this.CreatePMMsgTable = function(){
@@ -138,10 +158,15 @@ angular.module('starter')
 		return $q(function(resolve,reject){
 			var totalProcess = 0;
 			for (var i = 0; i <= tableNames.length - 1; i++) {
+				currentTableName = tableNames[i];
 				$cordovaSQLite.execute(db, "DELETE FROM " + tableNames[i]).then(
 					function(){
 						totalProcess++;
-						if(totalProcess == tableNames.length) resolve();
+						if(totalProcess == tableNames.length){
+							// //create default mobile config data
+							// service.CreateMobileConfigTable();
+							resolve();
+						}
 					},
 					function(error){console.log(error);reject(error);});
 			};
@@ -917,6 +942,25 @@ angular.module('starter')
 
 	this.CheckUserSeenMessage = function(empId,messageId,roomId){
 		return SQLiteService.Execute("select count(*) as totalCount FROM pmseenmessage where Empl_Code = '" + empId + "' and MessageId = '" + messageId + "' and roomId = '" + roomId + "'").then(function(response){return response;},function(error){return error;});	
+	};
+
+})
+.service('MobileConfigSQLite',function(SQLiteService){
+
+	this.Add = function(data){
+		var sql = "INSERT INTO mobileconfig (key, value) VALUES (?,?)";
+		return SQLiteService.Execute(sql,data).then(function(response){return response;},function(error){console.log(error); return error;});
+	};
+
+	this.Update = function(data){
+		var sql;
+		sql = "UPDATE mobileconfig SET key = ?, value = ? WHERE Id = " + data.Id;	
+		var param = [data.key,data.value];
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
+	};
+
+	this.GetValueByKey = function(key){
+		return SQLiteService.Execute("SELECT value FROM mobileconfig WHERE key = '" + key + "'").then(function(response){return response;},function(error){return error;});
 	};
 
 })

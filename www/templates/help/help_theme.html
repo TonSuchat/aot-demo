@@ -1,0 +1,16 @@
+<ion-view cache-view="false" view-title="Theme">
+    <ion-content>
+
+    	<div class='list'>
+
+        <div class='item item-thumbnail-left' ng-repeat='theme in Themes'>
+          <img src="img/themes/{{theme.Img}}.png">
+          <h2>{{theme.Name}}</h2>
+          <p>{{theme.Description}}</p>
+          <button ng-disabled='theme.IsApply' ng-click='ApplyTheme(theme.val)' class='button button-small button-balanced'><i ng-show='theme.IsApply' class='icon ion-checkmark-round'></i> {{theme.IsApply ? 'ใช้งานอยู่' : 'ใช้งาน'}}</button>
+        </div>
+
+      </div>
+     	
+    </ion-content>
+</ion-view>

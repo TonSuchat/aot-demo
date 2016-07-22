@@ -1,35 +1,50 @@
 var needReload = false;
 
 angular.module('starter')
-.service('NotiService',function($q,APIService,$cordovaDevice,$rootScope,$cordovaPushV5){
+.service('NotiService',function($q,APIService,$cordovaDevice,$rootScope,$cordovaPushV5,MobileConfigSQLite){
 
     // var isAndroid = ionic.Platform.isAndroid();
     // var isIOS = ionic.Platform.isIOS();
     //var androidConfig = {"senderID": "211415803371"};
     //var iosConfig = { "badge": true,"sound": true,"alert": true };
-    var options = {
-        android: {senderID: "211415803371"},
-        ios: {alert: "true",badge: "true",sound: "true"},
-        windows: {}
-    };
+    
     //var cordovaPushConfig = (isAndroid ? androidConfig : iosConfig);
     var serviceObj = this;
 
     this.Register = function(){
-        // initialize
-        $cordovaPushV5.initialize(options).then(function(){
-          // start listening for new notifications
-          $cordovaPushV5.onNotification();
-          // start listening for errors
-          $cordovaPushV5.onError();
-          // register to get registrationId
-          $cordovaPushV5.register().then(function(data) {
-            // `data.registrationId` save it somewhere;
-            console.log('GCM Token : ' + data);
-            serviceObj.StoreTokenOnServer(data,'',false);
-          })
-        });
-
+      console.log('register-gcm');
+      // GetNotificationSettings().then(function(response){
+      //   if(response != null){
+      //     var options = {
+      //       android: {senderID: "211415803371",sound: false,vibrate: false},
+      //       ios: {alert: "true",badge: "true",sound: response.sound},
+      //       windows: {}
+      //     };
+          
+      //   }
+      // })
+      
+      var options = {
+        android: {senderID: "211415803371",sound: false,vibrate: false},
+        ios: {alert: "true",badge: "true",sound: false},
+        windows: {}
+      };
+      // initialize
+      $cordovaPushV5.initialize(options).then(function(){
+        // start listening for new notifications
+        $cordovaPushV5.onNotification();
+        // start listening for errors
+        $cordovaPushV5.onError();
+        // register to get registrationId
+        $cordovaPushV5.register().then(function(data) {
+          // `data.registrationId` save it somewhere;
+          console.log('GCM Token : ' + data);
+          serviceObj.StoreTokenOnServer(data,'',false);
+        })
+      });
+       
+      
+        
         // $cordovaPush.register(cordovaPushConfig).then(function(result) {
         //   // Success
         //   //if ios this result is device token
@@ -113,6 +128,20 @@ angular.module('starter')
     $rootScope.$on('$cordovaPushV5:errorOcurred', function(event, e){
       console.log(e.message);
     });
+
+    function GetNotificationSettings () {
+      return $q(function(resolve){
+        var notification_config = {};
+        //sound
+        MobileConfigSQLite.GetValueByKey('notification_sound').then(function(response){
+          if(response != null){
+             notification_config.sound = ConvertQueryResultToArray(response)[0].value;
+             resolve(notification_config);
+          }
+          //vibrate
+        });
+      });
+    };
 
 
 });

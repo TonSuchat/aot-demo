@@ -61,6 +61,7 @@ angular.module('starter')
           $scope.menus.push({link:'#/app/stock',text:'ราคาหุ้น',icon:'ion-ios-pulse-strong'});
           $scope.menus.push({link:'#/app/aotlive',text:'AOT-Live',icon:'ion-social-youtube'});
           $scope.menus.push({link:'#/app/feedback',text:'เสนอความคิดเห็น',icon:'ion-paper-airplane'});
+          $scope.menus.push({link:'#/app/help',text:'ช่วยเหลือ',icon:'ion-help'});
         };
 
         // Create the login modal that we will use later
@@ -119,13 +120,14 @@ angular.module('starter')
 
         $scope.logout = function () {
           //if no internet connection
-          if(!CheckNetwork($cordovaNetwork)) return; //OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถออกจากระบบได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+          if(!CheckNetwork($cordovaNetwork)) return;
           else{
-            AuthService.logout();
+            AuthService.logout().then(function(response){
+              //reload set default theme
+              if(response) window.location.reload();
+            });
           }
         };
-
-
 
         $rootScope.$broadcast('checkAuthen', null);
 
@@ -363,8 +365,7 @@ angular.module('starter')
       }
 
     })
-    
-     
+ 
 
 function InitialCirculars(distinctCircularDate,$filter,allData,start,retrieve){
     var result = [];
