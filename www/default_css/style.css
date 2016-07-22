@@ -448,3 +448,26 @@ padding:0px;
 .larger{
     font-size: 50px;
 }
+
+
+
+/*date picker*/
+
+.popup-body{
+    color: #002e5f;
+}
+
+.ionic_datepicker_popup .popup-body .selected_date_full {
+    background-color: #004A99 !important;
+}
+
+.ionic_datepicker_popup .popup-buttons button {
+    background-color: #004A99 !important;
+}
+.ionic_datepicker_popup .popup-body .month_select, .ionic_datepicker_popup .popup-body .year_select{
+    background-color: #004A99 !important;
+    border-radius: 5px;
+}
+.ionic_datepicker_popup .selected_date {
+    background-color: #0BC70B !important;
+}
