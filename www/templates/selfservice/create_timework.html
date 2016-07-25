@@ -1,0 +1,91 @@
+<ion-view view-title="บันทึกลงเวลาทำงาน">
+    <ion-content>
+  		
+  		<div class='list'>
+
+  			<div class='item item-divider'>
+  				แก้ไขเวลาการทำงานเป็น
+  			</div>
+
+  			<div class='item'>
+  				  <ion-radio ng-model='timework.type' name='type' ng-value="1">เวลาเข้า</ion-radio>
+            <ion-radio ng-model='timework.type' name='type' ng-value="2">เวลาออก</ion-radio>
+  			</div>
+
+        <div class='item item-divider'>
+            เหตุผล
+        </div>
+
+        <div class='item'>
+            <ion-radio ng-model='timework.reasoncode' name='reasoncode' ng-value="1">อบรม</ion-radio>
+            <ion-radio ng-model='timework.reasoncode' name='reasoncode' ng-value="2">ปฏิบัติงานนอกสถานที่</ion-radio>
+            <ion-radio ng-model='timework.reasoncode' name='reasoncode' ng-value="3">บัตรบันทึกเวลาชำรุด</ion-radio>
+            <ion-radio ng-model='timework.reasoncode' name='reasoncode' ng-value="4">เครื่องบันทึกเวลาขัดข้อง</ion-radio>
+            <ion-radio ng-model='timework.reasoncode' name='reasoncode' ng-value="5">ลืมนำบัตรมา</ion-radio>
+            <ion-radio ng-model='timework.reasoncode' name='reasoncode' ng-value="6">อื่นๆ</ion-radio>
+        </div>
+
+        <div class='item item-divider'>
+            ตั้งแต่วันที่
+        </div>
+
+  			<div class='card padding'>
+  				<button ng-click='OpenDatePicker(true)' class='button button-block button-balanced'><i class='icon ion-calendar'></i>&nbsp;&nbsp;วันที่</button>
+  				<div class='text-center'>
+  					{{selectedDate.startDate}}
+  				</div>
+          <label class="item item-input item-select">
+            <div class="input-label">
+              เวลา
+            </div>
+            <select ng-options='option.name for option in ddlStartTimesData.options track by option.val' ng-model='ddlStartTimesData.selectedOptions'>
+            </select>
+          </label>
+  			</div>
+
+        <div class='item item-divider'>
+            ถึงวันที่
+        </div>
+
+        <div class='card padding'>
+          <button ng-click='OpenDatePicker(false)' class='button button-block button-balanced'><i class='icon ion-calendar'></i>&nbsp;&nbsp;วันที่</button>
+          <div class='text-center'>
+            {{selectedDate.endDate}}
+          </div>
+          <label class="item item-input item-select">
+            <div class="input-label">
+              เวลา
+            </div>
+            <select ng-options='option.name for option in ddlEndTimesData.options track by option.val' ng-model='ddlEndTimesData.selectedOptions'>
+            </select>
+          </label>
+        </div>
+
+        <div class='item item-divider'>
+          บันทึกเวลากับพนักงานรหัส
+        </div>
+
+        <div class="bar bar-header item-input-inset">
+          <label class="item-input-wrapper">
+            <i class="icon ion-ios-search placeholder-icon"></i>
+            <input type="search" ng-model='searchEmp.searchTxt' placeholder="รหัสพนักงานเเท่านั้น">
+          </label>
+          <button ng-click='searchEmployee()' class="button button-positive">
+            <i class="icon ion-ios-search"></i>
+          </button>
+        </div>
+
+        <div ng-show='searchEmp.result.length > 0' class='item'>
+          <span>{{searchEmp.result}}</span>
+        </div>
+
+  			<div>
+  				<input type='button' ng-disabled='noInternet' ng-click='CreateTimeWork()' class='button button-block button-calm' value='ตกลง' />
+  			</div>
+
+  		</div>
+
+
+
+    </ion-content>
+</ion-view>

@@ -1,7 +1,10 @@
 
 var selfServiceCategory = [
-	{id:1,name:'แลก/แทนเวร',requestURL:'#/app/createredeemduty',showRequestButton:true,icon:'ion-arrow-swap',unreadNumber:0},
-	{id:2,name:'ขอทำบัตรพนักงาน',requestURL:'#/app/cardrequest',showRequestButton:true,icon:'ion-card',unreadNumber:0},
+	{id:"",name:'เปลี่ยนรหัสผ่าน',href:'#/app/changepassword',requestURL:'#',showRequestButton:false,icon:'ion-locked',unreadNumber:0},
+	{id:1,name:'แลก/แทนเวร',href:'#/app/selfservicelist/',requestURL:'#/app/createredeemduty',showRequestButton:true,icon:'ion-arrow-swap',unreadNumber:0},
+	{id:2,name:'ขอทำบัตรพนักงาน',href:'#/app/selfservicelist/',requestURL:'#/app/cardrequest',showRequestButton:true,icon:'ion-card',unreadNumber:0},
+	{id:3,name:'ลงเวลาทำงาน',href:'#/app/selfservicelist/',requestURL:'#/app/createtimework',showRequestButton:true,icon:'ion-clock',unreadNumber:0},
+	{id:4,name:'บันทึกลาหยุดงาน',href:'#/app/selfservicelist/',requestURL:'#/app/createleave',showRequestButton:true,icon:'ion-medkit',unreadNumber:0},
 ];
 
 angular.module('starter')
@@ -44,6 +47,60 @@ angular.module('starter')
 	            }
 	          }
 	        })
+	        .state('app.cardrequest', {
+			    url: '/cardrequest',
+			    views: {
+			      'menuContent': {
+			        templateUrl: 'templates/selfservice/cardrequest.html',
+			        controller:'CardRequestCtrl'
+			      }
+			    }
+			})
+			.state('app.ssitemcardrequest', {
+			    url: '/ssitem_cardrequest?documentId&nextLevel',
+			    views: {
+			      'menuContent': {
+			        templateUrl: 'templates/selfservice/ssitem_cardrequest.html',
+			        controller:'ItemCardRequestCtrl'
+			      }
+			    }
+			})
+			.state('app.createleave', {
+	          url: '/createleave',
+	          views: {
+	            'menuContent': {
+	              templateUrl: 'templates/selfservice/create_leave.html',
+	              controller:'CreateLeaveCtrl'
+	            }
+	          }
+	        })
+	        .state('app.ssitemleave', {
+			    url: '/ssitem_leave?documentId&nextLevel',
+			    views: {
+			      'menuContent': {
+			        templateUrl: 'templates/selfservice/ssitem_leave.html',
+			        controller:'ItemLeaveCtrl'
+			      }
+			    }
+			})
+			.state('app.createtimework', {
+	          url: '/createtimework',
+	          views: {
+	            'menuContent': {
+	              templateUrl: 'templates/selfservice/create_timework.html',
+	              controller:'CreateTimeWorkCtrl'
+	            }
+	          }
+	        })
+	        .state('app.ssitemtimework', {
+			    url: '/ssitem_timework?documentId&nextLevel',
+			    views: {
+			      'menuContent': {
+			        templateUrl: 'templates/selfservice/ssitem_timework.html',
+			        controller:'ItemTimeWorkCtrl'
+			      }
+			    }
+			})
 	.state('app.changepassword', {
 	    url: '/changepassword',
 	    views: {
@@ -53,24 +110,7 @@ angular.module('starter')
 	      }
 	    }
 	})
-	.state('app.cardrequest', {
-	    url: '/cardrequest',
-	    views: {
-	      'menuContent': {
-	        templateUrl: 'templates/selfservice/cardrequest.html',
-	        controller:'CardRequestCtrl'
-	      }
-	    }
-	})
-	.state('app.ssitemcardrequest', {
-	    url: '/ssitem_cardrequest?documentId&nextLevel',
-	    views: {
-	      'menuContent': {
-	        templateUrl: 'templates/selfservice/ssitem_cardrequest.html',
-	        controller:'ItemCardRequestCtrl'
-	      }
-	    }
-	})
+
 })
  
 .controller('SelfServiceCtrl',function($scope,$cordovaNetwork,$ionicPopup,WorkFlowService,$filter,$ionicPlatform,$ionicPopup,$rootScope){
@@ -90,7 +130,15 @@ angular.module('starter')
 	    	};
 	    };
 
+	    $scope.SetReadedAll = function(){
+	    	for (var i = 0; i <= $scope.categories.length - 1; i++) {
+	    		$scope.categories[i].unreadNumber = 0;
+	    	};
+	    };
+
 	    $scope.BindCategoryUnreadNumber = function(data){
+	    	console.log(data);
+	    	console.log($scope.categories);
 	    	angular.forEach(data,function(value,key){
 	    		$scope.SetUnReadNumber(value.CategoryId,value.NumberIsUnread);
 	    	});
@@ -104,6 +152,7 @@ angular.module('starter')
 	    	//get badge number of new item and bind to each category
 	    	WorkFlowService.ViewUnReadMytask(window.localStorage.getItem("CurrentUserName")).then(function(response){
 	    		if(response != null && response.data != null) $scope.BindCategoryUnreadNumber(response.data);
+	    		else $scope.SetReadedAll();
 	    	});
 	    }
 
@@ -136,6 +185,12 @@ angular.module('starter')
 			        break;
 			    case 2:
 			    	$scope.itemDetailURL = '#/app/ssitem_cardrequest';
+			    	break;
+			    case 3:
+			    	$scope.itemDetailURL = '#/app/ssitem_timework';
+			    	break;
+			    case 4:
+			    	$scope.itemDetailURL = '#/app/ssitem_leave';
 			    	break;
 			    default:
 			        $scope.itemDetailURL = '#';
@@ -275,32 +330,36 @@ angular.module('starter')
 		};
 
 		$scope.searchEmployee = function(){
-			return $q(function(resolve){
-				APIService.ShowLoading();
-				var url = APIService.hostname() + '/ContactDirectory/viewContactPaging';
-				var data = {keyword:$scope.searchEmp.searchTxt,start:1,retrieve:1};
-				APIService.httpPost(url,data,
-					function(response){
-						if(response != null && response.data != null){
-							var emp = response.data[0];
-							$scope.searchEmp.result = emp.PrefixName + ' ' + emp.Firstname + ' ' + emp.Lastname;
-							APIService.HideLoading();
-							resolve(true);
-						}
-						else{
-							alert('ไม่พบข้อมูล');
-							$scope.searchEmp.result = '';
-							APIService.HideLoading();
-							resolve(false);
-						}
-					},
-					function(error){
-						$scope.searchEmp.result = '';
-						console.log(error);
-						alert('เกิดข้อผิดพลาดขึ้น ลองอีกครั้ง!');
-						APIService.HideLoading();
-						resolve(false);
-				})
+			// return $q(function(resolve){
+			// 	APIService.ShowLoading();
+			// 	var url = APIService.hostname() + '/ContactDirectory/viewContactPaging';
+			// 	var data = {keyword:$scope.searchEmp.searchTxt,start:1,retrieve:1};
+			// 	APIService.httpPost(url,data,
+			// 		function(response){
+			// 			if(response != null && response.data != null){
+			// 				var emp = response.data[0];
+			// 				$scope.searchEmp.result = emp.PrefixName + ' ' + emp.Firstname + ' ' + emp.Lastname;
+			// 				APIService.HideLoading();
+			// 				resolve(true);
+			// 			}
+			// 			else{
+			// 				alert('ไม่พบข้อมูล');
+			// 				$scope.searchEmp.result = '';
+			// 				APIService.HideLoading();
+			// 				resolve(false);
+			// 			}
+			// 		},
+			// 		function(error){
+			// 			$scope.searchEmp.result = '';
+			// 			console.log(error);
+			// 			alert('เกิดข้อผิดพลาดขึ้น ลองอีกครั้ง!');
+			// 			APIService.HideLoading();
+			// 			resolve(false);
+			// 	})
+			// });
+			APIService.searchEmployee($scope.searchEmp.searchTxt).then(function(response){
+				if(response != null) $scope.searchEmp.result = response;
+				else $scope.searchEmp.result = '';
 			});
 		};
 
@@ -311,12 +370,7 @@ angular.module('starter')
 
 		function SetSelectedDate (val,isDutyDate1) {
 			var selectedDate = new Date(val);
-			var day = selectedDate.getDate().toString();
-			day = (day.length == 1 ? '0' + day : day);
-			var month = (selectedDate.getUTCMonth() + 1).toString();
-			month = (month.length == 1 ? '0' + month : month);
-			var year = selectedDate.getFullYear();
-			var result = day + '/' + month + '/' + year;
+			var result = ConvertDateObjToSlashFormat(selectedDate);
 			if(isDutyDate1) $scope.selectedDate.dutyDate1 = result;
 			else $scope.selectedDate.dutyDate2 = result;
 		};
@@ -496,6 +550,7 @@ angular.module('starter')
 		//actiontype : 2 = approve , 5 = reject , 3 = acknowledge
 		$scope.popUpDetails = {title:'',subtitle:'',actiontype:0};
 		$scope.action = {remark:''};
+		$scope.noInternet = false;
 
 		//if no internet connection
 		if(!CheckNetwork($cordovaNetwork)){
@@ -537,4 +592,261 @@ angular.module('starter')
 
 	});
 
+})
+
+.controller('CreateLeaveCtrl',function($scope,$cordovaNetwork,$stateParams,$ionicPopup,$ionicPlatform,WorkFlowService,$filter,ionicDatePicker,$location){
+	$ionicPlatform.ready(function(){
+		var defaultDate1,defaultDate2;
+		$scope.noInternet = false;
+		//if no internet connection
+		if(!CheckNetwork($cordovaNetwork)){
+		  $scope.noInternet = true;
+		  OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+		};
+
+		$scope.leave = {type:1,reason:'',duration:1,contact:''};
+
+		InitialStartAndEndDate();
+
+		$scope.Empl_Code = window.localStorage.getItem("CurrentUserName");
+		 
+		var datePicker1 = {callback: function (val) { SetSelectedDate(val,true);},
+			inputDate:defaultDate1,
+			from:new Date()
+		};
+
+		var datePicker2 = {callback: function (val) { SetSelectedDate(val,false);},
+			inputDate:defaultDate2,
+			from:new Date()
+		};
+
+		$scope.OpenDatePicker = function(isStartDate){
+			if(isStartDate) ionicDatePicker.openDatePicker(datePicker1);
+			else ionicDatePicker.openDatePicker(datePicker2);
+		};
+
+		function SetSelectedDate (val,isStartDate) {
+			var selectedDate = new Date(val);
+			var result = ConvertDateObjToSlashFormat(selectedDate);
+			if(isStartDate) $scope.selectedDate.startDate = result;
+			else $scope.selectedDate.endDate = result;
+		};
+
+		function InitialStartAndEndDate () {
+			defaultDate1 = new Date();
+			defaultDate1.setDate(defaultDate1.getDate() + 1);
+			defaultDate2 = new Date();
+			defaultDate2.setDate(defaultDate2.getDate() + 2);
+			$scope.selectedDate = {startDate:ConvertDateObjToSlashFormat(defaultDate1),endDate:ConvertDateObjToSlashFormat(defaultDate2)};
+		};
+
+		$scope.IncrementDuration = function(){
+			$scope.leave.duration += 0.5;
+		};
+
+		$scope.DecreaseDuration = function(){
+			$scope.leave.duration -= 0.5;
+			if($scope.leave.duration < 0) $scope.leave.duration = 0;
+		};
+
+		$scope.CreateLeave = function(){
+			//if duration less than 1 set startdate and enddate to same day
+			if($scope.leave.duration == 1) $scope.selectedDate.endDate = $scope.selectedDate.startDate;
+			var description = $scope.GetDocumentDescription();
+			if(confirm('ต้องการสร้าง' + description + ' ?')){
+				var data = {
+					DocumentTitle:'บันทึกลาหยุดงาน',
+					DocumentDescription:description,
+					LeaveModel:{
+						Empl_Code:$scope.Empl_Code,
+						LeaveCode:$scope.leave.type,
+						Reason:$scope.leave.reason,
+						StartDate:$scope.selectedDate.startDate.toString().replace(new RegExp('/','g'),''),
+						EndDate:$scope.selectedDate.endDate.toString().replace(new RegExp('/','g'),''),
+						Duration:$scope.leave.duration,
+						Contact:$scope.leave.contact	
+					}
+				};
+				WorkFlowService.CreateWorkFlow(data).then(function(response){
+					if(response != null) $location.path('/app/selfservicelist/4');
+				},function(error){console.log(error);alert('ไม่สามารถทำรายการได้/โปรดลองใหม่อีกครั้ง');});
+			}
+		};
+
+		$scope.GetDocumentDescription = function(){
+			var message,typeName;
+			if($scope.leave.type == 1) typeName = 'ป่วย';
+			else if($scope.leave.type == 2) typeName = 'กิจ';
+			else if($scope.leave.type == 3) typeName = 'คลอด';
+			else if($scope.leave.type == 4) typeName = 'พักผ่อน';
+			message = 'บันทึกลา' + typeName + ' เนื่องจาก : ' + $scope.leave.reason + ' ตั้งแต่วันที่ ' + $scope.selectedDate.startDate + ' ถึงวันที่ ' + $scope.selectedDate.endDate + ' เป็นระยะเวลา ' + $scope.leave.duration + ' สามารถติดต่อได้ที่ ' + $scope.leave.contact;
+			return message;
+		};
+
+	});
+})
+
+.controller('ItemLeaveCtrl',function($scope,$cordovaNetwork,$stateParams,$ionicPopup,$ionicPlatform,WorkFlowService,$filter){
+	$ionicPlatform.ready(function(){
+
+		$scope.noInternet = false;
+		//if no internet connection
+		if(!CheckNetwork($cordovaNetwork)){
+		  $scope.noInternet = true;
+		  OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+		}
+
+	});
+})
+
+.controller('CreateTimeWorkCtrl',function($scope,$cordovaNetwork,$stateParams,$ionicPopup,$ionicPlatform,WorkFlowService,$filter,ionicDatePicker,APIService,$location){
+
+	$scope.searchEmp = {searchTxt:'',result:''};
+	$scope.ddlStartTimesData = {selectedOptions:{},options:[]};
+	$scope.ddlEndTimesData = {selectedOptions:{},options:[]};
+	$scope.timework = {type:1,reasoncode:1};
+	$scope.selectedDate = {startDate:GetCurrentDate().toString(),endDate:GetCurrentDate().toString()};
+	$scope.Empl_Code = window.localStorage.getItem("CurrentUserName");
+
+	var datePicker1 = {callback: function (val) { SetSelectedDate(val,true);}};
+
+	var datePicker2 = {callback: function (val) { SetSelectedDate(val,false);}};
+
+	$scope.OpenDatePicker = function(isStartDate){
+		if(isStartDate) ionicDatePicker.openDatePicker(datePicker1);
+		else ionicDatePicker.openDatePicker(datePicker2);
+	};
+
+	function SetSelectedDate (val,isStartDate) {
+		var selectedDate = new Date(val);
+		var result = ConvertDateObjToSlashFormat(selectedDate);
+		if(isStartDate) $scope.selectedDate.startDate = result;
+		else $scope.selectedDate.endDate = result;
+	};
+
+	$scope.BindDDLTimes = function(ddl,isStartDate){
+		ddl.options.push({name:'08:00',val:'080000'});
+		ddl.options.push({name:'09:00',val:'090000'});
+		ddl.options.push({name:'10:00',val:'100000'});
+		ddl.options.push({name:'11:00',val:'110000'});
+		ddl.options.push({name:'12:00',val:'120000'});
+		ddl.options.push({name:'13:00',val:'130000'});
+		ddl.options.push({name:'14:00',val:'140000'});
+		ddl.options.push({name:'15:00',val:'150000'});
+		ddl.options.push({name:'16:00',val:'160000'});
+		ddl.options.push({name:'17:00',val:'170000'});
+		if(isStartDate) ddl.selectedOptions = {name:'08:00',val:'080000'};
+		else ddl.selectedOptions = {name:'17:00',val:'170000'};
+	};
+
+	$scope.searchEmployee = function(){
+		APIService.searchEmployee($scope.searchEmp.searchTxt).then(function(response){
+			if(response != null) $scope.searchEmp.result = response;
+			else $scope.searchEmp.result = '';
+		});
+	};
+
+	$scope.CreateTimeWork = function(){
+		if(!$scope.CheckIsValid()) return;
+
+		var details = $scope.GetDocumentDescription();
+		
+		if(confirm('ต้องการสร้างข้อมูล' + details + ' ?')){
+			var data = {
+					CategoryId:3,
+					TimeWorkModel:{
+						DocumentTitle:'ลงเวลาการทำงาน',
+						DocumentDescription:details,
+						Empl_Code:$scope.Empl_Code,
+						TimeCode:$scope.timework.type,
+						ReasonCode:$scope.timework.reasoncode,
+						FromDate:$scope.selectedDate.startDate.toString().replace(new RegExp('/','g'),'') + $scope.ddlStartTimesData.selectedOptions.val,
+						ToDate:$scope.selectedDate.endDate.toString().replace(new RegExp('/','g'),'') + $scope.ddlEndTimesData.selectedOptions.val,
+						TimeWith:$scope.searchEmp.searchTxt	
+					}
+				};
+			WorkFlowService.CreateWorkFlow(data).then(function(response){
+				if(response != null) $location.path('/app/selfservicelist/3');
+			},function(error){console.log(error);alert('ไม่สามารถทำรายการได้/โปรดลองใหม่อีกครั้ง');});
+		}
+
+	};
+
+	$scope.GetDocumentDescription = function(){
+		var message,typeName,reasonTxt;
+		typeName = ($scope.timework.type == 1 ? 'เข้า' : 'ออก');
+		if($scope.timework.reasoncode == 1) reasonTxt = 'อบรม';
+		else if($scope.timework.reasoncode == 2) reasonTxt = 'ปฏิบัติงานนอกสถานที่';
+		else if($scope.timework.reasoncode == 3) reasonTxt = 'บัตรบันทึกเวลาชำรุด';
+		else if($scope.timework.reasoncode == 4) reasonTxt = 'เครื่องบันทึกเวลาขัดข้อง';
+		else if($scope.timework.reasoncode == 5) reasonTxt = 'ลืมนำบัตรมา';
+		else if($scope.timework.reasoncode == 6) reasonTxt = 'อื่นๆ';
+		message = 'บันทึกลงเวลา' + typeName + ' เนื่องจาก ' + reasonTxt + ' ในวันที่ ' + $scope.selectedDate.startDate + ' เวลา ' + $scope.ddlStartTimesData.selectedOptions.name + ' จนถึงวันที่ ' + $scope.selectedDate.endDate + ' เวลา ' + $scope.ddlEndTimesData.selectedOptions.name + ' บันทึกลงเวลากับพนักงานรหัส ' + $scope.searchEmp.searchTxt;
+		return message;
+	};
+
+	$scope.CheckIsValid = function(){
+		if(!$scope.searchEmp.searchTxt || $scope.searchEmp.searchTxt.length <= 0) 
+		{
+			alert('ต้องกรอกรหัสพนักงานที่บันทึกเวลาด้วย!');
+			return false;
+		}
+		if($scope.Empl_Code == $scope.searchEmp.searchTxt){
+			alert('ห้ามใส่รหัสพนักงานของตัวเอง!');
+			return false;
+		}
+		return true;
+	};
+
+	$scope.BindDDLTimes($scope.ddlStartTimesData,true);
+	$scope.BindDDLTimes($scope.ddlEndTimesData,false);
+
+})
+
+.controller('ItemTimeWorkCtrl',function($scope,$cordovaNetwork,$stateParams,$ionicPopup,$ionicPlatform,WorkFlowService,$filter){
+	$ionicPlatform.ready(function(){
+		$scope.TimeWorkDetails = {};
+		$scope.TimeWorkHistories = [];
+		//actiontype : 2 = approve , 5 = reject , 3 = acknowledge
+		$scope.popUpDetails = {title:'',subtitle:'',actiontype:0};
+		$scope.action = {remark:''};
+		$scope.noInternet = false;
+
+		//if no internet connection
+		if(!CheckNetwork($cordovaNetwork)){
+		 	$scope.noInternet = true;
+		 	OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+		}
+		else{
+			$scope.documentId = $stateParams.documentId;
+	    	$scope.nextLevel = $stateParams.nextLevel;
+	    	$scope.EmplCode = window.localStorage.getItem("CurrentUserName");
+			WorkFlowService.ViewHistoryMyTask($scope.documentId,$scope.nextLevel,$scope.EmplCode).then(function(response){
+				if(response != null && response.data != null){
+					$scope.InitialTimeWorkDetails(response.data);
+					//post to mark readed this document
+					WorkFlowService.UpdateReadMytask($scope.EmplCode,$scope.documentId);
+				};
+			});
+		}
+
+		$scope.InitialTimeWorkDetails = function(data){
+			$scope.showBtnAcknowledgment = data.Acknowledgment;
+			$scope.showBtnApprove = data.Approve;
+
+			$scope.TimeWorkDetails.DocumentTitle = data.HistoryWorkflow[0].DocumentTitle;
+			$scope.TimeWorkDetails.DocumentDescription = data.HistoryWorkflow[0].DocumentDescription;
+
+			console.log(data.HistoryWorkflow[0].DocumentDescription);
+
+			angular.forEach(data.HistoryWorkflow,function(value,key){
+	        	$scope.TimeWorkHistories.push({
+		    		UpdateBy:value.UpdateBy,
+		    		UpdateDate:GetThaiDateTimeByDate($filter,value.UpdateDate),
+		    		ActionTypeName:value.ActionTypeName
+		    	});	
+	      	});
+		};
+
+	});
 })

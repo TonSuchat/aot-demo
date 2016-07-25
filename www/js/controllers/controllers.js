@@ -409,7 +409,6 @@ angular.module('starter')
           NotiHistorySQLite.GetNotiHistories().then(function(response){
             if(response != null){
               var result = ConvertQueryResultToArray(response);
-              console.log(result);
               angular.forEach(result,function(value,key){
                 var eachNotiHistory = {};
                 eachNotiHistory.NotiType = GetNotiTypeText(value.NotiType);

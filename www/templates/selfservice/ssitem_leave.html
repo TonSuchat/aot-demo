@@ -1,0 +1,54 @@
+<ion-view cache-view="false" view-title="รายละเอียด ขอลาหยุดงาน">
+
+    <ion-content>
+
+      <div class='list'>
+
+        <!-- section-details -->
+        <div class='item item-divider'>
+          <h2><b>รายละเอียดคำขอ</b></h2>
+        </div>
+
+        <div class='item'>
+          <p><b>เรื่อง</b></p>
+          <p>{{cardRequestDetails.DocumentTitle}}</p>
+        </div>
+
+        <div class='item'>
+          <p><b>รายละเอียด</b></p>
+          <p>{{cardRequestDetails.DocumentDescription}}</p>
+        </div>
+        <!-- section-details -->
+
+        <!-- section-history -->
+        <div class='item item-divider'>
+          <h2><b>ประวัติ</b></h2>
+        </div>
+
+        <div class='item' ng-repeat='history in cardRequestHistories'>
+          <p>{{history.ActionTypeName}} , {{history.UpdateBy}} , {{history.UpdateDate}}</p>
+        </div>   
+        <!-- section-history -->
+
+        <!-- section-button -->
+        <div ng-show='showBtnAcknowledgment' class='row padding'>
+          <div class='col'>
+            <input type='button' ng-click='confirmAcknowledge()' class='button button-block button-balanced' value='รับทราบ' />
+          </div>
+        </div>
+
+        <div ng-show='showBtnApprove' class='row padding'>
+          <div class='col col-50'>
+            <input type='button' ng-click='confirmApproveOrReject(true)' class='button button-block button-positive' value='อนุมัติ' />
+          </div>
+          <div class='col col-50'>
+            <input type='button' ng-click='confirmApproveOrReject(false)' class='button button-block button-assertive' value='ไม่อนุมัติ' />
+          </div>
+        </div>
+        <!-- section-button -->
+
+      </div>
+
+    </ion-content>
+
+</ion-view>

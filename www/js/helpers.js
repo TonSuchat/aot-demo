@@ -75,6 +75,17 @@ function TransformDateHasSlashFormat (inputDate) {
     return inputDate.substring(0,2) + '/' + inputDate.substring(2,4) + '/' + inputDate.substring(4,8);
 };
 
+function ConvertDateObjToSlashFormat (date) {
+  if(date == null) return null;
+  var day = date.getDate().toString();
+  day = (day.length == 1 ? '0' + day : day);
+  var month = (date.getUTCMonth() + 1).toString();
+  month = (month.length == 1 ? '0' + month : month);
+  var year = date.getFullYear();
+  var inputDate = day + month + year;
+  return TransformDateHasSlashFormat(inputDate);
+};
+
 function GetThaiMonthNameByMonth($filter,monthVal){
     if(!monthVal || monthVal.length == 0) return;
     var currentMonth = $filter('filter')(shortnessThaiMonth, { monthValue: monthVal });

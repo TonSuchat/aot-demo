@@ -1,0 +1,86 @@
+<ion-view view-title="บันทึกลาหยุดงาน">
+    <ion-content>
+  		
+  		<div class='list'>
+
+  			<div class='item item-divider'>
+  				ประเภทการลา
+  			</div>
+
+  			<div class='item'>
+  				  <ion-radio ng-model='leave.type' name='type' ng-value="1">ลาป่วย</ion-radio>
+            <ion-radio ng-model='leave.type' name='type' ng-value="2">ลากิจ</ion-radio>
+            <ion-radio ng-model='leave.type' name='type' ng-value="3">ลาคลอด</ion-radio>
+            <ion-radio ng-model='leave.type' name='type' ng-value="4">ลาพักผ่อน</ion-radio>
+  			</div>
+
+        <div class='item item-divider'>
+            เนื่องจาก
+        </div>
+
+        <label class="item item-input padding">
+          <textarea rows='5' ng-model='leave.reason'></textarea>
+        </label>
+
+        <div class='item item-divider'>
+            ในวันที่
+        </div>
+
+  			<div class='card padding'>
+  				<button ng-click='OpenDatePicker(true)' class='button button-block button-balanced'><i class='icon ion-calendar'></i>&nbsp;&nbsp;วันที่</button>
+  				<div class='text-center'>
+  					{{selectedDate.startDate}}
+  				</div>
+  			</div>
+
+        <div class='item item-divider'>
+            เป็นระยะเวลา (วัน)
+        </div>
+
+        <div class='item'>
+          <div class='row'>
+            <div class='col col-33 text-center'>
+              <button ng-click='DecreaseDuration()' class='button button-calm'><i class='icon ion-minus-round'></i></button>
+            </div>
+            <div class='col col-33 text-center'>
+              <span>{{leave.duration}}</span>
+            </div>
+            <div class='col col-33 text-center'>
+              <button ng-click='IncrementDuration()' class='button button-calm'><i class='icon ion-plus-round'></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div ng-show='leave.duration > 1' class='item item-divider'>
+            จนถึงวันที่
+        </div>
+
+        <div ng-show='leave.duration > 1' class='card padding'>
+          <button ng-click='OpenDatePicker(false)' class='button button-block button-balanced'><i class='icon ion-calendar'></i>&nbsp;&nbsp;วันที่</button>
+          <div class='text-center'>
+            {{selectedDate.endDate}}
+          </div>
+        </div>
+
+        
+
+        <div class='item item-divider'>
+            จะติดต่อข้าพเจ้าได้ที่
+        </div>
+
+        <div class='item'>
+            <label class="item item-input">
+              <input type="text" ng-model='leave.contact' placeholder="เบอร์ติดต่อ">
+            </label>
+        </div>
+
+  			<div>
+  				<input type='button' ng-disabled='noInternet' ng-click='CreateLeave()' class='button button-block button-calm' value='ตกลง' />
+  			</div>
+
+  		</div>
+
+
+
+    </ion-content>
+</ion-view>

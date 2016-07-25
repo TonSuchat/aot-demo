@@ -22,15 +22,15 @@
             <!--</div>-->
         <!--</div>-->
 
-        <div class="row">
-            <div class="col col-33 text-center">
+        <div class="row" ng-if='$index % 3 == 0' ng-repeat='category in categories'>
+            <!-- <div class="col col-33 text-center">
                 <div class="card">
                     <a class='item' href="#/app/changepassword">
                         <i class='icon larger ion-locked'></i>
                         <div class="item-text-wrap">เปลี่ยนรหัสผ่าน</div>
                     </a>
                 </div>
-            </div>
+            </div> -->
             <!-- <div class="col col-33 text-center">
                 <div class="card">
                     <a class="item" href="#/app/cardrequest">
@@ -39,15 +39,36 @@
                     </a>
                 </div>
             </div> -->
-            <div class="col col-33 text-center ssmenu-container" ng-repeat='category in categories'>
-                <span class='badge badge-assertive' ng-show='category.unreadNumber > 0'>{{category.unreadNumber}}</span>
+            <div class="col col-33 text-center ssmenu-container">
+                <span class='badge badge-assertive' ng-show='categories[$index].unreadNumber > 0'>{{categories[$index].unreadNumber}}</span>
                 <div class="card">
-                    <a class="item" href="#/app/selfservicelist/{{category.id}}">
-                        <i class="icon larger {{category.icon}}"></i>
-                        <div class="item-text-wrap">{{category.name}}</div>
+                    <a class="item" href="{{categories[$index].href}}{{categories[$index].id}}">
+                        <i class="icon larger {{categories[$index].icon}}"></i>
+                        <div class="item-text-wrap">{{categories[$index].name}}</div>
                     </a>
                 </div>
             </div>
+
+            <div ng-if='($index + 1) < categories.length' class="col col-33 text-center ssmenu-container">
+                <span class='badge badge-assertive' ng-show='categories[$index + 1].unreadNumber > 0'>{{categories[$index + 1].unreadNumber}}</span>
+                <div class="card">
+                    <a class="item" href="{{categories[$index + 1].href}}{{categories[$index + 1].id}}">
+                        <i class="icon larger {{categories[$index + 1].icon}}"></i>
+                        <div class="item-text-wrap">{{categories[$index + 1].name}}</div>
+                    </a>
+                </div>
+            </div>
+
+            <div ng-if='($index + 2) < categories.length' class="col col-33 text-center ssmenu-container">
+                <span class='badge badge-assertive' ng-show='categories[$index + 2].unreadNumber > 0'>{{categories[$index + 2].unreadNumber}}</span>
+                <div class="card">
+                    <a class="item" href="{{categories[$index + 2].href}}{{categories[$index + 2].id}}">
+                        <i class="icon larger {{categories[$index + 2].icon}}"></i>
+                        <div class="item-text-wrap">{{categories[$index + 2].name}}</div>
+                    </a>
+                </div>
+            </div>
+
         </div>
 
     </ion-content>
