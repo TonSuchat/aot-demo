@@ -130,15 +130,17 @@ angular.module('starter')
 	    	};
 	    };
 
-	    $scope.SetReadedAll = function(){
+	    $scope.SetReadedAll = function(categoryId){
 	    	for (var i = 0; i <= $scope.categories.length - 1; i++) {
 	    		$scope.categories[i].unreadNumber = 0;
 	    	};
 	    };
 
 	    $scope.BindCategoryUnreadNumber = function(data){
-	    	console.log(data);
-	    	console.log($scope.categories);
+	    	//set readed all first
+	    	$scope.SetReadedAll();
+	    	//set unreadnumber by date from server
+	    	if(data == null) return;
 	    	angular.forEach(data,function(value,key){
 	    		$scope.SetUnReadNumber(value.CategoryId,value.NumberIsUnread);
 	    	});
@@ -152,7 +154,7 @@ angular.module('starter')
 	    	//get badge number of new item and bind to each category
 	    	WorkFlowService.ViewUnReadMytask(window.localStorage.getItem("CurrentUserName")).then(function(response){
 	    		if(response != null && response.data != null) $scope.BindCategoryUnreadNumber(response.data);
-	    		else $scope.SetReadedAll();
+	    		else $scope.BindCategoryUnreadNumber(null);
 	    	});
 	    }
 
@@ -655,14 +657,15 @@ angular.module('starter')
 			var description = $scope.GetDocumentDescription();
 			if(confirm('ต้องการสร้าง' + description + ' ?')){
 				var data = {
-					DocumentTitle:'บันทึกลาหยุดงาน',
-					DocumentDescription:description,
-					LeaveModel:{
+					CategoryId:4,
+					OnLeaveModel:{
+						DocumentTitle:'บันทึกลาหยุดงาน',
+						DocumentDescription:description,
 						Empl_Code:$scope.Empl_Code,
 						LeaveCode:$scope.leave.type,
 						Reason:$scope.leave.reason,
-						StartDate:$scope.selectedDate.startDate.toString().replace(new RegExp('/','g'),''),
-						EndDate:$scope.selectedDate.endDate.toString().replace(new RegExp('/','g'),''),
+						FromDate:$scope.selectedDate.startDate.toString().replace(new RegExp('/','g'),''),
+						ToDate:$scope.selectedDate.endDate.toString().replace(new RegExp('/','g'),''),
 						Duration:$scope.leave.duration,
 						Contact:$scope.leave.contact	
 					}
@@ -689,12 +692,67 @@ angular.module('starter')
 .controller('ItemLeaveCtrl',function($scope,$cordovaNetwork,$stateParams,$ionicPopup,$ionicPlatform,WorkFlowService,$filter){
 	$ionicPlatform.ready(function(){
 
+		$scope.LeaveDetails = {};
+		$scope.LeaveHistories = [];
+		//actiontype : 2 = approve , 5 = reject , 3 = acknowledge
+		$scope.popUpDetails = {title:'',subtitle:'',actiontype:0};
+		$scope.action = {remark:''};
 		$scope.noInternet = false;
 		//if no internet connection
 		if(!CheckNetwork($cordovaNetwork)){
 		  $scope.noInternet = true;
 		  OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
 		}
+		else{
+			$scope.documentId = $stateParams.documentId;
+	    	$scope.nextLevel = $stateParams.nextLevel;
+	    	$scope.EmplCode = window.localStorage.getItem("CurrentUserName");
+
+			WorkFlowService.ViewOnLeave($scope.EmplCode,$scope.documentId,$scope.nextLevel).then(function(response){
+				if(response != null && response.data != null) {
+					//initial leave details
+					InitialLeaveDetails(response.data);
+					//initial leave history
+					WorkFlowService.ViewHistoryMyTask($scope.documentId,$scope.nextLevel,$scope.EmplCode).then(function(response){
+						if(response != null && response.data != null){
+							$scope.InitialLeaveHistory(response.data);
+							//post to mark readed this document
+							WorkFlowService.UpdateReadMytask($scope.EmplCode,$scope.documentId);
+					};
+				});
+				}
+			});
+		}
+
+		$scope.confirmApproveOrReject = function(isApprove){
+	    	WorkFlowService.confirmApproveOrReject(isApprove,$scope);
+	    };
+
+	    function InitialLeaveDetails (data) {
+	    	$scope.LeaveDetails.Empl_Code = data[0].Empl_Code;
+			$scope.LeaveDetails.LeaveCode = data[0].LeaveCode;
+			$scope.LeaveDetails.Reason = data[0].Reason;
+			$scope.LeaveDetails.FromDate = GetThaiDateTimeByDate($filter,data[0].FromDate);
+			$scope.LeaveDetails.ToDate = GetThaiDateTimeByDate($filter,data[0].ToDate);
+			$scope.LeaveDetails.Contact = data[0].Contact;
+			$scope.LeaveDetails.Duration = data[0].Duration;
+	    };
+
+	    function InitialLeaveHistory (data) {
+	    	$scope.showBtnAcknowledgment = data.Acknowledgment;
+			$scope.showBtnApprove = data.Approve;
+
+			$scope.LeaveDetails.DocumentTitle = data.HistoryWorkflow[0].DocumentTitle;
+			$scope.LeaveDetails.DocumentDescription = data.HistoryWorkflow[0].DocumentDescription;
+
+			angular.forEach(data.HistoryWorkflow,function(value,key){
+	        	$scope.LeaveHistories.push({
+		    		UpdateBy:value.UpdateBy,
+		    		UpdateDate:GetThaiDateTimeByDate($filter,value.UpdateDate),
+		    		ActionTypeName:value.ActionTypeName
+		    	});	
+	      	});
+	    };
 
 	});
 })
@@ -821,23 +879,34 @@ angular.module('starter')
 			$scope.documentId = $stateParams.documentId;
 	    	$scope.nextLevel = $stateParams.nextLevel;
 	    	$scope.EmplCode = window.localStorage.getItem("CurrentUserName");
-			WorkFlowService.ViewHistoryMyTask($scope.documentId,$scope.nextLevel,$scope.EmplCode).then(function(response){
-				if(response != null && response.data != null){
-					$scope.InitialTimeWorkDetails(response.data);
-					//post to mark readed this document
-					WorkFlowService.UpdateReadMytask($scope.EmplCode,$scope.documentId);
-				};
-			});
+
+	    	WorkFlowService.ViewTimeWork($scope.EmplCode,$scope.documentId,$scope.nextLevel).then(function(response){
+	    		if(response != null && response.data != null) $scope.InitialTimeWorkDetails(response.data);
+	    		WorkFlowService.ViewHistoryMyTask($scope.documentId,$scope.nextLevel,$scope.EmplCode).then(function(response){
+					if(response != null && response.data != null){
+						$scope.InitialTimeWorkHistory(response.data);
+						//post to mark readed this document
+						WorkFlowService.UpdateReadMytask($scope.EmplCode,$scope.documentId);
+					};
+				});
+	    	});
 		}
 
 		$scope.InitialTimeWorkDetails = function(data){
+			$scope.TimeWorkDetails.Empl_Code = data[0].Empl_Code;
+			$scope.TimeWorkDetails.Reason = data[0].ReasonCode;
+			$scope.TimeWorkDetails.TimeCode = data[0].TimeCode;
+			$scope.TimeWorkDetails.StartDate = GetThaiDateTimeByDate($filter,data[0].FromDate);
+			$scope.TimeWorkDetails.EndDate = GetThaiDateTimeByDate($filter,data[0].ToDate);
+			$scope.TimeWorkDetails.TimeWith = data[0].TimeWith;
+		};
+
+		$scope.InitialTimeWorkHistory = function(data){
 			$scope.showBtnAcknowledgment = data.Acknowledgment;
 			$scope.showBtnApprove = data.Approve;
 
 			$scope.TimeWorkDetails.DocumentTitle = data.HistoryWorkflow[0].DocumentTitle;
 			$scope.TimeWorkDetails.DocumentDescription = data.HistoryWorkflow[0].DocumentDescription;
-
-			console.log(data.HistoryWorkflow[0].DocumentDescription);
 
 			angular.forEach(data.HistoryWorkflow,function(value,key){
 	        	$scope.TimeWorkHistories.push({
@@ -847,6 +916,10 @@ angular.module('starter')
 		    	});	
 	      	});
 		};
+
+		$scope.confirmApproveOrReject = function(isApprove){
+	    	WorkFlowService.confirmApproveOrReject(isApprove,$scope);
+	    };
 
 	});
 })

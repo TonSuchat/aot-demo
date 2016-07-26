@@ -31,6 +31,24 @@ angular.module('starter')
     });
   };
 
+  this.ViewTimeWork = function(emplCode,documentId,nextLevel){
+    return $q(function(resolve){
+      var url = APIService.hostname() + '/Workflow/ViewTimeWork';
+      var data = {Empl_Code:emplCode,DocumentId:documentId,NextLevel:nextLevel};
+      APIService.ShowLoading();
+      APIService.httpPost(url,data,function(response){APIService.HideLoading();resolve(response);},function(error){APIService.HideLoading();resolve(null);});
+    });
+  };
+
+  this.ViewOnLeave = function(Empl_Code,DocumentId,NextLevel){
+    return $q(function(resolve){
+      var url = APIService.hostname() + '/Workflow/ViewOnLeave';
+      var data = {Empl_Code:emplCode,DocumentId:documentId,NextLevel:nextLevel};
+      APIService.ShowLoading();
+      APIService.httpPost(url,data,function(response){APIService.HideLoading();resolve(response);},function(error){APIService.HideLoading();resolve(null);});
+    });
+  };
+
   this.ViewUnReadMytask = function(emplCode){
     return $q(function(resolve){
       var url = APIService.hostname() + '/Workflow/ViewUnReadMytask';

@@ -10,13 +10,18 @@
         </div>
 
         <div class='item'>
-          <p><b>เรื่อง</b></p>
-          <p>{{cardRequestDetails.DocumentTitle}}</p>
+          <p><b>ผู้บันทึกลาหยุดงาน</b></p>
+          <p>{{LeaveDetails.Empl_Code}}</p>
         </div>
 
         <div class='item'>
           <p><b>รายละเอียด</b></p>
-          <p>{{cardRequestDetails.DocumentDescription}}</p>
+          <p>ประเภทการลา : {{LeaveDetails.LeaveCode}}</p>
+          <p>เนื่องจาก : {{LeaveDetails.Reason}}</p>
+          <p>วันที่ : {{LeaveDetails.FromDate}}</p>
+          <p>ถึงวันที่ : {{LeaveDetails.ToDate}}</p>
+          <p>ระยะเวลา(วัน) : {{LeaveDetails.Duration}}</p>
+          <p>ติดต่อได้ที่ : {{LeaveDetails.Contact}}</p>
         </div>
         <!-- section-details -->
 
@@ -25,7 +30,7 @@
           <h2><b>ประวัติ</b></h2>
         </div>
 
-        <div class='item' ng-repeat='history in cardRequestHistories'>
+        <div class='item' ng-repeat='history in LeaveHistories'>
           <p>{{history.ActionTypeName}} , {{history.UpdateBy}} , {{history.UpdateDate}}</p>
         </div>   
         <!-- section-history -->
@@ -33,16 +38,16 @@
         <!-- section-button -->
         <div ng-show='showBtnAcknowledgment' class='row padding'>
           <div class='col'>
-            <input type='button' ng-click='confirmAcknowledge()' class='button button-block button-balanced' value='รับทราบ' />
+            <input type='button' ng-disabled='noInternet' ng-click='confirmAcknowledge()' class='button button-block button-balanced' value='รับทราบ' />
           </div>
         </div>
 
         <div ng-show='showBtnApprove' class='row padding'>
           <div class='col col-50'>
-            <input type='button' ng-click='confirmApproveOrReject(true)' class='button button-block button-positive' value='อนุมัติ' />
+            <input type='button' ng-disabled='noInternet' ng-click='confirmApproveOrReject(true)' class='button button-block button-positive' value='อนุมัติ' />
           </div>
           <div class='col col-50'>
-            <input type='button' ng-click='confirmApproveOrReject(false)' class='button button-block button-assertive' value='ไม่อนุมัติ' />
+            <input type='button' ng-disabled='noInternet' ng-click='confirmApproveOrReject(false)' class='button button-block button-assertive' value='ไม่อนุมัติ' />
           </div>
         </div>
         <!-- section-button -->
