@@ -12,7 +12,28 @@ angular.module('starter')
     var serviceObj = this;
 
     this.Register = function(){
-      console.log('register-gcm');
+      return $q(function(resolve){
+        console.log('register-gcm');
+        var options = {
+          android: {senderID: "211415803371",sound: false,vibrate: false},
+          ios: {alert: "true",badge: "true",sound: false},
+          windows: {}
+        };
+        // initialize
+        $cordovaPushV5.initialize(options).then(function(){
+          // start listening for new notifications
+          $cordovaPushV5.onNotification();
+          // start listening for errors
+          $cordovaPushV5.onError();
+          // register to get registrationId
+          $cordovaPushV5.register().then(function(data) {
+            // `data.registrationId` save it somewhere;
+            console.log('GCM Token : ' + data);
+            serviceObj.StoreTokenOnServer(data,'',false).then(function(response){resolve(response);});
+          })
+        });
+      });
+      
       // GetNotificationSettings().then(function(response){
       //   if(response != null){
       //     var options = {
@@ -24,27 +45,6 @@ angular.module('starter')
       //   }
       // })
       
-      var options = {
-        android: {senderID: "211415803371",sound: false,vibrate: false},
-        ios: {alert: "true",badge: "true",sound: false},
-        windows: {}
-      };
-      // initialize
-      $cordovaPushV5.initialize(options).then(function(){
-        // start listening for new notifications
-        $cordovaPushV5.onNotification();
-        // start listening for errors
-        $cordovaPushV5.onError();
-        // register to get registrationId
-        $cordovaPushV5.register().then(function(data) {
-          // `data.registrationId` save it somewhere;
-          console.log('GCM Token : ' + data);
-          serviceObj.StoreTokenOnServer(data,'',false);
-        })
-      });
-       
-      
-        
         // $cordovaPush.register(cordovaPushConfig).then(function(result) {
         //   // Success
         //   //if ios this result is device token
@@ -61,17 +61,19 @@ angular.module('starter')
     };
 
     this.StoreTokenOnServer = function(token,empid,isUpdate){
-        window.localStorage.setItem('GCMToken',token);
-        console.log('StoreTokenOnServer');
-        var deviceInfo = $cordovaDevice.getDevice();
-        var url = '';
-        if(!isUpdate) url = APIService.hostname() + '/DeviceRegistered/Register'
-        else url = APIService.hostname() + '/DeviceRegistered/UpdateDevice'
-        var data = {RegisterID : token, OS : deviceInfo.platform, Model:deviceInfo.model, Serial:deviceInfo.serial, EmpID: empid, RegistAction:true, DeviceName:''};
-        console.log('isUpdate -> ' + isUpdate);
-        console.log('empid -> ' + empid);
-        console.log(data);
-        APIService.httpPost(url,data,function(response){},function(error){console.log(error);});
+        return $q(function(resolve){
+          window.localStorage.setItem('GCMToken',token);
+          console.log('StoreTokenOnServer');
+          var deviceInfo = $cordovaDevice.getDevice();
+          var url = '';
+          if(!isUpdate) url = APIService.hostname() + '/DeviceRegistered/Register'
+          else url = APIService.hostname() + '/DeviceRegistered/UpdateDevice'
+          var data = {RegisterID : token, OS : deviceInfo.platform, Model:deviceInfo.model, Serial:deviceInfo.serial, EmpID: empid, RegistAction:true, DeviceName:''};
+          console.log('isUpdate -> ' + isUpdate);
+          console.log('empid -> ' + empid);
+          console.log(data);
+          APIService.httpPost(url,data,function(response){resolve(true)},function(error){console.log(error);resolve(false);});  
+        });
     };
 
     $rootScope.$on('$cordovaPushV5:notificationReceived', function(event, notification) {

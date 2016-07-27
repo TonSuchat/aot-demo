@@ -40,10 +40,10 @@ angular.module('starter')
     });
   };
 
-  this.ViewOnLeave = function(Empl_Code,DocumentId,NextLevel){
+  this.ViewOnLeave = function(Empl_Code,documentId,nextLevel){
     return $q(function(resolve){
       var url = APIService.hostname() + '/Workflow/ViewOnLeave';
-      var data = {Empl_Code:emplCode,DocumentId:documentId,NextLevel:nextLevel};
+      var data = {Empl_Code:Empl_Code,DocumentId:documentId,NextLevel:nextLevel};
       APIService.ShowLoading();
       APIService.httpPost(url,data,function(response){APIService.HideLoading();resolve(response);},function(error){APIService.HideLoading();resolve(null);});
     });

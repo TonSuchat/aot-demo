@@ -282,7 +282,6 @@ function DisplayPDF($cordovaFile,$cordovaFileOpener2,APIService,url,data,fileNam
     APIService.ShowLoading();
     APIService.httpPost(url,data,function(response){
         if(response != null && response.data != null){
-          console.log(response.data[0]);
           var extension = response.data[0].ContentType;
           var base64Str = response.data[0].ContentData;
           var contentType = GetContentTypeByExtension(extension);
@@ -391,5 +390,17 @@ function CheckSessionIsExpire(APIService,$q){
       },
       function(error){console.log(error);resolve(false);});
   });
-  
+};
+
+function CheckDeviceIsValid (APIService,$q,registerId) {
+  return $q(function(resolve){
+    var url = APIService.hostname() + '/DeviceRegistered/ValidateDevice';
+    var data = {RegisterID:registerId};
+    APIService.ShowLoading();
+    APIService.httpPost(url,data,function(response){
+      APIService.HideLoading();
+      resolve(response);
+    },
+      function(error){console.log(error);APIService.HideLoading();resolve(null);});
+  });
 };

@@ -46,7 +46,23 @@
         LogInAPI(AUTH_EVENTS,APIService,$http,$q,$cordovaNetwork, $ionicPopup).then(function(){
           APIService.HideLoading();
           //post to gcm(google cloud messaging) for register device and get token from gcm
-          if (window.cordova) NotiService.Register();
+          if (window.cordova){
+            NotiService.Register().then(function(){
+              //check this device is valid
+              CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
+                if(response != null && response.data != null){
+                  //if not valid and still logged on then force logout
+                  if(!response.data && AuthService.isAuthenticated()){
+                    alert('อุปกรณ์เครื่องนี้ถูกระงับการใช้งาน');
+                    AuthService.logout().then(function(response){
+                      //reload for set default theme
+                      if(response) window.location.reload();
+                    });  
+                  }
+                }
+              });
+            });
+          } 
 
           //check session is expire?,Yes force logout.
           CheckSessionIsExpire(APIService,$q).then(function(response){
@@ -56,6 +72,25 @@
               AuthService.logout();
             }
           });
+
+          //ionic resume event
+          $ionicPlatform.on('resume', function(){
+            if(window.localStorage.getItem('GCMToken') == null) return;
+            //check this device is valid
+            CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
+              if(response != null && response.data != null){
+                //if not valid and still logged on then force logout
+                if(!response.data && AuthService.isAuthenticated()){
+                  alert('อุปกรณ์เครื่องนี้ถูกระงับการใช้งาน');
+                  AuthService.logout().then(function(response){
+                    //reload for set default theme
+                    if(response) window.location.reload();
+                  });  
+                }
+              }
+            });
+          });
+
         });
 
         window.onbeforeunload = function (event) {

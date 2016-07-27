@@ -289,8 +289,8 @@ angular.module('starter')
 		$scope.doRedeemDuty = function(){
 			if(!CheckRedeemDutyValidation()) return;
 			//search emp again for confirm before create workflow
-			this.searchEmployee().then(function(response){
-				if(response){
+			$scope.searchEmployee().then(function(response){
+				if(response != null){
 					var leaderTxt = ($scope.redeemDuty.leader == 1 ? 'หัวหน้าเวร' : 'ลูกเวร');
 					if($scope.redeemDuty.type == 1) message = 'คุณต้องการแลกเวรกับ ' + $scope.searchEmp.result + ' ในตำแหน่ง ' + leaderTxt + ' ในวันที่ ' + $scope.selectedDate.dutyDate1 + ' กับวันที่ ' + $scope.selectedDate.dutyDate2;
 					else message = 'คุณต้องการแทนเวรกับ ' + $scope.searchEmp.result + ' ในตำแหน่ง ' + leaderTxt + ' ในวันที่ ' + $scope.selectedDate.dutyDate1;
@@ -359,10 +359,18 @@ angular.module('starter')
 			// 			resolve(false);
 			// 	})
 			// });
-			APIService.searchEmployee($scope.searchEmp.searchTxt).then(function(response){
-				if(response != null) $scope.searchEmp.result = response;
-				else $scope.searchEmp.result = '';
-			});
+			return $q(function(resolve){
+				APIService.searchEmployee($scope.searchEmp.searchTxt).then(function(response){
+					if(response != null){
+						$scope.searchEmp.result = response;
+						resolve(true);
+					} 
+					else{
+						$scope.searchEmp.result = '';	
+						resolve(false);
+					} 
+				});
+			})
 		};
 
 		$scope.OpenRedeemDutyDatePicker = function(isDutyDate1){
@@ -648,7 +656,7 @@ angular.module('starter')
 
 		$scope.DecreaseDuration = function(){
 			$scope.leave.duration -= 0.5;
-			if($scope.leave.duration < 0) $scope.leave.duration = 0;
+			if($scope.leave.duration < 0.5) $scope.leave.duration = 0.5;
 		};
 
 		$scope.CreateLeave = function(){
@@ -732,8 +740,8 @@ angular.module('starter')
 	    	$scope.LeaveDetails.Empl_Code = data[0].Empl_Code;
 			$scope.LeaveDetails.LeaveCode = data[0].LeaveCode;
 			$scope.LeaveDetails.Reason = data[0].Reason;
-			$scope.LeaveDetails.FromDate = GetThaiDateTimeByDate($filter,data[0].FromDate);
-			$scope.LeaveDetails.ToDate = GetThaiDateTimeByDate($filter,data[0].ToDate);
+			$scope.LeaveDetails.FromDate = GetThaiDateByDate($filter,data[0].FromDate);
+			$scope.LeaveDetails.ToDate = GetThaiDateByDate($filter,data[0].ToDate);
 			$scope.LeaveDetails.Contact = data[0].Contact;
 			$scope.LeaveDetails.Duration = data[0].Duration;
 	    };
