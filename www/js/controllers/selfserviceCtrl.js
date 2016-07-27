@@ -723,7 +723,7 @@ angular.module('starter')
 					//initial leave history
 					WorkFlowService.ViewHistoryMyTask($scope.documentId,$scope.nextLevel,$scope.EmplCode).then(function(response){
 						if(response != null && response.data != null){
-							$scope.InitialLeaveHistory(response.data);
+							InitialLeaveHistory(response.data);
 							//post to mark readed this document
 							WorkFlowService.UpdateReadMytask($scope.EmplCode,$scope.documentId);
 					};
