@@ -690,7 +690,7 @@ angular.module('starter')
 			else if($scope.leave.type == 2) typeName = 'กิจ';
 			else if($scope.leave.type == 3) typeName = 'คลอด';
 			else if($scope.leave.type == 4) typeName = 'พักผ่อน';
-			message = 'บันทึกลา' + typeName + ' เนื่องจาก : ' + $scope.leave.reason + ' ตั้งแต่วันที่ ' + $scope.selectedDate.startDate + ' ถึงวันที่ ' + $scope.selectedDate.endDate + ' เป็นระยะเวลา ' + $scope.leave.duration + ' สามารถติดต่อได้ที่ ' + $scope.leave.contact;
+			message = 'บันทึกลา' + typeName + ' เนื่องจาก : ' + $scope.leave.reason + ' ตั้งแต่วันที่ ' + $scope.selectedDate.startDate + ' ถึงวันที่ ' + $scope.selectedDate.endDate + ' เป็นระยะเวลา ' + $scope.leave.duration + ' วัน สามารถติดต่อได้ที่ ' + $scope.leave.contact;
 			return message;
 		};
 

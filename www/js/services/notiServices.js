@@ -145,6 +145,38 @@ angular.module('starter')
       });
     };
 
+    function ProcessNotification(data){
+      //check if force logout from server
+      if(data.additionalData.alertType == "9"){
+        if(AuthService.isAuthenticated()){
+          alert(data.message);
+          AuthService.logout();
+          return;
+        }
+        else return;
+      }
+      //check if messageType is hyperlink
+      if(data.additionalData.messageType.type == "1"){
+        if(confirm('ต้องการเปิด link : ' + data.additionalData.messageType.optData + ' ?'))
+          window.open(data.additionalData.messageType.optData,'_system','location=no');
+      }
+      else{
+        //check if need to confirm and redirect to specific path
+        if(data.additionalData.alertType == "1"){
+          if(confirm('ต้องการดูข้อมูล : ' + data.title + ' ?')){
+            // //check is selfservice menu, Yes redirect with other logic, No redirect by link
+            // if(CheckURLIsSelfService(data.additionalData.menu)) RedirectSelfServiceMenu(data.additionalData.menu);
+            // else{
+            //   needReload = true;
+            //   window.location.href = '#/app' + data.additionalData.menu;  
+            // }
+            ProcessRedirect(data.additionalData.menu);
+          }
+        }
+        //just show message
+        else alert(data.message);
+      }
+    };
 
 });
 // /**
@@ -221,39 +253,6 @@ angular.module('starter')
 //   alert('an error occured');
 // };
 
-
-function ProcessNotification(data){
-  //check if force logout from server
-  if(data.additionalData.alertType == "9"){
-    if(AuthService.isAuthenticated()){
-      alert(data.message);
-      AuthService.logout();
-      return;
-    }
-  }
-  //check if messageType is hyperlink
-  if(data.additionalData.messageType.type == "1"){
-    if(confirm('ต้องการเปิด link : ' + data.additionalData.messageType.optData + ' ?'))
-      window.open(data.additionalData.messageType.optData,'_system','location=no');
-  }
-  else{
-    //check if need to confirm and redirect to specific path
-    if(data.additionalData.alertType == "1"){
-      if(confirm('ต้องการดูข้อมูล : ' + data.title + ' ?')){
-        // //check is selfservice menu, Yes redirect with other logic, No redirect by link
-        // if(CheckURLIsSelfService(data.additionalData.menu)) RedirectSelfServiceMenu(data.additionalData.menu);
-        // else{
-        //   needReload = true;
-        //   window.location.href = '#/app' + data.additionalData.menu;  
-        // }
-        ProcessRedirect(data.additionalData.menu);
-      }
-    }
-    //just show message
-    else alert(data.message);
-  }
-};
-
 function ProcessRedirect(url) {
   //check is selfservice menu, Yes redirect with other logic, No redirect by link
   if(CheckURLIsSelfService(url)) RedirectSelfServiceMenu(url);
@@ -281,6 +280,13 @@ function RedirectSelfServiceMenu (url) {
       case 2:
         window.location.href = '#/app/ssitem_cardrequest?documentId=' + documentId + '&nextLevel=' + nextLevel;
         break;
+      case 3:
+        window.location.href = '#/app/ssitem_timework?documentId=' + documentId + '&nextLevel=' + nextLevel;
+        break;
+      case 4:
+        window.location.href = '#/app/ssitem_leave?documentId=' + documentId + '&nextLevel=' + nextLevel;
+        break;
     }
   }
 };
+
