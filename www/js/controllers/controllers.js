@@ -124,8 +124,8 @@ angular.module('starter')
           if(!CheckNetwork($cordovaNetwork)) return;
           else{
             AuthService.logout().then(function(response){
-              //reload set default theme
-              if(response) window.location.reload();
+              // //reload set default theme
+              //if(response) window.location.reload();
             });
           }
         };
@@ -367,7 +367,7 @@ angular.module('starter')
 
     })
 
-    .controller('NotiHistoryCtrl',function($scope,$cordovaNetwork,SyncService,APIService,$ionicPopup,NotiHistorySQLite,$ionicPlatform){
+    .controller('NotiHistoryCtrl',function($scope,$cordovaNetwork,SyncService,APIService,$ionicPopup,NotiHistorySQLite,$ionicPlatform,$filter){
 
       $ionicPlatform.ready(function() {
 
@@ -411,10 +411,12 @@ angular.module('starter')
               var result = ConvertQueryResultToArray(response);
               angular.forEach(result,function(value,key){
                 var eachNotiHistory = {};
-                eachNotiHistory.NotiType = GetNotiTypeText(value.NotiType);
+                eachNotiHistory.NotiType = value.NotiType;
+                eachNotiHistory.NotiTypeText = GetNotiTypeText(value.NotiType);
                 eachNotiHistory.Priority = GetPriorityText(value.NotiPriority);
                 eachNotiHistory.Message = value.Message;
                 eachNotiHistory.MenuPath = value.MenuPath
+                eachNotiHistory.NotiTime = GetThaiDateTimeByDate($filter,value.NotiTime);
                 $scope.NotiHistoryDetails.push(eachNotiHistory);
               });
               FinalActionInfo($scope,APIService);
@@ -433,6 +435,9 @@ angular.module('starter')
                 break;
             case 3:
                 return 'รออนุมัติ/รับทราบ';
+                break;
+            case 4:
+                return 'แจ้งเตือน';
                 break;
             case 9:
                 return 'PrivateMessage';

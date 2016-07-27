@@ -6,10 +6,16 @@
     </ion-refresher>
   	
   	<div class='list'>
-  		<div ng-click='Redirect(notiHistory.MenuPath)' class='item' ng-repeat='notiHistory in NotiHistoryDetails'>
-  			<h2>{{notiHistory.NotiType}}</h2>
+  		<div ng-click='Redirect(notiHistory.MenuPath)' class='item item-icon-left item-text-wrap' ng-repeat='notiHistory in NotiHistoryDetails'>
+        <i ng-show='notiHistory.NotiType == 1' class='icon ion-clipboard'></i>
+        <i ng-show='notiHistory.NotiType == 2' class='icon ion-social-bitcoin'></i>
+        <i ng-show='notiHistory.NotiType == 3' class='icon ion-android-checkmark-circle'></i>
+        <i ng-show='notiHistory.NotiType == 4' class='icon ion-speakerphone'></i>
+        <i ng-show='notiHistory.NotiType == 9' class='icon ion-chatbubble-working'></i>
+  			<h2>{{notiHistory.NotiTypeText}}</h2>
+        <p><b>สำคัญ :</b> {{notiHistory.Priority}}</p>
+        <p><b>วันที่ส่ง :</b> {{notiHistory.NotiTime}}</p>
   			<p>{{notiHistory.Message}}</p>
-  			<p>{{notiHistory.Priority}}</p>
   		</div>
   	</div>
 

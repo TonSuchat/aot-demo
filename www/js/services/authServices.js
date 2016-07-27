@@ -292,6 +292,6 @@ angular.module('starter')
         window.localStorage.removeItem("AuthServices_username");
         window.localStorage.removeItem("AuthServices_password");
         window.localStorage.removeItem("lastLogInDate");
-        //set theme to default
-        window.localStorage.setItem('theme','default');
+        // //set theme to default
+        // window.localStorage.setItem('theme','default');
     };

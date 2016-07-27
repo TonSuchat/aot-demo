@@ -58,6 +58,7 @@ function GetThaiDateByDate($filter,inputDate){
 
 //05072016161000
 function GetThaiDateTimeByDate ($filter,inputDate) {
+  if(inputDate == null) return;
   var result = GetThaiDateByDate($filter,inputDate);
   result = result + ' เวลา ' + inputDate.substring(8,10) + '.' + inputDate.substring(10,12);
   return result;

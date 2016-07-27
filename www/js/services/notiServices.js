@@ -1,7 +1,7 @@
 var needReload = false;
 
 angular.module('starter')
-.service('NotiService',function($q,APIService,$cordovaDevice,$rootScope,$cordovaPushV5,MobileConfigSQLite){
+.service('NotiService',function($q,APIService,$cordovaDevice,$rootScope,$cordovaPushV5,MobileConfigSQLite,AuthService){
 
     // var isAndroid = ionic.Platform.isAndroid();
     // var isIOS = ionic.Platform.isIOS();
@@ -223,6 +223,14 @@ angular.module('starter')
 
 
 function ProcessNotification(data){
+  //check if force logout from server
+  if(data.additionalData.alertType == "9"){
+    if(AuthService.isAuthenticated()){
+      alert(data.message);
+      AuthService.logout();
+      return;
+    }
+  }
   //check if messageType is hyperlink
   if(data.additionalData.messageType.type == "1"){
     if(confirm('ต้องการเปิด link : ' + data.additionalData.messageType.optData + ' ?'))

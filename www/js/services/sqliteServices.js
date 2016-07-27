@@ -126,7 +126,7 @@ angular.module('starter')
 
 	this.CreateNotiHistoryTable = function(){
 		console.log('create notihistory');
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS notihistory(clientid integer primary key AUTOINCREMENT,Id int, Empl_Code text, NotiType int, NotiPriority int, Message text, MenuPath text, DL boolean, dirty boolean, TS text)");	
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS notihistory(clientid integer primary key AUTOINCREMENT,Id int, Empl_Code text, NotiType int, NotiPriority int, Message text, MenuPath text, NotiTime text, DL boolean, dirty boolean, TS text)");	
 	};
 
 	this.CreateMobileConfigTable = function(){
@@ -999,25 +999,26 @@ angular.module('starter')
 	this.Update = function(data,isDirty,clientUpdate){
 		var sql;
 		if(clientUpdate)
-			sql = "UPDATE notihistory SET Id = ?, Empl_Code = ?, NotiType = ?, NotiPriority = ?, Message = ?, MenuPath = ?, DL = ?, dirty = ?, TS = ? WHERE clientid = " + data.clientid;
+			sql = "UPDATE notihistory SET Id = ?, Empl_Code = ?, NotiType = ?, NotiPriority = ?, Message = ?, MenuPath = ?, NotiTime = ?, DL = ?, dirty = ?, TS = ? WHERE clientid = " + data.clientid;
 		else
-			sql = "UPDATE notihistory SET Id = ?, Empl_Code = ?, NotiType = ?, NotiPriority = ?, Message = ?, MenuPath = ?, DL = ?, dirty = ?, TS = ? WHERE Id = " + data.Id;
-		var param = [data.Id,data.Empl_Code,data.NotiType,data.NotiPriority,data.Message,data.MenuPath,data.DL,isDirty,data.TS];
+			sql = "UPDATE notihistory SET Id = ?, Empl_Code = ?, NotiType = ?, NotiPriority = ?, Message = ?, MenuPath = ?, NotiTime = ?, DL = ?, dirty = ?, TS = ? WHERE Id = " + data.Id;
+		var param = [data.Id,data.Empl_Code,data.NotiType,data.NotiPriority,data.Message,data.MenuPath,data.NotiTime,data.DL,isDirty,data.TS];
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
 	};
 
 	this.Add = function(data,createFromClient){
-		var sql = "INSERT INTO notihistory (Id, Empl_Code, NotiType, NotiPriority, Message, MenuPath, DL, dirty, TS) VALUES ";
+		var sql = "INSERT INTO notihistory (Id, Empl_Code, NotiType, NotiPriority, Message, MenuPath, NotiTime, DL, dirty, TS) VALUES ";
 		var param = []; 
 		var rowArgs = [];
 		data.forEach(function(item){
-			rowArgs.push("(?,?,?,?,?,?,?,?,?)");
+			rowArgs.push("(?,?,?,?,?,?,?,?,?,?)");
 			param.push(item.Id);
 			param.push(item.Empl_Code);
 			param.push(item.NotiType);
 			param.push(item.NotiPriority);
 			param.push(item.Message);
 			param.push(item.MenuPath);
+			param.push(item.NotiTime);
 			param.push(item.DL);
 			//dirty
 			if(createFromClient) param.push(true);
@@ -1032,7 +1033,7 @@ angular.module('starter')
 	//***Necessary-Method
 
 	this.GetNotiHistories = function(){
-		return SQLiteService.Execute("SELECT * FROM notihistory ORDER BY TS DESC").then(function(response){return response;},function(error){return error;});
+		return SQLiteService.Execute("SELECT * FROM notihistory ORDER BY Id DESC").then(function(response){return response;},function(error){return error;});
 	};
 })
 

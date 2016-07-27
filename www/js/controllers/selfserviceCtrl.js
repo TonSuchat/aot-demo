@@ -736,6 +736,10 @@ angular.module('starter')
 	    	WorkFlowService.confirmApproveOrReject(isApprove,$scope);
 	    };
 
+	    $scope.confirmAcknowledge = function(){
+	    	WorkFlowService.confirmAcknowledge($scope);
+	    };
+
 	    function InitialLeaveDetails (data) {
 	    	$scope.LeaveDetails.Empl_Code = data[0].Empl_Code;
 			$scope.LeaveDetails.LeaveCode = data[0].LeaveCode;

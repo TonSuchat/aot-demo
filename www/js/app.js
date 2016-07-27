@@ -83,8 +83,8 @@
                 if(!response.data && AuthService.isAuthenticated()){
                   alert('อุปกรณ์เครื่องนี้ถูกระงับการใช้งาน');
                   AuthService.logout().then(function(response){
-                    //reload for set default theme
-                    if(response) window.location.reload();
+                    // //reload for set default theme
+                    // if(response) window.location.reload();
                   });  
                 }
               }
