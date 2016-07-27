@@ -201,12 +201,13 @@ color: #F0F1F1;*/
 /*}*/
 
 .dark .scroll .list {
-background-color: #004A99 !important;
+background-color: #009cde !important;
     /*background-image: url("../img/MobileBG.jpg");*/
     color: #cccccc;
 }
 .dark .scroll a{
 color: #ffffff;
+    background-color: #009cde;
 }
 
 .dark .list a:first-child{
@@ -255,49 +256,50 @@ ul.rating li i {
 /*background*/
 
 .scroll-content{
-    background-image: url("../img/MobileBG.jpg");
-}
-.scroll .list .item{
-    background: none;
-    /*border-radius: 10px;*/
-
+    /*background-color: #bde3f2;*/
+    /*background-image: url("../img/MobileBG.jpg");*/
 }
 
 .scroll .list .item >.item{
     background: none;
-    background-image: url("../img/transparent.png");
+
 }
 
 /*Customize Card*/
 
 .card{
-    border-radius: 10px;
+    border-radius: 5px;
     margin: 5px;
 
-    background: red;
-	
-    border: outset #777 0.5px;
+    background: #009cde;
+
+    border: outset #eeeeee 0.5px;
 
 }
 .card .item{
     background: none;
-    color: #FFFFFF;
+    /*color: #002e5f;*/
+    color: #ffffff;
+    /*background-color: #009cde;*/
+    /*background-image: url("../img/transparent.png");*/
 }
 .card h4{
-    color: #FFFFFF;
+    color: #ffffff;
+    /*color: #4c565c;*/
 }
 
 .item{
     border-color: #aaaaaa;
 }
 .item p{
-    color: #cccccc;
+    color: #bec0c2;
 }
 .item h2{
     color: #ffffff;
 }
-.item-divider h2{
-    color: #cccccc;
+
+.card .item-divider{
+    background-color: #004A99;
 }
 
 .img-circle{
@@ -362,4 +364,5 @@ ul.rating li i {
 
 .larger{
     font-size: 50px;
+    color: #002e5f;
 }

@@ -19,11 +19,15 @@ $dark:                            #444 !default;
 $ionicons-font-path: "../lib/ionic/fonts" !default;
 
 //Customizations
+//$calm:                            #11c1f3 !default;
+//$calm:                            #002E5F !default;
+$calm:                            #009cde !default;
+//$calm:                            #62c6e9 !default;
+//$calm:                            #5692ce !default;
+//$calm:                            #55acee !default;
 
-$calm:                            #002E5F !default;
-//$calm:                            #009cde !default;
 
-$input-color-placeholder:         #FFFFFF!default;
+//$input-color-placeholder:         #FFFFFF!default;
 
 // Include all of Ionic
 @import "www/lib/ionic/scss/ionic";
