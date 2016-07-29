@@ -34,8 +34,8 @@
           <h2><b>ประวัติ</b></h2>
         </div>
 
-        <div class='item' ng-repeat='history in redeemDutyHistories'>
-          <p>{{history.ActionTypeName}} , {{history.UpdateBy}} , {{history.UpdateDate}}</p>
+        <div class='item item-text-wrap' ng-repeat='history in redeemDutyHistories'>
+          <p>{{history.RouteName}} , {{history.UpdateBy}} , {{history.UpdateDate}}</p>
           <!-- <p>ชื่อรายการ : {{history.RouteName}}</p>
           <p>การตอบรับ : {{history.ActionTypeName}}</p>
           <p>โดย : {{history.UpdateBy}}</p>

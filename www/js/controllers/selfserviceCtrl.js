@@ -423,7 +423,8 @@ angular.module('starter')
 		    		RouteName:value.RouteName,
 		    		UpdateBy:value.UpdateBy,
 		    		UpdateDate:GetThaiDateTimeByDate($filter,value.UpdateDate),
-		    		ActionTypeName:value.ActionTypeName
+		    		ActionTypeName:value.ActionTypeName,
+		    		RouteName:value.RouteName
 		    	});	
 	      	});
 	    };
@@ -591,7 +592,8 @@ angular.module('starter')
 	        	$scope.cardRequestHistories.push({
 		    		UpdateBy:value.UpdateBy,
 		    		UpdateDate:GetThaiDateTimeByDate($filter,value.UpdateDate),
-		    		ActionTypeName:value.ActionTypeName
+		    		ActionTypeName:value.ActionTypeName,
+		    		RouteName:value.RouteName
 		    	});	
 	      	});
 		};
@@ -662,6 +664,8 @@ angular.module('starter')
 		$scope.CreateLeave = function(){
 			//if duration less than 1 set startdate and enddate to same day
 			if($scope.leave.duration == 1) $scope.selectedDate.endDate = $scope.selectedDate.startDate;
+			if(!$scope.leave.reason || $scope.leave.reason.length <= 0) $scope.leave.reason = '-';
+			if(!$scope.leave.contact || $scope.leave.contact.length <= 0) $scope.leave.contact = '-';
 			var description = $scope.GetDocumentDescription();
 			if(confirm('ต้องการสร้าง' + description + ' ?')){
 				var data = {
@@ -761,7 +765,8 @@ angular.module('starter')
 	        	$scope.LeaveHistories.push({
 		    		UpdateBy:value.UpdateBy,
 		    		UpdateDate:GetThaiDateTimeByDate($filter,value.UpdateDate),
-		    		ActionTypeName:value.ActionTypeName
+		    		ActionTypeName:value.ActionTypeName,
+		    		RouteName:value.RouteName
 		    	});	
 	      	});
 	    };
@@ -924,7 +929,8 @@ angular.module('starter')
 	        	$scope.TimeWorkHistories.push({
 		    		UpdateBy:value.UpdateBy,
 		    		UpdateDate:GetThaiDateTimeByDate($filter,value.UpdateDate),
-		    		ActionTypeName:value.ActionTypeName
+		    		ActionTypeName:value.ActionTypeName,
+		    		RouteName:value.RouteName
 		    	});	
 	      	});
 		};

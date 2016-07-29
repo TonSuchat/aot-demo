@@ -15,7 +15,7 @@ angular.module('starter')
       return $q(function(resolve){
         console.log('register-gcm');
         var options = {
-          android: {senderID: "211415803371",sound: false,vibrate: false},
+          android: {senderID: "211415803371"},
           ios: {alert: "true",badge: "true",sound: false},
           windows: {}
         };

@@ -1,6 +1,6 @@
 angular.module('starter')
 
-    .service('AuthService', function($q, $http,AUTH_EVENTS,APIService,UserProfileSQLite,PMSubscribeSQLite,XMPPService,XMPPApiService,$cordovaNetwork,SQLiteService,$state,$timeout,$ionicHistory,$ionicPopup,$rootScope) {
+    .service('AuthService', function($q, $http,AUTH_EVENTS,APIService,UserProfileSQLite,PMSubscribeSQLite,XMPPService,XMPPApiService,$cordovaNetwork,SQLiteService,$state,$timeout,$ionicHistory,$ionicPopup,$rootScope,$cordovaFile) {
         //var LOCAL_TOKEN_KEY = 'yourTokenKey';
         var username = '';
         var isAuthenticated = false;
@@ -215,6 +215,8 @@ angular.module('starter')
                         //post to api for logout process
                         APIService.httpPost(url,data,
                         function(response){
+                          //delete pdf files
+                          RemovePDFFiles($cordovaFile);
                           //delete all datas and all tables
                           SQLiteService.DeleteAllTables().then(function(){
                             //disconnect xmpp

@@ -109,7 +109,7 @@ angular.module('starter')
 
           }, function(err) {
             var alertPopup = $ionicPopup.alert({
-              title: 'Login failed!',
+              title: err,
               template: 'Please check your credentials!'
             });
           });

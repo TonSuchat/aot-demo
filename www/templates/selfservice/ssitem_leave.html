@@ -30,9 +30,12 @@
           <h2><b>ประวัติ</b></h2>
         </div>
 
-        <div class='item' ng-repeat='history in LeaveHistories'>
-          <p>{{history.ActionTypeName}} , {{history.UpdateBy}} , {{history.UpdateDate}}</p>
-        </div>   
+        <div class='item item-text-wrap' ng-repeat='history in LeaveHistories'>
+          <p>{{history.RouteName}} , {{history.UpdateBy}} , {{history.UpdateDate}}</p>
+        </div>
+        <!-- <div class='item item-text-wrap' >
+          <p>InworkFlow , นาย สนธยา วิไลจิตต์ , 28 ก.ค. 2559 เวลา 15:32</p>
+        </div>    -->
         <!-- section-history -->
 
         <!-- section-button -->

@@ -286,7 +286,7 @@ function DisplayPDF($cordovaFile,$cordovaFileOpener2,APIService,url,data,fileNam
           var extension = response.data[0].ContentType;
           var base64Str = response.data[0].ContentData;
           var contentType = GetContentTypeByExtension(extension);
-          fileName = fileName + extension;
+          fileName = fileName + '.' + extension;
           var blob = b64toBlob(base64Str, contentType);
           if(!window.cordova){
             //pc process
@@ -312,6 +312,28 @@ function DisplayPDF($cordovaFile,$cordovaFileOpener2,APIService,url,data,fileNam
         }
         else APIService.HideLoading();
     },function(error){APIService.HideLoading();console.log(error);alert('ไม่พบข้อมูล');});
+};
+
+function RemovePDFFiles($cordovaFile) {
+  if(!window.cordova) return;
+  var pathFile = '';
+  if (ionic.Platform.isIOS()) pathFile = cordova.file.documentsDirectory
+  else pathFile = cordova.file.externalDataDirectory
+  var arrFiles = ['Tax_91.pdf','Tax_50.pdf','AOTNews.pdf','circular-letter.pdf'];
+  for (var i = 0; i <= arrFiles.length - 1; i++) {
+    RemoveFile($cordovaFile,pathFile,arrFiles[i]);
+  };
+};
+
+function RemoveFile($cordovaFile,pathFile,fileName) {
+  $cordovaFile.removeFile(pathFile,fileName)
+      .then(function (success) {
+        console.log('remove_file ' + fileName + ' - success');
+        return true;
+      }, function (error) {
+        console.log(error);
+        return false;
+      });
 };
 
 function GetContentTypeByExtension (extension) {
