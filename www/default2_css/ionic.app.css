@@ -3948,7 +3948,7 @@ a.subdued {
   .bar.bar-calm {
     border-color: #0078ab;
     background-color: #009cde;
-    /*background-image: linear-gradient(0deg, #0078ab, #0078ab 50%, transparent 50%);*/
+    background-image: linear-gradient(0deg, #0078ab, #0078ab 50%, transparent 50%);
     color: #fff; }
     .bar.bar-calm .title {
       color: #fff; }
@@ -7739,11 +7739,11 @@ input[type="color"] {
 textarea {
   padding-left: 0; }
   textarea::-moz-placeholder {
-    color: #aaaaaa; }
+    color: #4c565c; }
   textarea:-ms-input-placeholder {
-    color: #aaaaaa; }
+    color: #4c565c; }
   textarea::-webkit-input-placeholder {
-    color: #aaaaaa;
+    color: #4c565c;
     text-indent: -3px; }
 
 textarea {
@@ -7792,15 +7792,15 @@ input[type="file"] {
 
 input::-moz-placeholder,
 textarea::-moz-placeholder {
-  color: #aaaaaa; }
+  color: #4c565c; }
 
 input:-ms-input-placeholder,
 textarea:-ms-input-placeholder {
-  color: #aaaaaa; }
+  color: #4c565c; }
 
 input::-webkit-input-placeholder,
 textarea::-webkit-input-placeholder {
-  color: #aaaaaa;
+  color: #4c565c;
   text-indent: 0; }
 
 input[disabled],
