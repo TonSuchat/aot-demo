@@ -1,4 +1,4 @@
-var standardPrefix = ['http://','https://','mailto:','tel:','sms:','geo:','mecard:'];
+var standardPrefix = ['http://','https://','matmsg:','tel:','smsto:','geo:','mecard:'];
 
 angular.module('starter')
 
@@ -69,7 +69,6 @@ function QRProcess(qrresult,$ionicPopup,$scope,APIService){
 function GetStandardPrefix(qrresult){
 	var result = '';
 	angular.forEach(standardPrefix,function(value,key){
-		console.log(qrresult.toString().toLowerCase());
 		if(qrresult.toString().toLowerCase().indexOf(value) > -1) result = value;
 	});
 	return result;
@@ -85,28 +84,48 @@ function GetAOTPrefix(qrresult){
 function ProcessStandardPrefix(prefixType,qrresult){
 	console.log('ProcessStandardPrefix : ' + prefixType);
 	switch(prefixType){
-		case 'http://:':
+		case 'http://':
 			window.open(qrresult,'_system','location=no');
 			break;
 		case 'https://':
 			window.open(qrresult,'_system','location=no');
 			break;
-		case 'mailto:':
-			window.location = qrresult;
+		case 'matmsg:':
+			var emailformat = GetEmailFormatFromQRResult(qrresult);
+			window.location = emailformat;
 			break;
 		case 'tel:':
-			window.location = qrresult;
-			break;
-		case 'sms:':
-			window.location = qrresult;
-			break;
 		case 'geo:':
 			window.location = qrresult;
 			break;
+		case 'smsto:':
+			var smsformat = GetSMSFormatFromQRResult(qrresult);
+			window.location = smsformat;
+			break;
+		// case 'geo:':
+		// 	window.location = qrresult;
+		// 	break;
 		case 'mecard:':
 			//window.location = qrresult;
 			break;
 	}
+};
+
+function GetSMSFormatFromQRResult (qrresult) {
+	var arrSMS = qrresult.split(':');
+	console.log(arrSMS);
+	var result = 'sms:' + arrSMS[1] + '?body=' + arrSMS[2];
+	return result;
+};
+
+function GetEmailFormatFromQRResult (qrresult) {
+	//MATMSG:TO:suchat.v26@gmail.com; SUB:Hello; BODY:Message;
+	var arrEmail = qrresult.split(';');
+	var to = arrEmail[0].split(':')[2];
+	var subject = arrEmail[1].split(':')[1];
+	var result = 'mailto:' + to + '?subject=' + subject;
+	return result;
+	//mailto:test@host.com?subject=testing123	
 };
 
 //AOT customize process

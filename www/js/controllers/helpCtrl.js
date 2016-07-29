@@ -12,6 +12,15 @@ angular.module('starter')
           }
         }
     })
+  .state('app.help_devicesetting',{
+      url: '/helpdevicesetting',
+        views: {
+          'menuContent': {
+            templateUrl: 'templates/help/help_devicesetting.html',
+            controller:'HelpDeviceSettingCtrl'
+          }
+      }
+  })
 	.state('app.help_notification', {
 	    url: '/helpnotification',
 	    views: {
@@ -43,9 +52,11 @@ angular.module('starter')
 
 })
 
-.controller('HelpCtrl',function($scope,APIService,$cordovaNetwork,$ionicPopup){
+.controller('HelpCtrl',function($scope,APIService,$cordovaNetwork,$ionicPopup,AuthService){
 
     $scope.noInternet = false;
+    //check is authen for display some menu
+    $scope.isAuthen = AuthService.isAuthenticated();
     //if no internet connection
     if(!CheckNetwork($cordovaNetwork)){
         $scope.noInternet = true;
@@ -98,5 +109,40 @@ angular.module('starter')
       }
     };
   }
+
+})
+
+.controller('HelpDeviceSettingCtrl',function($scope,APIService,$cordovaNetwork,$ionicPopup){
+    
+    $scope.noInternet = false;
+    $scope.setting = {useOneDevice:false};
+    $scope.Empl_Code = window.localStorage.getItem('CurrentUserName');
+    //if no internet connection
+    if(!CheckNetwork($cordovaNetwork)){
+      $scope.noInternet = true;
+      OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+    }
+    else{
+      //bind setting from server
+      InitialDeviceSetting();
+    }
+    
+    //method triggered when toggle checkbox
+    $scope.SetUseOnDevice = function(){
+      console.log($scope.setting.useOneDevice);
+    };
+
+    function InitialDeviceSetting () {
+      APIService.ShowLoading();
+      var url = APIService.hostname() + '/Device/ProfileSetting';
+      var data = {Empl_Code:$scope.Empl_Code};
+      APIService.httpPost(url,data,function(response){
+        if(response != null && response.data != null){
+          //set value to each setting
+          $scope.setting.useOneDevice = data[0].useOneDevice;
+        }
+        else APIService.HideLoading();
+      },function(error){APIService.HideLoading();console.log(error);});
+    };
 
 })

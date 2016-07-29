@@ -403,7 +403,7 @@ angular.module('starter')
 
             $scope.DisplayPDFTax = function (methodName,taxYear) {
                 var url = APIService.hostname() + '/' + methodName;
-                var data = {Empl_Code:$scope.empCode,TaxYear:taxYear,password_new:window.localStorage.getItem('AuthServices_password')};
+                var data = {Empl_Code:$scope.empCode,TaxYear:taxYear,password:window.localStorage.getItem('AuthServices_password')};
                 //var fileName = methodName + '_' + $scope.empCode + '_' + taxYear;
                 var fileName = methodName;
                 DisplayPDF($cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName);
