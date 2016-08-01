@@ -1,0 +1,16 @@
+<ion-view cache-view="false" view-title="รายชื่ออุปกรณ์ที่ใช้งานอยู่">
+    <ion-content>
+
+      <ul class='list'>
+
+        <div class='item item-text-wrap' ng-repeat='device in activeDevices'>
+          <div><b>Model :</b> {{device.Model}}</div>
+          <div><b>OS :</b> {{device.OS}}</div>
+          <div><b>Serial :</b> {{device.Serial}}</div>
+          <div><b>ใช้งานล่าสุด :</b> {{device.LastAccess}}</div>
+        </div>
+
+      </ul>
+     	
+    </ion-content>
+</ion-view>

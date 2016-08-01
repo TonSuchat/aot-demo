@@ -21,6 +21,15 @@ angular.module('starter')
           }
       }
   })
+  .state('app.help_activedevices',{
+      url: '/helpactivedevices',
+        views: {
+          'menuContent': {
+            templateUrl: 'templates/help/help_activedevices.html',
+            controller:'HelpActiveDevicesCtrl'
+          }
+      }
+  })
 	.state('app.help_notification', {
 	    url: '/helpnotification',
 	    views: {
@@ -129,7 +138,13 @@ angular.module('starter')
     
     //method triggered when toggle checkbox
     $scope.SetUseOnDevice = function(){
-      console.log($scope.setting.useOneDevice);
+      if(confirm('ต้องการเปลี่ยนการตั้งค่าอุปกรณ์?')){
+        console.log($scope.setting.useOneDevice);
+      }
+      else{
+        if($scope.setting.useOneDevice) $scope.setting.useOneDevice = false;
+        else $scope.setting.useOneDevice = true;
+      }
     };
 
     function InitialDeviceSetting () {
@@ -144,5 +159,42 @@ angular.module('starter')
         else APIService.HideLoading();
       },function(error){APIService.HideLoading();console.log(error);});
     };
+
+})
+
+.controller('HelpActiveDevicesCtrl',function($scope,APIService,$cordovaNetwork,$ionicPopup,$filter){
+  $scope.noInternet = false;
+  $scope.activeDevices = [];
+  //if no internet connection
+  if(!CheckNetwork($cordovaNetwork)){
+    $scope.noInternet = true;
+    OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+  }
+  else{
+    //get devices from API
+    APIService.ShowLoading();
+    var url = APIService.hostname() + '/DeviceRegistered/GetActiveDevices';
+    var data = {Empl_Code:window.localStorage.getItem('CurrentUserName')};
+    APIService.httpPost(url,data,function(response){
+      if(response != null && response.data != null){
+        InitialActiveDevices(data);
+        APIService.HideLoading(); 
+      }
+      else APIService.HideLoading();
+    },
+      function(error){APIService.HideLoading();console.log(error);});
+  }
+
+  function InitialActiveDevices(data){
+    angular.forEach(data,function(value,key){
+      $scope.activeDevices.push({
+        Model:value.Model,
+        OS:value.OS,
+        Serial:value.Serial,
+        LastAccess:GetThaiDateTimeByDate($filter,value.LastAccess)
+      });
+    });
+  };
+
 
 })

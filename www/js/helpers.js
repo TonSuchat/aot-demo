@@ -128,8 +128,8 @@ function CheckNeedToReload($rootScope,checkedURL){
     $rootScope.$on( "$stateChangeSuccess", function(event, next, current) {
         if(next.url == checkedURL){
             if(needReload){
-                window.location.reload();
                 needReload = false;
+                window.location.reload();
             }
         };
     });

@@ -584,18 +584,22 @@ function InitialStockProcess($scope,$filter,data){
   $scope.stockInfo.price = (data == null) ? '-' : data.Price;
   $scope.stockInfo.priceDif = (data == null) ? '-' : data.Pdiff;
   $scope.stockInfo.pricePercentDif = (data == null) ? '-' : data.Diff;
+  console.log(data);
   //up
-  if(data != null && data.Diff.indexOf('+') >= 0) {
-    $scope.stockInfo.color = '#0BC70B';
+  if(data != null && data.Pdiff.indexOf('+') >= 0) {
+    console.log('up');
+    $scope.stockInfo.color = 'green';
     $scope.stockInfo.type = 'up';
   }
   //down
-  else if (data != null && data.Diff.indexOf('-') >= 0){
-     $scope.stockInfo.color = '#FF3232'; 
+  else if (data != null && data.Pdiff.indexOf('-') >= 0){
+    console.log('down');
+     $scope.stockInfo.color = 'red'; 
     $scope.stockInfo.type = 'down';
   }
   //not change
   else{
+    console.log('else');
     $scope.stockInfo.color = 'gray'; 
     $scope.stockInfo.type = '';
   }

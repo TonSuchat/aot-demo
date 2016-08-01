@@ -254,6 +254,7 @@ angular.module('starter')
 // };
 
 function ProcessRedirect(url) {
+  if(!url || url.length <= 0) return;
   //check is selfservice menu, Yes redirect with other logic, No redirect by link
   if(CheckURLIsSelfService(url)) RedirectSelfServiceMenu(url);
   else{

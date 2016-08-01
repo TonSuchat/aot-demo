@@ -841,6 +841,7 @@ angular.module('starter')
 					}
 				};
 			WorkFlowService.CreateWorkFlow(data).then(function(response){
+				//check response from server if have warn from server then show alert('message') before redirect to selfservicelist
 				if(response != null) $location.path('/app/selfservicelist/3');
 			},function(error){console.log(error);alert('ไม่สามารถทำรายการได้/โปรดลองใหม่อีกครั้ง');});
 		}
