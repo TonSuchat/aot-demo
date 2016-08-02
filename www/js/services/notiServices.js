@@ -273,7 +273,7 @@ function RedirectSelfServiceMenu (url) {
   if(urlDetails.length > 0){
     var categoryId = urlDetails[2];
     var documentId = urlDetails[3];
-    var nextLevel = urlDetails[4];
+    var nextLevel = ''; //urlDetails[4];
     switch(+categoryId){
       case 1:
         window.location.href = '#/app/ssitem_redeemduty?documentId=' + documentId + '&nextLevel=' + nextLevel;

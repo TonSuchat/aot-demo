@@ -30,7 +30,7 @@ angular.module('starter')
                 window.localStorage.setItem("AuthServices_picThumb", userData.PictureThumb); //userData.PictureThumb; 
                 window.localStorage.setItem("AuthServices_position", userData.Position); //userData.Position;
                 //connect xmpp server
-                XMPPService.Authentication(window.localStorage.getItem("AuthServices_username"),window.localStorage.getItem("AuthServices_password"));
+                XMPPService.Authentication(window.localStorage.getItem("CurrentUserName"),window.localStorage.getItem("AuthServices_password"));
                 //enable xmpp maintain timer
                 XMPPService.TimerMaintainConnection();
                 successAction();
@@ -60,7 +60,7 @@ angular.module('starter')
                             }
                         });
                         //check if user existed then connect xmpp server ,else create user and connect xmpp server
-                        XMPPApiService.CheckAndCreateUserIfNotExist({username:window.localStorage.getItem("AuthServices_username"),password:window.localStorage.getItem("AuthServices_password"),name:window.localStorage.getItem('AuthServices_fullname')}).then(function(response){
+                        XMPPApiService.CheckAndCreateUserIfNotExist({username:window.localStorage.getItem("CurrentUserName"),password:window.localStorage.getItem("AuthServices_password"),name:window.localStorage.getItem('AuthServices_fullname')}).then(function(response){
                             if(response){
                                 //update openfire password same as AD password
                                 XMPPApiService.ChangePassword(username,window.localStorage.getItem("AuthServices_password")).then(function(response){
@@ -69,12 +69,17 @@ angular.module('starter')
                                     //set flag enable sync room
                                     xmppSyncRooms = true;
                                     //connect xmpp
-                                    XMPPService.Authentication(window.localStorage.getItem("AuthServices_username"),window.localStorage.getItem("AuthServices_password"));
+                                    XMPPService.Authentication(window.localStorage.getItem("CurrentUserName"),window.localStorage.getItem("AuthServices_password"));
                                     //enable xmpp maintain timer
                                     XMPPService.TimerMaintainConnection();
                                   }
                                 });
                             }
+                        });
+                        //load profile setting
+                        GetProfileSettings(APIService,$q,window.localStorage.getItem("CurrentUserName")).then(function(response){
+                            //set profile setting
+                            SetProfileSettings($q,response.data.Setting);
                         });
                         successAction();
                     },
@@ -122,7 +127,7 @@ angular.module('starter')
                     function(response){
                         if(window.cordova){
                             username = user;
-                            window.localStorage.setItem("AuthServices_username", user);
+                            window.localStorage.setItem("CurrentUserName", user);
                             window.localStorage.setItem("AuthServices_password", pw);
                             window.localStorage.setItem(AUTH_EVENTS.LOCAL_USERNAME_KEY, username);
                             useCredentials(function () { APIService.HideLoading(); resolve('Login success.'); },null);
@@ -132,7 +137,7 @@ angular.module('starter')
                             if(result == null || result.length == 0) return reject('Login Failed.');
                             if (result._successField) {
                                 username = user;
-                                window.localStorage.setItem("AuthServices_username", user);
+                                window.localStorage.setItem("CurrentUserName", user);
                                 window.localStorage.setItem("AuthServices_password", pw);
                                 window.localStorage.setItem(AUTH_EVENTS.LOCAL_USERNAME_KEY, username);
                                 useCredentials(function () { APIService.HideLoading(); resolve('Login success.'); },null);
@@ -193,6 +198,8 @@ angular.module('starter')
                     if (!window.cordova){
                         //delete all datas and all tables
                         SQLiteService.DeleteAllTables().then(function(){
+                            //set device setting to default value
+                            SetDefaultDeviceSettings($q);
                             //disconnect xmpp
                             XMPPService.Disconnect(true);
                             destroyUserCredentials();
@@ -217,6 +224,8 @@ angular.module('starter')
                         function(response){
                           //delete pdf files
                           RemovePDFFiles($cordovaFile);
+                          //set device setting to default value
+                          SetDefaultDeviceSettings($q);
                           //delete all datas and all tables
                           SQLiteService.DeleteAllTables().then(function(){
                             //disconnect xmpp
@@ -291,9 +300,14 @@ angular.module('starter')
         window.localStorage.removeItem("AuthServices_fullname");
         window.localStorage.removeItem("AuthServices_picThumb");
         window.localStorage.removeItem("AuthServices_position");
-        window.localStorage.removeItem("AuthServices_username");
+        window.localStorage.removeItem("CurrentUserName");
         window.localStorage.removeItem("AuthServices_password");
         window.localStorage.removeItem("lastLogInDate");
         // //set theme to default
         // window.localStorage.setItem('theme','default');
+    };
+
+    function SetDefaultDeviceSettings ($q) {
+        var defaultSetting = {Device:0,LogOn:1,TimeOut:60};
+        SetProfileSettings($q,defaultSetting);
     };

@@ -398,24 +398,29 @@ function CheckSessionIsExpire(APIService,$q){
     if(window.localStorage.getItem('lastLogInDate') == null) return resolve(false);
     var lastLogInDate = new Date(parseInt(window.localStorage.getItem('lastLogInDate')));
     var diffDay = DateDiff(lastLogInDate);
-    //get number of expire day from api
-    var url = APIService.hostname() + '/AOTLiveConfig/AOTLive';
-    var data = {ConfigKeys:'Timeout'};
-    APIService.httpPost(url,data,
-      function(response){
-        console.log(diffDay);
-        if(response != null && response.data != null){
-          var numberOfExpireDay = +response.data;
-          if(diffDay >= numberOfExpireDay) resolve(true);
-          else resolve(false);
-        }
-        else resolve(false);
-      },
-      function(error){console.log(error);resolve(false);});
+    //get number of expire day from local storage
+    var numberOfExpireDay = +window.localStorage.getItem('TimeOut');
+    if(diffDay >= numberOfExpireDay) return resolve(true);
+    else return resolve(false);
+
+    // //get number of expire day from api
+    // var url = APIService.hostname() + '/AOTLiveConfig/AOTLive';
+    // var data = {ConfigKeys:'Timeout'};
+    // APIService.httpPost(url,data,
+    //   function(response){
+    //     console.log(diffDay);
+    //     if(response != null && response.data != null){
+    //       var numberOfExpireDay = +response.data;
+    //       if(diffDay >= numberOfExpireDay) resolve(true);
+    //       else resolve(false);
+    //     }
+    //     else resolve(false);
+    //   },
+    //   function(error){console.log(error);resolve(false);});
   });
 };
 
-function CheckDeviceIsValid (APIService,$q,registerId) {
+function CheckDeviceIsValid(APIService,$q,registerId) {
   return $q(function(resolve){
     var url = APIService.hostname() + '/DeviceRegistered/ValidateDevice';
     var data = {RegisterID:registerId};
@@ -425,5 +430,80 @@ function CheckDeviceIsValid (APIService,$q,registerId) {
       resolve(response);
     },
       function(error){console.log(error);APIService.HideLoading();resolve(null);});
+  });
+};
+
+function CheckIsKeepLogIn($q){
+  return $q(function(resolve){
+    if(+window.localStorage.getItem('Logon') == 1) return resolve(true);
+    else return resolve(false);
+  })
+};
+
+function GetProfileSettings(APIService,$q,emplcode) {
+  return $q(function(resolve,reject){
+    APIService.ShowLoading();
+    var url = APIService.hostname() + '/DeviceRegistered/ViewProfile';
+    var data = {Empl_Code:emplcode};
+    APIService.httpPost(url,data,function(response){
+      APIService.HideLoading();
+      return resolve(response);
+    },
+      function(error){APIService.HideLoading();return reject(null)});
+  }); 
+};
+
+function SetProfileSettings($q,data){
+  return $q(function(resolve){
+    if(data == null) return response(false);
+    //var settings = response.data;
+    //set all settings to local storage
+    window.localStorage.setItem('Device', +data.Device);
+    window.localStorage.setItem('Logon', +data.LogOn);
+    window.localStorage.setItem('TimeOut', data.TimeOut);
+    return resolve(true);
+  });
+};
+
+function CheckForceLogOut(APIService,AuthService,$q) {
+  return $q(function(resolve){
+    //if not loged in then exit
+    if(!AuthService.isAuthenticated()) return resolve(true);
+    //check is set keep login
+    CheckIsKeepLogIn($q).then(function(response){
+      //if not keep and still loged in
+      if(!response){
+        //force logout
+        console.log('not_keep_login');
+        AuthService.logout();
+        return resolve(true);
+      }
+      else{
+        //check session is expire?,Yes force logout.
+        CheckSessionIsExpire(APIService,$q).then(function(response){
+          if(response){
+            //force logout
+            alert('คุณไม่ได้ออกจากระบบนานเกินไป กรุณาเข้าสู่ระบบใหม่');
+            AuthService.logout();
+            return resolve(true);
+          }
+        });
+        //check this device is valid
+        if(window.localStorage.getItem('GCMToken') == null) return resolve(true);
+        CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
+          if(response != null && response.data != null){
+            //if not valid and still logged on then force logout
+            if(!response.data){
+              alert('อุปกรณ์เครื่องนี้ถูกระงับการใช้งาน');
+              AuthService.logout();
+              return resolve(true);
+            }
+          }
+        });
+      }
+    });
+
+    
+
   });
 };

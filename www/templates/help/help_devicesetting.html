@@ -6,16 +6,50 @@
         <li class="item item-toggle">
           ใช้งานครั้งละ 1 อุปกรณ์
           <label class="toggle toggle-balanced">
-             <input ng-model='setting.useOneDevice' ng-disabled='noInternet' ng-change='SetUseOnDevice()' type="checkbox">
+             <input ng-model='setting.Device' type="checkbox">
              <div class="track">
               <div class="handle"></div>
             </div>
           </label>
         </li>
 
-        <a href="#/app/helpactivedevices" ng-show='!setting.useOneDevice' class='item'>รายชื่ออุปกรณ์ที่ใช้งานอยู่</a>
+        <a href="#/app/helpactivedevices" class='item'>รายชื่ออุปกรณ์ที่ใช้งานอยู่</a>
+
+        <li class="item item-toggle">
+          ต้องการ Log-In ค้างไว้
+          <label class="toggle toggle-balanced">
+             <input ng-model='setting.Logon' ng-change='ToggleLogOn()' type="checkbox">
+             <div class="track">
+              <div class="handle"></div>
+            </div>
+          </label>
+        </li>
+
+        <!-- <div class="item item-button-right">
+          จำนวนวัน
+          <div class="buttons">
+            <button ng-disabled='!setting.Logon' ng-click='DecreaseTimeOut()' class="button button-small button-calm">
+              <i class="icon ion-minus-round"></i>
+            </button>
+            <span class='spn-login-timeout'>{{setting.TimeOut}}</span>
+            <button ng-disabled='!setting.Logon' ng-click='IncreaseTimeOut()' class="button button-small button-calm">
+              <i class="icon ion-plus-round"></i>
+            </button>
+          </div>
+        </div> -->
+
+        <label class="item item-input">
+          <span class="input-label">จำนวนวัน</span>
+          <input ng-model='setting.TimeOut' ng-click='SelectAllText($event)' ng-disabled='!setting.Logon' type="number">
+        </label>
+
+        <div class='item'>
+          <input type='button' ng-disabled='noInternet' ng-click='SaveSetting()' class='button button-block button-calm' value='ตกลง' />
+        </div>
 
     	</ul>
-     	
+
+
     </ion-content>
 </ion-view>
+ 

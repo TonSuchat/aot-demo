@@ -48,47 +48,50 @@
           //post to gcm(google cloud messaging) for register device and get token from gcm
           if (window.cordova){
             NotiService.Register().then(function(){
-              //check this device is valid
-              CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
-                if(response != null && response.data != null){
-                  //if not valid and still logged on then force logout
-                  if(!response.data && AuthService.isAuthenticated()){
-                    alert('อุปกรณ์เครื่องนี้ถูกระงับการใช้งาน');
-                    AuthService.logout().then(function(response){
-                      //reload for set default theme
-                      if(response) window.location.reload();
-                    });  
-                  }
-                }
-              });
+              CheckForceLogOut(APIService,AuthService,$q);
+              // //check this device is valid
+              // CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
+              //   if(response != null && response.data != null){
+              //     //if not valid and still logged on then force logout
+              //     if(!response.data && AuthService.isAuthenticated()){
+              //       alert('อุปกรณ์เครื่องนี้ถูกระงับการใช้งาน');
+              //       AuthService.logout();
+              //     }
+              //   }
+              // });
+              // //check session is expire?,Yes force logout.
+              // CheckSessionIsExpire(APIService,$q).then(function(response){
+              //   if(response){
+              //     //force logout
+              //     alert('คุณไม่ได้ออกจากระบบนานเกินไป กรุณาเข้าสู่ระบบใหม่');
+              //     AuthService.logout();
+              //   }
+              // });
             });
           } 
 
-          //check session is expire?,Yes force logout.
-          CheckSessionIsExpire(APIService,$q).then(function(response){
-            if(response){
-              //force logout
-              alert('คุณไม่ได้ออกจากระบบนานเกินไป กรุณาเข้าสู่ระบบใหม่');
-              AuthService.logout();
-            }
-          });
-
           //ionic resume event
           $ionicPlatform.on('resume', function(){
-            if(window.localStorage.getItem('GCMToken') == null) return;
-            //check this device is valid
-            CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
-              if(response != null && response.data != null){
-                //if not valid and still logged on then force logout
-                if(!response.data && AuthService.isAuthenticated()){
-                  alert('อุปกรณ์เครื่องนี้ถูกระงับการใช้งาน');
-                  AuthService.logout().then(function(response){
-                    // //reload for set default theme
-                    // if(response) window.location.reload();
-                  });  
-                }
-              }
-            });
+            CheckForceLogOut(APIService,AuthService,$q);
+            // if(window.localStorage.getItem('GCMToken') == null) return;
+            // //check this device is valid
+            // CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
+            //   if(response != null && response.data != null){
+            //     //if not valid and still logged on then force logout
+            //     if(!response.data && AuthService.isAuthenticated()){
+            //       alert('อุปกรณ์เครื่องนี้ถูกระงับการใช้งาน');
+            //       AuthService.logout();  
+            //     }
+            //   }
+            // });
+            // //check session is expire?,Yes force logout.
+            // CheckSessionIsExpire(APIService,$q).then(function(response){
+            //   if(response){
+            //     //force logout
+            //     alert('คุณไม่ได้ออกจากระบบนานเกินไป กรุณาเข้าสู่ระบบใหม่');
+            //     AuthService.logout();
+            //   }
+            // });
           });
 
         });

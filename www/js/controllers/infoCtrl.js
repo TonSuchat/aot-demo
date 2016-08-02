@@ -205,6 +205,7 @@ angular.module('starter')
     })
     .controller('LeaveCtrl', function($scope, $filter, LeaveSQLite, SyncService, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup) {
         $ionicPlatform.ready(function(){
+            $scope.notFoundData = false;
             APIService.ShowLoading();
 
             $scope.toggleGroup = function(group) {
@@ -253,11 +254,13 @@ angular.module('starter')
 
     })
     .controller('MedicalCtrl', function($scope, $stateParams, $filter, MedicalSQLite, SyncService, $rootScope) {
+        $scope.notFoundData = false;
         MedicalSQLite.GetMedicals().then(function(response){
             shareMedicalData = response;
             //get distinct paiddate for group data by paiddate
             MedicalSQLite.GetDistinctPaidDate().then(function(resultDistinct){
                 $scope.MedicalInfo = CreateFinanceInfoGroupByDate(resultDistinct,$filter,shareMedicalData,'medical');
+                if($scope.MedicalInfo.length == 0) $scope.notFoundData = true;
             });
         });
         //set new medical info = 0 on financial view
@@ -446,6 +449,7 @@ angular.module('starter')
     .controller('TuitionCtrl', function($scope, $filter, TuitionSQLite, SyncService, $rootScope) {
         //set new tuition info = 0 on financial view
         $rootScope.$broadcast('seenTuitionInfo',null);
+        $scope.notFoundData = false;
         // shareTuitionData = tmpTuitionData;
         // $scope.TuitionInfo = CreateFinanceInfoGroupByDate(tmpDistinctTuitionData,$filter,shareTuitionData,'tuition');
         TuitionSQLite.GetTuitions().then(function(response){
@@ -453,6 +457,7 @@ angular.module('starter')
             //get distinct paiddate for group data by paiddate
             TuitionSQLite.GetDistinctPaidDate().then(function(resultDistinct){
                 $scope.TuitionInfo = CreateFinanceInfoGroupByDate(resultDistinct,$filter,shareTuitionData,'tuition');
+                if($scope.TuitionInfo.length == 0) $scope.notFoundData = true;
             });
         });
     })

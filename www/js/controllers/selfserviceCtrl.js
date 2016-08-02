@@ -433,7 +433,7 @@ angular.module('starter')
 	    if(!CheckNetwork($cordovaNetwork)) OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
 	    else{
 	    	$scope.documentId = $stateParams.documentId;
-	    	$scope.nextLevel = $stateParams.nextLevel;
+	    	$scope.nextLevel = ''; //$stateParams.nextLevel;
 	    	$scope.EmplCode = window.localStorage.getItem("CurrentUserName");
 	    	//bind redeem duty details
 	    	WorkFlowService.ViewDutyChangeStaff($scope.documentId).then(function(response){
@@ -570,7 +570,7 @@ angular.module('starter')
 		}
 		else{
 			$scope.documentId = $stateParams.documentId;
-	    	$scope.nextLevel = $stateParams.nextLevel;
+	    	$scope.nextLevel = ''; //$stateParams.nextLevel;
 	    	$scope.EmplCode = window.localStorage.getItem("CurrentUserName");
 			WorkFlowService.ViewHistoryMyTask($scope.documentId,$scope.nextLevel,$scope.EmplCode).then(function(response){
 				if(response != null && response.data != null){
@@ -717,7 +717,7 @@ angular.module('starter')
 		}
 		else{
 			$scope.documentId = $stateParams.documentId;
-	    	$scope.nextLevel = $stateParams.nextLevel;
+	    	$scope.nextLevel = ''; //$stateParams.nextLevel;
 	    	$scope.EmplCode = window.localStorage.getItem("CurrentUserName");
 
 			WorkFlowService.ViewOnLeave($scope.EmplCode,$scope.documentId,$scope.nextLevel).then(function(response){
