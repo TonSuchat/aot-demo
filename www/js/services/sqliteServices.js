@@ -617,6 +617,10 @@ angular.module('starter')
 	this.GetLeaves = function(){
 		return SQLiteService.Execute("SELECT * FROM leave ORDER BY CAST(SUBSTR(Leave_From,5,4) AS INT) DESC, CAST(SUBSTR(Leave_From,3,2) AS INT) DESC, CAST(SUBSTR(Leave_From,1,2) AS INT) DESC ").then(function(response){return response;},function(error){return error;});
 	};
+
+	this.GetTotalLeave = function(leaveCode){
+		return SQLiteService.Execute("select sum(leave_day) as totalLeave from leave where leave_code = " + leaveCode).then(function(response){return response;},function(error){return error;});	
+	};
 })
 .service('CircularSQLite',function(SQLiteService){
 	//***Necessary-Method

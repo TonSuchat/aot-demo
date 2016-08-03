@@ -203,7 +203,7 @@ angular.module('starter')
         CheckNeedToReload($rootScope,'/time');
 
     })
-    .controller('LeaveCtrl', function($scope, $filter, LeaveSQLite, SyncService, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup) {
+    .controller('LeaveCtrl', function($scope, $filter, LeaveSQLite, SyncService, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup, $q) {
         $ionicPlatform.ready(function(){
             $scope.notFoundData = false;
             APIService.ShowLoading();
@@ -224,13 +224,13 @@ angular.module('starter')
             //have internet connection
             if(CheckNetwork($cordovaNetwork)){
                 SyncService.SyncLeave().then(function(){
-                    InitialLeaveInfo($scope,$filter,LeaveSQLite);
+                    InitialLeaveInfo($scope,$filter,LeaveSQLite,$q);
                     FinalActionInfo($scope,APIService);
                 });
             }
             else{
                 //no internet connection
-                InitialLeaveInfo($scope,$filter,LeaveSQLite);
+                InitialLeaveInfo($scope,$filter,LeaveSQLite,$q);
                 FinalActionInfo($scope,APIService);
             }
 
@@ -243,7 +243,7 @@ angular.module('starter')
                 else{
                     APIService.ShowLoading();
                     SyncService.SyncLeave().then(function(){
-                        InitialLeaveInfo($scope,$filter,LeaveSQLite);
+                        InitialLeaveInfo($scope,$filter,LeaveSQLite,$q);
                         FinalActionInfo($scope,APIService);
                     });    
                 }
@@ -542,22 +542,28 @@ function InitialTimeInfo($scope,$q,$filter,TimeAttendanceSQLite){
         });
 };
 
-function InitialLeaveInfo($scope,$filter,LeaveSQLite){
+function InitialLeaveInfo($scope,$filter,LeaveSQLite,$q){
     LeaveSQLite.GetLeaves().then(function(response){
         var result = ConvertQueryResultToArray(response);
         if(result == null || result.length == 0) return;
 
-        //get leave datas
-        $scope.leaveInfo = {};
-        $scope.leaveInfo.sickLeave = GetLeaveDetails('1',result,$filter);
-        $scope.leaveInfo.annualLeave = GetLeaveDetails('4',result,$filter);
-        $scope.leaveInfo.personalLeave = GetLeaveDetails('2',result,$filter);
-
         //bind into accordion
         $scope.leaveGroups = [];
-        $scope.leaveGroups.push({name:'ลาป่วย',items:$scope.leaveInfo.sickLeave.leaveDate,totalLeave:$scope.leaveInfo.sickLeave.totalLeave});
-        $scope.leaveGroups.push({name:'ลาพักผ่อน',items:$scope.leaveInfo.annualLeave.leaveDate,totalLeave:$scope.leaveInfo.annualLeave.totalLeave});
-        $scope.leaveGroups.push({name:'ลากิจ',items:$scope.leaveInfo.personalLeave.leaveDate,totalLeave:$scope.leaveInfo.personalLeave.totalLeave});
+
+        //get leave datas
+        $scope.leaveInfo = {};
+        GetLeaveDetails('1',result,$filter,LeaveSQLite,$q).then(function(response){
+            $scope.leaveInfo.sickLeave = response;
+            $scope.leaveGroups.push({name:'ลาป่วย',items:$scope.leaveInfo.sickLeave.leaveDate,totalLeave:$scope.leaveInfo.sickLeave.totalLeave});
+        });
+        GetLeaveDetails('4',result,$filter,LeaveSQLite,$q).then(function(response){
+            $scope.leaveInfo.annualLeave = response;
+            $scope.leaveGroups.push({name:'ลาพักผ่อน',items:$scope.leaveInfo.annualLeave.leaveDate,totalLeave:$scope.leaveInfo.annualLeave.totalLeave});    
+        });
+        GetLeaveDetails('2',result,$filter,LeaveSQLite,$q).then(function(response){
+            $scope.leaveInfo.personalLeave = response;
+            $scope.leaveGroups.push({name:'ลากิจ',items:$scope.leaveInfo.personalLeave.leaveDate,totalLeave:$scope.leaveInfo.personalLeave.totalLeave});
+        });
 
         //show first group by default
         $scope.shownGroup = $scope.leaveGroups[0];
@@ -758,14 +764,14 @@ function ProcessSyncLeaveData($scope,LeaveSQLite,APIService,AuthService,$filter)
                         LeaveSQLite.DeleteAllLeave().then(function(){
                             //save to sqlite
                             LeaveSQLite.SaveLeaves(result).then(function(){
-                                InitialLeaveInfo($scope,$filter,LeaveSQLite);
+                                InitialLeaveInfo($scope,$filter,LeaveSQLite,$q);
                             });
                         });
                     }
                     //save to sqlite
                     else {
                         LeaveSQLite.SaveLeaves(result).then(function(){
-                            InitialLeaveInfo($scope,$filter,LeaveSQLite);    
+                            InitialLeaveInfo($scope,$filter,LeaveSQLite,$q);    
                         });    
                     }
                 }
@@ -888,15 +894,22 @@ function GetTimeInfo(distinctStampDate,$filter,allTADatas){
     return result;
 };
 
-function GetLeaveDetails(leaveCode,allLeaveDatas,$filter){
-    var result = {};
-    var leaves = $filter('filter')(allLeaveDatas,{Leave_Code:leaveCode});
-    result.totalLeave = leaves.length;
-    result.leaveDate = [];
-    for (var i = 0; i <= leaves.length - 1; i++) {
-        result.leaveDate.push({leavedate:GetThaiDateByDate($filter,leaves[i].Leave_Date),leavefrom:GetThaiDateByDate($filter,leaves[i].Leave_From)});
-    };
-    return result;
+function GetLeaveDetails(leaveCode,allLeaveDatas,$filter,LeaveSQLite,$q){
+    return $q(function(resolve){
+        var result = {};
+        var leaves = $filter('filter')(allLeaveDatas,{Leave_Code:leaveCode});
+        LeaveSQLite.GetTotalLeave(leaveCode).then(function(response){
+            if(response == null) return resolve(result);
+            else{
+                result.totalLeave = ConvertQueryResultToArray(response)[0].totalLeave;
+                result.leaveDate = [];
+                for (var i = 0; i <= leaves.length - 1; i++) {
+                    result.leaveDate.push({leavedate:GetThaiDateByDate($filter,leaves[i].Leave_Date),leavefrom:GetThaiDateByDate($filter,leaves[i].Leave_From)});
+                };
+                return resolve(result);
+            }
+        })
+    });
 };
 
 function FinalActionInfo($scope,APIService){

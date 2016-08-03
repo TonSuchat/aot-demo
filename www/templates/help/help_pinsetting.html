@@ -1,0 +1,163 @@
+<ion-view cache-view="false" view-title="ตั้งค่า PIN">
+
+   <ion-content>
+    <!-- 
+        <div class='row padding'>
+          <div class='col text-center'>
+            PIN-Code
+          </div>
+        </div>
+
+        <div class='row row-padding'>
+          <div class='col col-padding'>
+            <div class='pin-cover'><i class='icon ion-record'></i></div>
+          </div>
+          <div class='col col-padding'>
+            <div class='pin-cover'><i class='icon ion-record'></i></div>
+          </div>
+          <div class='col col-padding'>
+            <div class='pin-cover'><i class='icon ion-record'></i></div>
+          </div>
+          <div class='col col-padding'>
+            <div class='pin-cover'><i class='icon ion-record'></i></div>
+          </div>
+          <div class='col col-padding'>
+            <div class='pin-cover'><i class='icon ion-record'></i></div>
+          </div>
+          <div class='col col-padding'>
+            <div class='pin-cover'><i class='icon ion-record'></i></div>
+          </div>
+        </div>
+
+        <div class='row row-padding'>
+          <div class='col col-padding'>
+            <div class='pin-btn-cover'>
+              <input type='button' class='button button-block' value='1'>  
+            </div>
+          </div>
+          <div class='col col-padding'>
+            <div class='pin-btn-cover'>
+              <input type='button' class='button button-block' value='2'>  
+            </div>
+          </div>
+          <div class='col col-padding'>
+            <div class='pin-btn-cover'>
+              <input type='button' class='button button-block' value='3'>  
+            </div>
+          </div>
+        </div>
+
+        <div class='row'>
+          <div class='col col-padding'>
+            <div class='pin-btn-cover'>
+              <input type='button' class='button button-block' value='4'>  
+            </div>
+          </div>
+          <div class='col col-padding'>
+            <div class='pin-btn-cover'>
+              <input type='button' class='button button-block' value='5'>  
+            </div>
+          </div>
+          <div class='col col-padding'>
+            <div class='pin-btn-cover'>
+              <input type='button' class='button button-block' value='6'>  
+            </div>
+          </div>
+        </div>
+
+        <div class='row'>
+          <div class='col col-padding'>
+            <div class='pin-btn-cover'>
+              <input type='button' class='button button-block' value='7'>  
+            </div>
+          </div>
+          <div class='col col-padding'>
+            <div class='pin-btn-cover'>
+              <input type='button' class='button button-block' value='8'>  
+            </div>
+          </div>
+          <div class='col col-padding'>
+            <div class='pin-btn-cover'>
+              <input type='button' class='button button-block' value='9'>  
+            </div>
+          </div>
+        </div>
+
+        
+        <div class='row'>
+          <div class='col col-padding'>
+            <div class='pin-btn-cover'>
+              <input type='button' ng-disabled='true' class='button button-block' value=''>  
+            </div>
+          </div>
+          <div class='col col-padding'>
+            <div class='pin-btn-cover'>
+              <input type='button' class='button button-block' value='0'>  
+            </div>
+          </div>
+          <div class='col col-padding'>
+            <div class='pin-btn-cover'>
+              <button class='button button-block'><i class='icon ion-backspace'></i></button>
+            </div>
+          </div>
+        </div> -->
+
+       <!--  <div class='row row-padding'>
+          <div class='col col-padding'>
+            <div class="circle-text"><div>1</div></div>
+          </div>
+          <div class='col col-padding'>
+            <div class="circle-text"><div>2</div></div>
+          </div>
+          <div class='col col-padding'>
+            <div class="circle-text"><div>3</div></div>
+          </div>
+        </div> -->
+
+        <!-- <div class='row'>
+          <div class='col col-padding'>
+            <div class="number text-center">1</div>    
+          </div>
+          <div class='col col-padding'>
+            <div class="number">2</div>    
+          </div>
+          <div class='col col-padding'>
+            <div class="number">3</div>    
+          </div>
+        </div> -->
+
+
+
+        <div class='pin'>
+          <div class="dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+          <span class='spnPINHeaderTxt'>{{headerTxt}}</span>
+          <!-- <p style='color:red'>{{errorTxt}}</p> -->
+        </div>
+
+        </div>
+        <div class="numbers">
+          <div class="number">1</div>
+          <div class="number">2</div>
+          <div class="number">3</div>
+          <div class="number">4</div>
+          <div class="number">5</div>
+          <div class="number">6</div>
+          <div class="number">7</div>
+          <div class="number">8</div>
+          <div class="number">9</div>
+          <div class="number" style='visibility:hidden;'></div>
+          <div class="number">0</div>
+          <div class="pin-delete-icon" ng-click='deletePIN()'><i class='icon ion-backspace'></i></div>
+        </div>
+
+  </ion-content>
+
+</ion-view>
+ 

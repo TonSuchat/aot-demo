@@ -21,6 +21,15 @@ angular.module('starter')
           }
       }
   })
+  .state('app.help_pinsetting',{
+      url: '/helppinsetting',
+        views: {
+          'menuContent': {
+            templateUrl: 'templates/help/help_pinsetting.html',
+            controller:'HelpPINSettingCtrl'
+          }
+      }
+  })
   .state('app.help_activedevices',{
       url: '/helpactivedevices',
         views: {
@@ -61,227 +70,377 @@ angular.module('starter')
 
 })
 
-.controller('HelpCtrl',function($scope,APIService,$cordovaNetwork,$ionicPopup,AuthService){
+.controller('HelpCtrl',function($scope,APIService,$cordovaNetwork,$ionicPopup,AuthService,$ionicPlatform){
+    $ionicPlatform.ready(function() {
+      $scope.noInternet = false;
+      //check is authen for display some menu
+      $scope.isAuthen = AuthService.isAuthenticated();
+      //if no internet connection
+      if(!CheckNetwork($cordovaNetwork)){
+          $scope.noInternet = true;
+        OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+      }
 
-    $scope.noInternet = false;
-    //check is authen for display some menu
-    $scope.isAuthen = AuthService.isAuthenticated();
-    //if no internet connection
-    if(!CheckNetwork($cordovaNetwork)){
-        $scope.noInternet = true;
-    	OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
-    }
-
-    $scope.OpenHelperLink = function(key){
-        if($scope.noInternet) return;
-        var url = APIService.hostname() + '/AOTLiveConfig/AOTLive';
-        var data = {ConfigKeys:key}
-        APIService.ShowLoading();
-        APIService.httpPost(url,data,function(response){
-          APIService.HideLoading();
-          if(response != null && response.data != null){
-            var link = response.data;
-            window.open(link,'_system','location=no');
-          }
-        },function(error){APIService.HideLoading();console.log(error);alert('ไม่พบ URL/ลองใหม่อีกครั้ง')});
-    };
-
+      $scope.OpenHelperLink = function(key){
+          if($scope.noInternet) return;
+          var url = APIService.hostname() + '/AOTLiveConfig/AOTLive';
+          var data = {ConfigKeys:key}
+          APIService.ShowLoading();
+          APIService.httpPost(url,data,function(response){
+            APIService.HideLoading();
+            if(response != null && response.data != null){
+              var link = response.data;
+              window.open(link,'_system','location=no');
+            }
+          },function(error){APIService.HideLoading();console.log(error);alert('ไม่พบ URL/ลองใหม่อีกครั้ง')});
+      };
+    });
 })
 
-.controller('HelpNotificationCtrl',function($scope,NotiService){
+.controller('HelpNotificationCtrl',function($scope,NotiService,$ionicPlatform){
    	
 })
 
-.controller('HelpThemeCtrl',function($scope,APIService){
+.controller('HelpThemeCtrl',function($scope,APIService,$ionicPlatform){
 
-  InitialThemeDetails();
+  $ionicPlatform.ready(function() {
 
-  $scope.ApplyTheme = function(val){
-    window.localStorage.setItem('theme',val);
-    APIService.ShowLoading();
-    window.location.reload();
-  };
+    InitialThemeDetails();
 
-  function InitialThemeDetails() {
-    $scope.Themes = [];
-    $scope.Themes.push({Img:'default_theme',Name:'Default',Description:'Description',IsApply:false,val:'default'});
-    $scope.Themes.push({Img:'default2_theme',Name:'Default2',Description:'Description2',IsApply:false,val:'default2'});
-    //set IsApply for selected theme
-    SetSelectedTheme();
-  };
-
-  function SetSelectedTheme () {
-    for (var i = 0; i <= $scope.Themes.length -1; i++) {
-      if(window.localStorage.getItem('theme') == $scope.Themes[i].val){
-        $scope.Themes[i].IsApply = true;
-        break;
-      }
+    $scope.ApplyTheme = function(val){
+      window.localStorage.setItem('theme',val);
+      APIService.ShowLoading();
+      window.location.reload();
     };
-  }
+
+    function InitialThemeDetails() {
+      $scope.Themes = [];
+      $scope.Themes.push({Img:'default_theme',Name:'Default',Description:'Description',IsApply:false,val:'default'});
+      $scope.Themes.push({Img:'default2_theme',Name:'Default2',Description:'Description2',IsApply:false,val:'default2'});
+      //set IsApply for selected theme
+      SetSelectedTheme();
+    };
+
+    function SetSelectedTheme () {
+      for (var i = 0; i <= $scope.Themes.length -1; i++) {
+        if(window.localStorage.getItem('theme') == $scope.Themes[i].val){
+          $scope.Themes[i].IsApply = true;
+          break;
+        }
+      };
+    }
+
+  });
+  
 
 })
 
-.controller('HelpDeviceSettingCtrl',function($scope,APIService,$cordovaNetwork,$ionicPopup,$q,AuthService){
+.controller('HelpDeviceSettingCtrl',function($scope,APIService,$cordovaNetwork,$ionicPopup,$q,AuthService,$ionicPlatform){
     
+    $ionicPlatform.ready(function() {
+      $scope.noInternet = false;
+      $scope.setting = {Device:false,Logon:true,TimeOut:60};
+      $scope.Empl_Code = window.localStorage.getItem('CurrentUserName');
+      //if no internet connection
+      if(!CheckNetwork($cordovaNetwork)){
+        $scope.noInternet = true;
+        OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+      }
+      else{
+        //get setting from server
+        GetProfileSettings(APIService,$q,$scope.Empl_Code).then(function(response){
+          //set profile setting
+          SetProfileSettings($q,response.data.Setting).then(function(){
+            //bind settings from local storage
+            InitialDeviceSetting();
+          });
+        })
+      }
+      
+      //method triggered when toggle checkbox
+      $scope.SetUseOnDevice = function(){
+        if(confirm('ต้องการเปลี่ยนการตั้งค่าอุปกรณ์?')){
+          console.log($scope.setting.Device);
+        }
+        else{
+          if($scope.setting.Device) $scope.setting.Device = false;
+          else $scope.setting.Device = true;
+        }
+      };
+
+      function GetDeviceSettings (argument) {
+        APIService.ShowLoading();
+        var url = APIService.hostname() + '/Device/ProfileSetting';
+        var data = {Empl_Code:$scope.Empl_Code};
+        APIService.httpPost(url,data,function(response){
+          if(response != null && response.data != null){
+            //set value to each setting
+            SetProfileSettings(response.data);
+            //initial device settings
+            APIService.HideLoading();
+          }
+          else APIService.HideLoading();
+        },function(error){APIService.HideLoading();console.log(error);});
+      };
+
+      $scope.ToggleLogOn = function(){
+        if(!$scope.setting.Logon) $scope.setting.TimeOut = 0;
+        else $scope.setting.TimeOut = 60;
+      };
+
+      $scope.IncreaseTimeOut = function(){
+        $scope.setting.TimeOut += 1;
+      };
+
+      $scope.DecreaseTimeOut = function(){
+        $scope.setting.TimeOut -= 1;
+      };
+
+      function InitialDeviceSetting() {
+        $scope.setting.Device = (+window.localStorage.getItem('Device') == 1 ? true : false);
+        $scope.setting.Logon = (+window.localStorage.getItem('Logon') == 1 ? true : false);
+        $scope.setting.TimeOut = +window.localStorage.getItem('TimeOut');
+      };
+
+      $scope.CheckValidate = function(){
+        //validate TimeOut
+        if($scope.setting.Logon){
+          if(!$scope.setting.TimeOut || $scope.setting.TimeOut.length == 0){
+            alert('จำนวนวันห้ามเป็นค่าว่าง');
+            return false;
+          }
+          if((+$scope.setting.TimeOut > 60) || (+$scope.setting.TimeOut < 0)){
+            alert('จำนวนวันต้องมากกว่า 0 และไม่เกิน 60 วัน');
+            return false;
+          }
+        }
+        return true;
+      };
+
+      $scope.SelectAllText = function($event){
+        $event.target.select();
+      };
+
+      $scope.SaveSetting = function(){
+        if(!$scope.CheckValidate()) return;
+        if(confirm('ต้องการเปลี่ยนการตั้งค่าอุปกรณ์')){
+          //post setting save on server
+          APIService.ShowLoading()
+          var url = APIService.hostname() + '/DeviceRegistered/SetProfile';
+          var data = {
+            Empl_Code:$scope.Empl_Code,
+            Setting:{
+              Device:$scope.setting.Device,
+              LogOn:$scope.setting.Logon,
+              TimeOut:$scope.setting.TimeOut
+            }
+          };
+          APIService.httpPost(url,data,function(response){
+            if(response){
+              //force user to logout for apply new settings
+              alert('กรุณาเข้าสู่ระบบใหม่อีกครั้งเพื่อใช้งานการตั้งค่า');
+              AuthService.logout();
+              // //save setting to local storage
+              // SetProfileSettings($q,{Device:+$scope.setting.Device,LogOn:+$scope.setting.Logon,TimeOut:$scope.setting.TimeOut}).then(function(response){
+              //   if(response){
+              //     //force user to logout for apply new settings
+              //     alert('กรุณาเข้าสู่ระบบใหม่อีกครั้งเพื่อใช้งานการตั้งค่า');
+              //     AuthService.logout();
+              //   }
+              //   else{
+              //     alert('ไม่สามารถบันทึกการตั้งค่าอุปกรณ์ได้');
+              //     APIService.HideLoading();
+              //     console.log("can't save settings to localStorage");
+              //   }
+              // });  
+            }
+          },
+            function(error){console.log(error);APIService.HideLoading();alert('ไม่สามารถบันทึกการตั้งค่าที่ Server ได้');});
+          
+        }
+      };
+    });
+
+})
+
+.controller('HelpActiveDevicesCtrl',function($scope,APIService,$cordovaNetwork,$ionicPopup,$filter,$ionicPlatform){
+  $ionicPlatform.ready(function() {
     $scope.noInternet = false;
-    $scope.setting = {Device:false,Logon:true,TimeOut:60};
-    $scope.Empl_Code = window.localStorage.getItem('CurrentUserName');
+    $scope.activeDevices = [];
     //if no internet connection
     if(!CheckNetwork($cordovaNetwork)){
       $scope.noInternet = true;
       OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
     }
     else{
-      //get setting from server
-      GetProfileSettings(APIService,$q,$scope.Empl_Code).then(function(response){
-        //set profile setting
-        SetProfileSettings($q,response.data.Setting).then(function(){
-          //bind settings from local storage
-          InitialDeviceSetting();
-        });
-      })
+      //get devices from API
+      APIService.ShowLoading();
+      var url = APIService.hostname() + '/DeviceRegistered/ViewDeviceRegistered';
+      var data = {Empl_Code:window.localStorage.getItem('CurrentUserName')};
+      APIService.httpPost(url,data,function(response){
+        if(response != null && response.data != null){
+          InitialActiveDevices(response.data);
+          APIService.HideLoading(); 
+        }
+        else APIService.HideLoading();
+      },
+        function(error){APIService.HideLoading();console.log(error);});
     }
-    
-    //method triggered when toggle checkbox
-    $scope.SetUseOnDevice = function(){
-      if(confirm('ต้องการเปลี่ยนการตั้งค่าอุปกรณ์?')){
-        console.log($scope.setting.Device);
-      }
-      else{
-        if($scope.setting.Device) $scope.setting.Device = false;
-        else $scope.setting.Device = true;
-      }
+    function InitialActiveDevices(data){
+      angular.forEach(data,function(value,key){
+        $scope.activeDevices.push({
+          Model:value.Model,
+          OS:value.OS,
+          Serial:value.Serial,
+          LastAccess:GetThaiDateTimeByDate($filter,value.LastAccessTime)
+        });
+      });
+    };
+  });
+})
+
+.controller('HelpPINSettingCtrl',function($scope,APIService,$cordovaNetwork,$ionicPopup,$filter,$ionicPlatform){
+  $ionicPlatform.ready(function() {
+
+    $scope.InitialPIN = function(){
+      APIService.ShowLoading();
+      $scope.pin = '';
+      $scope.keepPIN = '';
+      $scope.headerTxt = 'กรอกรหัสใหม่';
+      //1 = กรอกรหัสเดิม , 2 = กรอกรหัสใหม่ , 3 = ยืนยันรหัสใหม่
+      $scope.state = 2;
+      var url = APIService.hostname() + '/';
+      var data = {Empl_Code:$scope.Empl_Code};
+      APIService.httpPost(url,data,function(response){
+        if(response.data.Existing){
+          $scope.state = 1;
+          $scope.headerTxt = 'กรอกรหัสเดิม';
+        }
+        else{
+          $scope.state = 2;
+          $scope.headerTxt = 'กรอกรหัสใหม่';
+        }
+        APIService.HideLoading();
+      },
+        function(error){console.log(error);APIService.HideLoading();});
     };
 
-    function GetDeviceSettings (argument) {
+    $scope.noInternet = false;
+    $scope.Empl_Code = window.localStorage.getItem('CurrentUserName');
+    //if no internet connection
+    if(!CheckNetwork($cordovaNetwork)){
+      $scope.noInternet = true;
+      OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+      return;
+    }
+    else{
+      //Initial
+      $scope.InitialPIN();
+    }
+
+    //element variables
+    var dots = document.querySelectorAll(".dot");
+    var numbers = document.querySelectorAll(".number");
+    var dots = Array.prototype.slice.call(dots);
+
+    //each process by state
+    $scope.ProcessPIN = function(){
       APIService.ShowLoading();
-      var url = APIService.hostname() + '/Device/ProfileSetting';
+      if($scope.state == 1) $scope.ProcessPINState1();
+      else if($scope.state == 2) $scope.ProcessPINState2();
+      else if($scope.state == 3) $scope.ProcessPINState3();
+    };
+
+    $scope.ProcessPINState1 = function(){
+      var url = APIService.hostname() + '/';
       var data = {Empl_Code:$scope.Empl_Code};
       APIService.httpPost(url,data,function(response){
         if(response != null && response.data != null){
-          //set value to each setting
-          SetProfileSettings(response.data);
-          //initial device settings
+          if(response.data.Valid){
+            $scope.pin = '';
+            $scope.state = 2;
+            $scope.headerTxt = 'กรอกรหัสใหม่';
+            $scope.ResetDot();
+            APIService.HideLoading();
+          }
+          else $scope.Error();
+        }
+        else{
+          $scope.ResetDot();
           APIService.HideLoading();
+          alert('ไม่ได้รับค่าจาก Server');
         }
-        else APIService.HideLoading();
-      },function(error){APIService.HideLoading();console.log(error);});
+      },
+        function(error){console.log(error);$scope.ResetDot();APIService.HideLoading();alert('เกิดข้อผิดพลาด/ลองใหม่อีกครั้ง');})
     };
 
-    $scope.ToggleLogOn = function(){
-      if(!$scope.setting.Logon) $scope.setting.TimeOut = 0;
-      else $scope.setting.TimeOut = 60;
+    $scope.ProcessPINState2 = function(){
+      $scope.ResetDot();
+      $scope.keepPIN = $scope.pin;
+      $scope.pin = '';
+      $scope.state = 3;
+      $scope.headerTxt = 'ยืนยันรหัสอีกครั้ง';
+      APIService.HideLoading();
     };
 
-    $scope.IncreaseTimeOut = function(){
-      $scope.setting.TimeOut += 1;
-    };
-
-    $scope.DecreaseTimeOut = function(){
-      $scope.setting.TimeOut -= 1;
-    };
-
-    function InitialDeviceSetting() {
-      $scope.setting.Device = (+window.localStorage.getItem('Device') == 1 ? true : false);
-      $scope.setting.Logon = (+window.localStorage.getItem('Logon') == 1 ? true : false);
-      $scope.setting.TimeOut = +window.localStorage.getItem('TimeOut');
-    };
-
-    $scope.CheckValidate = function(){
-      //validate TimeOut
-      if($scope.setting.Logon){
-        if(!$scope.setting.TimeOut || $scope.setting.TimeOut.length == 0){
-          alert('จำนวนวันห้ามเป็นค่าว่าง');
-          return false;
-        }
-        if((+$scope.setting.TimeOut > 60) || (+$scope.setting.TimeOut < 0)){
-          alert('จำนวนวันต้องมากกว่า 0 และไม่เกิน 60 วัน');
-          return false;
-        }
-      }
-      return true;
-    };
-
-    $scope.SelectAllText = function($event){
-      $event.target.select();
-    };
-
-    $scope.SaveSetting = function(){
-      if(!$scope.CheckValidate()) return;
-      if(confirm('ต้องการเปลี่ยนการตั้งค่าอุปกรณ์')){
-        //post setting save on server
-        APIService.ShowLoading()
-        var url = APIService.hostname() + '/DeviceRegistered/SetProfile';
-        var data = {
-          Empl_Code:$scope.Empl_Code,
-          Setting:{
-            Device:$scope.setting.Device,
-            LogOn:$scope.setting.Logon,
-            TimeOut:$scope.setting.TimeOut
-          }
-        };
+    $scope.ProcessPINState3 = function(){
+      if($scope.keepPIN == $scope.pin){
+        var url = APIService.hostname() + '/';
+        var data = {Empl_Code:$scope.Empl_Code,PIN:$scope.pin};
         APIService.httpPost(url,data,function(response){
-          if(response){
-            //force user to logout for apply new settings
-            alert('กรุณาเข้าสู่ระบบใหม่อีกครั้งเพื่อใช้งานการตั้งค่า');
-            AuthService.logout();
-            // //save setting to local storage
-            // SetProfileSettings($q,{Device:+$scope.setting.Device,LogOn:+$scope.setting.Logon,TimeOut:$scope.setting.TimeOut}).then(function(response){
-            //   if(response){
-            //     //force user to logout for apply new settings
-            //     alert('กรุณาเข้าสู่ระบบใหม่อีกครั้งเพื่อใช้งานการตั้งค่า');
-            //     AuthService.logout();
-            //   }
-            //   else{
-            //     alert('ไม่สามารถบันทึกการตั้งค่าอุปกรณ์ได้');
-            //     APIService.HideLoading();
-            //     console.log("can't save settings to localStorage");
-            //   }
-            // });  
-          }
+          APIService.HideLoading();
+          alert('ตั้งค่าเรียบร้อย');
+          window.location = '#/app/help';
         },
-          function(error){console.log(error);APIService.HideLoading();alert('ไม่สามารถบันทึกการตั้งค่าที่ Server ได้');});
-        
+          function(error){console.log(error);$scope.ResetDot();APIService.HideLoading();alert('เกิดข้อผิดพลาด/ลองใหม่อีกครั้ง');})
+      }
+      else $scope.Error();
+    };
+
+    //reset dot elements to default class
+    $scope.ResetDot = function(){
+      dots.forEach(function(dot, index) {
+        dot.className = 'dot';
+      });
+    };
+
+    //set animation error to dot elements
+    $scope.Error = function(){
+      dots.forEach(function(dot, index) {
+        dot.className += " wrong";
+      });
+      document.body.className = "wrong";
+      setTimeout(function() {
+        dots.forEach(function(dot, index) {
+          dot.className = "dot"; 
+      }); $scope.ResetDot();}, 900);
+      $scope.pin = '';
+      setTimeout(function() {APIService.HideLoading();},1000);
+    };
+
+    //loop add event click for number buttons
+    if(!$scope.noInternet){
+      numbers.forEach(function(number, index) {
+        number.addEventListener('click', function() {
+          $scope.errorTxt = '';
+          if($scope.pin.length == 6) return;
+          number.className += ' grow';
+          $scope.pin += (index+1 == 11 ? 0 : index + 1);
+          dots[$scope.pin.length-1].className += ' active';
+          setTimeout(function() {number.className = 'number';}, 1000);
+          if($scope.pin.length == 6){
+            $scope.ProcessPIN();
+          }
+        });
+      });  
+    }
+
+    $scope.deletePIN = function (){
+      if($scope.pin.length > 0) {
+        $scope.pin = $scope.pin.substring(0, $scope.pin.length - 1);
+        dots[$scope.pin.length].className = 'dot';
       }
     };
-    
 
-
-})
-
-.controller('HelpActiveDevicesCtrl',function($scope,APIService,$cordovaNetwork,$ionicPopup,$filter){
-  $scope.noInternet = false;
-  $scope.activeDevices = [];
-  //if no internet connection
-  if(!CheckNetwork($cordovaNetwork)){
-    $scope.noInternet = true;
-    OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
-  }
-  else{
-    //get devices from API
-    APIService.ShowLoading();
-    var url = APIService.hostname() + '/DeviceRegistered/ViewDeviceRegistered';
-    var data = {Empl_Code:window.localStorage.getItem('CurrentUserName')};
-    APIService.httpPost(url,data,function(response){
-      if(response != null && response.data != null){
-        InitialActiveDevices(response.data);
-        APIService.HideLoading(); 
-      }
-      else APIService.HideLoading();
-    },
-      function(error){APIService.HideLoading();console.log(error);});
-  }
-
-  function InitialActiveDevices(data){
-    angular.forEach(data,function(value,key){
-      $scope.activeDevices.push({
-        Model:value.Model,
-        OS:value.OS,
-        Serial:value.Serial,
-        LastAccess:GetThaiDateTimeByDate($filter,value.LastAccessTime)
-      });
-    });
-  };
-
-
+  });
 })
