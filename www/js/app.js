@@ -274,42 +274,6 @@
               }
             }
           })
-          .state('app.qrcode', {
-            url: '/qrcode',
-            views: {
-              'menuContent': {
-                templateUrl: 'templates/qrcode/qrcode.html',
-                controller:'QRCodeCtrl'
-              }
-            }
-          })
-          .state('app.genqrcode', {
-            url: '/genqrcode',
-            views: {
-              'menuContent': {
-                templateUrl: 'templates/qrcode/genqrcode.html',
-                controller:'QRCodeCtrl'
-              }
-            }
-          })
-              .state('app.genqremployee', {
-                url: '/genqremployee',
-                views: {
-                  'menuContent': {
-                    templateUrl: 'templates/qrcode/qr-templates/employeeqr.html',
-                    controller:'GenQRCodeCtrl'
-                  }
-                }
-              })
-          .state('app.readqrcode', {
-            url: '/readqrcode',
-            views: {
-              'menuContent': {
-                templateUrl: 'templates/qrcode/readqrcode.html',
-                controller:'ReadQRCodeCtrl'
-              }
-            }
-          })
           .state('app.pmsrooms', {
             url: '/pmsrooms',
             views: {

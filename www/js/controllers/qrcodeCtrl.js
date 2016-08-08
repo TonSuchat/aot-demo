@@ -2,21 +2,86 @@ var standardPrefix = ['http://','https://','matmsg:','tel:','smsto:','geo:','mec
 
 angular.module('starter')
 
+.config(function($stateProvider) {
+	$stateProvider
+		.state('app.qrcode', {
+		    url: '/qrcode',
+		    views: {
+		      'menuContent': {
+		        templateUrl: 'templates/qrcode/qrcode.html',
+		        controller:'QRCodeCtrl'
+		      }
+		    }
+		})
+		.state('app.genqrcode', {
+		    url: '/genqrcode',
+		    views: {
+		      'menuContent': {
+		        templateUrl: 'templates/qrcode/genqrcode.html',
+		        controller:'QRCodeCtrl'
+		      }
+		    }
+		})
+			.state('app.genqremployee', {
+			        url: '/renderqrcode/:qrtype',
+			        views: {
+			          'menuContent': {
+			            templateUrl: 'templates/qrcode/renderqrcode.html',
+			            controller:'GenQRCodeCtrl'
+			          }
+			        }
+			})
+		.state('app.readqrcode', {
+		    url: '/readqrcode',
+		    views: {
+		      'menuContent': {
+		        templateUrl: 'templates/qrcode/readqrcode.html',
+		        controller:'ReadQRCodeCtrl'
+		      }
+		    }
+		})
+})
+
 .controller('QRCodeCtrl',function($scope,$cordovaBarcodeScanner){
    	//$scope.isAuthen = AuthService.isAuthenticated();
    	$scope.empId = window.localStorage.getItem("CurrentUserName");
 })
 
-.controller('GenQRCodeCtrl',function($scope,ionicDatePicker,APIService,$ionicPopup,$cordovaNetwork){
+.controller('GenQRCodeCtrl',function($scope,ionicDatePicker,APIService,$ionicPopup,$cordovaNetwork,$stateParams){
 	$scope.QRSrc = '';
-	
-	//employee-number//
-	var employeeNumber = PadString(window.localStorage.getItem("CurrentUserName"),"0000000000");
-	var employeeNumberdata = {"ContentCode":2,DataTpe:2,BindingDataType02:{EmployeeID: employeeNumber}};
-	POSTRenderQRCode(employeeNumberdata,function(response){
-		$scope.QRSrc = 'data:image/png;base64,' + response.data;
-	},function(error){});
-	//employee-number//
+	$scope.QRType = $stateParams.qrtype;
+	$scope.headerTxt = '';
+
+	$scope.GenEmplooyeeQRCode = function(){
+		var employeeNumber = PadString(window.localStorage.getItem("CurrentUserName"),"0000000000");
+		var employeeNumberdata = {"ContentCode":2,DataTpe:2,BindingDataType02:{EmployeeID: employeeNumber}};
+		POSTRenderQRCode(employeeNumberdata,function(response){
+			$scope.QRSrc = 'data:image/png;base64,' + response.data;
+		},function(error){});
+	};
+
+	$scope.GenEmplooyeeCardQRCode = function() {
+		var data = {ObjectQRType:3,URLViewModel:{URL:'http://eservice2.airportthai.co.th/m/emp.aspx/' + window.localStorage.getItem('CurrentUserName')}};
+		POSTGenerateQRCode(data,function(response){
+			$scope.QRSrc = 'data:image/png;base64,' + response.data;
+		},function(error){});
+	};
+
+	$scope.ProcessGenQRCode = function(){
+		switch (+$scope.QRType) {
+		    case 1:
+		        $scope.headerTxt = 'สร้างรหัสพนักงาน';
+		        $scope.GenEmplooyeeQRCode();
+		        break;
+		    case 2:
+		        $scope.headerTxt = 'นามบัตรพนักงาน';
+		        $scope.GenEmplooyeeCardQRCode();
+		        break;
+		}
+	};
+ 	
+	//do process
+	$scope.ProcessGenQRCode();
 
 	function POSTRenderQRCode(data,SuccessCB,ErrorCB) {
 		var url = APIService.hostname() + '/RenderQRAndBarcode';
@@ -26,6 +91,16 @@ angular.module('starter')
 			SuccessCB(response);
 		},function(error){console.log(error);APIService.HideLoading();ErrorCB(ErrorCB)});
 	};
+
+	function POSTGenerateQRCode(data,SuccessCB,ErrorCB) {
+		var url = APIService.hostname() + '/QRCode/GenerateQR';
+		APIService.ShowLoading();
+		APIService.httpPost(url,data,function(response){
+			APIService.HideLoading();
+			SuccessCB(response);
+		},function(error){console.log(error);APIService.HideLoading();ErrorCB(ErrorCB)});
+	};
+
 })
 
 .controller('ReadQRCodeCtrl',function($scope,$cordovaBarcodeScanner,$ionicPopup,APIService,$cordovaNetwork){
