@@ -309,10 +309,10 @@ angular.module('starter')
       $scope.headerTxt = 'กรอกรหัสใหม่';
       //1 = กรอกรหัสเดิม , 2 = กรอกรหัสใหม่ , 3 = ยืนยันรหัสใหม่
       $scope.state = 2;
-      var url = APIService.hostname() + '/';
+      var url = APIService.hostname() + '/DeviceRegistered/CheckExistPIN';
       var data = {Empl_Code:$scope.Empl_Code};
       APIService.httpPost(url,data,function(response){
-        if(response.data.Existing){
+        if(response.data){
           $scope.state = 1;
           $scope.headerTxt = 'กรอกรหัสเดิม';
         }
@@ -352,11 +352,11 @@ angular.module('starter')
     };
 
     $scope.ProcessPINState1 = function(){
-      var url = APIService.hostname() + '/';
-      var data = {Empl_Code:$scope.Empl_Code};
+      var url = APIService.hostname() + '/DeviceRegistered/ValidatePIN';
+      var data = {Empl_Code:$scope.Empl_Code,PIN:$scope.pin};
       APIService.httpPost(url,data,function(response){
         if(response != null && response.data != null){
-          if(response.data.Valid){
+          if(response.data){
             $scope.pin = '';
             $scope.state = 2;
             $scope.headerTxt = 'กรอกรหัสใหม่';
@@ -385,7 +385,7 @@ angular.module('starter')
 
     $scope.ProcessPINState3 = function(){
       if($scope.keepPIN == $scope.pin){
-        var url = APIService.hostname() + '/';
+        var url = APIService.hostname() + '/DeviceRegistered/SetPIN';
         var data = {Empl_Code:$scope.Empl_Code,PIN:$scope.pin};
         APIService.httpPost(url,data,function(response){
           APIService.HideLoading();

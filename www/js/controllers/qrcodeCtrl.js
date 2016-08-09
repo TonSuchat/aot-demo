@@ -206,8 +206,27 @@ function GetEmailFormatFromQRResult (qrresult) {
 //AOT customize process
 function ProcessAOTPrefix(prefixType,qrresult,$ionicPopup,$scope,APIService){
 	console.log(prefixType,qrresult);
+	switch(+prefixType) {
+	    case 7:
+	    	//mobile - login
+	        ProcessAOTType7(qrresult,APIService);
+	        break;
+	}
 	//redeemDuty
 	//if(prefixType == 14) ProcessApproveRedeemDuty(qrresult,$ionicPopup,$scope,APIService);
+};
+
+function ProcessAOTType7(qrresult,APIService){
+	APIService.ShowLoading();
+	var token = qrresult.substring(7);
+	var url = APIService.hostname() + '/ValidateQRCode';
+	var data = {Empl_Code:window.localStorage.getItem("CurrentUserName"),Token:token};
+	//post qrlogin
+	APIService.httpPost(url,data,function(response){
+		APIService.HideLoading();
+		alert('LogIn เรียบร้อย');
+	},
+		function(error){APIService.HideLoading();console.log(error);alert(error.data);});
 };
 
 //redeem duty
