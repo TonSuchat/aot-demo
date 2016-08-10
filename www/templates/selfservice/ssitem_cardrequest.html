@@ -9,26 +9,44 @@
           <h2><b>รายละเอียดคำขอ</b></h2>
         </div>
 
-        <div class='item'>
+        <div class='item item-text-wrap'>
           <p><b>เรื่อง</b></p>
           <p>{{cardRequestDetails.DocumentTitle}}</p>
         </div>
 
-        <div class='item'>
+        <div class='item item-text-wrap'>
           <p><b>รายละเอียด</b></p>
           <p>{{cardRequestDetails.DocumentDescription}}</p>
         </div>
         <!-- section-details -->
 
         <!-- section-history -->
-        <div class='item item-divider'>
+        <!-- <div class='item item-divider'>
           <h2><b>ประวัติ</b></h2>
         </div>
 
         <div class='item item-text-wrap' ng-repeat='history in cardRequestHistories'>
           <p>{{history.RouteName}} , {{history.UpdateBy}} , {{history.UpdateDate}}</p>
-        </div>   
+        </div>    -->
+        <div ng-repeat="group in historyGroups">
+            <ion-item class="item-stable" ng-click="toggleGroup(group)" ng-class="{active: isGroupShown(group)}">
+                <i class="icon" ng-class="isGroupShown(group) ? 'ion-minus' : 'ion-plus'"></i>&nbsp;<b>{{group.name}}</b>
+            </ion-item>
+            <ion-item class="item-accordion item-text-wrap" ng-show="isGroupShown(group)" ng-repeat="item in group.items">
+                <p>{{item.RouteName}} , {{item.UpdateBy}} , {{item.UpdateDate}}</p>
+          </ion-item>
+        </div>
         <!-- section-history -->
+
+        <!-- section-nextState -->
+        <div class='item item-divider'>
+          <h2><b>สถานะต่อไป</b></h2>
+        </div>
+
+        <div class='item item-text-wrap'>
+          <p>{{stateNextLevel}}</p>
+        </div> 
+        <!-- section-nextState -->
 
         <!-- section-button -->
         <div ng-show='showBtnAcknowledgment' class='row padding'>

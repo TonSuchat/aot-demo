@@ -9,12 +9,12 @@
           <h2><b>รายละเอียดคำขอ</b></h2>
         </div>
 
-        <div class='item'>
+        <div class='item item-text-wrap'>
           <p><b>ผู้ที่ต้องการ แลก/แทนเวร</b></p>
           <p>{{redeemDutyDetails.Emp1}}</p>
         </div>
 
-        <div class='item'>
+        <div class='item item-text-wrap'>
           <p><b>ผู้ที่รับ แลก/แทนเวร</b></p>
           <p>{{redeemDutyDetails.Emp2}}</p>
         </div>
@@ -30,18 +30,34 @@
         <!-- section-details -->
 
         <!-- section-history -->
-        <div class='item item-divider'>
+        <!-- <div class='item item-divider'>
           <h2><b>ประวัติ</b></h2>
         </div>
 
         <div class='item item-text-wrap' ng-repeat='history in redeemDutyHistories'>
           <p>{{history.RouteName}} , {{history.UpdateBy}} , {{history.UpdateDate}}</p>
-          <!-- <p>ชื่อรายการ : {{history.RouteName}}</p>
-          <p>การตอบรับ : {{history.ActionTypeName}}</p>
-          <p>โดย : {{history.UpdateBy}}</p>
-          <p>วันที่ เวลา : {{history.UpdateDate}}</p> -->
-        </div>        
+        </div>         -->
+        
+        <div ng-repeat="group in historyGroups">
+            <ion-item class="item-stable" ng-click="toggleGroup(group)" ng-class="{active: isGroupShown(group)}">
+                <i class="icon" ng-class="isGroupShown(group) ? 'ion-minus' : 'ion-plus'"></i>&nbsp;<b>{{group.name}}</b>
+            </ion-item>
+            <ion-item class="item-accordion item-text-wrap" ng-show="isGroupShown(group)" ng-repeat="item in group.items">
+                <p>{{item.RouteName}} , {{item.UpdateBy}}, {{item.Device}} , {{item.UpdateDate}}</p>
+          </ion-item>
+        </div>
+        
         <!-- section-history -->
+
+        <!-- section-nextState -->
+        <div class='item item-divider'>
+          <h2><b>สถานะต่อไป</b></h2>
+        </div>
+
+        <div class='item item-text-wrap'>
+          <p>{{stateNextLevel}}</p>
+        </div> 
+        <!-- section-nextState -->
 
         <!-- section-button -->
         <!-- <label ng-show='showBtnApprove || showBtnAcknowledgment' class="item item-input item-stacked-label padding">

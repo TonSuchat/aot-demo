@@ -49,49 +49,13 @@
           if (window.cordova){
             NotiService.Register().then(function(){
               CheckForceLogOut(APIService,AuthService,$q);
-              // //check this device is valid
-              // CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
-              //   if(response != null && response.data != null){
-              //     //if not valid and still logged on then force logout
-              //     if(!response.data && AuthService.isAuthenticated()){
-              //       alert('อุปกรณ์เครื่องนี้ถูกระงับการใช้งาน');
-              //       AuthService.logout();
-              //     }
-              //   }
-              // });
-              // //check session is expire?,Yes force logout.
-              // CheckSessionIsExpire(APIService,$q).then(function(response){
-              //   if(response){
-              //     //force logout
-              //     alert('คุณไม่ได้ออกจากระบบนานเกินไป กรุณาเข้าสู่ระบบใหม่');
-              //     AuthService.logout();
-              //   }
-              // });
             });
-          } 
+          }
+          else window.localStorage.setItem('GCMToken','eJ14KuUSnZ0:APA91bGkY-r-gMLRIPQCqnkJVKylnWII5HRXYnF_0vdjbAaEWRggofkuWCYWcz2IcPv_gk8L0GBhyePBjj0Bpb5gEst5Cc7TJ6goPy6aB4y_alCxso4BKorYjPwWrtiO-20g_9mdXeUB');
 
           //ionic resume event
           $ionicPlatform.on('resume', function(){
             CheckForceLogOut(APIService,AuthService,$q);
-            // if(window.localStorage.getItem('GCMToken') == null) return;
-            // //check this device is valid
-            // CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
-            //   if(response != null && response.data != null){
-            //     //if not valid and still logged on then force logout
-            //     if(!response.data && AuthService.isAuthenticated()){
-            //       alert('อุปกรณ์เครื่องนี้ถูกระงับการใช้งาน');
-            //       AuthService.logout();  
-            //     }
-            //   }
-            // });
-            // //check session is expire?,Yes force logout.
-            // CheckSessionIsExpire(APIService,$q).then(function(response){
-            //   if(response){
-            //     //force logout
-            //     alert('คุณไม่ได้ออกจากระบบนานเกินไป กรุณาเข้าสู่ระบบใหม่');
-            //     AuthService.logout();
-            //   }
-            // });
           });
 
         });

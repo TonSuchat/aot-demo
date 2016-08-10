@@ -237,11 +237,9 @@ angular.module('starter')
 	  	};
 
 		$scope.changePassword = function(form){
-			console.log(form.$valid);
 		    if(form.$valid) {
 		      var url = APIService.hostname() + '/Authen/ChangePassword';
 		      var data = {userName: window.localStorage.getItem("CurrentUserName"),password_old: $scope.changePassword.oldPassword,password_new: $scope.changePassword.newPassword};
-		      console.log(data);
 		      APIService.ShowLoading();
 		      //post to change password AD
 		      APIService.httpPost(url,data,function(response){
@@ -297,6 +295,7 @@ angular.module('starter')
 					if(confirm(message)){
 						var data = {
 									  CategoryId: 1,
+									  RegisterId:window.localStorage.getItem("GCMToken"),
 									  DutyModel:{
 									  	DocumentTitle: "แลก/แทนเวร",
 									  	DocumentDescription: "รายการแลก/แทนเวร",
@@ -310,7 +309,6 @@ angular.module('starter')
 									  }
 									};
 						//var data = {Empl_Code:$scope.Empl_Code,Empl_Code2:$scope.searchEmp.searchTxt,DutyDate:$scope.selectedDate.dutyDate1.toString().replace(new RegExp('/','g'),''),DutyType: $scope.redeemDuty.type,DutyDate2:$scope.selectedDate.dutyDate2.toString().replace(new RegExp('/','g'),''),Remark: "sample string 6"}
-						console.log(data);
 						WorkFlowService.CreateWorkFlow(data).then(function(response){
 							if(response != null) $location.path('/app/selfservicelist/1');
 						},function(error){console.log(error);alert('ไม่สามารถทำรายการได้/โปรดลองใหม่อีกครั้ง');});
@@ -399,6 +397,28 @@ angular.module('starter')
 		$scope.popUpDetails = {title:'',subtitle:'',actiontype:0};
 		$scope.action = {remark:''};
 
+		//Accordion-Code
+		$scope.initialHistoryGroup = function (){
+			$scope.historyGroups = [];
+			$scope.historyGroups[0] = {name: 'ประวัติ',items: []};
+		};
+
+		$scope.initialHistoryGroup();
+		
+		$scope.toggleGroup = function(group) {
+	    	if ($scope.isGroupShown(group)) {
+	      		$scope.shownGroup = null;
+	    	} 
+	    	else {
+	      		$scope.shownGroup = group;
+	    	}
+	  	};
+
+	  	$scope.isGroupShown = function(group) {
+	    	return $scope.shownGroup == group;
+	  	};
+	  	//Accordion-Code
+
 		$scope.InititalRedeemDutyDetails = function(data){
     		//RedeemDutyType : 1 = แลก , 2 = แทน
 	    	$scope.redeemDutyDetails = {
@@ -417,14 +437,23 @@ angular.module('starter')
 
 	    	$scope.showBtnApprove = data.Approve;
 	    	$scope.showBtnAcknowledgment = data.Acknowledgment;
+	    	$scope.stateNextLevel = data.StateNextLevel;
 	    	
 	    	angular.forEach(data.HistoryWorkflow,function(value,key){
-	        	$scope.redeemDutyHistories.push({
+	      //   	$scope.redeemDutyHistories.push({
+		    	// 	RouteName:value.RouteName,
+		    	// 	UpdateBy:value.UpdateBy,
+		    	// 	UpdateDate:GetThaiDateTimeByDate($filter,value.UpdateDate),
+		    	// 	ActionTypeName:value.ActionTypeName,
+		    	// 	RouteName:value.RouteName
+		    	// });	
+	    		$scope.historyGroups[0].items.push({
 		    		RouteName:value.RouteName,
 		    		UpdateBy:value.UpdateBy,
 		    		UpdateDate:GetThaiDateTimeByDate($filter,value.UpdateDate),
 		    		ActionTypeName:value.ActionTypeName,
-		    		RouteName:value.RouteName
+		    		RouteName:value.RouteName,
+		    		Device:value.Device
 		    	});	
 	      	});
 	    };
@@ -537,11 +566,14 @@ angular.module('starter')
 			// 		APIService.HideLoading();	
 			// 	},
 			// 	function(error){APIService.HideLoading();console.log(error);});
-			var data = {CategoryId:2,REQCardModel:{
-				DocumentTitle:'ขอทำบัตรพนักงาน',
-				DocumentDescription:window.localStorage.getItem("CurrentUserName") + ' ขอทำบัตรพนักงาน',
-				Empl_Code:window.localStorage.getItem("CurrentUserName")
-			}};
+			var data = {
+				CategoryId:2,
+				RegisterId:window.localStorage.getItem("GCMToken"),
+				REQCardModel:{
+					DocumentTitle:'ขอทำบัตรพนักงาน',
+					DocumentDescription:window.localStorage.getItem("CurrentUserName") + ' ขอทำบัตรพนักงาน',
+					Empl_Code:window.localStorage.getItem("CurrentUserName")
+				}};
 			WorkFlowService.CreateWorkFlow(data).then(function(response){
 				if(response != null && response.data != null && response.data != 'Error'){
 					OpenIonicAlertPopup($ionicPopup,'ขอทำบัตร','หมายเลขคำขอเลขที่ ' + response.data + ' ได้ถูกจัดส่งให้ผู้ดำเนินการแล้ว กรุณาติดต่อ 1449 คุณจำปูน');
@@ -562,6 +594,28 @@ angular.module('starter')
 		$scope.popUpDetails = {title:'',subtitle:'',actiontype:0};
 		$scope.action = {remark:''};
 		$scope.noInternet = false;
+
+		//Accordion-Code
+		$scope.initialHistoryGroup = function (){
+			$scope.historyGroups = [];
+			$scope.historyGroups[0] = {name: 'ประวัติ',items: []};
+		};
+
+		$scope.initialHistoryGroup();
+		
+		$scope.toggleGroup = function(group) {
+	    	if ($scope.isGroupShown(group)) {
+	      		$scope.shownGroup = null;
+	    	} 
+	    	else {
+	      		$scope.shownGroup = group;
+	    	}
+	  	};
+
+	  	$scope.isGroupShown = function(group) {
+	    	return $scope.shownGroup == group;
+	  	};
+	  	//Accordion-Code
 
 		//if no internet connection
 		if(!CheckNetwork($cordovaNetwork)){
@@ -584,12 +638,13 @@ angular.module('starter')
 		$scope.InitialCardRequestDetails = function(data){
 			$scope.showBtnAcknowledgment = data.Acknowledgment;
 			$scope.showBtnApprove = data.Approve;
+			$scope.stateNextLevel = data.StateNextLevel;
 
 			$scope.cardRequestDetails.DocumentTitle = data.HistoryWorkflow[0].DocumentTitle;
 			$scope.cardRequestDetails.DocumentDescription = data.HistoryWorkflow[0].DocumentDescription;
 
 			angular.forEach(data.HistoryWorkflow,function(value,key){
-	        	$scope.cardRequestHistories.push({
+	        	$scope.historyGroups[0].items.push({
 		    		UpdateBy:value.UpdateBy,
 		    		UpdateDate:GetThaiDateTimeByDate($filter,value.UpdateDate),
 		    		ActionTypeName:value.ActionTypeName,
@@ -670,6 +725,7 @@ angular.module('starter')
 			if(confirm('ต้องการสร้าง' + description + ' ?')){
 				var data = {
 					CategoryId:4,
+					RegisterId:window.localStorage.getItem("GCMToken"),
 					OnLeaveModel:{
 						DocumentTitle:'บันทึกลาหยุดงาน',
 						DocumentDescription:description,
@@ -709,6 +765,29 @@ angular.module('starter')
 		//actiontype : 2 = approve , 5 = reject , 3 = acknowledge
 		$scope.popUpDetails = {title:'',subtitle:'',actiontype:0};
 		$scope.action = {remark:''};
+
+		//Accordion-Code
+		$scope.initialHistoryGroup = function (){
+			$scope.historyGroups = [];
+			$scope.historyGroups[0] = {name: 'ประวัติ',items: []};
+		};
+
+		$scope.initialHistoryGroup();
+		
+		$scope.toggleGroup = function(group) {
+	    	if ($scope.isGroupShown(group)) {
+	      		$scope.shownGroup = null;
+	    	} 
+	    	else {
+	      		$scope.shownGroup = group;
+	    	}
+	  	};
+
+	  	$scope.isGroupShown = function(group) {
+	    	return $scope.shownGroup == group;
+	  	};
+	  	//Accordion-Code
+
 		$scope.noInternet = false;
 		//if no internet connection
 		if(!CheckNetwork($cordovaNetwork)){
@@ -757,12 +836,13 @@ angular.module('starter')
 	    function InitialLeaveHistory (data) {
 	    	$scope.showBtnAcknowledgment = data.Acknowledgment;
 			$scope.showBtnApprove = data.Approve;
+			$scope.stateNextLevel = data.StateNextLevel;
 
 			$scope.LeaveDetails.DocumentTitle = data.HistoryWorkflow[0].DocumentTitle;
 			$scope.LeaveDetails.DocumentDescription = data.HistoryWorkflow[0].DocumentDescription;
 
 			angular.forEach(data.HistoryWorkflow,function(value,key){
-	        	$scope.LeaveHistories.push({
+	        	$scope.historyGroups[0].items.push({
 		    		UpdateBy:value.UpdateBy,
 		    		UpdateDate:GetThaiDateTimeByDate($filter,value.UpdateDate),
 		    		ActionTypeName:value.ActionTypeName,
@@ -829,6 +909,7 @@ angular.module('starter')
 		if(confirm('ต้องการสร้างข้อมูล' + details + ' ?')){
 			var data = {
 					CategoryId:3,
+					RegisterId:window.localStorage.getItem("GCMToken"),
 					TimeWorkModel:{
 						DocumentTitle:'ลงเวลาการทำงาน',
 						DocumentDescription:details,
@@ -886,8 +967,30 @@ angular.module('starter')
 		//actiontype : 2 = approve , 5 = reject , 3 = acknowledge
 		$scope.popUpDetails = {title:'',subtitle:'',actiontype:0};
 		$scope.action = {remark:''};
-		$scope.noInternet = false;
 
+		//Accordion-Code
+		$scope.initialHistoryGroup = function (){
+			$scope.historyGroups = [];
+			$scope.historyGroups[0] = {name: 'ประวัติ',items: []};
+		};
+
+		$scope.initialHistoryGroup();
+		
+		$scope.toggleGroup = function(group) {
+	    	if ($scope.isGroupShown(group)) {
+	      		$scope.shownGroup = null;
+	    	} 
+	    	else {
+	      		$scope.shownGroup = group;
+	    	}
+	  	};
+
+	  	$scope.isGroupShown = function(group) {
+	    	return $scope.shownGroup == group;
+	  	};
+	  	//Accordion-Code
+
+		$scope.noInternet = false;
 		//if no internet connection
 		if(!CheckNetwork($cordovaNetwork)){
 		 	$scope.noInternet = true;
@@ -922,12 +1025,13 @@ angular.module('starter')
 		$scope.InitialTimeWorkHistory = function(data){
 			$scope.showBtnAcknowledgment = data.Acknowledgment;
 			$scope.showBtnApprove = data.Approve;
+			$scope.stateNextLevel = data.StateNextLevel;
 
 			$scope.TimeWorkDetails.DocumentTitle = data.HistoryWorkflow[0].DocumentTitle;
 			$scope.TimeWorkDetails.DocumentDescription = data.HistoryWorkflow[0].DocumentDescription;
 
 			angular.forEach(data.HistoryWorkflow,function(value,key){
-	        	$scope.TimeWorkHistories.push({
+	        	$scope.historyGroups[0].items.push({
 		    		UpdateBy:value.UpdateBy,
 		    		UpdateDate:GetThaiDateTimeByDate($filter,value.UpdateDate),
 		    		ActionTypeName:value.ActionTypeName,

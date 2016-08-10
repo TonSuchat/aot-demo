@@ -77,7 +77,7 @@ angular.module('starter')
   this.ApproveWorkflow = function(documentId,emplCode,remark,actionType){
     return $q(function(resolve){
       var url = APIService.hostname() + '/Workflow/ApproveWorkflow';
-      var data = {DocumentId:documentId,Empl_Code:emplCode,Remark:remark,ActionType:actionType};
+      var data = {DocumentId:documentId,Empl_Code:emplCode,Remark:remark,ActionType:actionType,RegisterID:window.localStorage.getItem("GCMToken")};
       APIService.ShowLoading();
       APIService.httpPost(url,data,function(response){APIService.HideLoading();resolve(true)},function(error){APIService.HideLoading();resolve(false);});
     });
