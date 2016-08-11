@@ -325,15 +325,16 @@ angular.module('starter')
       };
       
       $scope.sendFeedback = function(){
+        var emplcode = (window.localStorage.getItem('CurrentUserName') == null ? '' : window.localStorage.getItem('CurrentUserName'));
         var url = APIService.hostname() + '/UserFeedbacks/Feedback';
-        var data = {Msg:$scope.feedbackMSG,Rating:$scope.rating.rate};
+        var data = {Msg:$scope.feedbackMSG,Rating:$scope.rating.rate,Empl_Code:emplcode};
         APIService.ShowLoading();
         APIService.httpPost(url,data,
           function(response){
             APIService.HideLoading();
             if(response != null && response.data.length > 0){
               alert('ระบบได้ส่งความคิดเห็นของท่านแล้ว ทางทีมงาน สสน.ฝรส.ขอขอบคุณที่ร่วมแสดงความคิดเห็น ให้เราได้นำไปปรับปรุงและพัฒนาต่อไป');
-              $location.path('/app/home/circular-letter');  
+              $location.path('/app/firstpage');  
             }
           },
           function(error){APIService.HideLoading();console.log(error);});
