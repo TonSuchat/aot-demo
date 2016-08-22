@@ -571,6 +571,7 @@ function InitialLeaveInfo($scope,$filter,LeaveSQLite,$q){
 };
 
 function InitialMedicalDetails($scope,$filter,$stateParams){
+    if(shareMedicalData.length == 0) return;
     var shareMedicalDataArr = ConvertQueryResultToArray(shareMedicalData);
     var currentMedical = $filter('filter')(shareMedicalDataArr, { Id: $stateParams.Id });
     $scope.MedicalDetails = {};

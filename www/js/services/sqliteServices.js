@@ -277,7 +277,7 @@ angular.module('starter')
 	};
 
 	this.UpdateIsRead = function(){
-		return SQLiteService.Execute("UPDATE tuition set IsRead = 'true'").then(function(response){return response;},function(error){return error;});
+		return SQLiteService.Execute("UPDATE medical set IsRead = 'true'").then(function(response){return response;},function(error){return error;});
 	};
 	//***Necessary-Method
 
