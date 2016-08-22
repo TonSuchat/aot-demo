@@ -43,7 +43,7 @@
                 <i class="icon" ng-class="isGroupShown(group) ? 'ion-minus' : 'ion-plus'"></i>&nbsp;<b>{{group.name}}</b>
             </ion-item>
             <ion-item class="item-accordion item-text-wrap" ng-show="isGroupShown(group)" ng-repeat="item in group.items">
-                <p>{{item.RouteName}} , {{item.UpdateBy}}, {{item.Device}} , {{item.UpdateDate}}</p>
+                <p><b>{{item.RouteName}} :</b> {{item.ActionTypeName}} , {{item.UpdateBy}}, {{item.Device}} , {{item.UpdateDate}}</p>
           </ion-item>
         </div>
         
