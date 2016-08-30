@@ -52,6 +52,15 @@ angular.module('starter')
                     }
                 }
             })
+            .state('app.info.leavedetail', {
+                url: '/leavedetail?leavecode&leavename&fiscalyear',
+                views: {
+                    'hr': {
+                        templateUrl: 'templates/info/leave_details.html',
+                        controller: 'LeaveDetailCtrl'
+                    }
+                }
+            })
             .state('app.info.tax', {
                 url: '/tax',
                 views: {
@@ -203,7 +212,7 @@ angular.module('starter')
         CheckNeedToReload($rootScope,'/time');
 
     })
-    .controller('LeaveCtrl', function($scope, $filter, LeaveSQLite, SyncService, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup, $q) {
+    .controller('LeaveCtrl', function($scope, $filter, LeaveSQLite, LeaveSummarySQLite, SyncService, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup, $q) {
         $ionicPlatform.ready(function(){
             $scope.notFoundData = false;
             APIService.ShowLoading();
@@ -223,14 +232,18 @@ angular.module('starter')
 
             //have internet connection
             if(CheckNetwork($cordovaNetwork)){
-                SyncService.SyncLeave().then(function(){
-                    InitialLeaveInfo($scope,$filter,LeaveSQLite,$q);
-                    FinalActionInfo($scope,APIService);
+                SyncService.SyncLeaveSummary().then(function(){
+                    InitialLeaveSummary();
+                    SyncService.SyncLeave().then(function(){
+                        //InitialLeaveInfo($scope,$filter,LeaveSQLite,$q);
+                        FinalActionInfo($scope,APIService);
+                    });
                 });
             }
             else{
                 //no internet connection
-                InitialLeaveInfo($scope,$filter,LeaveSQLite,$q);
+                InitialLeaveSummary();
+                //InitialLeaveInfo($scope,$filter,LeaveSQLite,$q);
                 FinalActionInfo($scope,APIService);
             }
 
@@ -242,15 +255,72 @@ angular.module('starter')
                 }
                 else{
                     APIService.ShowLoading();
-                    SyncService.SyncLeave().then(function(){
-                        InitialLeaveInfo($scope,$filter,LeaveSQLite,$q);
-                        FinalActionInfo($scope,APIService);
+                    SyncService.SyncLeaveSummary().then(function(){
+                        InitialLeaveSummary();
+                        SyncService.SyncLeave().then(function(){
+                            //InitialLeaveInfo($scope,$filter,LeaveSQLite,$q);
+                            FinalActionInfo($scope,APIService);
+                        });
                     });    
                 }
             };
         });
 
         CheckNeedToReload($rootScope,'/leave');
+
+        function InitialLeaveSummary(){
+            BindDDLFiscalYear().then(function(){
+                if($scope.ddlFiscalYear.options.length > 0) ProcessLeaveSummary($scope.ddlFiscalYear.options[0].val);    
+            });
+        };
+
+        function ProcessLeaveSummary(fiscalYear){
+            console.log('ProcessLeaveSummary');
+            LeaveSummarySQLite.GetLeaveSummaryInfos(fiscalYear).then(function(response){
+                var data = ConvertQueryResultToArray(response);
+                $scope.leaveSummaryGroups = [];
+                angular.forEach(data,function(value,key){
+                    $scope.leaveSummaryGroups.push({LeaveCode:value.LeaveCode,name:value.LeaveName,Bring:value.Bring,YearRight:value.YearRight,SumRight:value.SumRight,Used:value.Used,Left:value.Left});
+                });
+            });
+        };
+
+        function BindDDLFiscalYear(){
+            return $q(function(resolve){
+                $scope.ddlFiscalYear = {options:[],selectedOptions:null};
+                LeaveSummarySQLite.GetFiscalYears().then(function(response){
+                    if(response == null) return resolve();
+                    var fiscalYears = ConvertQueryResultToArray(response);
+                    angular.forEach(fiscalYears,function(value,key){
+                        $scope.ddlFiscalYear.options.push({name:value.FiscalYear,val:value.FiscalYear});
+                    });
+                    $scope.ddlFiscalYear.selectedOptions = $scope.ddlFiscalYear.options[0];
+                    return resolve();
+                });
+            });
+        };
+
+    })
+    .controller('LeaveDetailCtrl',function($scope, LeaveSQLite, $stateParams, $ionicPlatform, APIService, $filter){
+        $ionicPlatform.ready(function(){
+            //APIService.ShowLoading();
+            if($stateParams.leavecode == null) return;
+            $scope.leaveCode = $stateParams.leavecode;
+            $scope.leaveName = $stateParams.leavename;
+            $scope.fiscalYear = $stateParams.fiscalyear;
+            $scope.leaveDetails = [];
+            LeaveSQLite.GetLeavesByLeaveCode($scope.leaveCode,$scope.fiscalYear).then(function(response){
+                if(response == null) return;
+                var data = ConvertQueryResultToArray(response);
+                InitialLeaveDetails(data);
+            });
+        });
+
+        function InitialLeaveDetails(data){
+            angular.forEach(data,function(value,key){
+                $scope.leaveDetails.push({val:GetThaiDateByDate($filter,value.Leave_From),leaveDay:value.Leave_Day});
+            });
+        };
 
     })
     .controller('MedicalCtrl', function($scope, $stateParams, $filter, MedicalSQLite, SyncService, $rootScope) {
@@ -543,6 +613,8 @@ function InitialTimeInfo($scope,$q,$filter,TimeAttendanceSQLite){
 };
 
 function InitialLeaveInfo($scope,$filter,LeaveSQLite,$q){
+
+
     LeaveSQLite.GetLeaves().then(function(response){
         var result = ConvertQueryResultToArray(response);
         if(result == null || result.length == 0) return;

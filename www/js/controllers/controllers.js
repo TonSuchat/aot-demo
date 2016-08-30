@@ -88,35 +88,37 @@ angular.module('starter')
         };
 
         // Perform the login action when the user submits the login form
-        $scope.doLogin = function() {
-          var currentUserName = $scope.loginData.username;
-          AuthService.login($scope.loginData.username, $scope.loginData.password).then(function() {
-            $rootScope.$broadcast('checkAuthen', null);
-            //update register device -> empid to server
-            if(window.localStorage.getItem('GCMToken') != null && window.localStorage.getItem('GCMToken').length > 0) {
-              if (window.cordova) NotiService.StoreTokenOnServer(window.localStorage.getItem('GCMToken'),currentUserName,true);
-            }
-            //bind full menus
-            $scope.InitialMenus(true);
-            // //sync private message data (rooms/messages/subscribe)
-            // SyncService.SyncInitialPM();
+        $scope.doLogin = function(form) {
+          if(form.$valid) {
+            var currentUserName = $scope.loginData.username;
+            AuthService.login($scope.loginData.username, $scope.loginData.password).then(function() {
+              $rootScope.$broadcast('checkAuthen', null);
+              //update register device -> empid to server
+              if(window.localStorage.getItem('GCMToken') != null && window.localStorage.getItem('GCMToken').length > 0) {
+                if (window.cordova) NotiService.StoreTokenOnServer(window.localStorage.getItem('GCMToken'),currentUserName,true);
+              }
+              //bind full menus
+              $scope.InitialMenus(true);
+              // //sync private message data (rooms/messages/subscribe)
+              // SyncService.SyncInitialPM();
 
-            $scope.closeLogin();
+              $scope.closeLogin();
 
-            //save login date to local storage for check expire to force logout(security process)
-            var currentDate = new Date();
-            window.localStorage.setItem('lastLogInDate',+currentDate);
+              //save login date to local storage for check expire to force logout(security process)
+              var currentDate = new Date();
+              window.localStorage.setItem('lastLogInDate',+currentDate);
 
-          }, function(err) {
-            var alertPopup = $ionicPopup.alert({
-              title: err,
-              template: 'Please check your credentials!'
+            }, function(err) {
+              var alertPopup = $ionicPopup.alert({
+                title: err,
+                template: 'Please check your credentials!'
+              });
             });
-          });
-          //
-          //$ionicHistory.nextViewOptions({
-          //  disableBack: true
-          //});
+            //
+            //$ionicHistory.nextViewOptions({
+            //  disableBack: true
+            //});
+          }
         };
 
         $scope.logout = function () {

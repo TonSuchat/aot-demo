@@ -4,38 +4,39 @@
         </ion-refresher>
         <div class="list">
 
+            <label class="item item-input item-select">
+                <div class="input-label">
+                    ปีงบประมาณ
+                </div>
+                <select ng-change='ProcessLeaveSummary(ddlFiscalYear.selectedOptions.val)' ng-options='item.name for item in ddlFiscalYear.options track by item.val' ng-model='ddlFiscalYear.selectedOptions'>
+                </select>
+            </label>
 
-            <div ng-repeat="group in leaveGroups">
+            <div ng-repeat="group in leaveSummaryGroups">
+
                 <ion-item class="item-stable" ng-click="toggleGroup(group)" ng-class="{active: isGroupShown(group)}">
-                    <i class="icon" ng-class="isGroupShown(group) ? 'ion-minus' : 'ion-plus'"></i>&nbsp;<b>{{group.name}} {{group.totalLeave}} วัน</b>
+                    <i class="icon" ng-class="isGroupShown(group) ? 'ion-minus' : 'ion-plus'"></i>&nbsp;<b><u>{{group.name}}</u></b>
                 </ion-item>
 
-                <ion-item class="item-accordion" ng-show="isGroupShown(group)" ng-repeat="item in group.items">
-                    วันที่ {{item.leavefrom}}
-              </ion-item>
+                <ion-item class="item" ng-show="isGroupShown(group)">
+                    <!-- <b>สิทธิ์ยกมา : </b> {{group.Bring | number}} วัน -->
+                    สิทธิ์ยกมา : {{group.Bring | number}} วัน
+                </ion-item>
+                <ion-item class="item" ng-show="isGroupShown(group)">
+                    สิทธิ์ในปีนี้ : {{group.YearRight | number}} วัน
+                </ion-item>
+                <ion-item class="item" ng-show="isGroupShown(group)">
+                    รวมสิทธิ์ในการลา : {{group.SumRight | number}} วัน
+                </ion-item>
+                <a href="#/app/information/leavedetail?leavecode={{group.LeaveCode}}&leavename={{group.name}}&fiscalyear={{ddlFiscalYear.selectedOptions.val}}" class='item' ng-show="isGroupShown(group)">
+                    ใช้ไปในปีนี้ : {{group.Used | number}} วัน
+                    <span class='badge badge-assertive'><i class='ion ion-arrow-right-a'></i></span>
+                </a>
+                <ion-item class="item" ng-show="isGroupShown(group)">
+                    คงเหลือ/ยกไป : {{group.Left | number}} วัน
+                </ion-item>
 
             </div>
-
-            <!-- <div class="item item-divider">
-                ลาป่วย {{leaveInfo.sickLeave.totalLeave}} วัน
-            </div>
-            <div class="item" ng-repeat='leavedate in leaveInfo.sickLeave.leaveDate'>
-                วันที่ {{leavedate.leavefrom}}
-            </div>
-            
-            <div class="item item-divider">
-                ลาพักผ่อน {{leaveInfo.annualLeave.totalLeave}} วัน
-            </div>
-            <div class="item" ng-repeat='leavedate in leaveInfo.annualLeave.leaveDate'>
-                วันที่ {{leavedate.leavefrom}}
-            </div>            
-
-            <div class="item item-divider">
-                ลากิจ {{leaveInfo.personalLeave.totalLeave}} วัน
-            </div>
-            <div class="item" ng-repeat='leavedate in leaveInfo.personalLeave.leaveDate'>
-                วันที่ {{leavedate.leavefrom}}
-            </div>   -->          
 
         </div>
     </ion-content>

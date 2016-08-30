@@ -1,5 +1,5 @@
 var db;
-var tableNames = ['userprofile','medical','tuition','royal','timeattendance','leave','circular','news','pmroom','pmmsg','pmsubscribe','pmuserinroom','pmseenmessage','notihistory'];
+var tableNames = ['userprofile','medical','tuition','royal','timeattendance','leave','leavesummary','circular','news','pmroom','pmmsg','pmsubscribe','pmuserinroom','pmseenmessage','notihistory'];
 
 angular.module('starter')
 .service('SQLiteService',function($cordovaSQLite,$q){
@@ -71,6 +71,7 @@ angular.module('starter')
 		this.CreateRoyalTable();
 		this.CreateTimeAttendanceTable();
 		this.CreateLeaveTable();
+		this.CreateLeaveSummaryTable();
 		this.CreateCircularTable();
 		this.CreateNewsTable();
 		this.CreatePMRoomTable();
@@ -106,6 +107,9 @@ angular.module('starter')
 	};
 	this.CreateLeaveTable = function(){
 		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS leave(clientid integer primary key AUTOINCREMENT, Id int, Empl_Code text, Empl_Name text, Leave_Code text, Leave_Day text, Leave_From text, Leave_To text, Leave_Date text, Updt_Date text, Tran_Seqe text, Leave_Timecode text, DL boolean,dirty boolean,TS text)");
+	};
+	this.CreateLeaveSummaryTable = function(){
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS leavesummary(clientid integer primary key AUTOINCREMENT, Id int, EmplCode text, LeaveCode text, LeaveName text, Bring text, YearRight text, SumRight text, Used text, Left text, FiscalYear text, DL boolean,dirty boolean,TS text)");
 	};
 	this.CreateCircularTable = function(){
 		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS circular(clientid integer primary key AUTOINCREMENT, Id int, DocID text, DocDate text, Link text, Description text, DocNumber text, DL boolean,dirty boolean,TS text)");	
@@ -618,9 +622,89 @@ angular.module('starter')
 		return SQLiteService.Execute("SELECT * FROM leave ORDER BY CAST(SUBSTR(Leave_From,5,4) AS INT) DESC, CAST(SUBSTR(Leave_From,3,2) AS INT) DESC, CAST(SUBSTR(Leave_From,1,2) AS INT) DESC ").then(function(response){return response;},function(error){return error;});
 	};
 
+	this.GetLeavesByLeaveCode = function(leaveCode,fiscalYear){
+		return SQLiteService.Execute("SELECT * FROM leave WHERE Leave_Code = '" + leaveCode + "' and (substr(Leave_From,5)||substr(Leave_From,3,2)||substr(Leave_From,1,2) between '" + (+fiscalYear - 1) + "1001' and '" + +fiscalYear + "0930') ORDER BY CAST(SUBSTR(Leave_From,5,4) AS INT) DESC, CAST(SUBSTR(Leave_From,3,2) AS INT) DESC, CAST(SUBSTR(Leave_From,1,2) AS INT) DESC ").then(function(response){return response;},function(error){return error;});	
+	};
+
 	this.GetTotalLeave = function(leaveCode){
 		return SQLiteService.Execute("select sum(leave_day) as totalLeave from leave where leave_code = " + leaveCode).then(function(response){return response;},function(error){return error;});	
 	};
+
+})
+.service('LeaveSummarySQLite',function(SQLiteService){
+	//***Necessary-Method
+	this.GetLatestTS = function(){
+		return SQLiteService.BaseGetLatestTS('leavesummary').then(function(response){return response;},function(error){return error;});
+	};
+
+	this.CountByServerId = function(serverid){
+		return SQLiteService.CountByServerId(serverid,'leavesummary').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.CountIsNotDirtyById = function(id){
+		return SQLiteService.CountIsNotDirtyById(id,'leavesummary').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.GetDataByTSIsNull = function(){
+		return SQLiteService.GetDataByTSIsNull('leavesummary');
+	};
+
+	this.GetDataIsDirty = function(){
+		return SQLiteService.GetDataIsDirty("leavesummary");
+	};
+
+	this.DeleteDataIsFlagDeleted = function(){
+		return SQLiteService.DeleteDataIsFlagDeleted("leavesummary");
+	};
+
+	this.Update = function(data,isDirty,clientUpdate){
+		var sql;
+		if(clientUpdate)
+			sql = "UPDATE leavesummary SET Id = ?, EmplCode = ?, LeaveCode = ?, LeaveName = ?, Bring = ?, YearRight = ?, SumRight = ?, Used = ?, Left = ?, FiscalYear = ?, DL = ?, dirty = ?, TS = ? WHERE clientid = " + data.clientid;
+		else
+			sql = "UPDATE leavesummary SET Id = ?, EmplCode = ?, LeaveCode = ?, LeaveName = ?, Bring = ?, YearRight = ?, SumRight = ?, Used = ?, Left = ?, FiscalYear = ?, DL = ?, dirty = ?, TS = ? WHERE Id = " + data.Id;
+		var param = [data.Id,data.EmplCode,data.LeaveCode,data.LeaveName,data.Bring,data.YearRight,data.SumRight,data.Used,data.Left,data.FiscalYear,data.DL,isDirty,data.TS];
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
+	};
+
+	this.Add = function(data,createFromClient){
+		var sql = "INSERT INTO leavesummary (Id, EmplCode, LeaveCode, LeaveName, Bring, YearRight, SumRight, Used, Left, FiscalYear, DL, dirty, TS) VALUES ";
+		var param = []; 
+		var rowArgs = [];
+		data.forEach(function(item){
+			rowArgs.push("(?,?,?,?,?,?,?,?,?,?,?,?,?)");
+			param.push(item.Id);
+			param.push(item.EmplCode);
+			param.push(item.LeaveCode);
+			param.push(item.LeaveName);
+			param.push(item.Bring);
+			param.push(item.YearRight);
+			param.push(item.SumRight);
+			param.push(item.Used);
+			param.push(item.Left);
+			param.push(item.FiscalYear);
+			param.push(item.DL);
+			//dirty
+			if(createFromClient) param.push(true);
+			else param.push(false);
+			//TS
+			if(createFromClient) param.push(null);
+			else param.push(item.TS);
+		});
+		sql += rowArgs.join(', ');
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){console.log(error); return error;});
+	};
+	//***Necessary-Method
+
+	this.GetFiscalYears = function(){
+		return SQLiteService.Execute("SELECT distinct FiscalYear FROM leavesummary order by FiscalYear desc").then(function(response){return response;},function(error){return error;});	
+	};
+
+	this.GetLeaveSummaryInfos = function(fiscalYear){
+		return SQLiteService.Execute("SELECT * FROM leavesummary where FiscalYear = '" + fiscalYear + "' ").then(function(response){return response;},function(error){return error;});	
+	};
+
+
 })
 .service('CircularSQLite',function(SQLiteService){
 	//***Necessary-Method

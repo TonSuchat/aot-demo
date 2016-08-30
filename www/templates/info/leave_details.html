@@ -1,0 +1,21 @@
+<ion-view view-title="รายละเอียดข้อมูลวันลา">
+    <ion-content>
+         
+        <div class="list">
+
+            <div class='item item-divider text-wrap'>
+                {{leaveName}} - ปีงบ {{fiscalYear}}
+            </div>
+
+            <div class='item' ng-show='leaveDetails.length == 0'>
+                ไม่พบข้อมูล
+            </div>
+
+            <div class='item' ng-repeat='leave in leaveDetails'>
+                วันที่ {{leave.val}} ({{leave.leaveDay}} วัน)
+            </div>
+
+        </div>
+
+    </ion-content>
+</ion-view>

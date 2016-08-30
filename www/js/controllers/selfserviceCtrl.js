@@ -678,13 +678,13 @@ angular.module('starter')
 		$scope.Empl_Code = window.localStorage.getItem("CurrentUserName");
 		 
 		var datePicker1 = {callback: function (val) { SetSelectedDate(val,true);},
-			inputDate:defaultDate1,
-			from:new Date()
+			inputDate:defaultDate1
+			//from:new Date()
 		};
 
 		var datePicker2 = {callback: function (val) { SetSelectedDate(val,false);},
-			inputDate:defaultDate2,
-			from:new Date()
+			inputDate:defaultDate2
+			//from:new Date()
 		};
 
 		$scope.OpenDatePicker = function(isStartDate){
@@ -918,7 +918,7 @@ angular.module('starter')
 						ReasonCode:$scope.timework.reasoncode,
 						FromDate:$scope.selectedDate.startDate.toString().replace(new RegExp('/','g'),'') + $scope.ddlStartTimesData.selectedOptions.val,
 						ToDate:$scope.selectedDate.endDate.toString().replace(new RegExp('/','g'),'') + $scope.ddlEndTimesData.selectedOptions.val,
-						TimeWith:$scope.searchEmp.searchTxt	
+						TimeWith:(!$scope.searchEmp.searchTxt || $scope.searchEmp.searchTxt.length <= 0) ? '-' : $scope.searchEmp.searchTxt
 					}
 				};
 			WorkFlowService.CreateWorkFlow(data).then(function(response){
@@ -943,11 +943,11 @@ angular.module('starter')
 	};
 
 	$scope.CheckIsValid = function(){
-		if(!$scope.searchEmp.searchTxt || $scope.searchEmp.searchTxt.length <= 0) 
-		{
-			alert('ต้องกรอกรหัสพนักงานที่บันทึกเวลาด้วย!');
-			return false;
-		}
+		// if(!$scope.searchEmp.searchTxt || $scope.searchEmp.searchTxt.length <= 0) 
+		// {
+		// 	alert('ต้องกรอกรหัสพนักงานที่บันทึกเวลาด้วย!');
+		// 	return false;
+		// }
 		if($scope.Empl_Code == $scope.searchEmp.searchTxt){
 			alert('ห้ามใส่รหัสพนักงานของตัวเอง!');
 			return false;

@@ -205,12 +205,13 @@ angular.module('starter')
       $scope.CheckValidate = function(){
         //validate TimeOut
         if($scope.setting.Logon){
+          console.log($scope.setting.TimeOut);
           if(!$scope.setting.TimeOut || $scope.setting.TimeOut.length == 0){
-            alert('จำนวนวันห้ามเป็นค่าว่าง');
+            alert('จำนวนวันห้ามเป็นค่าว่าง/ต้องเป็นตัวเลขเท่านั้น');
             return false;
           }
-          if((+$scope.setting.TimeOut > 60) || (+$scope.setting.TimeOut < 0)){
-            alert('จำนวนวันต้องมากกว่า 0 และไม่เกิน 60 วัน');
+          if((+$scope.setting.TimeOut > 90) || (+$scope.setting.TimeOut < 0)){
+            alert('จำนวนวันต้องมากกว่า 0 และไม่เกิน 90 วัน');
             return false;
           }
         }
@@ -219,6 +220,10 @@ angular.module('starter')
 
       $scope.SelectAllText = function($event){
         $event.target.select();
+      };
+
+      $scope.CheckLimitTimeOut = function(){
+        if($scope.setting.TimeOut > 90) $scope.setting.TimeOut = 90;
       };
 
       $scope.SaveSetting = function(){

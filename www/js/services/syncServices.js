@@ -1,6 +1,6 @@
 angular.module('starter')
 
-.service('SyncService',function($q,APIService,TestSyncSQLite,UserProfileSQLite,MedicalSQLite,TuitionSQLite,RoyalSQLite,TimeAttendanceSQLite,LeaveSQLite,CircularSQLite,NewsSQLite,PMRoomSQLite,PMMsgSQLite,PMSubscribeSQLite,PMUserInRoomSQLite,NotiHistorySQLite){
+.service('SyncService',function($q,APIService,TestSyncSQLite,UserProfileSQLite,MedicalSQLite,TuitionSQLite,RoyalSQLite,TimeAttendanceSQLite,LeaveSQLite,LeaveSummarySQLite,CircularSQLite,NewsSQLite,PMRoomSQLite,PMMsgSQLite,PMSubscribeSQLite,PMUserInRoomSQLite,NotiHistorySQLite){
 
   enableSync = true;
 
@@ -59,6 +59,17 @@ angular.module('starter')
     };
     console.log('SYNC-LEAVE');
     return ProcessSyncData(APIService,LeaveSQLite,$q,apiURLs,apiDatas,null);
+  };
+
+  this.SyncLeaveSummary = function(){
+    var myEmpId = window.localStorage.getItem("CurrentUserName"); //'565888'; **Hard-Code**
+    var apiDatas = {
+      GetData:{ObjectID:10,SyncLeaveSummaryViewModel:{Empl_Code: myEmpId}},
+      AddData:{ObjectID:10,ObjectLeaveSummaryEntity:{}},
+      UpdateData:{ObjectID:10,ObjectLeaveSummaryEntity:{}}
+    };
+    console.log('SYNC-LEAVE-SUMMARY');
+    return ProcessSyncData(APIService,LeaveSummarySQLite,$q,apiURLs,apiDatas,null);
   };
 
   this.SyncRoyal = function(){

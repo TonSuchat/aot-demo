@@ -40,7 +40,7 @@
 
         <label class="item item-input">
           <span class="input-label">จำนวนวัน</span>
-          <input ng-model='setting.TimeOut' ng-click='SelectAllText($event)' ng-disabled='!setting.Logon' type="number">
+          <input ng-model='setting.TimeOut' ng-click='SelectAllText($event)' ng-change='CheckLimitTimeOut()' ng-disabled='!setting.Logon' type="number">
         </label>
 
         <div class='item'>
