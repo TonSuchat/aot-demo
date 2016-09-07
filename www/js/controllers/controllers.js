@@ -335,8 +335,7 @@ angular.module('starter')
           function(response){
             APIService.HideLoading();
             if(response != null && response.data.length > 0){
-              alert('ระบบได้ส่งความคิดเห็นของท่านแล้ว ทางทีมงาน สสน.ฝรส.ขอขอบคุณที่ร่วมแสดงความคิดเห็น ให้เราได้นำไปปรับปรุงและพัฒนาต่อไป');
-              $location.path('/app/firstpage');  
+              IonicAlert($ionicPopup,'ระบบได้ส่งความคิดเห็นของท่านแล้ว ทางทีมงาน สสน.ฝรส.ขอขอบคุณที่ร่วมแสดงความคิดเห็น ให้เราได้นำไปปรับปรุงและพัฒนาต่อไป',function(){$location.path('/app/firstpage'); });
             }
           },
           function(error){APIService.HideLoading();console.log(error);});
@@ -364,7 +363,7 @@ angular.module('starter')
           },
           function(error){
             APIService.HideLoading();
-            alert('ไม่พบ URL/ลองใหม่อีกครั้ง');
+            IonicAlert($ionicPopup,'ไม่พบ URL/ลองใหม่อีกครั้ง',null);
         });
       }
 

@@ -1,7 +1,7 @@
 var needReload = false;
 
 angular.module('starter')
-.service('NotiService',function($q,APIService,$cordovaDevice,$rootScope,$cordovaPushV5,MobileConfigSQLite,AuthService){
+.service('NotiService',function($q,APIService,$cordovaDevice,$rootScope,$cordovaPushV5,MobileConfigSQLite,AuthService,$ionicPopup){
 
     // var isAndroid = ionic.Platform.isAndroid();
     // var isIOS = ionic.Platform.isIOS();
@@ -149,9 +149,7 @@ angular.module('starter')
       //check if force logout from server
       if(data.additionalData.alertType == "9"){
         if(AuthService.isAuthenticated()){
-          alert(data.message);
-          AuthService.logout();
-          return;
+          IonicAlert($ionicPopup,data.message,null,function(){AuthService.logout();return;});
         }
         else return;
       }
@@ -174,7 +172,7 @@ angular.module('starter')
           }
         }
         //just show message
-        else alert(data.message);
+        else IonicAlert($ionicPopup,data.message,null);
       }
     };
 

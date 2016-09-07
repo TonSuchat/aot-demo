@@ -502,8 +502,12 @@ function CheckForceLogOut(APIService,AuthService,$q) {
         });
       }
     });
-
-    
-
   });
+};
+
+function IonicAlert($ionicPopup,title,callback){
+  var alertPopup = $ionicPopup.alert({title: title});
+   alertPopup.then(function(res) {
+    if(callback != null) callback();
+   });
 };

@@ -209,14 +209,14 @@ function ProcessAOTPrefix(prefixType,qrresult,$ionicPopup,$scope,APIService){
 	switch(+prefixType) {
 	    case 7:
 	    	//mobile - login
-	        ProcessAOTType7(qrresult,APIService);
+	        ProcessAOTType7(qrresult,APIService,$ionicPopup);
 	        break;
 	}
 	//redeemDuty
 	//if(prefixType == 14) ProcessApproveRedeemDuty(qrresult,$ionicPopup,$scope,APIService);
 };
 
-function ProcessAOTType7(qrresult,APIService){
+function ProcessAOTType7(qrresult,APIService,$ionicPopup){
 	APIService.ShowLoading();
 	var token = qrresult.substring(7);
 	var url = APIService.hostname() + '/ValidateQRCode';
@@ -224,9 +224,9 @@ function ProcessAOTType7(qrresult,APIService){
 	//post qrlogin
 	APIService.httpPost(url,data,function(response){
 		APIService.HideLoading();
-		alert('LogIn เรียบร้อย');
+		IonicAlert($ionicPopup,'LogIn เรียบร้อย',null);
 	},
-		function(error){APIService.HideLoading();console.log(error);alert(error.data);});
+		function(error){APIService.HideLoading();console.log(error);IonicAlert($ionicPopup,error.data,null);});
 };
 
 //redeem duty
@@ -248,7 +248,7 @@ function ProcessApproveRedeemDuty (qrresult,$ionicPopup,$scope,APIService) {
 			var Empl_Code = window.localStorage.getItem("CurrentUserName");
 			POSTCheckQR(APIService,{Empl_Code:Empl_Code,ContentData:qrresult,Remark:remark},
 				function(response){
-					if(response) alert('แลก/แทนเวร เรียบร้อย');
+					if(response) IonicAlert($ionicPopup,'แลก/แทนเวร เรียบร้อย',null);
 				},
 				function(error){console.log(error);});
 		},function(){});

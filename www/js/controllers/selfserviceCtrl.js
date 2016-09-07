@@ -245,12 +245,12 @@ angular.module('starter')
 		      APIService.httpPost(url,data,function(response){
 		        //change password openfire
 		        XMPPApiService.ChangePassword(window.localStorage.getItem("CurrentUserName"),$scope.changePassword.newPassword).then(function(response){
-		          if(response) alert('เปลี่ยนรหัสผ่านเรียบร้อย');
+		          if(response) IonicAlert($ionicPopup,'เปลี่ยนรหัสผ่านเรียบร้อย');
 		          //keep new password in localstorage
 		          window.localStorage.setItem("AuthServices_password",$scope.changePassword.newPassword);
 		          APIService.HideLoading();
 		        });
-		      },function(error){alert(error.data);console.log(error);APIService.HideLoading();});
+		      },function(error){IonicAlert($ionicPopup,error.data,null);console.log(error);APIService.HideLoading();});
 		    }
 		};
 	});
@@ -311,7 +311,7 @@ angular.module('starter')
 						//var data = {Empl_Code:$scope.Empl_Code,Empl_Code2:$scope.searchEmp.searchTxt,DutyDate:$scope.selectedDate.dutyDate1.toString().replace(new RegExp('/','g'),''),DutyType: $scope.redeemDuty.type,DutyDate2:$scope.selectedDate.dutyDate2.toString().replace(new RegExp('/','g'),''),Remark: "sample string 6"}
 						WorkFlowService.CreateWorkFlow(data).then(function(response){
 							if(response != null) $location.path('/app/selfservicelist/1');
-						},function(error){console.log(error);alert('ไม่สามารถทำรายการได้/โปรดลองใหม่อีกครั้ง');});
+						},function(error){console.log(error);IonicAlert($ionicPopup,'ไม่สามารถทำรายการได้/โปรดลองใหม่อีกครั้ง',null);});
 					}
 				}
 			});
@@ -319,11 +319,11 @@ angular.module('starter')
 
 		function CheckRedeemDutyValidation () {
 			if(!$scope.searchEmp.searchTxt || $scope.searchEmp.searchTxt.length <= 0){
-				alert('รหัสพนักงานห้ามเป็นค่าว่าง');
+				IonicAlert($ionicPopup,'รหัสพนักงานห้ามเป็นค่าว่าง',null);
 				return false;
 			}
 			if($scope.Empl_Code == $scope.searchEmp.searchTxt){
-				alert('คุณเลือกรหัสพนักงานของตัวเอง');
+				IonicAlert($ionicPopup,'คุณเลือกรหัสพนักงานของตัวเอง',null);
 				return false;
 			}
 			return true;
@@ -740,7 +740,7 @@ angular.module('starter')
 				};
 				WorkFlowService.CreateWorkFlow(data).then(function(response){
 					if(response != null) $location.path('/app/selfservicelist/4');
-				},function(error){console.log(error);alert('ไม่สามารถทำรายการได้/โปรดลองใหม่อีกครั้ง');});
+				},function(error){console.log(error);IonicAlert($ionicPopup,'ไม่สามารถทำรายการได้/โปรดลองใหม่อีกครั้ง',null);});
 			}
 		};
 
@@ -934,7 +934,7 @@ angular.module('starter')
 			WorkFlowService.CreateWorkFlow(data).then(function(response){
 				//check response from server if have warn from server then show alert('message') before redirect to selfservicelist
 				if(response != null) $location.path('/app/selfservicelist/3');
-			},function(error){console.log(error);alert('ไม่สามารถทำรายการได้/โปรดลองใหม่อีกครั้ง');});
+			},function(error){console.log(error);IonicAlert($ionicPopup,'ไม่สามารถทำรายการได้/โปรดลองใหม่อีกครั้ง',null);});
 		}
 
 	};
@@ -959,7 +959,7 @@ angular.module('starter')
 		// 	return false;
 		// }
 		if($scope.Empl_Code == $scope.searchEmp.searchTxt){
-			alert('ห้ามใส่รหัสพนักงานของตัวเอง!');
+			IonicAlert($ionicPopup,'ห้ามใส่รหัสพนักงานของตัวเอง!',null);
 			return false;
 		}
 		return true;

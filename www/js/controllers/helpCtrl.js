@@ -92,7 +92,7 @@ angular.module('starter')
               var link = response.data;
               window.open(link,'_system','location=no');
             }
-          },function(error){APIService.HideLoading();console.log(error);alert('ไม่พบ URL/ลองใหม่อีกครั้ง')});
+          },function(error){APIService.HideLoading();console.log(error);IonicAlert($ionicPopup,'ไม่พบ URL/ลองใหม่อีกครั้ง',null);});
       };
     });
 })
@@ -207,11 +207,11 @@ angular.module('starter')
         if($scope.setting.Logon){
           console.log($scope.setting.TimeOut);
           if(!$scope.setting.TimeOut || $scope.setting.TimeOut.length == 0){
-            alert('จำนวนวันห้ามเป็นค่าว่าง/ต้องเป็นตัวเลขเท่านั้น');
+            IonicAlert($ionicPopup,'จำนวนวันห้ามเป็นค่าว่าง/ต้องเป็นตัวเลขเท่านั้น',null);
             return false;
           }
           if((+$scope.setting.TimeOut > 90) || (+$scope.setting.TimeOut < 0)){
-            alert('จำนวนวันต้องมากกว่า 0 และไม่เกิน 90 วัน');
+            IonicAlert($ionicPopup,'จำนวนวันต้องมากกว่า 0 และไม่เกิน 90 วัน',null);
             return false;
           }
         }
@@ -243,8 +243,7 @@ angular.module('starter')
           APIService.httpPost(url,data,function(response){
             if(response){
               //force user to logout for apply new settings
-              alert('กรุณาเข้าสู่ระบบใหม่อีกครั้งเพื่อใช้งานการตั้งค่า');
-              AuthService.logout();
+              IonicAlert($ionicPopup,'กรุณาเข้าสู่ระบบใหม่อีกครั้งเพื่อใช้งานการตั้งค่า',function(){AuthService.logout();});
               // //save setting to local storage
               // SetProfileSettings($q,{Device:+$scope.setting.Device,LogOn:+$scope.setting.Logon,TimeOut:$scope.setting.TimeOut}).then(function(response){
               //   if(response){
@@ -260,7 +259,7 @@ angular.module('starter')
               // });  
             }
           },
-            function(error){console.log(error);APIService.HideLoading();alert('ไม่สามารถบันทึกการตั้งค่าที่ Server ได้');});
+            function(error){console.log(error);APIService.HideLoading();IonicAlert($ionicPopup,'ไม่สามารถบันทึกการตั้งค่าที่ Server ได้',null);});
           
         }
       };
@@ -373,10 +372,10 @@ angular.module('starter')
         else{
           $scope.ResetDot();
           APIService.HideLoading();
-          alert('ไม่ได้รับค่าจาก Server');
+          IonicAlert($ionicPopup,'ไม่ได้รับค่าจาก Server',null);
         }
       },
-        function(error){console.log(error);$scope.ResetDot();APIService.HideLoading();alert('เกิดข้อผิดพลาด/ลองใหม่อีกครั้ง');})
+        function(error){console.log(error);$scope.ResetDot();APIService.HideLoading();IonicAlert($ionicPopup,'เกิดข้อผิดพลาด/ลองใหม่อีกครั้ง',null);})
     };
 
     $scope.ProcessPINState2 = function(){
@@ -394,10 +393,9 @@ angular.module('starter')
         var data = {Empl_Code:$scope.Empl_Code,PIN:$scope.pin};
         APIService.httpPost(url,data,function(response){
           APIService.HideLoading();
-          alert('ตั้งค่าเรียบร้อย');
-          window.location = '#/app/help';
+          IonicAlert($ionicPopup,'ตั้งค่าเรียบร้อย',function(){window.location = '#/app/help';});
         },
-          function(error){console.log(error);$scope.ResetDot();APIService.HideLoading();alert('เกิดข้อผิดพลาด/ลองใหม่อีกครั้ง');})
+          function(error){console.log(error);$scope.ResetDot();APIService.HideLoading();IonicAlert($ionicPopup,'เกิดข้อผิดพลาด/ลองใหม่อีกครั้ง',null);})
       }
       else $scope.Error();
     };

@@ -1,4 +1,4 @@
-angular.module('starter').service('APIService',function($http,$httpParamSerializerJQLike,$ionicLoading,$q){
+angular.module('starter').service('APIService',function($http,$httpParamSerializerJQLike,$ionicLoading,$q,$ionicPopup){
 
     var service = this;
 
@@ -42,9 +42,9 @@ angular.module('starter').service('APIService',function($http,$httpParamSerializ
 
 	this.hostname = function(){
 	    //return 'https://10.74.17.239:8443/AOTWebAPI2';
-	    return 'https://10.74.17.188:8443/AOTWebAPI';
+	    //return 'https://10.74.17.188:8443/AOTWebAPI';
         //return 'http://localhost:51754/api';
-        //return 'https://eservice.airportthai.co.th/AOTWebAPI';
+        return 'https://eservice.airportthai.co.th/AOTWebAPI';
 	};
 
 	this.ShowLoading = function () {
@@ -77,14 +77,14 @@ angular.module('starter').service('APIService',function($http,$httpParamSerializ
                         return resolve(result);
                     }
                     else{
-                        alert('ไม่พบข้อมูล');
+                        IonicAlert($ionicPopup,'ไม่พบข้อมูล',null);
                         service.HideLoading();
                         return resolve(null);
                     }
                 },
                 function(error){
                     console.log(error);
-                    alert('เกิดข้อผิดพลาดขึ้น ลองอีกครั้ง!');
+                    IonicAlert($ionicPopup,'เกิดข้อผิดพลาดขึ้น ลองอีกครั้ง!',null);
                     service.HideLoading();
                     return resolve(null);
             })

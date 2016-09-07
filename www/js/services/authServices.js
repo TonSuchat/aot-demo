@@ -245,7 +245,7 @@ angular.module('starter')
                         function(error){
                           APIService.HideLoading();
                           console.log(error);
-                          alert('ไม่สามารถออกจากระบบได้/โปรดลองอีกครั้ง');
+                          IonicAlert($ionicPopup,'ไม่สามารถออกจากระบบได้/โปรดลองอีกครั้ง',null);
                           resolve(false);
                         });
                     }

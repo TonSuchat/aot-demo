@@ -67,7 +67,7 @@ angular.module('starter')
 				else{
 					$scope.modalCheckIn.hide();
 					APIService.HideLoading();
-					alert(response);
+					IonicAlert($ionicPopup,response,null);
 				}
 			});
 	};
@@ -129,7 +129,7 @@ angular.module('starter')
 		console.log(GetDutyEmpsClipboardText());
 		if(window.cordova){
 			$cordovaClipboard.copy(GetDutyEmpsClipboardText()).then(function () {
-		      alert('copy ข้อมูลเรียบร้อยแล้ว');
+				IonicAlert($ionicPopup,'copy ข้อมูลเรียบร้อยแล้ว',null);
 		    }, function () {
 		      // error
 		    });
