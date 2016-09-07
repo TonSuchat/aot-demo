@@ -346,7 +346,8 @@ angular.module('starter')
     //element variables
     var dots = document.querySelectorAll(".dot");
     var numbers = document.querySelectorAll(".number");
-    var dots = Array.prototype.slice.call(dots);
+    dots = Array.prototype.slice.call(dots);
+    numbers = Array.prototype.slice.call(numbers);
 
     //each process by state
     $scope.ProcessPIN = function(){
