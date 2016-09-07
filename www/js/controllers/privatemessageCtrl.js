@@ -203,7 +203,7 @@ angular.module('starter')
         };
 
         $scope.deleteMessage = function(msgId){
-            if(confirm('ลบข้อความนี้ ?')){
+            IonicConfirm($ionicPopup,'ลบข้อความ','ลบข้อความนี้ ?',function(){
                 PMMsgSQLite.DeleteMessage(msgId,$scope.roomId).then(function(response){
                     for (var i = 0; i <= $scope.msgDetails.length - 1; i++) {
                         if($scope.msgDetails[i].msgId == msgId){
@@ -213,7 +213,7 @@ angular.module('starter')
                     };
                     if(!$scope.$$phase) $scope.$apply();
                 });
-            }
+            });
         };
 
         $rootScope.$on( "$stateChangeStart", function(e, toState, toParams, fromState, fromParams) {

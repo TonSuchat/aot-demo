@@ -511,3 +511,17 @@ function IonicAlert($ionicPopup,title,callback){
     if(callback != null) callback();
    });
 };
+
+function IonicConfirm ($ionicPopup,title,content,confirmCB,cancelCB) {
+   var confirmPopup = $ionicPopup.confirm({
+     title: title,
+     template: content
+   });
+
+   confirmPopup.then(function(res) {
+     if(res) confirmCB();
+     else{
+      if(cancelCB != null) cancelCB();
+     }
+   });
+};

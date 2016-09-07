@@ -292,7 +292,8 @@ angular.module('starter')
 					var leaderTxt = ($scope.redeemDuty.leader == 1 ? 'หัวหน้าเวร' : 'ลูกเวร');
 					if($scope.redeemDuty.type == 1) message = 'คุณต้องการแลกเวรกับ ' + $scope.searchEmp.result + ' ในตำแหน่ง ' + leaderTxt + ' ในวันที่ ' + $scope.selectedDate.dutyDate1 + ' กับวันที่ ' + $scope.selectedDate.dutyDate2;
 					else message = 'คุณต้องการแทนเวรกับ ' + $scope.searchEmp.result + ' ในตำแหน่ง ' + leaderTxt + ' ในวันที่ ' + $scope.selectedDate.dutyDate1;
-					if(confirm(message)){
+
+					IonicConfirm($ionicPopup,'สร้างรายการแลกแทนเวร',message,function(){
 						var data = {
 									  CategoryId: 1,
 									  RegisterId:window.localStorage.getItem("GCMToken"),
@@ -312,7 +313,7 @@ angular.module('starter')
 						WorkFlowService.CreateWorkFlow(data).then(function(response){
 							if(response != null) $location.path('/app/selfservicelist/1');
 						},function(error){console.log(error);IonicAlert($ionicPopup,'ไม่สามารถทำรายการได้/โปรดลองใหม่อีกครั้ง',null);});
-					}
+					});
 				}
 			});
 		};
@@ -722,7 +723,8 @@ angular.module('starter')
 			if(!$scope.leave.reason || $scope.leave.reason.length <= 0) $scope.leave.reason = '-';
 			if(!$scope.leave.contact || $scope.leave.contact.length <= 0) $scope.leave.contact = '-';
 			var description = $scope.GetDocumentDescription();
-			if(confirm('ต้องการสร้าง' + description + ' ?')){
+
+			IonicConfirm($ionicPopup,'สร้างรายการวันลา','ต้องการสร้าง' + description + ' ?',function(){
 				var data = {
 					CategoryId:4,
 					RegisterId:window.localStorage.getItem("GCMToken"),
@@ -741,7 +743,7 @@ angular.module('starter')
 				WorkFlowService.CreateWorkFlow(data).then(function(response){
 					if(response != null) $location.path('/app/selfservicelist/4');
 				},function(error){console.log(error);IonicAlert($ionicPopup,'ไม่สามารถทำรายการได้/โปรดลองใหม่อีกครั้ง',null);});
-			}
+			});
 		};
 
 		$scope.GetDocumentDescription = function(){
@@ -916,7 +918,7 @@ angular.module('starter')
 
 		var details = $scope.GetDocumentDescription();
 		
-		if(confirm('ต้องการสร้างข้อมูล' + details + ' ?')){
+		IonicConfirm($ionicPopup,'สร้างรายการลงเวลา','ต้องการสร้างข้อมูล' + details + ' ?',function(){
 			var data = {
 					CategoryId:3,
 					RegisterId:window.localStorage.getItem("GCMToken"),
@@ -935,7 +937,7 @@ angular.module('starter')
 				//check response from server if have warn from server then show alert('message') before redirect to selfservicelist
 				if(response != null) $location.path('/app/selfservicelist/3');
 			},function(error){console.log(error);IonicAlert($ionicPopup,'ไม่สามารถทำรายการได้/โปรดลองใหม่อีกครั้ง',null);});
-		}
+		});
 
 	};
 

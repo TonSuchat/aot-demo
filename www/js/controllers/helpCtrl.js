@@ -159,13 +159,22 @@ angular.module('starter')
       
       //method triggered when toggle checkbox
       $scope.SetUseOnDevice = function(){
-        if(confirm('ต้องการเปลี่ยนการตั้งค่าอุปกรณ์?')){
-          console.log($scope.setting.Device);
-        }
-        else{
-          if($scope.setting.Device) $scope.setting.Device = false;
-          else $scope.setting.Device = true;
-        }
+        IonicConfirm($ionicPopup,'ตั้งค่าอุปกรณ์','ต้องการเปลี่ยนการตั้งค่าอุปกรณ์?',
+          function(){
+            console.log($scope.setting.Device);
+          },
+          function(){
+            if($scope.setting.Device) $scope.setting.Device = false;
+            else $scope.setting.Device = true;  
+          });
+
+        // if(confirm('ต้องการเปลี่ยนการตั้งค่าอุปกรณ์?')){
+        //   console.log($scope.setting.Device);
+        // }
+        // else{
+        //   if($scope.setting.Device) $scope.setting.Device = false;
+        //   else $scope.setting.Device = true;
+        // }
       };
 
       function GetDeviceSettings (argument) {
@@ -228,7 +237,7 @@ angular.module('starter')
 
       $scope.SaveSetting = function(){
         if(!$scope.CheckValidate()) return;
-        if(confirm('ต้องการเปลี่ยนการตั้งค่าอุปกรณ์')){
+        IonicConfirm($ionicPopup,'ตั้งค่าอุปกรณ์','ต้องการเปลี่ยนการตั้งค่าอุปกรณ์',function(){
           //post setting save on server
           APIService.ShowLoading()
           var url = APIService.hostname() + '/DeviceRegistered/SetProfile';
@@ -260,8 +269,7 @@ angular.module('starter')
             }
           },
             function(error){console.log(error);APIService.HideLoading();IonicAlert($ionicPopup,'ไม่สามารถบันทึกการตั้งค่าที่ Server ได้',null);});
-          
-        }
+        })
       };
     });
 

@@ -74,8 +74,7 @@ angular.module('starter')
 
 	//delete our check in data
 	$scope.deleteCheckIn = function(){
-		if(confirm('ต้องการลบข้อมูลนี้ ?'))
-		{
+		IonicConfirm($ionicPopup,'ลบข้อมูล','ต้องการลบข้อมูลนี้ ?',function(){
 			var param = {Empl_Code:window.localStorage.getItem("CurrentUserName"),dutyDate:$scope.selectedDate.plainFormat,Action:2};
 			APIService.ShowLoading();
 			POSTCheckInDuty(APIService,$q,param,$scope).then(
@@ -88,9 +87,7 @@ angular.module('starter')
 					}
 					else APIService.HideLoading();
 				});
-		}
-		else
-			return;
+		});
 	};
 
   	//show first group by default

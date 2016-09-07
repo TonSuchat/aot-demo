@@ -76,9 +76,9 @@ angular.module('starter')
         });
     };
 
-    $rootScope.$on('$cordovaPushV5:notificationReceived', function(event, notification) {
+    $rootScope.$on('$cordovaPushV5:notificationReceived', function(event, notification,$ionicPopup) {
       console.log(notification);
-      ProcessNotification(notification);
+      ProcessNotification(notification,$ionicPopup);
 
       // //android part
       // if(isAndroid){
@@ -145,7 +145,7 @@ angular.module('starter')
       });
     };
 
-    function ProcessNotification(data){
+    function ProcessNotification(data,$ionicPopup){
       //check if force logout from server
       if(data.additionalData.alertType == "9"){
         if(AuthService.isAuthenticated()){
@@ -155,21 +155,16 @@ angular.module('starter')
       }
       //check if messageType is hyperlink
       if(data.additionalData.messageType.type == "1"){
-        if(confirm('ต้องการเปิด link : ' + data.additionalData.messageType.optData + ' ?'))
+        IonicConfirm($ionicPopup,'แจ้งเตือน','ต้องการเปิด link : ' + data.additionalData.messageType.optData + ' ?',function(){
           window.open(data.additionalData.messageType.optData,'_system','location=no');
+        });  
       }
       else{
         //check if need to confirm and redirect to specific path
         if(data.additionalData.alertType == "1"){
-          if(confirm('ต้องการดูข้อมูล : ' + data.title + ' ?')){
-            // //check is selfservice menu, Yes redirect with other logic, No redirect by link
-            // if(CheckURLIsSelfService(data.additionalData.menu)) RedirectSelfServiceMenu(data.additionalData.menu);
-            // else{
-            //   needReload = true;
-            //   window.location.href = '#/app' + data.additionalData.menu;  
-            // }
+          IonicConfirm($ionicPopup,'แจ้งเตือน','ต้องการดูข้อมูล : ' + data.title + ' ?',function(){
             ProcessRedirect(data.additionalData.menu);
-          }
+          });
         }
         //just show message
         else IonicAlert($ionicPopup,data.message,null);
