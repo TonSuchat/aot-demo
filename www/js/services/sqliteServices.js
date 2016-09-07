@@ -701,7 +701,7 @@ angular.module('starter')
 	};
 
 	this.GetLeaveSummaryInfos = function(fiscalYear){
-		return SQLiteService.Execute("SELECT * FROM leavesummary where FiscalYear = '" + fiscalYear + "' ").then(function(response){return response;},function(error){return error;});	
+		return SQLiteService.Execute("SELECT * FROM leavesummary where FiscalYear = '" + fiscalYear + "' ORDER BY CASE LeaveCode WHEN 2 THEN 0 WHEN 1 THEN 1 WHEN 4 THEN 2 END desc ").then(function(response){return response;},function(error){return error;});	
 	};
 
 

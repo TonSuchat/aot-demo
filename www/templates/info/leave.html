@@ -14,7 +14,7 @@
 
             <div ng-repeat="group in leaveSummaryGroups">
 
-                <ion-item class="item-stable" ng-click="toggleGroup(group)" ng-class="{active: isGroupShown(group)}">
+                <ion-item class="item-stable item-text-wrap" ng-click="toggleGroup(group)" ng-class="{active: isGroupShown(group)}">
                     <i class="icon" ng-class="isGroupShown(group) ? 'ion-minus' : 'ion-plus'"></i>&nbsp;<b><u>{{group.name}}</u></b>
                 </ion-item>
 

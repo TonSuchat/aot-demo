@@ -280,7 +280,7 @@ angular.module('starter')
                 var data = ConvertQueryResultToArray(response);
                 $scope.leaveSummaryGroups = [];
                 angular.forEach(data,function(value,key){
-                    $scope.leaveSummaryGroups.push({LeaveCode:value.LeaveCode,name:value.LeaveName,Bring:value.Bring,YearRight:value.YearRight,SumRight:value.SumRight,Used:value.Used,Left:value.Left});
+                    $scope.leaveSummaryGroups.push({LeaveCode:value.LeaveCode,name:value.LeaveName + ' (' + value.Used + ' วัน)',Bring:value.Bring,YearRight:value.YearRight,SumRight:value.SumRight,Used:value.Used,Left:value.Left});
                 });
             });
         };

@@ -750,6 +750,16 @@ angular.module('starter')
 			else if($scope.leave.type == 2) typeName = 'กิจ';
 			else if($scope.leave.type == 3) typeName = 'คลอด';
 			else if($scope.leave.type == 4) typeName = 'พักผ่อน';
+			else if($scope.leave.type == 1.1) typeName = 'ลาป่วยเนื่องจากปฏิบัติในหน้าที่';
+			else if($scope.leave.type == 9) typeName = 'ลาศึกษาและอบรมต่างประเทศ';
+			else if($scope.leave.type == 5) typeName = 'ลาอุปสมบท';
+			else if($scope.leave.type == 6) typeName = 'ลาไปประกอบพิธีฮัจย์';
+			else if($scope.leave.type == 2.1) typeName = 'ลากิจเพื่อเลี้ยงดูบัตร';
+			else if($scope.leave.type == 7) typeName = 'ลาติดตามคู่สมรสไปต่างประเทศ';
+			else if($scope.leave.type == 8) typeName = 'รับราชการทหาร';
+			else if($scope.leave.type == 10) typeName = 'ลาช่วยเหลือภริยาที่คลอดบุตร';
+			else if($scope.leave.type == 12) typeName = 'ขาดงาน';
+			else if($scope.leave.type == 13) typeName = 'ลาถือศีลปฏิบัติธรรม';
 			message = 'บันทึกลา' + typeName + ' เนื่องจาก : ' + $scope.leave.reason + ' ตั้งแต่วันที่ ' + $scope.selectedDate.startDate + ' ถึงวันที่ ' + $scope.selectedDate.endDate + ' เป็นระยะเวลา ' + $scope.leave.duration + ' วัน สามารถติดต่อได้ที่ ' + $scope.leave.contact;
 			return message;
 		};
