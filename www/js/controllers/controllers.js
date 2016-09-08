@@ -419,6 +419,8 @@ angular.module('starter')
                 eachNotiHistory.Message = value.Message;
                 eachNotiHistory.MenuPath = value.MenuPath
                 eachNotiHistory.NotiTime = GetThaiDateTimeByDate($filter,value.NotiTime);
+                eachNotiHistory.CategoryName = (value.NotiType != 3 ? null : GetCategoryNameByMenuPath(value.MenuPath));
+                eachNotiHistory.DocuemntId = (value.NotiType != 3 ? null : GetDocumentIdByMenuPath(value.MenuPath));
                 $scope.NotiHistoryDetails.push(eachNotiHistory);
               });
               FinalActionInfo($scope,APIService);
@@ -462,6 +464,32 @@ angular.module('starter')
                 return 'ด่วนที่สุด';
                 break;
           };
+        };
+
+        function GetCategoryNameByMenuPath(menuPath){
+          var str = menuPath.split('/');
+          var categoryId = str[2];
+          switch(+categoryId){
+            case 1:
+              return 'แลก/แทนเวร';
+              break;
+            case 2:
+                return 'ขอทำบัตรพนักงาน';
+                break;
+            case 3:
+                return 'ลงเวลาทำงาน';
+                break;
+            case 4:
+                return 'บันทึกลาหยุดงาน';
+                break;
+            default:
+                return '';
+          }
+        };
+
+        function GetDocumentIdByMenuPath (menuPath) {
+          var str = menuPath.split('/');
+          return str[3];
         };
 
       });

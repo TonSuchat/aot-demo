@@ -102,7 +102,7 @@ angular.module('starter')
   this.doAcknowledge = function(scope){
     console.log('doAcknowledge',scope.documentId,scope.action.remark);
     service.ApproveWorkflow(scope.documentId,window.localStorage.getItem("CurrentUserName"),scope.action.remark,3).then(function(response){
-      if(response) $location.path('/app/selfservicelist/1');
+      if(response) $location.path('/app/selfservicelist/' + $scope.categoryId);
     });
   };
 
@@ -130,7 +130,7 @@ angular.module('starter')
   this.doApproveOrReject = function(isApprove,actionType,scope){
     console.log('doApproveOrReject',scope.documentId,scope.action.remark);
     service.ApproveWorkflow(scope.documentId,window.localStorage.getItem("CurrentUserName"),scope.action.remark,actionType).then(function(response){
-      if(response) $location.path('/app/selfservicelist/1');
+      if(response) $location.path('/app/selfservicelist/' + $scope.categoryId);
     });
   };
 

@@ -464,6 +464,7 @@ angular.module('starter')
 	    else{
 	    	$scope.documentId = $stateParams.documentId;
 	    	$scope.nextLevel = ''; //$stateParams.nextLevel;
+	    	$scope.categoryId = 1;
 	    	$scope.EmplCode = window.localStorage.getItem("CurrentUserName");
 	    	//bind redeem duty details
 	    	WorkFlowService.ViewDutyChangeStaff($scope.documentId).then(function(response){
@@ -626,6 +627,7 @@ angular.module('starter')
 		else{
 			$scope.documentId = $stateParams.documentId;
 	    	$scope.nextLevel = ''; //$stateParams.nextLevel;
+	    	$scope.categoryId = 2;
 	    	$scope.EmplCode = window.localStorage.getItem("CurrentUserName");
 			WorkFlowService.ViewHistoryMyTask($scope.documentId,$scope.nextLevel,$scope.EmplCode).then(function(response){
 				if(response != null && response.data != null){
@@ -809,6 +811,7 @@ angular.module('starter')
 		else{
 			$scope.documentId = $stateParams.documentId;
 	    	$scope.nextLevel = ''; //$stateParams.nextLevel;
+	    	$scope.categoryId = 4;
 	    	$scope.EmplCode = window.localStorage.getItem("CurrentUserName");
 
 			WorkFlowService.ViewOnLeave($scope.EmplCode,$scope.documentId,$scope.nextLevel).then(function(response){
@@ -1011,6 +1014,7 @@ angular.module('starter')
 		else{
 			$scope.documentId = $stateParams.documentId;
 	    	$scope.nextLevel = $stateParams.nextLevel;
+	    	$scope.categoryId = 3;
 	    	$scope.EmplCode = window.localStorage.getItem("CurrentUserName");
 
 	    	WorkFlowService.ViewTimeWork($scope.EmplCode,$scope.documentId,$scope.nextLevel).then(function(response){

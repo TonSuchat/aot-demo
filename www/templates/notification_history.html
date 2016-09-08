@@ -15,6 +15,8 @@
   			<h2>{{notiHistory.NotiTypeText}}</h2>
         <p><b>สำคัญ :</b> {{notiHistory.Priority}}</p>
         <p><b>วันที่ส่ง :</b> {{notiHistory.NotiTime}}</p>
+        <p ng-show='notiHistory.NotiType == 3'><b>ประเภท :</b> {{notiHistory.CategoryName}}</p>
+        <p ng-show='notiHistory.NotiType == 3'><b>รหัสเอกสาร :</b> {{notiHistory.DocuemntId}}</p>
   			<p>{{notiHistory.Message}}</p>
   		</div>
   	</div>
