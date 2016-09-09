@@ -288,7 +288,7 @@ angular.module('starter')
 			if(!CheckRedeemDutyValidation()) return;
 			//search emp again for confirm before create workflow
 			$scope.searchEmployee().then(function(response){
-				if(response != null){
+				if(response != null && response != false){
 					var leaderTxt = ($scope.redeemDuty.leader == 1 ? 'หัวหน้าเวร' : 'ลูกเวร');
 					if($scope.redeemDuty.type == 1) message = 'คุณต้องการแลกเวรกับ ' + $scope.searchEmp.result + ' ในตำแหน่ง ' + leaderTxt + ' ในวันที่ ' + $scope.selectedDate.dutyDate1 + ' กับวันที่ ' + $scope.selectedDate.dutyDate2;
 					else message = 'คุณต้องการแทนเวรกับ ' + $scope.searchEmp.result + ' ในตำแหน่ง ' + leaderTxt + ' ในวันที่ ' + $scope.selectedDate.dutyDate1;

@@ -76,7 +76,7 @@ angular.module('starter')
         });
     };
 
-    $rootScope.$on('$cordovaPushV5:notificationReceived', function(event, notification,$ionicPopup) {
+    $rootScope.$on('$cordovaPushV5:notificationReceived', function(event, notification) {
       console.log(notification);
       ProcessNotification(notification,$ionicPopup);
 
