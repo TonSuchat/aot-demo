@@ -239,7 +239,7 @@ angular.module('starter')
 		$scope.changePassword = function(form){
 		    if(form.$valid) {
 		      var url = APIService.hostname() + '/Authen/ChangePassword';
-		      var data = {userName: window.localStorage.getItem("CurrentUserName"),password_old: $scope.changePassword.oldPassword,password_new: $scope.changePassword.newPassword};
+		      var data = {userName: window.localStorage.getItem("CurrentUserName"),password_old: $scope.changePassword.oldPassword,password_new: $scope.changePassword.newPassword,RegisterID:window.localStorage.getItem("GCMToken")};
 		      APIService.ShowLoading();
 		      //post to change password AD
 		      APIService.httpPost(url,data,function(response){
