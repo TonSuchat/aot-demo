@@ -720,7 +720,7 @@ angular.module('starter')
 		};
 
 		$scope.CreateLeave = function(){
-			if(!$scope.CheckDateValidation()) return;
+			if(!CheckDateValidation($ionicPopup,$scope.selectedDate.startDate,$scope.selectedDate.endDate)) return;
 			//if duration less than 1 set startdate and enddate to same day
 			if($scope.leave.duration == 1) $scope.selectedDate.endDate = $scope.selectedDate.startDate;
 			if(!$scope.leave.reason || $scope.leave.reason.length <= 0) $scope.leave.reason = '-';
@@ -767,22 +767,6 @@ angular.module('starter')
 			else if($scope.leave.type == 13) typeName = 'ลาถือศีลปฏิบัติธรรม';
 			message = 'บันทึกลา' + typeName + ' เนื่องจาก : ' + $scope.leave.reason + ' ตั้งแต่วันที่ ' + $scope.selectedDate.startDate + ' ถึงวันที่ ' + $scope.selectedDate.endDate + ' เป็นระยะเวลา ' + $scope.leave.duration + ' วัน สามารถติดต่อได้ที่ ' + $scope.leave.contact;
 			return message;
-		};
-
-		$scope.CheckDateValidation = function(){
-			if($scope.leave.duration > 1){
-				var arrStartDate,startDate,endDate,arrEndDate;
-				arrStartDate = $scope.selectedDate.startDate.split('/');
-				arrEndDate = $scope.selectedDate.endDate.split('/');
-				startDate = new Date(arrStartDate[2] + '-' + arrStartDate[1] + '-' + arrStartDate[0]);
-				endDate = new Date(arrEndDate[2] + '-' + arrEndDate[1] + '-' + arrEndDate[0]);
-				if(startDate > endDate) {
-					IonicAlert($ionicPopup,'ช่วงวันที่ไม่ถูกต้อง',function(){
-						return false;	
-					})
-				}
-				else return true;
-			}
 		};
 
 	});
@@ -939,7 +923,6 @@ angular.module('starter')
 		var details = $scope.GetDocumentDescription();
 		
 		IonicConfirm($ionicPopup,'สร้างรายการลงเวลา','ต้องการสร้างข้อมูล' + details + ' ?',function(){
-			console.log($scope.timework.reason);
 			var data = {
 					CategoryId:3,
 					RegisterId:window.localStorage.getItem("GCMToken"),
@@ -986,6 +969,7 @@ angular.module('starter')
 			IonicAlert($ionicPopup,'ห้ามใส่รหัสพนักงานของตัวเอง!',null);
 			return false;
 		}
+		if(!CheckDateValidation($ionicPopup,$scope.selectedDate.startDate,$scope.selectedDate.endDate)) return false;
 		return true;
 	};
 
