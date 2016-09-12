@@ -525,3 +525,18 @@ function IonicConfirm ($ionicPopup,title,content,confirmCB,cancelCB) {
      }
    });
 };
+
+//string date format : dd/MM/yyyy
+function CheckDateValidation ($ionicPopup,startDate,endDate) {
+  var arrStartDate,startDate,endDate,arrEndDate;
+  arrStartDate = startDate.split('/');
+  arrEndDate = endDate.split('/');
+  startDate = new Date(arrStartDate[2] + '-' + arrStartDate[1] + '-' + arrStartDate[0]);
+  endDate = new Date(arrEndDate[2] + '-' + arrEndDate[1] + '-' + arrEndDate[0]);
+  if(startDate > endDate) {
+    IonicAlert($ionicPopup,'ช่วงวันที่ไม่ถูกต้อง',function(){
+      return false; 
+    })
+  }
+  else return true;
+};
