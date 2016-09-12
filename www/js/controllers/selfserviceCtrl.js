@@ -720,6 +720,7 @@ angular.module('starter')
 		};
 
 		$scope.CreateLeave = function(){
+			if(!$scope.CheckDateValidation()) return;
 			//if duration less than 1 set startdate and enddate to same day
 			if($scope.leave.duration == 1) $scope.selectedDate.endDate = $scope.selectedDate.startDate;
 			if(!$scope.leave.reason || $scope.leave.reason.length <= 0) $scope.leave.reason = '-';
@@ -766,6 +767,22 @@ angular.module('starter')
 			else if($scope.leave.type == 13) typeName = 'ลาถือศีลปฏิบัติธรรม';
 			message = 'บันทึกลา' + typeName + ' เนื่องจาก : ' + $scope.leave.reason + ' ตั้งแต่วันที่ ' + $scope.selectedDate.startDate + ' ถึงวันที่ ' + $scope.selectedDate.endDate + ' เป็นระยะเวลา ' + $scope.leave.duration + ' วัน สามารถติดต่อได้ที่ ' + $scope.leave.contact;
 			return message;
+		};
+
+		$scope.CheckDateValidation = function(){
+			if($scope.leave.duration > 1){
+				var arrStartDate,startDate,endDate,arrEndDate;
+				arrStartDate = $scope.selectedDate.startDate.split('/');
+				arrEndDate = $scope.selectedDate.endDate.split('/');
+				startDate = new Date(arrStartDate[2] + '-' + arrStartDate[1] + '-' + arrStartDate[0]);
+				endDate = new Date(arrEndDate[2] + '-' + arrEndDate[1] + '-' + arrEndDate[0]);
+				if(startDate > endDate) {
+					IonicAlert($ionicPopup,'ช่วงวันที่ไม่ถูกต้อง',function(){
+						return false;	
+					})
+				}
+				else return true;
+			}
 		};
 
 	});
@@ -874,7 +891,7 @@ angular.module('starter')
 	$scope.searchEmp = {searchTxt:'',result:''};
 	$scope.ddlStartTimesData = {selectedOptions:{},options:[]};
 	$scope.ddlEndTimesData = {selectedOptions:{},options:[]};
-	$scope.timework = {type:1,reasoncode:1};
+	$scope.timework = {type:1,reasoncode:1,reason:''};
 	$scope.selectedDate = {startDate:GetCurrentDate().toString(),endDate:GetCurrentDate().toString()};
 	$scope.Empl_Code = window.localStorage.getItem("CurrentUserName");
 
@@ -922,6 +939,7 @@ angular.module('starter')
 		var details = $scope.GetDocumentDescription();
 		
 		IonicConfirm($ionicPopup,'สร้างรายการลงเวลา','ต้องการสร้างข้อมูล' + details + ' ?',function(){
+			console.log($scope.timework.reason);
 			var data = {
 					CategoryId:3,
 					RegisterId:window.localStorage.getItem("GCMToken"),
@@ -933,7 +951,8 @@ angular.module('starter')
 						ReasonCode:$scope.timework.reasoncode,
 						FromDate:$scope.selectedDate.startDate.toString().replace(new RegExp('/','g'),'') + $scope.ddlStartTimesData.selectedOptions.val,
 						ToDate:$scope.selectedDate.endDate.toString().replace(new RegExp('/','g'),'') + $scope.ddlEndTimesData.selectedOptions.val,
-						TimeWith:(!$scope.searchEmp.searchTxt || $scope.searchEmp.searchTxt.length <= 0) ? '-' : $scope.searchEmp.searchTxt
+						TimeWith:(!$scope.searchEmp.searchTxt || $scope.searchEmp.searchTxt.length <= 0) ? '-' : $scope.searchEmp.searchTxt,
+						Reason:($scope.timework.reasoncode == 6 ) ? $scope.timework.reason : ''
 					}
 				};
 			WorkFlowService.CreateWorkFlow(data).then(function(response){

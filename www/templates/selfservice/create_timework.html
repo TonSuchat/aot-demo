@@ -25,6 +25,10 @@
             <ion-radio ng-model='timework.reasoncode' name='reasoncode' ng-value="6">อื่นๆ</ion-radio>
         </div>
 
+        <label ng-show='timework.reasoncode == 6' class="item item-input padding">
+          <textarea rows='3' cols='3' ng-model='timework.reason'></textarea>
+        </label>
+
         <div class='item item-divider'>
             ตั้งแต่วันที่
         </div>
