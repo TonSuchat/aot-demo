@@ -185,7 +185,7 @@ angular.module('starter')
         //     destroyUserCredentials();
         // };
 
-        var logout = function() {
+        var logout = function(isForceLogOut) {
             return $q(function(resolve){
                 console.log('service logout');
                 if(!CheckNetwork($cordovaNetwork)){
@@ -217,7 +217,7 @@ angular.module('starter')
                     else{
                         //mobile logout
                         var url = APIService.hostname() + '/DeviceRegistered/LogOut';
-                        var data = {RegisterID:window.localStorage.getItem('GCMToken')};
+                        var data = {RegisterID:window.localStorage.getItem('GCMToken'),Force:isForceLogOut};
                         console.log(data);
                         //post to api for logout process
                         APIService.httpPost(url,data,

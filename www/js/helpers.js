@@ -465,7 +465,7 @@ function SetProfileSettings($q,data){
   });
 };
 
-function CheckForceLogOut(APIService,AuthService,$q) {
+function CheckForceLogOut($ionicPopup,APIService,AuthService,$q) {
   return $q(function(resolve){
     //if not loged in then exit
     if(!AuthService.isAuthenticated()) return resolve(true);
@@ -475,7 +475,7 @@ function CheckForceLogOut(APIService,AuthService,$q) {
       if(!response){
         //force logout
         console.log('not_keep_login');
-        AuthService.logout();
+        AuthService.logout(false);
         return resolve(true);
       }
       else{
@@ -483,21 +483,33 @@ function CheckForceLogOut(APIService,AuthService,$q) {
         CheckSessionIsExpire(APIService,$q).then(function(response){
           if(response){
             //force logout
-            alert('คุณไม่ได้ออกจากระบบนานเกินไป กรุณาเข้าสู่ระบบใหม่');
-            AuthService.logout();
-            return resolve(true);
+            IonicAlert($ionicPopup,'คุณไม่ได้ออกจากระบบนานเกินไป กรุณาเข้าสู่ระบบใหม่',function(){
+              AuthService.logout(false);
+              return resolve(true);  
+            });
           }
         });
         //check this device is valid
         if(window.localStorage.getItem('GCMToken') == null) return resolve(true);
         CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
+          console.log(response);
           if(response != null && response.data != null){
-            //if not valid and still logged on then force logout
-            if(!response.data){
-              alert('อุปกรณ์เครื่องนี้ถูกระงับการใช้งาน');
-              AuthService.logout();
-              return resolve(true);
+            //check device is disable by server
+            if(!response.data.RegistAction){
+              //if not valid and still logged on then force logout
+              IonicAlert($ionicPopup,'อุปกรณ์เครื่องนี้ถูกระงับการใช้งาน',function(){
+                AuthService.logout(true);
+                return resolve(true);
+              });
             }
+            else if(response.data.ChangePWD){
+              //if other device changed password this device must re login
+              IonicAlert($ionicPopup,'มีการเปลี่ยนรหัสผ่านจากอุปกรณ์อื่น ต้องเข้าสู่ระบบใหม่',function(){
+                AuthService.logout(false);
+                return resolve(true);
+              });
+            }
+            
           }
         });
       }

@@ -252,7 +252,7 @@ angular.module('starter')
           APIService.httpPost(url,data,function(response){
             if(response){
               //force user to logout for apply new settings
-              IonicAlert($ionicPopup,'กรุณาเข้าสู่ระบบใหม่อีกครั้งเพื่อใช้งานการตั้งค่า',function(){AuthService.logout();});
+              IonicAlert($ionicPopup,'กรุณาเข้าสู่ระบบใหม่อีกครั้งเพื่อใช้งานการตั้งค่า',function(){AuthService.logout(false);});
               // //save setting to local storage
               // SetProfileSettings($q,{Device:+$scope.setting.Device,LogOn:+$scope.setting.Logon,TimeOut:$scope.setting.TimeOut}).then(function(response){
               //   if(response){

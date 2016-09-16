@@ -149,7 +149,7 @@ angular.module('starter')
       //check if force logout from server
       if(data.additionalData.alertType == "9"){
         if(AuthService.isAuthenticated()){
-          IonicAlert($ionicPopup,data.message,null,function(){AuthService.logout();return;});
+          IonicAlert($ionicPopup,data.message,null,function(){AuthService.logout(true);return;});
         }
         else return;
       }

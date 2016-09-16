@@ -48,14 +48,14 @@
           //post to gcm(google cloud messaging) for register device and get token from gcm
           if (window.cordova){
             NotiService.Register().then(function(){
-              CheckForceLogOut(APIService,AuthService,$q);
+              CheckForceLogOut($ionicPopup,APIService,AuthService,$q);
             });
           }
-          else window.localStorage.setItem('GCMToken','eJ14KuUSnZ0:APA91bGkY-r-gMLRIPQCqnkJVKylnWII5HRXYnF_0vdjbAaEWRggofkuWCYWcz2IcPv_gk8L0GBhyePBjj0Bpb5gEst5Cc7TJ6goPy6aB4y_alCxso4BKorYjPwWrtiO-20g_9mdXeUB');
+          else window.localStorage.setItem('GCMToken',PCGCMToken);
 
           //ionic resume event
           $ionicPlatform.on('resume', function(){
-            CheckForceLogOut(APIService,AuthService,$q);
+            CheckForceLogOut($ionicPopup,APIService,AuthService,$q);
           });
 
         });
