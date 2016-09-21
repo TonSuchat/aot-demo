@@ -13,14 +13,14 @@
     /*white-space: normal;*/
 /*}*/
 
-/*.header-badge{*/
-    /*display:inline-table !important;*/
-    /*margin-right:-6px;*/
-/*}*/
+.header-badge{
+    display:inline-table !important;
+    margin-right:-6px;
+}
 
-/*.ssmenu-container{*/
-    /*position: relative;*/
-/*}*/
+.ssmenu-container{
+    position: relative;
+}
 
 .col-33 .badge{
     float: right;
@@ -29,9 +29,9 @@
     right: 5px;
     z-index: 99;
 }
-/*.col-33 .item{*/
-    /*padding: 10px 0px 10px 0px;*/
-/*}*/
+.col-33 .item{
+    padding: 10px 0px 10px 0px;
+}
 
 /*!*chat-css*!*/
 
