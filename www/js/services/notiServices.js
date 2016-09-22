@@ -68,7 +68,7 @@ angular.module('starter')
           var url = '';
           if(!isUpdate) url = APIService.hostname() + '/DeviceRegistered/Register'
           else url = APIService.hostname() + '/DeviceRegistered/UpdateDevice'
-          var data = {RegisterID : token, OS : deviceInfo.platform, Model:deviceInfo.model, Serial:deviceInfo.serial, EmpID: empid, RegistAction:true, DeviceName:''};
+          var data = {RegisterID : token, OS : deviceInfo.platform, Model:deviceInfo.model, Serial:deviceInfo.uuid, EmpID: empid, RegistAction:true, DeviceName:''};
           console.log('isUpdate -> ' + isUpdate);
           console.log('empid -> ' + empid);
           console.log(data);
