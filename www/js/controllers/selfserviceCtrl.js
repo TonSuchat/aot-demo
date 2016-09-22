@@ -7,6 +7,23 @@ var selfServiceCategory = [
 	{id:4,name:'บันทึกลาหยุดงาน',href:'#/app/selfservicelist/',requestURL:'#/app/createleave',showRequestButton:true,icon:'ion-medkit',unreadNumber:0},
 ];
 
+var listLeave = [
+	{val:1,name:'ลาป่วย'},
+	{val:2,name:'ลากิจ'},
+	{val:3,name:'ลาคลอด'},
+	{val:4,name:'ลาพักผ่อน'},
+	{val:1.1,name:'ลาป่วยเนื่องจากปฏิบัติในหน้าที่'},
+	{val:9,name:'ลาศึกษาและอบรมต่างประเทศ'},
+	{val:5,name:'ลาอุปสมบท'},
+	{val:6,name:'ลาไปประกอบพิธีฮัจย์'},
+	{val:2.1,name:'ลากิจเพื่อเลี้ยงดูบุตร'},
+	{val:7,name:'ลาติดตามคู่สมรสไปต่างประเทศ'},
+	{val:8,name:'รับราชการทหาร'},
+	{val:10,name:'ลาช่วยเหลือภริยาที่คลอดบุตร'},
+	{val:12,name:'ขาดงาน'},
+	{val:13,name:'ลาถือศีลปฏิบัติธรรม'}
+];
+
 angular.module('starter')
 
 .config(function($stateProvider) {
@@ -664,7 +681,7 @@ angular.module('starter')
 
 })
 
-.controller('CreateLeaveCtrl',function($scope,$cordovaNetwork,$stateParams,$ionicPopup,$ionicPlatform,WorkFlowService,$filter,ionicDatePicker,$location){
+.controller('CreateLeaveCtrl',function($scope,$cordovaNetwork,$stateParams,$ionicPopup,$ionicPlatform,WorkFlowService,$filter,ionicDatePicker,$location,LeaveSummarySQLite){
 	$ionicPlatform.ready(function(){
 		var defaultDate1,defaultDate2;
 		$scope.noInternet = false;
@@ -674,8 +691,9 @@ angular.module('starter')
 		  OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
 		};
 
-		$scope.leave = {type:1,reason:'',duration:1,contact:''};
+		$scope.leave = {type:1,reason:'',duration:1,contact:'',summary:[]};
 
+		InitialDropdownList();
 		InitialStartAndEndDate();
 
 		$scope.Empl_Code = window.localStorage.getItem("CurrentUserName");
@@ -710,6 +728,21 @@ angular.module('starter')
 			$scope.selectedDate = {startDate:ConvertDateObjToSlashFormat(defaultDate1),endDate:ConvertDateObjToSlashFormat(defaultDate2)};
 		};
 
+		function InitialDropdownList(){
+			$scope.ddlLeave = {options:[],selectedOptions:{}};
+			//get array of leavesummary
+			LeaveSummarySQLite.GetLeaveSummaryInfos(GetFiscalYear()).then(function(response){
+				if(response != null){
+					$scope.leave.summary = ConvertQueryResultToArray(response);
+					angular.forEach(listLeave,function(value,key){
+						var eachSummary = $filter('filter')($scope.leave.summary, { LeaveCode: value.val });
+						$scope.ddlLeave.options.push({val:value.val,name:value.name + ' (คงเหลือ ' + eachSummary[0].Left + ' วัน)'});
+					});
+					$scope.ddlLeave.selectedOptions = {val:listLeave[0].val,name:listLeave[0].name};		
+				}
+			});
+		};
+
 		$scope.IncrementDuration = function(){
 			$scope.leave.duration += 0.5;
 		};
@@ -727,7 +760,7 @@ angular.module('starter')
 			if(!$scope.leave.contact || $scope.leave.contact.length <= 0) $scope.leave.contact = '-';
 			var description = $scope.GetDocumentDescription();
 
-			IonicConfirm($ionicPopup,'สร้างรายการวันลา','ต้องการสร้าง' + description + ' ?',function(){
+			IonicConfirm($ionicPopup,'สร้างรายการวันลา',description,function(){
 				var data = {
 					CategoryId:4,
 					RegisterId:window.localStorage.getItem("GCMToken"),
@@ -735,7 +768,7 @@ angular.module('starter')
 						DocumentTitle:'บันทึกลาหยุดงาน',
 						DocumentDescription:description,
 						Empl_Code:$scope.Empl_Code,
-						LeaveCode:$scope.leave.type,
+						LeaveCode:$scope.ddlLeave.selectedOptions.val,
 						Reason:$scope.leave.reason,
 						FromDate:$scope.selectedDate.startDate.toString().replace(new RegExp('/','g'),''),
 						ToDate:$scope.selectedDate.endDate.toString().replace(new RegExp('/','g'),''),
@@ -750,22 +783,12 @@ angular.module('starter')
 		};
 
 		$scope.GetDocumentDescription = function(){
-			var message,typeName;
-			if($scope.leave.type == 1) typeName = 'ป่วย';
-			else if($scope.leave.type == 2) typeName = 'กิจ';
-			else if($scope.leave.type == 3) typeName = 'คลอด';
-			else if($scope.leave.type == 4) typeName = 'พักผ่อน';
-			else if($scope.leave.type == 1.1) typeName = 'ลาป่วยเนื่องจากปฏิบัติในหน้าที่';
-			else if($scope.leave.type == 9) typeName = 'ลาศึกษาและอบรมต่างประเทศ';
-			else if($scope.leave.type == 5) typeName = 'ลาอุปสมบท';
-			else if($scope.leave.type == 6) typeName = 'ลาไปประกอบพิธีฮัจย์';
-			else if($scope.leave.type == 2.1) typeName = 'ลากิจเพื่อเลี้ยงดูบัตร';
-			else if($scope.leave.type == 7) typeName = 'ลาติดตามคู่สมรสไปต่างประเทศ';
-			else if($scope.leave.type == 8) typeName = 'รับราชการทหาร';
-			else if($scope.leave.type == 10) typeName = 'ลาช่วยเหลือภริยาที่คลอดบุตร';
-			else if($scope.leave.type == 12) typeName = 'ขาดงาน';
-			else if($scope.leave.type == 13) typeName = 'ลาถือศีลปฏิบัติธรรม';
-			message = 'บันทึกลา' + typeName + ' เนื่องจาก : ' + $scope.leave.reason + ' ตั้งแต่วันที่ ' + $scope.selectedDate.startDate + ' ถึงวันที่ ' + $scope.selectedDate.endDate + ' เป็นระยะเวลา ' + $scope.leave.duration + ' วัน สามารถติดต่อได้ที่ ' + $scope.leave.contact;
+			var message = ''; 
+			var typeName = '';
+			var result = $filter('filter')($scope.leave.summary, { LeaveCode: $scope.ddlLeave.selectedOptions.val });
+			typeName = result[0].LeaveName;
+			if(result[0].Left < $scope.leave.duration) message = 'เตือน : วันลาของคุณเหลือน้อยกว่าระยะเวลาที่ต้องการลา ||| '; 
+			message += 'ต้องการสร้าง บันทึกลา' + typeName + ' เนื่องจาก : ' + $scope.leave.reason + ' ตั้งแต่วันที่ ' + $scope.selectedDate.startDate + ' ถึงวันที่ ' + $scope.selectedDate.endDate + ' เป็นระยะเวลา ' + $scope.leave.duration + ' วัน สามารถติดต่อได้ที่ ' + $scope.leave.contact;
 			return message;
 		};
 

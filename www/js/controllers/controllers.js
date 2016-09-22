@@ -22,7 +22,7 @@ angular.module('starter')
       });
     })
 
-    .controller('AppCtrl', function($scope, $ionicModal, $timeout, $state, AuthService, $ionicPopup, $location, $ionicHistory, SQLiteService, NotiService, SyncService, $cordovaNetwork, APIService, $rootScope, $ionicPlatform, $q) {
+    .controller('AppCtrl', function($scope, $ionicModal, $timeout, $state, AuthService, $ionicPopup, $location, $ionicHistory, SQLiteService, NotiService, SyncService, $cordovaNetwork, APIService, $rootScope, $ionicPlatform, $q, $cordovaFile) {
 
       // With the new view caching in Ionic, Controllers are only called
       // when they are recreated or on app start, instead of every page change.
@@ -91,44 +91,59 @@ angular.module('starter')
         $scope.doLogin = function(form) {
           if(form.$valid) {
             var currentUserName = $scope.loginData.username;
-            var gcmToken = (window.cordova) ? window.localStorage.getItem('GCMToken') : PCGCMToken;
-            CheckDeviceIsValid(APIService,$q,gcmToken).then(function(response){
-              if(response != null && response.data.RegistAction){
-                AuthService.login($scope.loginData.username, $scope.loginData.password).then(function() {
-                  $rootScope.$broadcast('checkAuthen', null);
-                  //update register device -> empid to server
-                  if(window.localStorage.getItem('GCMToken') != null && window.localStorage.getItem('GCMToken').length > 0) {
-                    if (window.cordova) NotiService.StoreTokenOnServer(window.localStorage.getItem('GCMToken'),currentUserName,true);
+            var gcmToken = (window.cordova) ? (window.localStorage.getItem('GCMToken') == null ? '' : window.localStorage.getItem('GCMToken')) : PCGCMToken;
+            console.log(gcmToken);
+            //check has permission to manage files?
+            CreateFileCheckPermission($cordovaFile,$q,APIService).then(function(response){
+              if(response != null && response){
+                CheckDeviceIsValid(APIService,$q,gcmToken).then(function(response){
+                  console.log(response);
+                  if(response != null){
+                    if(response.status == 500){
+                      var alertPopup = $ionicPopup.alert({
+                        title: 'ไม่สามารถเข้าสู่ระบบได้',
+                        template: 'โปรดเข้าสู่ระบบอีกครั้ง!'
+                      });
+                    }
+                    else if(response.data){
+                      AuthService.login($scope.loginData.username, $scope.loginData.password).then(function() {
+                        $rootScope.$broadcast('checkAuthen', null);
+                        //update register device -> empid to server
+                        if(window.localStorage.getItem('GCMToken') != null && window.localStorage.getItem('GCMToken').length > 0) {
+                          if (window.cordova) NotiService.StoreTokenOnServer(window.localStorage.getItem('GCMToken'),currentUserName,true);
+                        }
+                        //bind full menus
+                        $scope.InitialMenus(true);
+                        $scope.closeLogin();
+
+                        //save login date to local storage for check expire to force logout(security process)
+                        var currentDate = new Date();
+                        window.localStorage.setItem('lastLogInDate',+currentDate);
+
+                      }, function(err) {
+                        var alertPopup = $ionicPopup.alert({
+                          title: err,
+                          template: 'รหัสพนักงาน/รหัสผ่านไม่ถูกต้อง!'
+                        });
+                      });
+                    }
+                    else{
+                      var alertPopup = $ionicPopup.alert({
+                        title: 'ไม่สามารถเข้าสู่ระบบได้',
+                        template: 'อุปกรณ์ถูกระงับการใช้งาน!'
+                      });
+                    }
                   }
-                  //bind full menus
-                  $scope.InitialMenus(true);
-                  // //sync private message data (rooms/messages/subscribe)
-                  // SyncService.SyncInitialPM();
-
-                  $scope.closeLogin();
-
-                  //save login date to local storage for check expire to force logout(security process)
-                  var currentDate = new Date();
-                  window.localStorage.setItem('lastLogInDate',+currentDate);
-
-                }, function(err) {
-                  var alertPopup = $ionicPopup.alert({
-                    title: err,
-                    template: 'Please check your credentials!'
-                  });
                 });
               }
               else{
                 var alertPopup = $ionicPopup.alert({
                   title: 'ไม่สามารถเข้าสู่ระบบได้',
-                  template: 'อุปกรณ์ถูกระงับการใช้งาน!'
+                  template: 'ต้องทำการอนุญาติให้เข้าถึงไฟล์ได้!'
                 });
               }
             });
-            //
-            //$ionicHistory.nextViewOptions({
-            //  disableBack: true
-            //});
+            return;
           }
         };
 

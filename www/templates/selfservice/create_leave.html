@@ -7,23 +7,13 @@
   				ประเภทการลา
   			</div>
 
-  			<div class='item'>
-  				  <ion-radio ng-model='leave.type' name='type' ng-value="1">ลาป่วย</ion-radio>
-            <ion-radio ng-model='leave.type' name='type' ng-value="2">ลากิจ</ion-radio>
-            <ion-radio ng-model='leave.type' name='type' ng-value="3">ลาคลอด</ion-radio>
-            <ion-radio ng-model='leave.type' name='type' ng-value="4">ลาพักผ่อน</ion-radio>
-            <ion-radio ng-model='leave.type' name='type' ng-value="1.1">ลาป่วยเนื่องจากปฏิบัติในหน้าที่</ion-radio>
-            <ion-radio ng-model='leave.type' name='type' ng-value="9">ลาศึกษาและอบรมต่างประเทศ</ion-radio>
-            <ion-radio ng-model='leave.type' name='type' ng-value="5">ลาอุปสมบท</ion-radio>
-            <ion-radio ng-model='leave.type' name='type' ng-value="6">ลาไปประกอบพิธีฮัจย์</ion-radio>
-            <ion-radio ng-model='leave.type' name='type' ng-value="2.1">ลากิจเพื่อเลี้ยงดูบัตร</ion-radio>
-            <ion-radio ng-model='leave.type' name='type' ng-value="7">ลาติดตามคู่สมรสไปต่างประเทศ</ion-radio>
-            <ion-radio ng-model='leave.type' name='type' ng-value="8">รับราชการทหาร</ion-radio>
-            <ion-radio ng-model='leave.type' name='type' ng-value="10">ลาช่วยเหลือภริยาที่คลอดบุตร</ion-radio>
-            <ion-radio ng-model='leave.type' name='type' ng-value="12">ขาดงาน</ion-radio>
-            <ion-radio ng-model='leave.type' name='type' ng-value="13">ลาถือศีลปฏิบัติธรรม</ion-radio>
-  			</div>
-
+        <label class="item item-input item-select">
+            <div class="input-label">
+                ประเภท
+            </div>
+            <select ng-options='item.name for item in ddlLeave.options track by item.val' ng-model='ddlLeave.selectedOptions'></select>
+        </label>
+  			 
         <div class='item item-divider'>
             เนื่องจาก
         </div>
