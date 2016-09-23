@@ -4,7 +4,7 @@ var selfServiceCategory = [
 	{id:1,name:'แลก/แทนเวร',href:'#/app/selfservicelist/',requestURL:'#/app/createredeemduty',showRequestButton:true,icon:'ion-arrow-swap',unreadNumber:0},
 	{id:2,name:'ขอทำบัตรพนักงาน',href:'#/app/selfservicelist/',requestURL:'#/app/cardrequest',showRequestButton:true,icon:'ion-card',unreadNumber:0},
 	{id:3,name:'ลงเวลาทำงาน',href:'#/app/selfservicelist/',requestURL:'#/app/createtimework',showRequestButton:true,icon:'ion-clock',unreadNumber:0},
-	{id:4,name:'บันทึกลาหยุดงาน',href:'#/app/selfservicelist/',requestURL:'#/app/createleave',showRequestButton:true,icon:'ion-medkit',unreadNumber:0},
+	{id:4,name:'บันทึกลาหยุดงาน',href:'#/app/selfservicelist/',requestURL:'#/app/createleave',showRequestButton:true,icon:'ion-medkit',unreadNumber:0}
 ];
 
 var listLeave = [
@@ -180,7 +180,7 @@ angular.module('starter')
 
 })
 
-.controller('SelfServiceListCtrl',function($scope,$stateParams,$cordovaNetwork,$ionicPopup,$filter,WorkFlowService,$ionicPlatform,$rootScope){
+.controller('SelfServiceListCtrl',function($scope,$stateParams,$cordovaNetwork,$ionicPopup,$filter,WorkFlowService,$ionicPlatform,$rootScope,$timeout){
 
 	$ionicPlatform.ready(function(){
 
@@ -234,6 +234,15 @@ angular.module('starter')
 	    	angular.forEach(data,function(value,key){
 	    		$scope.SSList.push({DocumentId:value.DocumentId,NextLevel:value.NextLevel,DocumentTitle:value.DocumentTitle,Note:value.Note,LastUpdate:GetThaiDateTimeByDate($filter,value.LastUpdate),IsRead:value.IsRead});
 	    	});
+	  //   	$timeout(function(){
+			//   $scope.screenHeight = (document.getElementById('listTask').offsetHeight) - 80;
+			//   console.log($scope.screenHeight);
+	  //   	  document.getElementById('floating-button').style.bottom = $scope.screenHeight + "px";
+			// });
+	    };
+
+	    $scope.myEvent = function(){
+	    	alert('aa');
 	    };
 
 	});
@@ -287,6 +296,13 @@ angular.module('starter')
 		};
 
 		//*******************Duty*******************
+		$scope.getEmployees = function (query) {
+			if(query){
+				return {items:filterEmployees(query)};
+			}
+			return {items:[]};
+        };
+
 		$scope.searchEmp = {searchTxt:'',result:''};
 		//RedeemDutyType : 1 = แลก , 2 = แทน
 	   	$scope.redeemDuty = {type:1,leader:1,remark:''};
@@ -683,6 +699,7 @@ angular.module('starter')
 
 .controller('CreateLeaveCtrl',function($scope,$cordovaNetwork,$stateParams,$ionicPopup,$ionicPlatform,WorkFlowService,$filter,ionicDatePicker,$location,LeaveSummarySQLite){
 	$ionicPlatform.ready(function(){
+
 		var defaultDate1,defaultDate2;
 		$scope.noInternet = false;
 		//if no internet connection

@@ -46,11 +46,21 @@
         <div class="bar bar-header item-input-inset">
           <label class="item-input-wrapper">
             <i class="icon ion-ios-search placeholder-icon"></i>
-            <input type="search" ng-model='searchEmp.searchTxt' placeholder="รหัสพนักงานเท่านั้น">
+            <!-- <input type="search" ng-model='searchEmp.searchTxt' placeholder="รหัสพนักงานเท่านั้น"> -->
+            <input ion-autocomplete type="search" readonly="readonly" class="ion-autocomplete" autocomplete="off"
+                       ng-model="searchEmp.searchTxt"
+                       item-value-key="emplcode"
+                       item-view-value-key="name"
+                       items-method="getEmployees(query)"
+                       items-method-value-key="items"
+                       placeholder="ชื่อ/รหัสพนักงาน"
+                       items-clicked-method="itemsClicked(callback)"
+                       items-removed-method="itemsRemoved(callback)"
+                       max-selected-items="1"/>
           </label>
-          <button ng-click='searchEmployee()' class="button button-positive">
+          <!-- <button ng-click='searchEmployee()' class="button button-positive">
             <i class="icon ion-ios-search"></i>
-          </button>
+          </button> -->
         </div>
 
         <div ng-show='searchEmp.result.length > 0' class='item'>

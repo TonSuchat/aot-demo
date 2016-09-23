@@ -23,22 +23,7 @@
         <!--</div>-->
 
         <div class="row" ng-if='$index % 3 == 0' ng-repeat='category in categories'>
-            <!-- <div class="col col-33 text-center">
-                <div class="card">
-                    <a class='item' href="#/app/changepassword">
-                        <i class='icon larger ion-locked'></i>
-                        <div class="item-text-wrap">เปลี่ยนรหัสผ่าน</div>
-                    </a>
-                </div>
-            </div> -->
-            <!-- <div class="col col-33 text-center">
-                <div class="card">
-                    <a class="item" href="#/app/cardrequest">
-                        <i class="icon larger ion-card"></i>
-                        <div class="item-text-wrap">ขอทำบัตรพนักงาน</div>
-                    </a>
-                </div>
-            </div> -->
+           
             <div class="col col-33 text-center ssmenu-container">
                 <span class='badge badge-assertive' ng-show='categories[$index].unreadNumber > 0'>{{categories[$index].unreadNumber}}</span>
                 <div class="card">
@@ -70,6 +55,11 @@
             </div>
 
         </div>
+
+        <ion-floating-button  id='floatBtn' click="myEvent()" has-footer="false" button-color="#2AC9AA" icon="ion-plus" icon-color="#fff">
+    </ion-floating-button>
+
+        
 
     </ion-content>
 

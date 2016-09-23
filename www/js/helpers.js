@@ -29,6 +29,8 @@ var shortnessEngMonth = [
     {monthValue:'12',monthName:'Dec'},
 ];
 
+var emplooyeeDatas = [{emplcode: "484074", name: "สนธยา วิไลจิตต์"},{emplcode: "484134", name: "ดนุพล ค่ายหนองสวง"},{emplcode: "484666", name: "Peter Parker"}];
+
 var _MS_PER_DAY = 1000 * 60 * 60 * 24;
 
  function GetCurrentDate(){
@@ -576,4 +578,12 @@ function CheckDateValidation ($ionicPopup,startDate,endDate) {
     })
   }
   else return true;
+};
+
+function filterEmployees(query){
+  var result = [];
+  for (var i = 0; i <= emplooyeeDatas.length - 1; i++) {
+    if(emplooyeeDatas[i].emplcode.toLowerCase().indexOf(query.toLowerCase()) >= 0 || emplooyeeDatas[i].name.toLowerCase().indexOf(query.toLowerCase()) >= 0) result.push(emplooyeeDatas[i]);
+  };
+  return result;
 };
