@@ -27,7 +27,7 @@
             <div class="col col-33 text-center ssmenu-container">
                 <span class='badge badge-assertive' ng-show='categories[$index].unreadNumber > 0'>{{categories[$index].unreadNumber}}</span>
                 <div class="card">
-                    <a class="item" href="{{categories[$index].href}}{{categories[$index].id}}">
+                    <a class="item" ng-click='setSelectedCategory(categories[$index].id)' href="{{categories[$index].href}}{{categories[$index].id}}">
                         <i class="icon larger {{categories[$index].icon}}"></i>
                         <div class="item-text-wrap">{{categories[$index].name}}</div>
                     </a>
@@ -37,7 +37,7 @@
             <div ng-if='($index + 1) < categories.length' class="col col-33 text-center ssmenu-container">
                 <span class='badge badge-assertive' ng-show='categories[$index + 1].unreadNumber > 0'>{{categories[$index + 1].unreadNumber}}</span>
                 <div class="card">
-                    <a class="item" href="{{categories[$index + 1].href}}{{categories[$index + 1].id}}">
+                    <a class="item" ng-click='setSelectedCategory(categories[$index + 1].id)' href="{{categories[$index + 1].href}}{{categories[$index + 1].id}}">
                         <i class="icon larger {{categories[$index + 1].icon}}"></i>
                         <div class="item-text-wrap">{{categories[$index + 1].name}}</div>
                     </a>
@@ -47,7 +47,7 @@
             <div ng-if='($index + 2) < categories.length' class="col col-33 text-center ssmenu-container">
                 <span class='badge badge-assertive' ng-show='categories[$index + 2].unreadNumber > 0'>{{categories[$index + 2].unreadNumber}}</span>
                 <div class="card">
-                    <a class="item" href="{{categories[$index + 2].href}}{{categories[$index + 2].id}}">
+                    <a class="item" ng-click='setSelectedCategory(categories[$index + 2].id)' href="{{categories[$index + 2].href}}{{categories[$index + 2].id}}">
                         <i class="icon larger {{categories[$index + 2].icon}}"></i>
                         <div class="item-text-wrap">{{categories[$index + 2].name}}</div>
                     </a>

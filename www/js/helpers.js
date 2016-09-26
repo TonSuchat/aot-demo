@@ -347,6 +347,47 @@ function CreateFileCheckPermission($cordovaFile,$q,APIService) {
   });
 };
 
+function CreateFile($cordovaFile,$q,APIService,fileName,data){
+  return $q(function(resolve){
+    APIService.ShowLoading();
+    if(window.cordova){
+      var pathFile = '';
+      if (ionic.Platform.isIOS()) pathFile = cordova.file.documentsDirectory
+      else pathFile = cordova.file.externalDataDirectory
+      $cordovaFile.writeFile(pathFile, fileName, data, true).then(function(success){
+          APIService.HideLoading();
+          return resolve(true);
+      }, function(error) {APIService.HideLoading(); console.log(error); return resolve(false);});
+    }
+    else{
+      APIService.HideLoading();
+      return resolve(true);
+    }   
+  });
+};
+
+function ReadFile ($cordovaFile,$q,APIService,fileName) {
+  return $q(function(resolve){
+    APIService.ShowLoading();
+    if(window.cordova){
+      var pathFile = '';
+      if (ionic.Platform.isIOS()) pathFile = cordova.file.documentsDirectory
+      else pathFile = cordova.file.externalDataDirectory
+      $cordovaFile.readAsText(pathFile, fileName)
+      .then(function (success) {
+        return resolve(success);
+      }, function (error) {
+        return resolve(null);
+      });
+    }
+    else{
+      //pc
+      APIService.HideLoading();
+      return resolve(true);
+    }   
+  });
+};
+
 function RemovePDFFiles($cordovaFile) {
   if(!window.cordova) return;
   var pathFile = '';

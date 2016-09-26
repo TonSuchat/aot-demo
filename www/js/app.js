@@ -9,14 +9,6 @@
 
     .run(function($ionicPlatform) {
 
-
-      // var date1 = new Date(2016,6,1);
-
-      // var date3 = new Date(parseInt(window.localStorage.getItem('myDate')));
-      // console.log(date3);
-
-      // console.log(DateDiff(date3));
-
       $ionicPlatform.ready(function() {
         // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
         // for form inputs)
@@ -29,6 +21,7 @@
           // org.apache.cordova.statusbar required
           StatusBar.styleDefault();
         }
+
       });
     })
     .run(function($cordovaFile,$cordovaFileOpener2,$ionicPlatform, SQLiteService, AuthService, XMPPService, XMPPApiService, $rootScope, AUTH_EVENTS, APIService, $http, $q, $cordovaNetwork, $ionicPopup,$state, NotiService){

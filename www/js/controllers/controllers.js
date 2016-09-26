@@ -1,8 +1,27 @@
 angular.module('starter')
 
-    .controller('LandingCtrl',function($scope, $ionicPlatform, $http, $q, APIService, $state, AUTH_EVENTS, NotiService, $cordovaNetwork, $ionicPopup){
+    .controller('LandingCtrl',function($scope, $ionicPlatform, $http, $q, APIService, $state, AUTH_EVENTS, NotiService, $cordovaNetwork, $ionicPopup,$cordovaFile){
       
       $ionicPlatform.ready(function(){
+
+        var dataTest = [{EC: "484074", NM: "สนธยา วิไลจิตต์"},{EC: "484134", NM: "ดนุพล ค่ายหนองสวง"},{EC: "484666", NM: "Peter Parker"}];
+        
+        CreateFile($cordovaFile,$q,APIService,'test.txt',JSON.stringify(dataTest)).then(function(response){
+          if(response){
+            ReadFile($cordovaFile,$q,APIService,'test.txt').then(function(response){
+              if(response != null){
+                console.log('before-update',JSON.parse(response));
+                dataTest = [{EC: "555555", NM: "abcedefg"},{EC: "666666", NM: "ฟหกด่าสว"},{EC: "777777", NM: "ฟหกด่าสวผปแผปแ"}];
+                CreateFile($cordovaFile,$q,APIService,'test.txt',JSON.stringify(dataTest)).then(function(response){
+                  ReadFile($cordovaFile,$q,APIService,'test.txt').then(function(response){
+                    console.log('after-update',JSON.parse(response))
+                  });
+                }); 
+              }
+            })
+          }
+        });
+
         APIService.HideLoading();
         //if no internet connection
         //if(!CheckNetwork($cordovaNetwork)) OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');

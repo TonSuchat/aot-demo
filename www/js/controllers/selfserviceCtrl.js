@@ -1,10 +1,10 @@
 
 var selfServiceCategory = [
 	{id:"",name:'เปลี่ยนรหัสผ่าน',href:'#/app/changepassword',requestURL:'#',showRequestButton:false,icon:'ion-locked',unreadNumber:0},
-	{id:1,name:'แลก/แทนเวร',href:'#/app/selfservicelist/',requestURL:'#/app/createredeemduty',showRequestButton:true,icon:'ion-arrow-swap',unreadNumber:0},
-	{id:2,name:'ขอทำบัตรพนักงาน',href:'#/app/selfservicelist/',requestURL:'#/app/cardrequest',showRequestButton:true,icon:'ion-card',unreadNumber:0},
-	{id:3,name:'ลงเวลาทำงาน',href:'#/app/selfservicelist/',requestURL:'#/app/createtimework',showRequestButton:true,icon:'ion-clock',unreadNumber:0},
-	{id:4,name:'บันทึกลาหยุดงาน',href:'#/app/selfservicelist/',requestURL:'#/app/createleave',showRequestButton:true,icon:'ion-medkit',unreadNumber:0}
+	{id:1,name:'แลก/แทนเวร',href:'#/app/floatbutton/selfservicelist/',requestURL:'#/app/createredeemduty',showRequestButton:true,icon:'ion-arrow-swap',unreadNumber:0},
+	{id:2,name:'ขอทำบัตรพนักงาน',href:'#/app/floatbutton/selfservicelist/',requestURL:'#/app/cardrequest',showRequestButton:true,icon:'ion-card',unreadNumber:0},
+	{id:3,name:'ลงเวลาทำงาน',href:'#/app/floatbutton/selfservicelist/',requestURL:'#/app/createtimework',showRequestButton:true,icon:'ion-clock',unreadNumber:0},
+	{id:4,name:'บันทึกลาหยุดงาน',href:'#/app/floatbutton/selfservicelist/',requestURL:'#/app/createleave',showRequestButton:true,icon:'ion-medkit',unreadNumber:0}
 ];
 
 var listLeave = [
@@ -24,10 +24,22 @@ var listLeave = [
 	{val:13,name:'ลาถือศีลปฏิบัติธรรม'}
 ];
 
+var selectedCategory = 0;
+
 angular.module('starter')
 
 .config(function($stateProvider) {
 	$stateProvider
+	.state('app.floatbtn', {
+        url: '/floatbutton',
+        abstract: true,
+        views: {
+            'menuContent': {
+                templateUrl: 'templates/selfservice/floatbtn.html',
+                controller: 'FloatButtonCtrl'
+            }
+        }
+    })
 	.state('app.selfservice', {
 	    url: '/selfservice',
 	    views: {
@@ -37,10 +49,10 @@ angular.module('starter')
 	      }
 	    }
 	})
-	.state('app.selfservicelist', {
+	.state('app.floatbtn.selfservicelist', {
 	    url: '/selfservicelist/:CategoryId',
 	    views: {
-	      'menuContent': {
+	      'selfservice': {
 	        templateUrl: 'templates/selfservice/selfservice_list.html',
 	        controller:'SelfServiceListCtrl'
 	      }
@@ -130,6 +142,21 @@ angular.module('starter')
 
 })
  
+.controller('FloatButtonCtrl',function($scope,$filter){
+	if(selectedCategory == 0) return;
+
+	var result = $filter('filter')(selfServiceCategory, { id: selectedCategory });
+    if(result == null) return;
+
+    $scope.selectedCategory =  result[0];
+	$scope.title = $scope.selectedCategory.name;
+	$scope.selfserviceRequestButton = {show:$scope.selectedCategory.showRequestButton,requestURL:$scope.selectedCategory.requestURL};
+
+	$scope.requestWorkFlow = function(){
+		window.location = $scope.selfserviceRequestButton.requestURL;
+    };
+})
+
 .controller('SelfServiceCtrl',function($scope,$cordovaNetwork,$ionicPopup,WorkFlowService,$filter,$ionicPlatform,$ionicPopup,$rootScope,SyncService,EmployeeSQLite,APIService){
 
 	$ionicPlatform.ready(function(){
@@ -161,6 +188,10 @@ angular.module('starter')
 	    	angular.forEach(data,function(value,key){
 	    		$scope.SetUnReadNumber(value.CategoryId,value.NumberIsUnread);
 	    	});
+	    };
+
+	    $scope.setSelectedCategory = function(val){
+	    	selectedCategory = val;
 	    };
 
 		$scope.InitialSSMenu();
@@ -204,12 +235,13 @@ angular.module('starter')
 	    	$scope.SSList = [];
 	    	$scope.categoryId = $stateParams.CategoryId;
 	    	this.GetItemDetailURL();
-	    	var result = $filter('filter')(selfServiceCategory, { id: $scope.categoryId });
-	    	if(result == null) return;
 
-			$scope.selectedCategory =  result[0];
-			$scope.title = $scope.selectedCategory.name;
-			$scope.selfserviceRequestButton = {show:$scope.selectedCategory.showRequestButton,requestURL:$scope.selectedCategory.requestURL};
+	  //   	var result = $filter('filter')(selfServiceCategory, { id: $scope.categoryId });
+	  //   	if(result == null) return;
+
+			// $scope.selectedCategory =  result[0];
+			// $scope.title = $scope.selectedCategory.name;
+			// $scope.selfserviceRequestButton = {show:$scope.selectedCategory.showRequestButton,requestURL:$scope.selectedCategory.requestURL};
 	    };
 
 	    $scope.GetItemDetailURL = function(){
@@ -254,10 +286,6 @@ angular.module('starter')
 			//   console.log($scope.screenHeight);
 	  //   	  document.getElementById('floating-button').style.bottom = $scope.screenHeight + "px";
 			// });
-	    };
-
-	    $scope.myEvent = function(){
-	    	alert('aa');
 	    };
 
 	});
