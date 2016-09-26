@@ -15,7 +15,8 @@
         </div> -->
 
         <ion-list>
-            <div class="card" ng-repeat='circular in Circulars'>
+
+            <!-- <div class="card" ng-repeat='circular in Circulars'>
                 <div class="item item-divider">
                     <h2>วันที่ {{circular.circularDate}}</h2>
                 </div>
@@ -23,7 +24,18 @@
                     <h2>{{circularDetail.header}}</h2>
                     <p>{{circularDetail.description}}</p>
                 </a>
+            </div> -->
+
+            <div class="card" ng-repeat="circular in Circulars | groupBy:'DocDate' | toArray:true | orderBy:max ">
+                <div class="item item-divider" >
+                    <h2>วันที่ {{GetThaiDateByDate(circular.$key)}}</h2>
+                </div>
+                <a href="#" ng-repeat="item in circular | orderBy:'-Id'" ng-click='OpenPDF(item.Id)' class="item" >
+                    <h2>{{item.Description}}</h2>
+                    <p>{{item.DocNumber}}</p>
+                </a>
             </div>
+
         </ion-list>
 
         <ion-infinite-scroll on-infinite="loadMoreData()" ng-if="haveMoreData" distanct="1%">

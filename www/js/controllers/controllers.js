@@ -209,13 +209,19 @@ angular.module('starter')
 
         $scope.loadMoreData = function(){
           if ($scope.isfirstLoad) { $scope.isfirstLoad = false; $scope.$broadcast('scroll.infiniteScrollComplete'); return; };
-          //start +3
+          //start +10
           APIService.ShowLoading();
           $scope.start += $scope.retrieve;
-          var result = InitialCirculars($scope.distinctDate,$filter,$scope.allData,$scope.start,$scope.retrieve);
+          //var result = InitialCirculars($scope.distinctDate,$filter,$scope.allData,$scope.start,$scope.retrieve);
+          var result = InitialCirculars($scope.allData,$scope.start,$scope.retrieve);
           $scope.Circulars = ($scope.Circulars.length > 0) ? $scope.Circulars.concat(result) : result;
           FinalCircularAction($scope,APIService);
-          $scope.haveMoreData = (($scope.start + $scope.retrieve) < $scope.distinctDate.rows.length) ? true : false;
+          $scope.haveMoreData = (($scope.start + $scope.retrieve) < $scope.allData.length) ? true : false;
+        };
+
+        $scope.max = function(arr){
+          return $filter('min')
+            ($filter('map')(arr, '-Id'));
         };
 
         $scope.OpenPDF = function(Id){
@@ -224,6 +230,10 @@ angular.module('starter')
           var data = {Id:Id};
           var fileName = 'circular-letter';
           DisplayPDF($cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName);
+        };
+
+        $scope.GetThaiDateByDate = function(inputDate){
+          return GetThaiDateByDate($filter,inputDate);
         };
 
       });
@@ -523,37 +533,38 @@ angular.module('starter')
     })
  
 
-function InitialCirculars(distinctCircularDate,$filter,allData,start,retrieve){
+// function InitialCirculars(distinctCircularDate,$filter,allData,start,retrieve){
+//     var result = [];
+//     var counter = 1;
+//     var currentIndex = start - 1;
+//     if(allData.rows != null && distinctCircularDate.rows != null){
+//       while ((currentIndex < distinctCircularDate.rows.length) && (counter <= retrieve)){
+//         var currentCircularDate = distinctCircularDate.rows.item(currentIndex).DocDate;
+//         allDataArr = ConvertQueryResultToArray(allData);
+//         var currentDetailsByDate = $filter('filter')(allDataArr,{DocDate:currentCircularDate});   
+//         if(currentCircularDate.indexOf('/') > -1) currentCircularDate = currentCircularDate.replace(/\//g,'');
+//         var newData = {};
+//         newData.circularDate = GetThaiDateByDate($filter,currentCircularDate);
+//         newData.circularDetails = [];
+//         for (var z = 0; z <= currentDetailsByDate.length -1; z++) {
+//             //newData.circularDetails.push({link:currentDetailsByDate[z].Link,header:currentDetailsByDate[z].Description,description:currentDetailsByDate[z].DocNumber});    
+//             newData.circularDetails.push({Id:currentDetailsByDate[z].Id,header:currentDetailsByDate[z].Description,description:currentDetailsByDate[z].DocNumber});    
+//         };
+//         result.push(newData);
+//         counter++;
+//         currentIndex++;
+//       }  
+//     };
+//     return result;
+// };
+
+function InitialCirculars(allData,start,retrieve){
     var result = [];
-    // for (var i = 0; i <= retrieve - 1; i++) {
-    //     var currentCircularDate = distinctCircularDate.rows.item(i).DocDate;
-    //     allDataArr = ConvertQueryResultToArray(allData);
-    //     var currentDetailsByDate = $filter('filter')(allDataArr,{DocDate:currentCircularDate});   
-    //     if(currentCircularDate.indexOf('/') > -1) currentCircularDate = currentCircularDate.replace(/\//g,'');
-    //     var newData = {};
-    //     newData.circularDate = GetThaiDateByDate($filter,currentCircularDate);
-    //     newData.circularDetails = [];
-    //     for (var z = 0; z <= currentDetailsByDate.length -1; z++) {
-    //         newData.circularDetails.push({link:currentDetailsByDate[z].Link,header:currentDetailsByDate[z].Description,description:currentDetailsByDate[z].DocNumber});    
-    //     };
-    //     result.push(newData);
-    // };
     var counter = 1;
     var currentIndex = start - 1;
-    if(allData.rows != null && distinctCircularDate.rows != null){
-      while ((currentIndex < distinctCircularDate.rows.length) && (counter <= retrieve)){
-        var currentCircularDate = distinctCircularDate.rows.item(currentIndex).DocDate;
-        allDataArr = ConvertQueryResultToArray(allData);
-        var currentDetailsByDate = $filter('filter')(allDataArr,{DocDate:currentCircularDate});   
-        if(currentCircularDate.indexOf('/') > -1) currentCircularDate = currentCircularDate.replace(/\//g,'');
-        var newData = {};
-        newData.circularDate = GetThaiDateByDate($filter,currentCircularDate);
-        newData.circularDetails = [];
-        for (var z = 0; z <= currentDetailsByDate.length -1; z++) {
-            //newData.circularDetails.push({link:currentDetailsByDate[z].Link,header:currentDetailsByDate[z].Description,description:currentDetailsByDate[z].DocNumber});    
-            newData.circularDetails.push({Id:currentDetailsByDate[z].Id,header:currentDetailsByDate[z].Description,description:currentDetailsByDate[z].DocNumber});    
-        };
-        result.push(newData);
+    if(allData != null){
+      while (counter <= retrieve){
+        result.push(allData[currentIndex]);
         counter++;
         currentIndex++;
       }  
@@ -568,29 +579,48 @@ function FinalCircularAction($scope,APIService){
 };
 
 function InitialCircularProcess($scope, $filter, SyncService, CircularSQLite, APIService){
+  // $scope.Circulars = [];
+  // $scope.haveMoreData = false;
+  // $scope.isfirstLoad = true;
+  // $scope.allData;
+  // $scope.distinctDate;
+  // $scope.start = 1;
+  // $scope.retrieve = 3;
+  // APIService.ShowLoading();
+  // SyncService.SyncCircular().then(function(){
+  //   CircularSQLite.GetAll().then(function(allData){
+  //     if(allData.rows != null && allData.rows.length > 0){
+  //       $scope.allData = allData;
+  //       CircularSQLite.GetDistinctDate().then(function(distinctDate){
+  //         $scope.distinctDate = distinctDate;
+  //         APIService.ShowLoading();
+  //         $scope.Circulars = InitialCirculars(distinctDate,$filter,allData,$scope.start,$scope.retrieve);
+  //         FinalCircularAction($scope,APIService);
+  //         $scope.haveMoreData = (($scope.start + $scope.retrieve) < $scope.distinctDate.rows.length) ? true : false;
+  //       });
+  //     }
+  //     APIService.HideLoading();
+  //   });
+  // });
+
   $scope.Circulars = [];
   $scope.haveMoreData = false;
   $scope.isfirstLoad = true;
-  $scope.allData;
-  $scope.distinctDate;
   $scope.start = 1;
-  $scope.retrieve = 3;
+  $scope.retrieve = 10;
+  $scope.allData;
   APIService.ShowLoading();
   SyncService.SyncCircular().then(function(){
-    CircularSQLite.GetAll().then(function(allData){
-      if(allData.rows != null && allData.rows.length > 0){
-        $scope.allData = allData;
-        CircularSQLite.GetDistinctDate().then(function(distinctDate){
-          $scope.distinctDate = distinctDate;
-          APIService.ShowLoading();
-          $scope.Circulars = InitialCirculars(distinctDate,$filter,allData,$scope.start,$scope.retrieve);
-          FinalCircularAction($scope,APIService);
-          $scope.haveMoreData = (($scope.start + $scope.retrieve) < $scope.distinctDate.rows.length) ? true : false;
-        });
+    CircularSQLite.GetAll().then(function(response){
+      if(response != null){
+        $scope.allData = ConvertQueryResultToArray(response);
+        $scope.Circulars = InitialCirculars($scope.allData,$scope.start,$scope.retrieve);
       }
+      $scope.haveMoreData = (($scope.start + $scope.retrieve) < $scope.allData.length) ? true : false;
       APIService.HideLoading();
     });
   });
+
 };
 
 function InitialNewsFeedProcess($scope, $stateParams, SyncService, NewsSQLite, $ionicPlatform, APIService){

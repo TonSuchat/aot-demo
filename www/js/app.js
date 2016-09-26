@@ -5,7 +5,7 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js
 // angular.module('starter', ['ionic','ngCordova','ngMockE2E','btford.socket-io','ionic.rating'])
- angular.module('starter', ['ionic','ngCordova','btford.socket-io','ionic.rating','ui.rCalendar','ionic-datepicker','ngMessages','ion-floating-menu','ion-autocomplete'])
+ angular.module('starter', ['ionic','ngCordova','btford.socket-io','ionic.rating','ui.rCalendar','ionic-datepicker','ngMessages','ion-floating-menu','ion-autocomplete','angular.filter'])
 
     .run(function($ionicPlatform) {
 

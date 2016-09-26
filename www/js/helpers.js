@@ -29,7 +29,7 @@ var shortnessEngMonth = [
     {monthValue:'12',monthName:'Dec'},
 ];
 
-var emplooyeeDatas = [{emplcode: "484074", name: "สนธยา วิไลจิตต์"},{emplcode: "484134", name: "ดนุพล ค่ายหนองสวง"},{emplcode: "484666", name: "Peter Parker"}];
+var emplooyeeDatas = []; //[{EC: "484074", NM: "สนธยา วิไลจิตต์"},{EC: "484134", NM: "ดนุพล ค่ายหนองสวง"},{EC: "484666", NM: "Peter Parker"}];
 
 var _MS_PER_DAY = 1000 * 60 * 60 * 24;
 
@@ -49,12 +49,18 @@ function GetFiscalDate(){
 	var day = today.getDate();
 	var month = today.getMonth()+1;
 	var year = today.getFullYear();
-	if(month > 10) return '0110' + (year + 1);
-	else return '0110' + year;
+	if(month > 10) return '0110' + year;
+	else return '0110' + (year - 1);
 };
 
 function  GetFiscalYear() {
-  var fiscalDate = GetFiscalDate();
+  var fiscalDate;
+  var today = new Date();
+  var day = today.getDate();
+  var month = today.getMonth()+1;
+  var year = today.getFullYear();
+  if(month > 10) fiscalDate = '0110' + (year + 1);
+  else fiscalDate = '0110' + year;
   return fiscalDate.substring(4);
 };
 
@@ -583,7 +589,7 @@ function CheckDateValidation ($ionicPopup,startDate,endDate) {
 function filterEmployees(query){
   var result = [];
   for (var i = 0; i <= emplooyeeDatas.length - 1; i++) {
-    if(emplooyeeDatas[i].emplcode.toLowerCase().indexOf(query.toLowerCase()) >= 0 || emplooyeeDatas[i].name.toLowerCase().indexOf(query.toLowerCase()) >= 0) result.push(emplooyeeDatas[i]);
+    if(emplooyeeDatas[i].EC.toLowerCase().indexOf(query.toLowerCase()) >= 0 || emplooyeeDatas[i].NM.toLowerCase().indexOf(query.toLowerCase()) >= 0) result.push(emplooyeeDatas[i]);
   };
   return result;
 };

@@ -80,6 +80,7 @@ angular.module('starter')
 		this.CreatePMUserInRoomTable();
 		this.CreatePMSeenMessage();
 		this.CreateNotiHistoryTable();
+		this.CreateEmployeeTable();
 		//this.CreateMobileConfigTable();
 	};
 
@@ -162,6 +163,10 @@ angular.module('starter')
 
 	this.CreatePMSeenMessage = function(){
 		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS pmseenmessage(Id integer primary key AUTOINCREMENT, Empl_Code text, MessageId text, roomId text)");
+	};
+
+	this.CreateEmployeeTable = function(){
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS employee(clientid integer primary key AUTOINCREMENT,Id int, EC text, NM text, DL boolean, dirty boolean, TS text)");
 	};
 
 	this.DeleteAllTables = function(){
@@ -772,7 +777,7 @@ angular.module('starter')
 	};
 
 	this.GetAll = function(){
-		return SQLiteService.Execute("SELECT * FROM circular").then(function(response){return response;},function(error){return error;});	
+		return SQLiteService.Execute("SELECT * FROM circular ORDER BY CAST(SUBSTR(DocDate,5,4) AS INT) DESC, CAST(SUBSTR(DocDate,3,2) AS INT) DESC, CAST(SUBSTR(DocDate,1,2) AS INT) DESC").then(function(response){return response;},function(error){return error;});	
 	};
 })
 .service('NewsSQLite',function(SQLiteService){
@@ -1122,6 +1127,68 @@ angular.module('starter')
 
 	this.GetNotiHistories = function(){
 		return SQLiteService.Execute("SELECT * FROM notihistory ORDER BY Id DESC").then(function(response){return response;},function(error){return error;});
+	};
+})
+
+.service('EmployeeSQLite',function(SQLiteService){
+	//***Necessary-Method
+	this.GetLatestTS = function(){
+		return SQLiteService.BaseGetLatestTS('employee').then(function(response){return response;},function(error){return error;});
+	};
+
+	this.CountByServerId = function(serverid){
+		return SQLiteService.CountByServerId(serverid,'employee').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.CountIsNotDirtyById = function(id){
+		return SQLiteService.CountIsNotDirtyById(id,'employee').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.GetDataByTSIsNull = function(){
+		return SQLiteService.GetDataByTSIsNull('employee');
+	};
+
+	this.GetDataIsDirty = function(){
+		return SQLiteService.GetDataIsDirty("employee");
+	};
+
+	this.DeleteDataIsFlagDeleted = function(){
+		return SQLiteService.DeleteDataIsFlagDeleted("employee");
+	};
+
+	this.Update = function(data,isDirty,clientUpdate){
+		var sql;
+		if(clientUpdate)
+			sql = "UPDATE employee SET Id = ?, EC = ?, NM = ?, DL = ?, dirty = ?, TS = ? WHERE clientid = " + data.clientid;
+		else
+			sql = "UPDATE employee SET Id = ?, EC = ?, NM = ?, DL = ?, dirty = ?, TS = ? WHERE Id = " + data.Id;
+		var param = [data.Id,data.EC,data.NM,data.DL,isDirty,data.TS];
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
+	};
+
+	this.Add = function(data,createFromClient){
+		var sql = "INSERT INTO employee (Id, EC, NM, DL, dirty, TS) VALUES ";
+		var param = []; 
+		var rowArgs = [];
+		data.forEach(function(item){
+			rowArgs.push("(?,?,?,?,?,?)");
+			param.push(item.Id);
+			param.push(item.EC);
+			param.push(item.NM);
+			param.push(item.DL);
+			//dirty
+			if(createFromClient) param.push(true);
+			else param.push(false);
+			//TS
+			if(createFromClient) param.push(null);
+			else param.push(item.TS);
+		});
+		sql += rowArgs.join(', ');
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){console.log(error); return error;});
+	};
+	//***Necessary-Method
+	this.GetEmplooyees = function(){
+		return SQLiteService.Execute("SELECT * FROM employee").then(function(response){return response;},function(error){return error;});
 	};
 })
 

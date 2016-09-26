@@ -1,6 +1,6 @@
 angular.module('starter')
 
-.service('SyncService',function($q,APIService,TestSyncSQLite,UserProfileSQLite,MedicalSQLite,TuitionSQLite,RoyalSQLite,TimeAttendanceSQLite,LeaveSQLite,LeaveSummarySQLite,CircularSQLite,NewsSQLite,PMRoomSQLite,PMMsgSQLite,PMSubscribeSQLite,PMUserInRoomSQLite,NotiHistorySQLite){
+.service('SyncService',function($q,APIService,TestSyncSQLite,UserProfileSQLite,MedicalSQLite,TuitionSQLite,RoyalSQLite,TimeAttendanceSQLite,LeaveSQLite,LeaveSummarySQLite,CircularSQLite,NewsSQLite,PMRoomSQLite,PMMsgSQLite,PMSubscribeSQLite,PMUserInRoomSQLite,NotiHistorySQLite,EmployeeSQLite){
 
   enableSync = true;
 
@@ -112,6 +112,16 @@ angular.module('starter')
     };
     console.log('SYNC-NotiHistory');
     return ProcessSyncData(APIService,NotiHistorySQLite,$q,apiURLs,apiDatas,null);
+  };
+
+  this.SyncEmployee = function(){
+    var apiDatas = {
+      GetData:{ObjectID:11,SyncEmplooyeeViewModel:{}},
+      AddData:{ObjectID:11,SyncEmplooyeeViewModel:{}},
+      UpdateData:{ObjectID:11,SyncEmplooyeeViewModel:{}}
+    };
+    console.log('SYNC-Employee');
+    return ProcessSyncData(APIService,EmployeeSQLite,$q,apiURLs,apiDatas,null);
   };
 
   // this.SyncPMRoom = function(){

@@ -130,7 +130,7 @@ angular.module('starter')
 
 })
  
-.controller('SelfServiceCtrl',function($scope,$cordovaNetwork,$ionicPopup,WorkFlowService,$filter,$ionicPlatform,$ionicPopup,$rootScope){
+.controller('SelfServiceCtrl',function($scope,$cordovaNetwork,$ionicPopup,WorkFlowService,$filter,$ionicPlatform,$ionicPopup,$rootScope,SyncService,EmployeeSQLite,APIService){
 
 	$ionicPlatform.ready(function(){
 
@@ -168,6 +168,21 @@ angular.module('starter')
 		//if no internet connection
 	    if(!CheckNetwork($cordovaNetwork)) OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
 	    else{
+	    	// //sync emplooyee datas
+	    	// APIService.ShowLoading();
+	    	// SyncService.SyncEmployee().then(function(response){
+	    	// 	APIService.HideLoading();
+      //           //get data from emplooyee and assign to array
+      //           EmployeeSQLite.GetEmplooyees().then(function(response){
+      //           	if(response != null){
+      //           		var result = ConvertQueryResultToArray(response);
+      //           		console.log('result',result);
+      //           		emplooyeeDatas = ConvertQueryResultToArray(response);
+      //           		console.log('emplooyeeDatas',emplooyeeDatas);
+      //           	} 
+      //           },function(error){console.log(error);APIService.HideLoading();});
+      //       },function(error){console.log(error);APIService.HideLoading();});
+
 	    	//get badge number of new item and bind to each category
 	    	WorkFlowService.ViewUnReadMytask(window.localStorage.getItem("CurrentUserName")).then(function(response){
 	    		if(response != null && response.data != null) $scope.BindCategoryUnreadNumber(response.data);
@@ -911,6 +926,13 @@ angular.module('starter')
 })
 
 .controller('CreateTimeWorkCtrl',function($scope,$cordovaNetwork,$stateParams,$ionicPopup,$ionicPlatform,WorkFlowService,$filter,ionicDatePicker,APIService,$location){
+
+	$scope.getEmployees = function (query) {
+		if(query){
+			return {items:filterEmployees(query)};
+		}
+		return {items:[]};
+	};
 
 	$scope.searchEmp = {searchTxt:'',result:''};
 	$scope.ddlStartTimesData = {selectedOptions:{},options:[]};
