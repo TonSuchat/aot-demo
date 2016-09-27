@@ -347,20 +347,17 @@ function CreateFileCheckPermission($cordovaFile,$q,APIService) {
   });
 };
 
-function CreateFile($cordovaFile,$q,APIService,fileName,data){
+function CreateFile($cordovaFile,$q,fileName,data){
   return $q(function(resolve){
-    APIService.ShowLoading();
     if(window.cordova){
       var pathFile = '';
       if (ionic.Platform.isIOS()) pathFile = cordova.file.documentsDirectory
       else pathFile = cordova.file.externalDataDirectory
       $cordovaFile.writeFile(pathFile, fileName, data, true).then(function(success){
-          APIService.HideLoading();
           return resolve(true);
-      }, function(error) {APIService.HideLoading(); console.log(error); return resolve(false);});
+      }, function(error) {console.log(error); return resolve(false);});
     }
     else{
-      APIService.HideLoading();
       return resolve(true);
     }   
   });
@@ -642,13 +639,12 @@ function filterEmployees(data,query){
 
 function SaveEmployeeMasterData($q,APIService,$cordovaFile) {
   return $q(function(resolve){
-    APIService.ShowLoading();
     var url = APIService.hostname() + '/ContactDirectory/EmployeeContactAll';
     APIService.httpPost(url,null,
       function(response){
           if(response != null && response.data != null){
             //save data as file
-            CreateFile($cordovaFile,$q,APIService,employeeFileName,JSON.stringify(response.data)).then(function(createResponse){resolve(true);});
+            CreateFile($cordovaFile,$q,employeeFileName,JSON.stringify(response.data)).then(function(createResponse){resolve(true);});
           };
     },function(error){console.log(error);resolve(false);});
   });

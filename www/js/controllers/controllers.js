@@ -111,7 +111,6 @@ angular.module('starter')
           if(form.$valid) {
             var currentUserName = $scope.loginData.username;
             var gcmToken = (window.cordova) ? (window.localStorage.getItem('GCMToken') == null ? '' : window.localStorage.getItem('GCMToken')) : PCGCMToken;
-            console.log(gcmToken);
             //check has permission to manage files?
             CreateFileCheckPermission($cordovaFile,$q,APIService).then(function(response){
               if(response != null && response){
