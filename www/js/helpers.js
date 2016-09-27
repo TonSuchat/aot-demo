@@ -375,8 +375,10 @@ function ReadFile ($cordovaFile,$q,APIService,fileName) {
       else pathFile = cordova.file.externalDataDirectory
       $cordovaFile.readAsText(pathFile, fileName)
       .then(function (success) {
+        APIService.HideLoading();
         return resolve(success);
       }, function (error) {
+        APIService.HideLoading();
         return resolve(null);
       });
     }
@@ -539,7 +541,7 @@ function SetProfileSettings($q,data){
   });
 };
 
-function CheckForceLogOut($ionicPopup,APIService,AuthService,$q) {
+function CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile) {
   return $q(function(resolve){
     //if not loged in then exit
     if(!AuthService.isAuthenticated()) return resolve(true);
@@ -568,6 +570,8 @@ function CheckForceLogOut($ionicPopup,APIService,AuthService,$q) {
         CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
           console.log(response);
           if(response != null && response.data != null){
+            //check employee version with localstorage
+            CheckEmployeeVersion($q,APIService,$cordovaFile,response.data.EmpVer);
             //check device is disable by server
             if(!response.data.RegistAction){
               //if not valid and still logged on then force logout
@@ -627,10 +631,66 @@ function CheckDateValidation ($ionicPopup,startDate,endDate) {
   else return true;
 };
 
-function filterEmployees(query){
+function filterEmployees(data,query){
   var result = [];
-  for (var i = 0; i <= emplooyeeDatas.length - 1; i++) {
-    if(emplooyeeDatas[i].EC.toLowerCase().indexOf(query.toLowerCase()) >= 0 || emplooyeeDatas[i].NM.toLowerCase().indexOf(query.toLowerCase()) >= 0) result.push(emplooyeeDatas[i]);
+  for (var i = 0; i <= data.length - 1; i++) {
+    if(data[i].EC.indexOf(query) >= 0 || data[i].NM.indexOf(query) >= 0) result.push(data[i]);
+    if(result.length == 8) break;
   };
   return result;
+};
+
+function SaveEmployeeMasterData($q,APIService,$cordovaFile) {
+  return $q(function(resolve){
+    APIService.ShowLoading();
+    var url = APIService.hostname() + '/ContactDirectory/EmployeeContactAll';
+    APIService.httpPost(url,null,
+      function(response){
+          if(response != null && response.data != null){
+            //save data as file
+            CreateFile($cordovaFile,$q,APIService,employeeFileName,JSON.stringify(response.data)).then(function(createResponse){resolve(true);});
+          };
+    },function(error){console.log(error);resolve(false);});
+  });
+};
+
+function ReadEmployeeMasterData($q,APIService,$cordovaFile){
+  return $q(function(resolve){
+    if(window.cordova){
+      ReadFile($cordovaFile,$q,APIService,employeeFileName).then(function(response){
+        if(response != null) return resolve(JSON.parse(response));
+        else return resolve(null);
+      });
+    }
+    else{
+      var url = APIService.hostname() + '/ContactDirectory/EmployeeContactAll';
+      APIService.httpPost(url,null,
+        function(response){
+            if(response != null && response.data != null){
+              //save data as file
+              return resolve(response.data);
+            };
+      },function(error){console.log(error);resolve(null);});
+    }
+  });
+};
+
+function CheckEmployeeVersion($q,APIService,$cordovaFile,empVer){
+  return $q(function(resolve){
+    if(window.cordova){
+      //check employee version with localstorage
+      if(window.localStorage.getItem('EmpVer') == null || (window.localStorage.getItem('EmpVer') != empVer)){
+        //get employee master data and created it as file
+        SaveEmployeeMasterData($q,APIService,$cordovaFile).then(function(response){
+          if(response){
+            //save version into localstorage for check in next time
+            window.localStorage.setItem('EmpVer',empVer);
+            return resolve(true);
+          }
+          else return resolve(false);
+        });
+      }  
+    }
+    else return resolve(true);
+  });
 };

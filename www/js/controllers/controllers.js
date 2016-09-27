@@ -4,23 +4,23 @@ angular.module('starter')
       
       $ionicPlatform.ready(function(){
 
-        var dataTest = [{EC: "484074", NM: "สนธยา วิไลจิตต์"},{EC: "484134", NM: "ดนุพล ค่ายหนองสวง"},{EC: "484666", NM: "Peter Parker"}];
+        // var dataTest = [{EC: "484074", NM: "สนธยา วิไลจิตต์"},{EC: "484134", NM: "ดนุพล ค่ายหนองสวง"},{EC: "484666", NM: "Peter Parker"}];
         
-        CreateFile($cordovaFile,$q,APIService,'test.txt',JSON.stringify(dataTest)).then(function(response){
-          if(response){
-            ReadFile($cordovaFile,$q,APIService,'test.txt').then(function(response){
-              if(response != null){
-                console.log('before-update',JSON.parse(response));
-                dataTest = [{EC: "555555", NM: "abcedefg"},{EC: "666666", NM: "ฟหกด่าสว"},{EC: "777777", NM: "ฟหกด่าสวผปแผปแ"}];
-                CreateFile($cordovaFile,$q,APIService,'test.txt',JSON.stringify(dataTest)).then(function(response){
-                  ReadFile($cordovaFile,$q,APIService,'test.txt').then(function(response){
-                    console.log('after-update',JSON.parse(response))
-                  });
-                }); 
-              }
-            })
-          }
-        });
+        // CreateFile($cordovaFile,$q,APIService,'test.txt',JSON.stringify(dataTest)).then(function(response){
+        //   if(response){
+        //     ReadFile($cordovaFile,$q,APIService,'test.txt').then(function(response){
+        //       if(response != null){
+        //         console.log('before-update',JSON.parse(response));
+        //         dataTest = [{EC: "555555", NM: "abcedefg"},{EC: "666666", NM: "ฟหกด่าสว"},{EC: "777777", NM: "ฟหกด่าสวผปแผปแ"}];
+        //         CreateFile($cordovaFile,$q,APIService,'test.txt',JSON.stringify(dataTest)).then(function(response){
+        //           ReadFile($cordovaFile,$q,APIService,'test.txt').then(function(response){
+        //             console.log('after-update',JSON.parse(response))
+        //           });
+        //         }); 
+        //       }
+        //     })
+        //   }
+        // });
 
         APIService.HideLoading();
         //if no internet connection
@@ -125,6 +125,8 @@ angular.module('starter')
                       });
                     }
                     else if(response.data){
+                      //check employee version with localstorage
+                      CheckEmployeeVersion($q,APIService,$cordovaFile,response.data.EmpVer);
                       AuthService.login($scope.loginData.username, $scope.loginData.password).then(function() {
                         $rootScope.$broadcast('checkAuthen', null);
                         //update register device -> empid to server

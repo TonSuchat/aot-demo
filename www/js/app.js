@@ -41,14 +41,14 @@
           //post to gcm(google cloud messaging) for register device and get token from gcm
           if (window.cordova){
             NotiService.Register().then(function(){
-              CheckForceLogOut($ionicPopup,APIService,AuthService,$q);
+              CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile);
             });
           }
           else window.localStorage.setItem('GCMToken',PCGCMToken);
 
           //ionic resume event
           $ionicPlatform.on('resume', function(){
-            CheckForceLogOut($ionicPopup,APIService,AuthService,$q);
+            CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile);
           });
 
         });

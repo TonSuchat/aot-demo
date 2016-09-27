@@ -327,11 +327,11 @@ angular.module('starter')
 
 })
 
-.controller('CreateRedeemDutyCtrl',function($scope,$q,ionicDatePicker,APIService,$ionicPopup,$cordovaNetwork,$location,WorkFlowService,$ionicPlatform){
+.controller('CreateRedeemDutyCtrl',function($scope,$q,ionicDatePicker,APIService,$ionicPopup,$cordovaNetwork,$location,WorkFlowService,$ionicPlatform,$cordovaFile){
 
 	$ionicPlatform.ready(function(){
 		$scope.noInternet = false;
-
+		$scope.autoCompleteDatas = [];
 		//if no internet connection
 		if(!CheckNetwork($cordovaNetwork)){
 		  $scope.noInternet = true;
@@ -339,12 +339,20 @@ angular.module('starter')
 		};
 
 		//*******************Duty*******************
+		//AutoComplete//
+		$scope.autoCompleteDatas
+		//read employee master data from file
+		ReadEmployeeMasterData($q,APIService,$cordovaFile).then(function(response){
+			if(response != null) $scope.autoCompleteDatas = response;
+		});
+
 		$scope.getEmployees = function (query) {
 			if(query){
-				return {items:filterEmployees(query)};
+				return {items:filterEmployees($scope.autoCompleteDatas,query)};
 			}
 			return {items:[]};
-        };
+		};
+		//AutoComplete//
 
 		$scope.searchEmp = {searchTxt:'',result:''};
 		//RedeemDutyType : 1 = แลก , 2 = แทน
@@ -953,14 +961,21 @@ angular.module('starter')
 	});
 })
 
-.controller('CreateTimeWorkCtrl',function($scope,$cordovaNetwork,$stateParams,$ionicPopup,$ionicPlatform,WorkFlowService,$filter,ionicDatePicker,APIService,$location){
+.controller('CreateTimeWorkCtrl',function($scope,$cordovaNetwork,$stateParams,$ionicPopup,$ionicPlatform,WorkFlowService,$filter,ionicDatePicker,APIService,$location,$q,$cordovaFile){
+	//AutoComplete//
+	$scope.autoCompleteDatas
+	//read employee master data from file
+	ReadEmployeeMasterData($q,APIService,$cordovaFile).then(function(response){
+		if(response != null) $scope.autoCompleteDatas = response;
+	});
 
 	$scope.getEmployees = function (query) {
 		if(query){
-			return {items:filterEmployees(query)};
+			return {items:filterEmployees($scope.autoCompleteDatas,query)};
 		}
 		return {items:[]};
 	};
+	//AutoComplete//
 
 	$scope.searchEmp = {searchTxt:'',result:''};
 	$scope.ddlStartTimesData = {selectedOptions:{},options:[]};
