@@ -393,6 +393,9 @@ function RemovePDFFiles($cordovaFile) {
   if (ionic.Platform.isIOS()) pathFile = cordova.file.documentsDirectory
   else pathFile = cordova.file.externalDataDirectory
   var arrFiles = ['Tax_91.pdf','Tax_50.pdf','AOTNews.pdf','circular-letter.pdf'];
+  for (var i = 1; i <= totalEmployeeFiles; i++) {
+    arrFiles.push(employeeFileName + i + '.txt');
+  };
   for (var i = 0; i <= arrFiles.length - 1; i++) {
     RemoveFile($cordovaFile,pathFile,arrFiles[i]);
   };
@@ -643,27 +646,55 @@ function SaveEmployeeMasterData($q,APIService,$cordovaFile) {
     APIService.httpPost(url,null,
       function(response){
           if(response != null && response.data != null){
-            //save data as file
-            CreateFile($cordovaFile,$q,employeeFileName,JSON.stringify(response.data)).then(function(createResponse){resolve(true);});
+            //loop split data and save to 4 files
+            LoopSaveEmployeeFiles($cordovaFile,$q,response.data).then(function(){resolve(true);});
           };
     },function(error){console.log(error);resolve(false);});
+  });
+};
+
+function LoopSaveEmployeeFiles($cordovaFile,$q,data) {
+  return $q(function(resolve){
+    //split to xx parts
+    var divideResult = Math.floor((data.length / 4));
+    var index = 1;
+    var start = 0;
+    var end = divideResult;
+    var count = 0;
+    while (index <= totalEmployeeFiles) {
+      var eachArr = index != totalEmployeeFiles ? data.slice(start,end) : data.slice(start);
+      var filename = employeeFileName + index + '.txt';
+      //create file
+      CreateFile($cordovaFile,$q,filename,JSON.stringify(eachArr)).then(function(){
+        count++;
+        if(count == totalEmployeeFiles) return resolve(true);
+      });
+      start += divideResult;
+      end = (start + divideResult);
+      index++;
+    }
   });
 };
 
 function ReadEmployeeMasterData($q,APIService,$cordovaFile){
   return $q(function(resolve){
     if(window.cordova){
-      ReadFile($cordovaFile,$q,APIService,employeeFileName).then(function(response){
-        if(response != null) return resolve(JSON.parse(response));
-        else return resolve(null);
-      });
+      var count = 0;
+      var result = [];
+      for (var i = 1; i <= totalEmployeeFiles; i++) {
+        var filename = employeeFileName + i + '.txt';
+        ReadFile($cordovaFile,$q,APIService,filename).then(function(response){
+          if(response != null) result = result.concat(JSON.parse(response));
+          count++;
+          if(count == totalEmployeeFiles) return resolve(result);
+        });   
+      };
     }
     else{
       var url = APIService.hostname() + '/ContactDirectory/EmployeeContactAll';
       APIService.httpPost(url,null,
         function(response){
             if(response != null && response.data != null){
-              //save data as file
               return resolve(response.data);
             };
       },function(error){console.log(error);resolve(null);});
