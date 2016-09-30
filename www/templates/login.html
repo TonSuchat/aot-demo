@@ -23,7 +23,7 @@
 
         <label class="item item-input" ng-class="{ 'has-errors' : logInForm.password.$invalid, 'no-errors' : logInForm.password.$valid}">
           <span class="input-label">Password</span>
-          <input type="password" name='password' ng-model="loginData.password" ng-minlength='8' ng-maxlength='12' required>
+          <input type="password" name='password' ng-model="loginData.password" ng-minlength='8' ng-maxlength='24' required>
         </label>
         <div class="error-container" ng-show="logInForm.password.$error" ng-messages="logInForm.$submitted && logInForm.password.$error">
           <div ng-messages-include="error-list.html"></div>
@@ -47,7 +47,7 @@
       </div>
       <div class="error" ng-message="maxlength">
         <i class="ion-information-circled"></i> 
-        รหัสผ่านต้องน้อยกว่า 12 ตัวอักษร!
+        รหัสผ่านต้องน้อยกว่า 24 ตัวอักษร!
       </div>
     </script> 
 
