@@ -748,7 +748,7 @@ angular.module('starter')
 
 })
 
-.controller('CreateLeaveCtrl',function($scope,$cordovaNetwork,$stateParams,$ionicPopup,$ionicPlatform,WorkFlowService,$filter,ionicDatePicker,$location,LeaveSummarySQLite,SyncService){
+.controller('CreateLeaveCtrl',function($scope,$cordovaNetwork,$stateParams,$ionicPopup,$ionicPlatform,WorkFlowService,$filter,ionicDatePicker,$location,LeaveSummarySQLite,SyncService,APIService){
 	$ionicPlatform.ready(function(){
 
 		var defaultDate1,defaultDate2;
