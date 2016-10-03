@@ -395,7 +395,7 @@ angular.module('starter')
 									};
 						//var data = {Empl_Code:$scope.Empl_Code,Empl_Code2:$scope.searchEmp.searchTxt,DutyDate:$scope.selectedDate.dutyDate1.toString().replace(new RegExp('/','g'),''),DutyType: $scope.redeemDuty.type,DutyDate2:$scope.selectedDate.dutyDate2.toString().replace(new RegExp('/','g'),''),Remark: "sample string 6"}
 						WorkFlowService.CreateWorkFlow(data).then(function(response){
-							if(response != null) $location.path('/app/selfservicelist/1');
+							if(response != null) $location.path('/app/floatbutton/selfservicelist/1');
 						},function(error){console.log(error);IonicAlert($ionicPopup,'ไม่สามารถทำรายการได้/โปรดลองใหม่อีกครั้ง',null);});
 					});
 				}
@@ -663,7 +663,7 @@ angular.module('starter')
 			WorkFlowService.CreateWorkFlow(data).then(function(response){
 				if(response != null && response.data != null && response.data != 'Error'){
 					OpenIonicAlertPopup($ionicPopup,'ขอทำบัตร','หมายเลขคำขอเลขที่ ' + response.data + ' ได้ถูกจัดส่งให้ผู้ดำเนินการแล้ว กรุณาติดต่อ 1449 คุณจำปูน');
-					$location.path('/app/selfservicelist/2');
+					$location.path('/app/floatbutton/selfservicelist/2');
 				}
 			},function(error){console.log(error);});
 		};
@@ -748,21 +748,27 @@ angular.module('starter')
 
 })
 
-.controller('CreateLeaveCtrl',function($scope,$cordovaNetwork,$stateParams,$ionicPopup,$ionicPlatform,WorkFlowService,$filter,ionicDatePicker,$location,LeaveSummarySQLite){
+.controller('CreateLeaveCtrl',function($scope,$cordovaNetwork,$stateParams,$ionicPopup,$ionicPlatform,WorkFlowService,$filter,ionicDatePicker,$location,LeaveSummarySQLite,SyncService){
 	$ionicPlatform.ready(function(){
 
 		var defaultDate1,defaultDate2;
 		$scope.noInternet = false;
+		$scope.leave = {type:1,reason:'',duration:1,contact:'',summary:[]};
 		//if no internet connection
 		if(!CheckNetwork($cordovaNetwork)){
-		  $scope.noInternet = true;
-		  OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
-		};
-
-		$scope.leave = {type:1,reason:'',duration:1,contact:'',summary:[]};
-
-		InitialDropdownList();
-		InitialStartAndEndDate();
+		  	$scope.noInternet = true;
+		  	OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+		  	InitialDropdownList();
+			InitialStartAndEndDate();
+		}
+		else{
+			APIService.ShowLoading();
+			SyncService.SyncLeaveSummary().then(function(){
+				APIService.HideLoading();
+				InitialDropdownList();
+				InitialStartAndEndDate();
+			});
+		}
 
 		$scope.Empl_Code = window.localStorage.getItem("CurrentUserName");
 		 
@@ -845,7 +851,7 @@ angular.module('starter')
 					}
 				};
 				WorkFlowService.CreateWorkFlow(data).then(function(response){
-					if(response != null) $location.path('/app/selfservicelist/4');
+					if(response != null) $location.path('/app/floatbutton/selfservicelist/4');
 				},function(error){console.log(error);IonicAlert($ionicPopup,'ไม่สามารถทำรายการได้/โปรดลองใหม่อีกครั้ง',null);});
 			});
 		};
@@ -1040,12 +1046,12 @@ angular.module('starter')
 						FromDate:$scope.selectedDate.startDate.toString().replace(new RegExp('/','g'),'') + $scope.ddlStartTimesData.selectedOptions.val,
 						ToDate:$scope.selectedDate.endDate.toString().replace(new RegExp('/','g'),'') + $scope.ddlEndTimesData.selectedOptions.val,
 						TimeWith:(!$scope.searchEmp.searchTxt || $scope.searchEmp.searchTxt.length <= 0) ? '-' : $scope.searchEmp.searchTxt,
-						Reason:($scope.timework.reasoncode == 6 ) ? $scope.timework.reason : ''
+						Reason:($scope.timework.reasoncode == 6 ) ? $scope.timework.reason : '-'
 					}
 				};
 			WorkFlowService.CreateWorkFlow(data).then(function(response){
 				//check response from server if have warn from server then show alert('message') before redirect to selfservicelist
-				if(response != null) $location.path('/app/selfservicelist/3');
+				if(response != null) $location.path('/app/floatbutton/selfservicelist/3');
 			},function(error){console.log(error);IonicAlert($ionicPopup,'ไม่สามารถทำรายการได้/โปรดลองใหม่อีกครั้ง',null);});
 		});
 

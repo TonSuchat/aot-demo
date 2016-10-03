@@ -940,7 +940,7 @@ function GetTimeDDLOptionsOnlyHaveData($filter,$q,TimeAttendanceSQLite){
                     var dbResult = ConvertQueryResultToArray(response);
                     angular.forEach(dbResult,function(value,key){
                         currentYear = value.monthyear.substring(2,6);
-                        currentMonth = GetStringNumber2Digits(value.monthyear.substring(1,2));
+                        currentMonth = value.monthyear.substring(0,2) //GetStringNumber2Digits(value.monthyear.substring(1,2));
                         result.options.push({val:value.monthyear,name:GetThaiMonthNameByMonth($filter,currentMonth) + ' ' + (+currentYear + 543)});
                     });
                     if(dbResult.length > 0) result.selectedOptions = {val:result.options[0].val,name:result.options[0].name}

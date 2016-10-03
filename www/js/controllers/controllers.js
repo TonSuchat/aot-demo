@@ -55,7 +55,16 @@ angular.module('starter')
 
         $scope.noInternet = false;
         $scope.PMNumber = 509;
-        
+        $scope.version = '';
+
+        if (window.cordova){
+          //get version
+          cordova.getAppVersion(function(version) {
+              $scope.version = version;
+          });
+        }
+        else $scope.version = 'PC';
+          
         // Form data for the login modal
         $scope.$on('checkAuthen',function(event,data){
           $scope.loginData = {};
