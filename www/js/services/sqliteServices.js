@@ -840,7 +840,7 @@ angular.module('starter')
 	//***Necessary-Method
 
 	this.GetAll = function(){
-		return SQLiteService.Execute("SELECT * FROM news").then(function(response){return response;},function(error){return error;});	
+		return SQLiteService.Execute("SELECT * FROM news order by PubDate desc").then(function(response){return response;},function(error){return error;});	
 	};
 })
 .service('PMRoomSQLite',function(SQLiteService){

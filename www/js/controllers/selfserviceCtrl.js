@@ -834,7 +834,7 @@ angular.module('starter')
 			if(!$scope.leave.contact || $scope.leave.contact.length <= 0) $scope.leave.contact = '-';
 			var description = $scope.GetDocumentDescription();
 
-			IonicConfirm($ionicPopup,'สร้างรายการวันลา',description,function(){
+			IonicConfirm($ionicPopup,'สร้างรายการวันลา ',description,function(){
 				var data = {
 					CategoryId:4,
 					RegisterId:window.localStorage.getItem("GCMToken"),
@@ -857,12 +857,12 @@ angular.module('starter')
 		};
 
 		$scope.GetDocumentDescription = function(){
-			var message = ''; 
+			var message; 
 			var typeName = '';
 			var result = $filter('filter')($scope.leave.summary, { LeaveCode: $scope.ddlLeave.selectedOptions.val });
 			typeName = result[0].LeaveName;
 			if(result[0].Left < $scope.leave.duration) message = 'เตือน : วันลาของคุณเหลือน้อยกว่าระยะเวลาที่ต้องการลา ||| '; 
-			message += 'ต้องการสร้าง บันทึกลา' + typeName + ' เนื่องจาก : ' + $scope.leave.reason + ' ตั้งแต่วันที่ ' + $scope.selectedDate.startDate + ' ถึงวันที่ ' + $scope.selectedDate.endDate + ' เป็นระยะเวลา ' + $scope.leave.duration + ' วัน สามารถติดต่อได้ที่ ' + $scope.leave.contact;
+			message = typeName + ' เนื่องจาก : ' + $scope.leave.reason + ' ตั้งแต่วันที่ ' + $scope.selectedDate.startDate + ' ถึงวันที่ ' + $scope.selectedDate.endDate + ' เป็นระยะเวลา ' + $scope.leave.duration + ' วัน สามารถติดต่อได้ที่ ' + $scope.leave.contact;
 			return message;
 		};
 

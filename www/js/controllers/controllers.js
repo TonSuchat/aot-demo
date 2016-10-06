@@ -250,7 +250,7 @@ angular.module('starter')
 
         $scope.max = function(arr){
           return $filter('min')
-            ($filter('map')(arr, '-Id'));
+            ($filter('map')(arr, '-OrderFiled'));
         };
 
         $scope.OpenPDF = function(Id){
@@ -593,7 +593,13 @@ function InitialCirculars(allData,start,retrieve){
     var currentIndex = start - 1;
     if(allData != null){
       while (counter <= retrieve){
-        result.push(allData[currentIndex]);
+        var item = {Id:allData[currentIndex].Id,
+                    DocDate:allData[currentIndex].DocDate,
+                    Description:allData[currentIndex].Description,
+                    DocNumber:allData[currentIndex].DocNumber,
+                    OrderFiled:allData[currentIndex].DocDate.substring(4) + allData[currentIndex].DocDate.substring(2,4) + allData[currentIndex].DocDate.substring(0,2)
+                  };
+        result.push(item);
         counter++;
         currentIndex++;
       }  

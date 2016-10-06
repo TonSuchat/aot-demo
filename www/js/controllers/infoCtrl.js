@@ -567,7 +567,7 @@ function InitialMedicalInfo($scope,MedicalSQLite,totalNotification){
     $scope.medicalInfo = {};
     MedicalSQLite.GetSumMedicalTotal().then(
         function(response){
-            if(response.rows.item(0).total != null && response.rows.item(0).total > 0) $scope.medicalInfo.totalSpent = response.rows.item(0).total;
+            if(response.rows.item(0).total != null && response.rows.item(0).total > 0) $scope.medicalInfo.totalSpent = parseFloat(response.rows.item(0).total).toFixed(2);
             else $scope.medicalInfo.totalSpent = 0;
         },
         function(error){$scope.medicalInfo.totalSpent = 0;}
@@ -579,7 +579,7 @@ function InitialTuitionInfo($scope,TuitionSQLite,totalNotification){
     $scope.tuitionInfo = {};
     TuitionSQLite.GetSumTuitionGrandTotal().then(
         function(response){
-            if(response.rows.item(0).Grand_Total != null && response.rows.item(0).Grand_Total > 0) $scope.tuitionInfo.totalSpent = response.rows.item(0).Grand_Total;
+            if(response.rows.item(0).Grand_Total != null && response.rows.item(0).Grand_Total > 0) $scope.tuitionInfo.totalSpent = parseFloat(response.rows.item(0).Grand_Total).toFixed(2);
             else $scope.tuitionInfo.totalSpent = 0;
         },
         function(error){$scope.tuitionInfo.totalSpent = 0;}
@@ -647,13 +647,13 @@ function InitialMedicalDetails($scope,$filter,$stateParams){
     var shareMedicalDataArr = ConvertQueryResultToArray(shareMedicalData);
     var currentMedical = $filter('filter')(shareMedicalDataArr, { Id: $stateParams.Id });
     $scope.MedicalDetails = {};
-    $scope.MedicalDetails.hospitalType = (currentMedical[0].HospType == 320) ? 'รัฐบาล' : 'เอกชน';
+    $scope.MedicalDetails.hospitalType = currentMedical[0].HospType; //(currentMedical[0].HospType == 320) ? 'รัฐบาล' : 'เอกชน';
     $scope.MedicalDetails.hospitalName = currentMedical[0].HospName;
     $scope.MedicalDetails.patientType = currentMedical[0].PatientType;
     $scope.MedicalDetails.family = currentMedical[0].Family;
     $scope.MedicalDetails.patientName = currentMedical[0].PatientName;
     $scope.MedicalDetails.disease = currentMedical[0].Disease;
-    $scope.MedicalDetails.total = currentMedical[0].Total;
+    $scope.MedicalDetails.total = parseFloat(currentMedical[0].Total).toFixed(2);
     $scope.MedicalDetails.docdate = GetThaiDateByDate($filter,currentMedical[0].DocDate);
     $scope.MedicalDetails.paidDate = GetThaiDateByDate($filter,currentMedical[0].PaidDate);
     $scope.MedicalDetails.bankName = currentMedical[0].BankName;
@@ -664,7 +664,7 @@ function InitialTuitionDetails($scope,$filter,$stateParams){
     var currentTuition = $filter('filter')(shareTuitionDataArr, { Id: $stateParams.Id });
     $scope.TuitionDetails = {};
     $scope.TuitionDetails.paidDate = GetThaiDateByDate($filter,currentTuition[0].Paid_Date.replace(/\//g,''));
-    $scope.TuitionDetails.total = currentTuition[0].Total_Amnt;
+    $scope.TuitionDetails.total = parseFloat(currentTuition[0].Total_Amnt).toFixed(2);
     $scope.TuitionDetails.vatAmnt = currentTuition[0].Vat_Amnt;
     $scope.TuitionDetails.grandTotal = currentTuition[0].Grand_Total;
     $scope.TuitionDetails.bankName = currentTuition[0].BankName;
@@ -876,10 +876,10 @@ function CreateFinanceInfoGroupByDate(distinctPaidDate,$filter,shareData,type){
         for (var z = 0; z <= currentFinanceDetailsByPaidDate.length -1; z++) {
             switch(type){
                 case "medical":
-                    newData.paidDetails.push({id:currentFinanceDetailsByPaidDate[z].Id,total:currentFinanceDetailsByPaidDate[z].Total,bankName:currentFinanceDetailsByPaidDate[z].BankName});    
+                    newData.paidDetails.push({id:currentFinanceDetailsByPaidDate[z].Id,total:parseFloat(currentFinanceDetailsByPaidDate[z].Total).toFixed(2),bankName:currentFinanceDetailsByPaidDate[z].BankName});    
                 break;
                 case "tuition":
-                    newData.paidDetails.push({id:currentFinanceDetailsByPaidDate[z].Id,grandtotal:currentFinanceDetailsByPaidDate[z].Grand_Total,bankName:currentFinanceDetailsByPaidDate[z].BankName});    
+                    newData.paidDetails.push({id:currentFinanceDetailsByPaidDate[z].Id,grandtotal:parseFloat(currentFinanceDetailsByPaidDate[z].Grand_Total).toFixed(2),bankName:currentFinanceDetailsByPaidDate[z].BankName});    
                 break;
             }
         };
