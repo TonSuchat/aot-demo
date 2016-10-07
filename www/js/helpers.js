@@ -499,19 +499,19 @@ function CheckSessionIsExpire(APIService,$q){
 function CheckDeviceIsValid(APIService,$q,registerId) {
   return $q(function(resolve){
     var url = APIService.hostname() + '/DeviceRegistered/ValidateDevice';
-    var deviceVersion = 'PC';
+    var deviceVersion = '';
     if(window.cordova){
       cordova.getAppVersion(function(version) {
           deviceVersion = version;
+          var data = {RegisterID:registerId,AppVer:deviceVersion};
+          APIService.ShowLoading();
+          APIService.httpPost(url,data,function(response){
+            APIService.HideLoading();
+            resolve(response);
+          },
+            function(error){console.log(error);APIService.HideLoading();resolve(error);});
       });
     }
-    var data = {RegisterID:registerId,AppVer:deviceVersion};
-    APIService.ShowLoading();
-    APIService.httpPost(url,data,function(response){
-      APIService.HideLoading();
-      resolve(response);
-    },
-      function(error){console.log(error);APIService.HideLoading();resolve(error);});
   });
 };
 
