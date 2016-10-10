@@ -1,7 +1,35 @@
 <ion-view view-title="ค่าเล่าเรียนบุตร">
     <ion-content>
         <div class="list">
-            <div ng-repeat='info in TuitionInfo'>
+
+            <label class="item item-input item-select">
+                <div class="input-label">
+                    ปีงบประมาณ
+                </div>
+                <select ng-change='ProcessTuition(ddlFiscalYear.selectedOptions.val)' ng-options='item.name for item in ddlFiscalYear.options track by item.val' ng-model='ddlFiscalYear.selectedOptions'>
+                </select>
+            </label>
+
+            <div ng-show='!notFoundData'>
+                <div class="item item-divider" >
+                    <h2><b>ค่าเล่าเรียนบุตร</b></h2>
+                </div>
+                <div class='item item-body'>
+                    <b>รวม {{sumTotal | number}} บาท</b>
+                </div>
+            </div>
+
+            <div ng-repeat="info in TuitionInfo | groupBy:'Paid_Date' | toArray:true | orderBy:max ">
+                <div class="item item-divider" >
+                    <h2>วันที่ {{GetThaiDateByDate(info.$key)}}</h2>
+                </div>
+                <a href="#/app/information/tuition-detail/{{item.Id}}" ng-repeat="item in info | orderBy:'-Id'" class="item" >
+                    จำนวน {{item.Grand_Total | number}} บาท
+                    <span class="item-note">{{item.BankName}}</span>
+                </a>
+            </div>
+
+           <!--  <div ng-repeat='info in TuitionInfo'>
                 <div class="item item-divider">
                     วันที่ {{info.paidDate}}
                 </div>
@@ -9,7 +37,8 @@
                    จำนวน {{detail.grandtotal | number}} บาท
                     <span class="item-note">{{detail.bankName}}</span>
                 </a>
-            </div>
+            </div> -->
+
         </div>
         <div class='card' ng-show='notFoundData'>
             <div class='item item-text-wrap'>

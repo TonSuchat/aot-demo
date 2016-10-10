@@ -323,22 +323,72 @@ angular.module('starter')
         };
 
     })
-    .controller('MedicalCtrl', function($scope, $stateParams, $filter, MedicalSQLite, SyncService, $rootScope) {
-        $scope.notFoundData = false;
-        MedicalSQLite.GetMedicals().then(function(response){
-            shareMedicalData = response;
-            //get distinct paiddate for group data by paiddate
-            MedicalSQLite.GetDistinctPaidDate().then(function(resultDistinct){
-                $scope.MedicalInfo = CreateFinanceInfoGroupByDate(resultDistinct,$filter,shareMedicalData,'medical');
-                if($scope.MedicalInfo.length == 0) $scope.notFoundData = true;
-            });
+    .controller('MedicalCtrl', function($scope, $stateParams, $filter, MedicalSQLite, SyncService, $rootScope, $ionicPlatform) {
+        $ionicPlatform.ready(function(){
+            //bind ddl fiscal year
+            BindDDLInfoFiscalYear($scope);
+            $scope.notFoundData = false;
+
+            $scope.GetThaiDateByDate = function(inputDate){
+              return GetThaiDateByDate($filter,inputDate);
+            };
+
+            $scope.max = function(arr){
+              return $filter('min')
+                ($filter('map')(arr, '-OrderField'));
+            };
+
+            $scope.CreateMedicalInfo = function(data){
+                var arr = [];
+                for (var i = 0; i <= data.length - 1; i++) {
+                    arr.push({
+                        PaidDate:data[i].PaidDate,
+                        Id:data[i].Id,
+                        Total:data[i].Total,
+                        OrderField:data[i].PaidDate.substring(4) + data[i].PaidDate.substring(2,4) + data[i].PaidDate.substring(0,2)
+                    });
+                };
+                return arr;
+            };
+
+            //ddl change fiscal year
+            $scope.ProcessMedical = function(fiscalYear){
+                //sum total medical
+                MedicalSQLite.GetSumMedicalTotal(fiscalYear).then(function(response){
+                    if(response != null){
+                        var result = ConvertQueryResultToArray(response);
+                        if(result.length == 0 || result[0].total == null) return $scope.sumTotal = 0;
+                        $scope.sumTotal = result[0].total;
+                    }
+                    else $scope.sumTotal = 0;
+                });
+                //find details
+                MedicalSQLite.GetMedicals(fiscalYear).then(function(response){
+                    if(response != null){
+                        var result = ConvertQueryResultToArray(response);
+                        if(result.length ==0) {
+                            $scope.notFoundData = true;
+                            $scope.MedicalInfo = [];
+                        }
+                        else $scope.notFoundData = false;
+                        shareMedicalData = result;
+                        $scope.MedicalInfo = $scope.CreateMedicalInfo(result);
+                    }
+                });
+            };
+
+            //initial
+            $scope.ProcessMedical($scope.ddlFiscalYear.selectedOptions.val);
+
+            //set new medical info = 0 on financial view
+            $rootScope.$broadcast('seenMedicalInfo',null);
         });
-        //set new medical info = 0 on financial view
-        $rootScope.$broadcast('seenMedicalInfo',null);
-    })
-    .controller('MedicalDetailCtrl', function($scope, $stateParams, $filter) {
         
-        InitialMedicalDetails($scope,$filter,$stateParams);
+    })
+    .controller('MedicalDetailCtrl', function($scope, $stateParams, $filter, $ionicPlatform) {
+        $ionicPlatform.ready(function(){
+            InitialMedicalDetails($scope,$filter,$stateParams);
+        });
     })
     .controller('FuelCtrl', function($scope, $stateParams) {
     })
@@ -475,11 +525,13 @@ angular.module('starter')
             };
 
             $scope.DisplayPDFTax = function (methodName,taxYear) {
-                var url = APIService.hostname() + '/' + methodName;
-                var data = {Empl_Code:$scope.empCode,TaxYear:taxYear,password:window.localStorage.getItem('AuthServices_password')};
-                //var fileName = methodName + '_' + $scope.empCode + '_' + taxYear;
-                var fileName = methodName;
-                DisplayPDF($cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName);
+                IonicAlert($ionicPopup,'รหัสผ่านคือรหัสที่ใช้ Login เข้าใช้งานระบบ',function(){
+                    var url = APIService.hostname() + '/' + methodName;
+                    var data = {Empl_Code:$scope.empCode,TaxYear:taxYear,password:window.localStorage.getItem('AuthServices_password')};
+                    //var fileName = methodName + '_' + $scope.empCode + '_' + taxYear;
+                    var fileName = methodName;
+                    DisplayPDF($cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName);    
+                });
                 // APIService.ShowLoading();
                 // var url = APIService.hostname() + '/' + methodName;
                 // var data = {Empl_Code:$scope.empCode,TaxYear:taxYear};
@@ -516,23 +568,74 @@ angular.module('starter')
         }
 
     })
-    .controller('TuitionCtrl', function($scope, $filter, TuitionSQLite, SyncService, $rootScope) {
-        //set new tuition info = 0 on financial view
-        $rootScope.$broadcast('seenTuitionInfo',null);
-        $scope.notFoundData = false;
-        // shareTuitionData = tmpTuitionData;
-        // $scope.TuitionInfo = CreateFinanceInfoGroupByDate(tmpDistinctTuitionData,$filter,shareTuitionData,'tuition');
-        TuitionSQLite.GetTuitions().then(function(response){
-            shareTuitionData = response;
-            //get distinct paiddate for group data by paiddate
-            TuitionSQLite.GetDistinctPaidDate().then(function(resultDistinct){
-                $scope.TuitionInfo = CreateFinanceInfoGroupByDate(resultDistinct,$filter,shareTuitionData,'tuition');
-                if($scope.TuitionInfo.length == 0) $scope.notFoundData = true;
-            });
+    .controller('TuitionCtrl', function($scope, $filter, TuitionSQLite, SyncService, $rootScope, $ionicPlatform) {
+        $ionicPlatform.ready(function(){
+            //set new tuition info = 0 on financial view
+            $rootScope.$broadcast('seenTuitionInfo',null);
+
+            //bind ddl fiscal year
+            BindDDLInfoFiscalYear($scope);
+
+            $scope.GetThaiDateByDate = function(inputDate){
+              return GetThaiDateByDate($filter,inputDate);
+            };
+
+            $scope.max = function(arr){
+              return $filter('min')
+                ($filter('map')(arr, '-OrderField'));
+            };
+
+            $scope.notFoundData = false;
+
+            $scope.CreateTuitionInfo = function(data){
+                var arr = [];
+                for (var i = 0; i <= data.length - 1; i++) {
+                    arr.push({
+                        Paid_Date:data[i].Paid_Date,
+                        Id:data[i].Id,
+                        Grand_Total:data[i].Grand_Total,
+                        BankName:data[i].BankName,
+                        OrderField:data[i].Paid_Date.substring(4) + data[i].Paid_Date.substring(2,4) + data[i].Paid_Date.substring(0,2)
+                    });
+                };
+                return arr;
+            };
+
+            //ddl change fiscal year
+            $scope.ProcessTuition = function(fiscalYear){
+                //sum total medical
+                TuitionSQLite.GetSumTuitionGrandTotal(fiscalYear).then(function(response){
+                    if(response != null){
+                        var result = ConvertQueryResultToArray(response);
+                        if(result.length == 0 || result[0].Grand_Total == null) return $scope.sumTotal = 0;
+                        $scope.sumTotal = result[0].Grand_Total;
+                    }
+                    else $scope.sumTotal = 0;
+                });
+                //find details
+                TuitionSQLite.GetTuitions(fiscalYear).then(function(response){
+                    if(response != null){
+                        var result = ConvertQueryResultToArray(response);
+                        if(result.length ==0) {
+                            $scope.notFoundData = true;
+                            $scope.TuitionInfo = [];
+                        }
+                        else $scope.notFoundData = false;
+                        shareTuitionData = result;
+                        $scope.TuitionInfo = $scope.CreateTuitionInfo(result);
+                    }
+                });
+            };
+
+            //initial
+            $scope.ProcessTuition($scope.ddlFiscalYear.selectedOptions.val);
+
         });
     })
-    .controller('TuitionDetailCtrl', function($scope, $stateParams, $filter) {
-        InitialTuitionDetails($scope,$filter,$stateParams);
+    .controller('TuitionDetailCtrl', function($scope, $stateParams, $filter, $ionicPlatform) {
+        $ionicPlatform.ready(function(){
+            InitialTuitionDetails($scope,$filter,$stateParams);    
+        });
     })
     .controller('RoyalCtrl', function($scope, RoyalSQLite, SyncService, $filter, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup) {
         $ionicPlatform.ready(function(){
@@ -563,27 +666,37 @@ angular.module('starter')
         CheckNeedToReload($rootScope,'/royal');
     })
 
+function BindDDLInfoFiscalYear($scope){
+    $scope.ddlFiscalYear = {selectedOptions:{},options:[]};
+    var currentFiscalYear = GetFiscalYear();
+    $scope.ddlFiscalYear.selectedOptions = {name:currentFiscalYear,val:currentFiscalYear};
+    for (var i = 3; i > 0; i--) {
+        $scope.ddlFiscalYear.options.push({name:currentFiscalYear,val:currentFiscalYear});    
+        currentFiscalYear -= 1;
+    };
+};
+
 function InitialMedicalInfo($scope,MedicalSQLite,totalNotification){
     $scope.medicalInfo = {};
-    MedicalSQLite.GetSumMedicalTotal().then(
-        function(response){
-            if(response.rows.item(0).total != null && response.rows.item(0).total > 0) $scope.medicalInfo.totalSpent = parseFloat(response.rows.item(0).total).toFixed(2);
-            else $scope.medicalInfo.totalSpent = 0;
-        },
-        function(error){$scope.medicalInfo.totalSpent = 0;}
-    );
+    // MedicalSQLite.GetSumMedicalTotal().then(
+    //     function(response){
+    //         if(response.rows.item(0).total != null && response.rows.item(0).total > 0) $scope.medicalInfo.totalSpent = parseFloat(response.rows.item(0).total).toFixed(2);
+    //         else $scope.medicalInfo.totalSpent = 0;
+    //     },
+    //     function(error){$scope.medicalInfo.totalSpent = 0;}
+    // );
     $scope.medicalInfo.notification = (totalNotification && totalNotification !== null && totalNotification != 'undefined') ? totalNotification : 0;
 };
 
 function InitialTuitionInfo($scope,TuitionSQLite,totalNotification){
     $scope.tuitionInfo = {};
-    TuitionSQLite.GetSumTuitionGrandTotal().then(
-        function(response){
-            if(response.rows.item(0).Grand_Total != null && response.rows.item(0).Grand_Total > 0) $scope.tuitionInfo.totalSpent = parseFloat(response.rows.item(0).Grand_Total).toFixed(2);
-            else $scope.tuitionInfo.totalSpent = 0;
-        },
-        function(error){$scope.tuitionInfo.totalSpent = 0;}
-    );
+    // TuitionSQLite.GetSumTuitionGrandTotal().then(
+    //     function(response){
+    //         if(response.rows.item(0).Grand_Total != null && response.rows.item(0).Grand_Total > 0) $scope.tuitionInfo.totalSpent = parseFloat(response.rows.item(0).Grand_Total).toFixed(2);
+    //         else $scope.tuitionInfo.totalSpent = 0;
+    //     },
+    //     function(error){$scope.tuitionInfo.totalSpent = 0;}
+    // );
     $scope.tuitionInfo.notification = (totalNotification && totalNotification !== null && totalNotification != 'undefined') ? totalNotification : 0;
 };
 
@@ -644,8 +757,9 @@ function InitialLeaveInfo($scope,$filter,LeaveSQLite,$q){
 
 function InitialMedicalDetails($scope,$filter,$stateParams){
     if(shareMedicalData.length == 0) return;
-    var shareMedicalDataArr = ConvertQueryResultToArray(shareMedicalData);
-    var currentMedical = $filter('filter')(shareMedicalDataArr, { Id: $stateParams.Id });
+    // console.log(shareMedicalData);
+    // var shareMedicalDataArr = ConvertQueryResultToArray(shareMedicalData);
+    var currentMedical = $filter('filter')(shareMedicalData, { Id: $stateParams.Id });
     $scope.MedicalDetails = {};
     $scope.MedicalDetails.hospitalType = currentMedical[0].HospType; //(currentMedical[0].HospType == 320) ? 'รัฐบาล' : 'เอกชน';
     $scope.MedicalDetails.hospitalName = currentMedical[0].HospName;
@@ -660,8 +774,8 @@ function InitialMedicalDetails($scope,$filter,$stateParams){
 };
 
 function InitialTuitionDetails($scope,$filter,$stateParams){
-    var shareTuitionDataArr = ConvertQueryResultToArray(shareTuitionData);
-    var currentTuition = $filter('filter')(shareTuitionDataArr, { Id: $stateParams.Id });
+    //var shareTuitionDataArr = ConvertQueryResultToArray(shareTuitionData);
+    var currentTuition = $filter('filter')(shareTuitionData, { Id: $stateParams.Id });
     $scope.TuitionDetails = {};
     $scope.TuitionDetails.paidDate = GetThaiDateByDate($filter,currentTuition[0].Paid_Date.replace(/\//g,''));
     $scope.TuitionDetails.total = parseFloat(currentTuition[0].Total_Amnt).toFixed(2);

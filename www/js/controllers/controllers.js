@@ -124,7 +124,6 @@ angular.module('starter')
             CreateFileCheckPermission($cordovaFile,$q,APIService).then(function(response){
               if(response != null && response){
                 CheckDeviceIsValid(APIService,$q,gcmToken).then(function(response){
-                  console.log(response);
                   if(response != null){
                     if(response.status == 500){
                       var alertPopup = $ionicPopup.alert({
@@ -250,7 +249,7 @@ angular.module('starter')
 
         $scope.max = function(arr){
           return $filter('min')
-            ($filter('map')(arr, '-OrderFiled'));
+            ($filter('map')(arr, '-OrderField'));
         };
 
         $scope.OpenPDF = function(Id){
@@ -597,7 +596,7 @@ function InitialCirculars(allData,start,retrieve){
                     DocDate:allData[currentIndex].DocDate,
                     Description:allData[currentIndex].Description,
                     DocNumber:allData[currentIndex].DocNumber,
-                    OrderFiled:allData[currentIndex].DocDate.substring(4) + allData[currentIndex].DocDate.substring(2,4) + allData[currentIndex].DocDate.substring(0,2)
+                    OrderField:allData[currentIndex].DocDate.substring(4) + allData[currentIndex].DocDate.substring(2,4) + allData[currentIndex].DocDate.substring(0,2)
                   };
         result.push(item);
         counter++;

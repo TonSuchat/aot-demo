@@ -2,7 +2,15 @@
     <ion-content>
     
             <div class='list' >
-                <div ng-repeat='info in MedicalInfo'>
+                <label class="item item-input item-select">
+                    <div class="input-label">
+                        ปีงบประมาณ
+                    </div>
+                    <select ng-change='ProcessMedical(ddlFiscalYear.selectedOptions.val)' ng-options='item.name for item in ddlFiscalYear.options track by item.val' ng-model='ddlFiscalYear.selectedOptions'>
+                    </select>
+                </label>
+
+               <!--  <div ng-repeat='info in MedicalInfo'>
                     <div class="item item-divider">
                         วันที่ {{info.paidDate}}
                     </div>
@@ -10,7 +18,27 @@
                        จำนวน {{detail.total | number}} บาท
                         <span class="item-note">{{detail.bankName}}</span>
                     </a>
+                </div> -->
+
+                <div ng-show='!notFoundData'>
+                    <div class="item item-divider" >
+                        <h2><b>ค่ารักษาพยาบาล</b></h2>
+                    </div>
+                    <div class='item item-body'>
+                        <b>รวม {{sumTotal | number}} บาท</b>
+                    </div>
                 </div>
+                
+                <div ng-repeat="info in MedicalInfo | groupBy:'PaidDate' | toArray:true | orderBy:max ">
+                    <div class="item item-divider" >
+                        <h2>วันที่ {{GetThaiDateByDate(info.$key)}}</h2>
+                    </div>
+                    <a href="#/app/information/medical-detail/{{item.Id}}" ng-repeat="item in info | orderBy:'-Id'" class="item" >
+                        จำนวน {{item.Total | number}} บาท
+                        <span class="item-note">{{item.bankName}}</span>
+                    </a>
+                </div>
+
             </div>
             <div class='card' ng-show='notFoundData'>
                 <div class='item item-text-wrap'>

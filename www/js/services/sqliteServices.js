@@ -290,12 +290,12 @@ angular.module('starter')
 	};
 	//***Necessary-Method
 
-	this.GetSumMedicalTotal = function(){
-		return SQLiteService.Execute("SELECT SUM(total) AS total FROM medical").then(function(response){return response;},function(error){return error;});
+	this.GetSumMedicalTotal = function(fiscalYear){
+		return SQLiteService.Execute("SELECT SUM(total) AS total FROM medical where SUBSTR(docdate,5,4) = '" + fiscalYear + "'").then(function(response){return response;},function(error){return error;});
 	};
 
-	this.GetMedicals = function(){
-		return SQLiteService.Execute("SELECT * FROM medical ORDER BY paiddate").then(function(response){return response;},function(error){return error;});
+	this.GetMedicals = function(fiscalYear){
+		return SQLiteService.Execute("SELECT * FROM medical where SUBSTR(docdate,5,4) = '" + fiscalYear + "'").then(function(response){return response;},function(error){return error;});
 	};
 
 	this.GetDistinctPaidDate = function(){
@@ -377,8 +377,8 @@ angular.module('starter')
 	};
 	//***Necessary-Method
 
-	this.GetSumTuitionGrandTotal = function(){
-		return SQLiteService.Execute("SELECT SUM(Grand_Total) AS Grand_Total FROM tuition").then(function(response){return response;},function(error){return error;});
+	this.GetSumTuitionGrandTotal = function(fiscalYear){
+		return SQLiteService.Execute("SELECT SUM(Grand_Total) AS Grand_Total FROM tuition where SUBSTR(Paid_Date,5,4) = '" + fiscalYear + "'").then(function(response){return response;},function(error){return error;});
 	};
 
 	this.DeleteAll = function(){
@@ -389,8 +389,8 @@ angular.module('starter')
 		return SQLiteService.Execute("SELECT DISTINCT Paid_Date FROM tuition ORDER BY CAST(SUBSTR(Paid_Date,5,4) AS INT) DESC, CAST(SUBSTR(Paid_Date,3,2) AS INT) DESC, CAST(SUBSTR(Paid_Date,1,2) AS INT) DESC").then(function(response){return response;},function(error){return error;});
 	};
 
-	this.GetTuitions = function(){
-		return SQLiteService.Execute("SELECT * FROM tuition ORDER BY Paid_Date").then(function(response){return response;},function(error){return error;});
+	this.GetTuitions = function(fiscalYear){
+		return SQLiteService.Execute("SELECT * FROM tuition where SUBSTR(Paid_Date,5,4) = '" + fiscalYear + "'").then(function(response){return response;},function(error){return error;});
 	};
 })
 .service('RoyalSQLite', function(SQLiteService){

@@ -5,7 +5,31 @@
         <ion-refresher pulling-text="โหลดข้อมูลใหม่" on-refresh="Refresh()">
         </ion-refresher>
 
-        <div class="card" >
+        <div class="row">
+
+            <div class="col col-33 text-center ssmenu-container">
+                <span ng-hide='medicalInfo.notification == 0' class="badge badge-assertive">{{medicalInfo.notification}}</span>
+                <div class='card'>
+                    <a class="item" href="#app/information/medical">
+                        <i class="icon larger ion-medkit"></i>
+                        <div class="item-text-wrap">ค่ารักษาพยาบาล</div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col col-33 text-center ssmenu-container">
+                <span ng-hide='tuitionInfo.notification == 0' class="badge badge-assertive">{{tuitionInfo.notification}}</span>
+                <div class='card'>
+                    <a class="item" href="#app/information/tuition">
+                        <i class="icon larger ion-android-happy"></i>
+                        <div class="item-text-wrap">ค่าเล่าเรียนบุตร</div>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- <div class="card" >
             <div class="item item-divider">
                 <h2>ค่ารักษาพยาบาล</h2>
             </div>
@@ -24,7 +48,7 @@
                 รวม {{tuitionInfo.totalSpent | number}} บาท
                 <span ng-hide='tuitionInfo.notification == 0' class="badge badge-assertive">{{tuitionInfo.notification}}</span>
             </a>
-        </div>
+        </div> -->
 
     </ion-content>
 </ion-view>

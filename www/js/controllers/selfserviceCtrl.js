@@ -808,11 +808,28 @@ angular.module('starter')
 			LeaveSummarySQLite.GetLeaveSummaryInfos(GetFiscalYear()).then(function(response){
 				if(response != null){
 					$scope.leave.summary = ConvertQueryResultToArray(response);
-					angular.forEach(listLeave,function(value,key){
-						var eachSummary = $filter('filter')($scope.leave.summary, { LeaveCode: value.val });
-						$scope.ddlLeave.options.push({val:value.val,name:value.name + ' (คงเหลือ ' + eachSummary[0].Left + ' วัน)'});
-					});
-					$scope.ddlLeave.selectedOptions = {val:listLeave[0].val,name:listLeave[0].name};		
+					if($scope.leave.summary.length > 0){
+						angular.forEach(listLeave,function(value,key){
+							var eachSummary = $filter('filter')($scope.leave.summary, { LeaveCode: value.val });
+							$scope.ddlLeave.options.push({val:value.val,name:value.name + ' (คงเหลือ ' + eachSummary[0].Left + ' วัน)'});
+						});
+						$scope.ddlLeave.selectedOptions = {val:listLeave[0].val,name:listLeave[0].name};		
+					}
+					else{
+						//if not found new data then use previous data
+						LeaveSummarySQLite.GetLeaveSummaryInfos(GetFiscalYear() - 1).then(function(response){
+							if(response != null){
+								$scope.leave.summary = ConvertQueryResultToArray(response);
+								if($scope.leave.summary.length > 0){
+									angular.forEach(listLeave,function(value,key){
+										var eachSummary = $filter('filter')($scope.leave.summary, { LeaveCode: value.val });
+										$scope.ddlLeave.options.push({val:value.val,name:value.name + ' (คงเหลือ ' + eachSummary[0].Left + ' วัน)'});
+									});
+									$scope.ddlLeave.selectedOptions = {val:listLeave[0].val,name:listLeave[0].name};		
+								}
+							}
+						});
+					}
 				}
 			});
 		};

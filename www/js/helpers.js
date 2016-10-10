@@ -59,7 +59,7 @@ function  GetFiscalYear() {
   var day = today.getDate();
   var month = today.getMonth()+1;
   var year = today.getFullYear();
-  if(month > 10) fiscalDate = '0110' + (year + 1);
+  if(month >= 10) fiscalDate = '0110' + (year + 1);
   else fiscalDate = '0110' + year;
   return fiscalDate.substring(4);
 };
@@ -512,6 +512,7 @@ function CheckDeviceIsValid(APIService,$q,registerId) {
             function(error){console.log(error);APIService.HideLoading();resolve(error);});
       });
     }
+    else resolve({data:true});
   });
 };
 
