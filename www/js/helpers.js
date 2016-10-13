@@ -499,20 +499,29 @@ function CheckSessionIsExpire(APIService,$q){
 function CheckDeviceIsValid(APIService,$q,registerId) {
   return $q(function(resolve){
     var url = APIService.hostname() + '/DeviceRegistered/ValidateDevice';
-    var deviceVersion = '';
     if(window.cordova){
-      cordova.getAppVersion(function(version) {
-          deviceVersion = version;
-          var data = {RegisterID:registerId,AppVer:deviceVersion};
-          APIService.ShowLoading();
-          APIService.httpPost(url,data,function(response){
-            APIService.HideLoading();
-            resolve(response);
-          },
-            function(error){console.log(error);APIService.HideLoading();resolve(error);});
-      });
+      GetAppVersion($q).then(function(version){
+        var data = {RegisterID:registerId,AppVer:version};
+        APIService.ShowLoading();
+        APIService.httpPost(url,data,function(response){
+          APIService.HideLoading();
+          resolve(response);
+        },
+          function(error){console.log(error);APIService.HideLoading();resolve(error);});
+      })
     }
     else resolve({data:true});
+  });
+};
+
+function GetAppVersion($q) {
+  return $q(function(resolve){
+    if(window.cordova){
+      cordova.getAppVersion(function(version) {
+          return resolve(version);
+      });
+    }
+    else return resolve('PC');
   });
 };
 
@@ -726,5 +735,24 @@ function CheckEmployeeVersion($q,APIService,$cordovaFile,empVer){
       }  
     }
     else return resolve(true);
+  });
+};
+
+function CheckIsUpdateVersion($q,SQLiteService,APIService,$ionicPopup){
+  console.log('CheckIsUpdateVersion');
+  GetAppVersion($q).then(function(version){
+    if(window.localStorage.getItem('AppVer') == null || window.localStorage.getItem('AppVer') != version){
+      IonicAlert($ionicPopup,'รอสักครู่กำลังปรับปรุงระบบ',function(){
+        APIService.ShowLoading();
+        //Drop all tables
+        SQLiteService.DropAllTables().then(function(){
+          //Create all tables
+          SQLiteService.InitailTables();
+          window.localStorage.setItem('AppVer',version);
+          APIService.HideLoading();
+          window.location.href = '#/app/firstpage';
+        },function(error){console.log(error);APIService.HideLoading();});  
+      })
+    }
   });
 };

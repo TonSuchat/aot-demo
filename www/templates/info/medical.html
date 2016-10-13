@@ -2,6 +2,7 @@
     <ion-content>
     
             <div class='list' >
+
                 <label class="item item-input item-select">
                     <div class="input-label">
                         ปีงบประมาณ
@@ -10,6 +11,40 @@
                     </select>
                 </label>
 
+              <!--   <label class="item item-input item-select">
+                    <div class="input-label">
+                        โรค
+                    </div>
+                    <select ng-change='updateDisease(ddlDisease.selectedOptions.val)' ng-options='item.name for item in ddlDisease.options track by item.val' ng-model='ddlDisease.selectedOptions'>
+                    </select>
+                </label> -->
+
+                <div class='item item-divider'>
+                    ประเภท
+                </div>
+
+                <div class="item-accordion" ng-repeat="item in PatientTypes track by $index">
+                  <ion-item class="item item-checkbox">
+                    <label class="checkbox">
+                      <input type="checkbox" ng-model="item.selected" ng-change="updatePatientType(item)">
+                    </label>
+                    {{item.name}}
+                  </ion-item>
+                </div>
+
+                <div class='item item-divider'>
+                    ประเภทโรงพยาบาล
+                </div>
+
+                <div class="item-accordion" ng-repeat="item in HospitalTypes track by $index">
+                  <ion-item class="item item-checkbox">
+                    <label class="checkbox">
+                      <input type="checkbox" ng-model="item.selected" ng-change="updateHospitalType(item)">
+                    </label>
+                    {{item.name}}
+                  </ion-item>
+                </div>
+                
                <!--  <div ng-repeat='info in MedicalInfo'>
                     <div class="item item-divider">
                         วันที่ {{info.paidDate}}

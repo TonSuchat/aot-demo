@@ -95,7 +95,7 @@ angular.module('starter')
 		$cordovaSQLite.execute(db, "CREATE TABLE IF NOT EXISTS userprofile (clientid integer primary key AUTOINCREMENT, UserID text, PrefixName text, Firstname text, Lastname text, Nickname text, Position text, Section text, Department text, CitizenID text, PicturePath text,PictureThumb text, posi_name_gover text, orga_gover text, changeDate text, OfficeTel text, OfficeFax text, MobilePhone text, eMailAddress text, Line text, Facebook text, DL boolean, dirty boolean, TS text)");
 	};
 	this.CreateMedicalTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS medical(clientid integer primary key AUTOINCREMENT, Id int,EmpID text, HospType text, HospName text, PatientType text, Family text, PatientName text, Disease text, Total int, DocDate text, PaidDate text, BankName text, IsRead boolean, DL boolean,dirty boolean,TS text)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS medical(clientid integer primary key AUTOINCREMENT, Id int,EmpID text, HospType text, HospName text, PatientType text, Family text, PatientName text, Disease text, SickGroup int, Total int, DocDate text, PaidDate text, BankName text, IsRead boolean, DL boolean,dirty boolean,TS text)");
 	};
 	this.CreateTuitionTable = function(){
 		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS tuition(clientid integer primary key AUTOINCREMENT, Id int,Empl_Code text, Paid_Date text, Total_Amnt int, Vat_Amnt int, Grand_Total int, BankName text, IsRead boolean, DL boolean,dirty boolean,TS text)");
@@ -130,7 +130,6 @@ angular.module('starter')
 	};
 
 	this.CreateNotiHistoryTable = function(){
-		console.log('create notihistory');
 		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS notihistory(clientid integer primary key AUTOINCREMENT,Id int, Empl_Code text, NotiType int, NotiPriority int, Message text, MenuPath text, NotiTime text, DL boolean, dirty boolean, TS text)");	
 	};
 
@@ -178,9 +177,24 @@ angular.module('starter')
 					function(){
 						totalProcess++;
 						if(totalProcess == tableNames.length){
-							// //create default mobile config data
-							// service.CreateMobileConfigTable();
-							resolve();
+							return resolve();
+						}
+					},
+					function(error){console.log(error);reject(error);});
+			};
+		});
+	};
+
+	this.DropAllTables = function(){
+		return $q(function(resolve,reject){
+			var totalProcess = 0;
+			for (var i = 0; i <= tableNames.length - 1; i++) {
+				currentTableName = tableNames[i];
+				$cordovaSQLite.execute(db, "DROP TABLE " + tableNames[i]).then(
+					function(){
+						totalProcess++;
+						if(totalProcess == tableNames.length){
+							return resolve();
 						}
 					},
 					function(error){console.log(error);reject(error);});
@@ -243,19 +257,19 @@ angular.module('starter')
 	this.Update = function(data,isDirty,clientUpdate){
 		var sql;
 		if(clientUpdate)
-			sql = "UPDATE medical SET Id = ?,EmpID = ?, HospType = ?, HospName = ?, PatientType = ?, Family = ?, PatientName = ?, Disease = ?, Total = ?, DocDate = ?, PaidDate = ?, BankName = ?, IsRead = ?, DL = ?,dirty = ?,TS = ? WHERE clientid = " + data.clientid;	
+			sql = "UPDATE medical SET Id = ?,EmpID = ?, HospType = ?, HospName = ?, PatientType = ?, Family = ?, PatientName = ?, Disease = ?, SickGroup = ?, Total = ?, DocDate = ?, PaidDate = ?, BankName = ?, IsRead = ?, DL = ?,dirty = ?,TS = ? WHERE clientid = " + data.clientid;	
 		else
-			sql = "UPDATE medical SET Id = ?,EmpID = ?, HospType = ?, HospName = ?, PatientType = ?, Family = ?, PatientName = ?, Disease = ?, Total = ?, DocDate = ?, PaidDate = ?, BankName = ?, IsRead = ?, DL = ?,dirty = ?,TS = ? WHERE Id = " + data.Id;
-		var param = [data.Id,data.EmpID,data.HospType,data.HospName,data.PatientType,data.Family,data.PatientName,data.Disease,data.Total,data.DocDate,data.PaidDate,data.BankName,data.IsRead,data.DL,isDirty,data.TS];
+			sql = "UPDATE medical SET Id = ?,EmpID = ?, HospType = ?, HospName = ?, PatientType = ?, Family = ?, PatientName = ?, Disease = ?, SickGroup = ?, Total = ?, DocDate = ?, PaidDate = ?, BankName = ?, IsRead = ?, DL = ?,dirty = ?,TS = ? WHERE Id = " + data.Id;
+		var param = [data.Id,data.EmpID,data.HospType,data.HospName,data.PatientType,data.Family,data.PatientName,data.Disease,data.SickGroup,data.Total,data.DocDate,data.PaidDate,data.BankName,data.IsRead,data.DL,isDirty,data.TS];
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
 	};
 
 	this.Add = function(data,createFromClient){
-		var sql = "INSERT INTO medical (id, empid, hosptype, hospname, patienttype, family, patientname, disease, total, docdate, paiddate, bankname, isread, DL, dirty, TS) VALUES ";
+		var sql = "INSERT INTO medical (id, empid, hosptype, hospname, patienttype, family, patientname, disease, sickgroup, total, docdate, paiddate, bankname, isread, DL, dirty, TS) VALUES ";
 		var param = []; 
 		var rowArgs = [];
 		data.forEach(function(item){
-			rowArgs.push("(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+			rowArgs.push("(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 			param.push(item.Id);
 			param.push(item.EmpID);
 			param.push(item.HospType);
@@ -264,6 +278,7 @@ angular.module('starter')
 			param.push(item.Family);
 			param.push(item.PatientName);
 			param.push(item.Disease);
+			param.push(item.SickGroup);
 			param.push(item.Total);
 			param.push(item.DocDate);
 			param.push(item.PaidDate);
@@ -292,6 +307,10 @@ angular.module('starter')
 
 	this.GetSumMedicalTotal = function(fiscalYear){
 		return SQLiteService.Execute("SELECT SUM(total) AS total FROM medical where SUBSTR(docdate,5,4) = '" + fiscalYear + "'").then(function(response){return response;},function(error){return error;});
+	};
+
+	this.GetDistinctSickGroup = function(){
+		return SQLiteService.Execute("SELECT DISTINCT SickGroup FROM medical").then(function(response){return response;},function(error){return error;});
 	};
 
 	this.GetMedicals = function(fiscalYear){

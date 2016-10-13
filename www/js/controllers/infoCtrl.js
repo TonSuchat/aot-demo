@@ -323,11 +323,72 @@ angular.module('starter')
         };
 
     })
-    .controller('MedicalCtrl', function($scope, $stateParams, $filter, MedicalSQLite, SyncService, $rootScope, $ionicPlatform) {
+    .controller('MedicalCtrl', function($scope, $stateParams, $filter, MedicalSQLite, SyncService, $rootScope, $ionicPlatform, $ionicPopup) {
         $ionicPlatform.ready(function(){
             //bind ddl fiscal year
             BindDDLInfoFiscalYear($scope);
+            InitialFiltersMedical($scope,MedicalSQLite);
             $scope.notFoundData = false;
+
+            $scope.updateDisease = function(item){
+                $scope.ProcessFilter();
+            };
+
+            $scope.updatePatientType = function(item){
+                if(item.selected && ($scope.selectedPatientTypes.indexOf(item.val) < 0)) $scope.selectedPatientTypes.push(item.val);  
+                else{
+                    if($scope.selectedPatientTypes.length == 1){
+                        item.selected = true;
+                        IonicAlert($ionicPopup,'ต้องเลือกอย่างน้อย 1 ประเภท',null)
+                    }
+                    else $scope.selectedPatientTypes.splice($scope.selectedPatientTypes.indexOf(item.val), 1);
+                }
+                //update result
+                $scope.ProcessFilter();
+            };
+
+            $scope.updateHospitalType = function(item){
+                if(item.selected && ($scope.selectedHospitalTypes.indexOf(item.val) < 0)) $scope.selectedHospitalTypes.push(item.val);
+                else{
+                    if($scope.selectedHospitalTypes.length == 1){
+                        item.selected = true;
+                        IonicAlert($ionicPopup,'ต้องเลือกอย่างน้อย 1 ประเภท',null)
+                    } 
+                    else $scope.selectedHospitalTypes.splice($scope.selectedHospitalTypes.indexOf(item.val), 1);
+                }
+                //update result
+                $scope.ProcessFilter();
+            };
+
+            $scope.calculateSumTotal = function(data){
+                if(data == null || data.length == 0) return 0;
+                var sum = 0;
+                for (var i = 0; i <= data.length - 1; i++) {
+                    sum += data[i].Total;
+                };
+                return sum;
+            };
+
+            $scope.ProcessFilter = function(){
+                if(shareMedicalData.length == 0) return $scope.MedicalInfo = [];
+                var result = shareMedicalData;
+                //var resultPatientTypes = [];
+                // //disease
+                // if($scope.ddlDisease.selectedOptions.val == 0){
+                //   resultPatientTypes.push(2);resultPatientTypes.push(3);  
+                // } 
+                // else resultPatientTypes.push($scope.ddlDisease.selectedOptions.val);
+                //patient type
+                //resultPatientTypes = resultPatientTypes.concat($scope.selectedPatientTypes);
+                //console.log('resultPatientTypes',resultPatientTypes);
+                result = result.filter(function(el){ return $scope.selectedPatientTypes.indexOf(el.SickGroup) >= 0; })
+                //hospital type
+                result = result.filter(function(el){ return $scope.selectedHospitalTypes.indexOf(el.HospType) >= 0; })
+                //set result to repeater
+                $scope.MedicalInfo = $scope.CreateMedicalInfo(result);
+                //edit sum
+                $scope.sumTotal = $scope.calculateSumTotal(result);
+            };
 
             $scope.GetThaiDateByDate = function(inputDate){
               return GetThaiDateByDate($filter,inputDate);
@@ -353,15 +414,15 @@ angular.module('starter')
 
             //ddl change fiscal year
             $scope.ProcessMedical = function(fiscalYear){
-                //sum total medical
-                MedicalSQLite.GetSumMedicalTotal(fiscalYear).then(function(response){
-                    if(response != null){
-                        var result = ConvertQueryResultToArray(response);
-                        if(result.length == 0 || result[0].total == null) return $scope.sumTotal = 0;
-                        $scope.sumTotal = result[0].total;
-                    }
-                    else $scope.sumTotal = 0;
-                });
+                // //todo edit sum total medical
+                // MedicalSQLite.GetSumMedicalTotal(fiscalYear).then(function(response){
+                //     if(response != null){
+                //         var result = ConvertQueryResultToArray(response);
+                //         if(result.length == 0 || result[0].total == null) return $scope.sumTotal = 0;
+                //         $scope.sumTotal = result[0].total;
+                //     }
+                //     else $scope.sumTotal = 0;
+                // });
                 //find details
                 MedicalSQLite.GetMedicals(fiscalYear).then(function(response){
                     if(response != null){
@@ -369,10 +430,15 @@ angular.module('starter')
                         if(result.length ==0) {
                             $scope.notFoundData = true;
                             $scope.MedicalInfo = [];
+                            shareMedicalData = [];
                         }
-                        else $scope.notFoundData = false;
-                        shareMedicalData = result;
-                        $scope.MedicalInfo = $scope.CreateMedicalInfo(result);
+                        else {
+                            $scope.notFoundData = false;
+                            shareMedicalData = result;
+                            //$scope.MedicalInfo = $scope.CreateMedicalInfo(result);
+                            //filter by conditions
+                            $scope.ProcessFilter();
+                        }
                     }
                 });
             };
@@ -676,6 +742,29 @@ function BindDDLInfoFiscalYear($scope){
     };
 };
 
+function InitialFiltersMedical ($scope,MedicalSQLite) {
+    // //bind ddl disease
+    // $scope.ddlDisease = {selectedOptions:{},options:[]};
+    // $scope.ddlDisease.selectedOptions = {name:'ทั้งหมด',val:''};
+    // $scope.ddlDisease.options.push({name:'ทั้งหมด',val:''});
+    // //get distinct all sickgroup
+    // MedicalSQLite.GetDistinctSickGroup().then(function(response){
+    //     if(response != null){
+    //         var diseases = ConvertQueryResultToArray(response);
+    //         console.log(diseases);
+    //         for (var i = 0; i <= diseases.length - 1; i++) {
+    //             $scope.ddlDisease.options.push({name:diseases[i].SickGroup,val:diseases[i].SickGroup});    
+    //         };
+    //     }
+    // });
+    //checkboxs patient type
+    $scope.PatientTypes = [{name:'ผู้ป่วยนอก',selected:true,val:'ผู้ป่วยนอก'},{name:'ผู้ป่วยใน',selected:true,val:'ผู้ป่วยใน'},{name:'ทันตกรรม',selected:true,val:'ทันตกรรม'},{name:'ตรวจภายใน',selected:true,val:'ตรวจภายใน'}];
+    $scope.selectedPatientTypes = ['ผู้ป่วยนอก','ตรวจภายใน','ทันตกรรม','ผู้ป่วยใน'];
+    //checkboxs hospital type
+    $scope.HospitalTypes = [{name:'รัฐบาล',selected:true,val:'รัฐบาล'},{name:'เอกชน',selected:true,val:'เอกชน'},{name:'ศูนย์แพทย์',selected:true,val:'ศูนย์แพทย์'}];
+    $scope.selectedHospitalTypes = ['รัฐบาล','เอกชน','ศูนย์แพทย์'];
+};
+
 function InitialMedicalInfo($scope,MedicalSQLite,totalNotification){
     $scope.medicalInfo = {};
     // MedicalSQLite.GetSumMedicalTotal().then(
@@ -761,7 +850,7 @@ function InitialMedicalDetails($scope,$filter,$stateParams){
     // var shareMedicalDataArr = ConvertQueryResultToArray(shareMedicalData);
     var currentMedical = $filter('filter')(shareMedicalData, { Id: $stateParams.Id });
     $scope.MedicalDetails = {};
-    $scope.MedicalDetails.hospitalType = currentMedical[0].HospType; //(currentMedical[0].HospType == 320) ? 'รัฐบาล' : 'เอกชน';
+    $scope.MedicalDetails.hospitalType = currentMedical[0].HospType;
     $scope.MedicalDetails.hospitalName = currentMedical[0].HospName;
     $scope.MedicalDetails.patientType = currentMedical[0].PatientType;
     $scope.MedicalDetails.family = currentMedical[0].Family;
@@ -771,6 +860,21 @@ function InitialMedicalDetails($scope,$filter,$stateParams){
     $scope.MedicalDetails.docdate = GetThaiDateByDate($filter,currentMedical[0].DocDate);
     $scope.MedicalDetails.paidDate = GetThaiDateByDate($filter,currentMedical[0].PaidDate);
     $scope.MedicalDetails.bankName = currentMedical[0].BankName;
+};
+
+function GetHospNameByType(type){
+    if(type == 320) return 'รัฐบาล';
+    if(type == 321) return 'เอกชน';
+    if(type == 322) return 'สำนักแพทย์';
+    return '';
+};
+
+function GetPatientNameByType(type){
+    if(type == 1) return 'OPD';
+    if(type == 2) return 'ทำฟัน';
+    if(type == 3) return 'ตรวจภายใน';
+    if(type == 4) return 'IPD';
+    return '';
 };
 
 function InitialTuitionDetails($scope,$filter,$stateParams){
