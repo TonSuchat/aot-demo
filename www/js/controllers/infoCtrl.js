@@ -582,54 +582,53 @@ angular.module('starter')
 
             $scope.OpenTax91 = function(){
                 var taxYear = $scope.ddlTaxYear.selectedOptions.val;
-                this.DisplayPDFTax('Tax_91',taxYear);
+                //check pin is exist
+                APIService.ShowLoading();
+                var url = APIService.hostname() + '/DeviceRegistered/CheckExistPIN';
+                var data = {Empl_Code:window.localStorage.getItem('CurrentUserName')};
+                APIService.httpPost(url,data,function(response){
+                    if(response.data){
+                        APIService.HideLoading();
+                        $scope.DisplayPDFTax('Tax_91',taxYear);
+                    }
+                    else{
+                        APIService.HideLoading();
+                        IonicAlert($ionicPopup,'ต้องตั้งค่า PIN ก่อนใช้งาน',function(){
+                            window.location = '#/app/helppinsetting';
+                        });
+                    }
+                  },
+                    function(error){console.log(error);APIService.HideLoading();});                
             };
 
             $scope.OpenTax50 = function(){
                 var taxYear = $scope.ddlTaxYear.selectedOptions.val;
-                this.DisplayPDFTax('Tax_50',taxYear);
+                //check pin is exist
+                APIService.ShowLoading();
+                var url = APIService.hostname() + '/DeviceRegistered/CheckExistPIN';
+                var data = {Empl_Code:window.localStorage.getItem('CurrentUserName')};
+                APIService.httpPost(url,data,function(response){
+                    if(response.data){
+                        APIService.HideLoading();
+                        $scope.DisplayPDFTax('Tax_50',taxYear);
+                    }
+                    else{
+                        APIService.HideLoading();
+                        IonicAlert($ionicPopup,'ต้องตั้งค่า PIN ก่อนใช้งาน',function(){
+                            window.location = '#/app/helppinsetting';
+                        });
+                    }
+                  },
+                    function(error){console.log(error);APIService.HideLoading();});
             };
 
             $scope.DisplayPDFTax = function (methodName,taxYear) {
-                IonicAlert($ionicPopup,'รหัสผ่านคือรหัสที่ใช้ Login เข้าใช้งานระบบ',function(){
+                IonicAlert($ionicPopup,'รหัสผ่านคือ PIN',function(){
                     var url = APIService.hostname() + '/' + methodName;
-                    var data = {Empl_Code:$scope.empCode,TaxYear:taxYear,password:window.localStorage.getItem('AuthServices_password')};
-                    //var fileName = methodName + '_' + $scope.empCode + '_' + taxYear;
+                    var data = {Empl_Code:$scope.empCode,TaxYear:taxYear};
                     var fileName = methodName;
                     DisplayPDF($cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName);    
                 });
-                // APIService.ShowLoading();
-                // var url = APIService.hostname() + '/' + methodName;
-                // var data = {Empl_Code:$scope.empCode,TaxYear:taxYear};
-                // var fileName = methodName + '_' + $scope.empCode + '_' + taxYear + '.pdf';
-                // console.log(fileName);
-                // APIService.httpPost(url,data,function(response){
-                //     if(response != null){
-                //         var blob = b64toBlob(response.data, 'application/pdf');
-                //         if(!window.cordova){
-                //             //pc process
-                //             var blobURL = URL.createObjectURL(blob);
-                //             window.open(blobURL,'_blank');
-                //             APIService.HideLoading();
-                //         }
-                //         else{
-                //             //mobile process
-                //             var pathFile = '';
-                //             if (ionic.Platform.isIOS()) pathFile = cordova.file.documentsDirectory
-                //             else pathFile = cordova.file.externalDataDirectory
-                //             $cordovaFile.writeFile(pathFile, fileName, blob, true).then(function(success){
-                //                 $cordovaFileOpener2.open(
-                //                     pathFile + fileName,
-                //                     'application/pdf'
-                //                   ).then(function() {
-                //                     APIService.HideLoading();
-                //                     console.log('file opened successfully');
-                //                   });
-                //             }, function(error) {APIService.HideLoading();console.log(error);});
-                //         }
-                //     }
-                //     else APIService.HideLoading();
-                // },function(error){APIService.HideLoading();console.log(error);alert('ไม่พบข้อมูล');});
             };    
         }
 

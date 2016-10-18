@@ -557,57 +557,94 @@ function SetProfileSettings($q,data){
   });
 };
 
-function CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile) {
+function CheckDeviceIsJailbreakOrRoot($q,$cordovaDevice) {
+  return $q(function(resolve){
+    if(window.cordova){
+      var deviceInfo = $cordovaDevice.getDevice();
+      if(deviceInfo.platform == 'Android'){
+        console.log('check is root?');
+        rootdetection.isDeviceRooted(function(result){
+          console.log(result);
+          var isDevicesRooted = result == 1;
+          if(isDevicesRooted == 1) return resolve(true);
+          else return resolve(false);
+        }, function(error){console.log(error);return resolve(false);});
+      }
+      else{
+        console.log('check is jailbreak?');
+        jailbreakdetection.isJailbroken(function(result){
+          console.log(result);
+          return resolve(result);
+        }, function(error){console.log(error);return resolve(false);});
+      }
+    }
+    else return resolve(false);
+  });
+};
+
+function CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile,$cordovaDevice) {
   return $q(function(resolve){
     //if not loged in then exit
     if(!AuthService.isAuthenticated()) return resolve(true);
-    //check is set keep login
-    CheckIsKeepLogIn($q).then(function(response){
-      //if not keep and still loged in
+    //check is jailbreak or root device
+    CheckDeviceIsJailbreakOrRoot($q,$cordovaDevice).then(function(response){
       if(!response){
-        //force logout
-        console.log('not_keep_login');
-        AuthService.logout(false);
-        return resolve(true);
-      }
-      else{
-        //check session is expire?,Yes force logout.
-        CheckSessionIsExpire(APIService,$q).then(function(response){
-          if(response){
+        //check is set keep login
+        CheckIsKeepLogIn($q).then(function(response){
+          //if not keep and still loged in
+          if(!response){
             //force logout
-            IonicAlert($ionicPopup,'คุณไม่ได้ออกจากระบบนานเกินไป กรุณาเข้าสู่ระบบใหม่',function(){
-              AuthService.logout(false);
-              return resolve(true);  
+            console.log('not_keep_login');
+            AuthService.logout(false);
+            return resolve(true);
+          }
+          else{
+            //check session is expire?,Yes force logout.
+            CheckSessionIsExpire(APIService,$q).then(function(response){
+              if(response){
+                //force logout
+                IonicAlert($ionicPopup,'คุณไม่ได้ออกจากระบบนานเกินไป กรุณาเข้าสู่ระบบใหม่',function(){
+                  AuthService.logout(false);
+                  return resolve(true);  
+                });
+              }
+            });
+            //check this device is valid
+            if(window.localStorage.getItem('GCMToken') == null) return resolve(true);
+            CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
+              console.log(response);
+              if(response != null && response.data != null){
+                //check employee version with localstorage
+                CheckEmployeeVersion($q,APIService,$cordovaFile,response.data.EmpVer);
+                //check device is disable by server
+                if(!response.data.RegistAction){
+                  //if not valid and still logged on then force logout
+                  IonicAlert($ionicPopup,'อุปกรณ์เครื่องนี้ถูกระงับการใช้งาน',function(){
+                    AuthService.logout(true);
+                    return resolve(true);
+                  });
+                }
+                else if(response.data.ChangePWD){
+                  //if other device changed password this device must re login
+                  IonicAlert($ionicPopup,'มีการเปลี่ยนรหัสผ่านจากอุปกรณ์อื่น ต้องเข้าสู่ระบบใหม่',function(){
+                    AuthService.logout(false);
+                    return resolve(true);
+                  });
+                }
+                
+              }
             });
           }
         });
-        //check this device is valid
-        if(window.localStorage.getItem('GCMToken') == null) return resolve(true);
-        CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
-          console.log(response);
-          if(response != null && response.data != null){
-            //check employee version with localstorage
-            CheckEmployeeVersion($q,APIService,$cordovaFile,response.data.EmpVer);
-            //check device is disable by server
-            if(!response.data.RegistAction){
-              //if not valid and still logged on then force logout
-              IonicAlert($ionicPopup,'อุปกรณ์เครื่องนี้ถูกระงับการใช้งาน',function(){
-                AuthService.logout(true);
-                return resolve(true);
-              });
-            }
-            else if(response.data.ChangePWD){
-              //if other device changed password this device must re login
-              IonicAlert($ionicPopup,'มีการเปลี่ยนรหัสผ่านจากอุปกรณ์อื่น ต้องเข้าสู่ระบบใหม่',function(){
-                AuthService.logout(false);
-                return resolve(true);
-              });
-            }
-            
-          }
+      }
+      else{
+        IonicAlert($ionicPopup,'อุปกรณ์ของคุณไม่ปลอดภัย(Jailbreak/Root)!',function(){
+          AuthService.logout(false);
+          return resolve(true);  
         });
       }
     });
+    
   });
 };
 

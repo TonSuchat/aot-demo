@@ -24,7 +24,7 @@
 
       });
     })
-    .run(function($cordovaFile,$cordovaFileOpener2,$ionicPlatform, SQLiteService, AuthService, XMPPService, XMPPApiService, $rootScope, AUTH_EVENTS, APIService, $http, $q, $cordovaNetwork, $ionicPopup,$state, NotiService){
+    .run(function($cordovaFile,$cordovaFileOpener2,$ionicPlatform, SQLiteService, AuthService, XMPPService, XMPPApiService, $rootScope, AUTH_EVENTS, APIService, $http, $q, $cordovaNetwork, $ionicPopup,$state, NotiService, $cordovaDevice){
       $ionicPlatform.ready(function(){
         
         //open db
@@ -41,14 +41,14 @@
           //post to gcm(google cloud messaging) for register device and get token from gcm
           if (window.cordova){
             NotiService.Register().then(function(){
-              CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile);
+              CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile,$cordovaDevice);
             });
           }
           else window.localStorage.setItem('GCMToken',PCGCMToken);
 
           //ionic resume event
           $ionicPlatform.on('resume', function(){
-            CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile);
+            CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile,$cordovaDevice);
           });
 
         });

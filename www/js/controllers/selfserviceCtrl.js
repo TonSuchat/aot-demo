@@ -315,8 +315,8 @@ angular.module('starter')
 		        //change password openfire
 		        XMPPApiService.ChangePassword(window.localStorage.getItem("CurrentUserName"),$scope.changePassword.newPassword).then(function(response){
 		          if(response) IonicAlert($ionicPopup,'เปลี่ยนรหัสผ่านเรียบร้อย');
-		          //keep new password in localstorage
-		          window.localStorage.setItem("AuthServices_password",$scope.changePassword.newPassword);
+		          // //keep new password in localstorage
+		          // window.localStorage.setItem("AuthServices_password",$scope.changePassword.newPassword);
 		          APIService.HideLoading();
 		        });
 		      },function(error){IonicAlert($ionicPopup,error.data,null);console.log(error);APIService.HideLoading();});

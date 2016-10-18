@@ -70,9 +70,10 @@ angular.module('starter')
 
 })
 
-.controller('HelpCtrl',function($scope,APIService,$cordovaNetwork,$ionicPopup,AuthService,$ionicPlatform){
+.controller('HelpCtrl',function($scope,APIService,$cordovaNetwork,$ionicPopup,AuthService,$ionicPlatform,$q){
     $ionicPlatform.ready(function() {
       $scope.noInternet = false;
+      GetAppVersion($q).then(function(version){$scope.appVersion = version;});
       //check is authen for display some menu
       $scope.isAuthen = AuthService.isAuthenticated();
       //if no internet connection

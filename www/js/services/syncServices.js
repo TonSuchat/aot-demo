@@ -106,7 +106,7 @@ angular.module('starter')
   this.SyncNotiHistory = function(){
     var myEmpId = window.localStorage.getItem("CurrentUserName");
     var apiDatas = {
-      GetData:{ObjectID:9,SyncNotiHistoryViewModel:{Empl_Code: myEmpId}},
+      GetData:{ObjectID:9,SyncNotiHistoryViewModel:{Empl_Code: myEmpId,RegisterID:window.localStorage.getItem('GCMToken')}},
       AddData:{ObjectID:9,ObjectNotiHistoryEntity:{}},
       UpdateData:{ObjectID:9,ObjectNotiHistoryEntity:{}}
     };

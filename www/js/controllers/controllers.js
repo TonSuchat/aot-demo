@@ -7,7 +7,7 @@ angular.module('starter')
       });
     })
 
-    .controller('AppCtrl', function($scope, $ionicModal, $timeout, $state, AuthService, $ionicPopup, $location, $ionicHistory, SQLiteService, NotiService, SyncService, $cordovaNetwork, APIService, $rootScope, $ionicPlatform, $q, $cordovaFile) {
+    .controller('AppCtrl', function($scope, $ionicModal, $timeout, $state, AuthService, $ionicPopup, $location, $ionicHistory, SQLiteService, NotiService, SyncService, $cordovaNetwork, APIService, $rootScope, $ionicPlatform, $q, $cordovaFile, $cordovaDevice) {
 
       // With the new view caching in Ionic, Controllers are only called
       // when they are recreated or on app start, instead of every page change.
@@ -89,55 +89,63 @@ angular.module('starter')
           if(form.$valid) {
             var currentUserName = $scope.loginData.username;
             var gcmToken = (window.cordova) ? (window.localStorage.getItem('GCMToken') == null ? '' : window.localStorage.getItem('GCMToken')) : PCGCMToken;
-            //check has permission to manage files?
-            CreateFileCheckPermission($cordovaFile,$q,APIService).then(function(response){
-              if(response != null && response){
-                CheckDeviceIsValid(APIService,$q,gcmToken).then(function(response){
-                  if(response != null){
-                    if(response.status == 500){
-                      var alertPopup = $ionicPopup.alert({
-                        title: 'ไม่สามารถเข้าสู่ระบบได้',
-                        template: 'โปรดเข้าสู่ระบบอีกครั้ง!'
-                      });
-                    }
-                    else if(response.data){
-                      //check employee version with localstorage
-                      CheckEmployeeVersion($q,APIService,$cordovaFile,response.data.EmpVer);
-                      AuthService.login($scope.loginData.username, $scope.loginData.password).then(function() {
-                        $rootScope.$broadcast('checkAuthen', null);
-                        //update register device -> empid to server
-                        if(window.localStorage.getItem('GCMToken') != null && window.localStorage.getItem('GCMToken').length > 0) {
-                          if (window.cordova) NotiService.StoreTokenOnServer(window.localStorage.getItem('GCMToken'),currentUserName,true);
+            //check device is jailbreak or root
+            CheckDeviceIsJailbreakOrRoot($q,$cordovaDevice).then(function(response){
+              if(!response){
+                //check has permission to manage files?
+                CreateFileCheckPermission($cordovaFile,$q,APIService).then(function(response){
+                  if(response != null && response){
+                    CheckDeviceIsValid(APIService,$q,gcmToken).then(function(response){
+                      if(response != null){
+                        if(response.status == 500){
+                          var alertPopup = $ionicPopup.alert({
+                            title: 'ไม่สามารถเข้าสู่ระบบได้',
+                            template: 'โปรดเข้าสู่ระบบอีกครั้ง!'
+                          });
                         }
-                        //bind full menus
-                        $scope.InitialMenus(true);
-                        $scope.closeLogin();
+                        else if(response.data){
+                          //check employee version with localstorage
+                          CheckEmployeeVersion($q,APIService,$cordovaFile,response.data.EmpVer);
+                          AuthService.login($scope.loginData.username, $scope.loginData.password).then(function() {
+                            $rootScope.$broadcast('checkAuthen', null);
+                            //update register device -> empid to server
+                            if(window.localStorage.getItem('GCMToken') != null && window.localStorage.getItem('GCMToken').length > 0) {
+                              if (window.cordova) NotiService.StoreTokenOnServer(window.localStorage.getItem('GCMToken'),currentUserName,true);
+                            }
+                            //bind full menus
+                            $scope.InitialMenus(true);
+                            $scope.closeLogin();
 
-                        //save login date to local storage for check expire to force logout(security process)
-                        var currentDate = new Date();
-                        window.localStorage.setItem('lastLogInDate',+currentDate);
+                            //save login date to local storage for check expire to force logout(security process)
+                            var currentDate = new Date();
+                            window.localStorage.setItem('lastLogInDate',+currentDate);
 
-                      }, function(err) {
-                        var alertPopup = $ionicPopup.alert({
-                          title: err,
-                          template: 'รหัสพนักงาน/รหัสผ่านไม่ถูกต้อง!'
-                        });
-                      });
-                    }
-                    else{
-                      var alertPopup = $ionicPopup.alert({
-                        title: 'ไม่สามารถเข้าสู่ระบบได้',
-                        template: 'อุปกรณ์ถูกระงับการใช้งาน!'
-                      });
-                    }
+                          }, function(err) {
+                            var alertPopup = $ionicPopup.alert({
+                              title: err,
+                              template: 'รหัสพนักงาน/รหัสผ่านไม่ถูกต้อง!'
+                            });
+                          });
+                        }
+                        else{
+                          var alertPopup = $ionicPopup.alert({
+                            title: 'ไม่สามารถเข้าสู่ระบบได้',
+                            template: 'อุปกรณ์ถูกระงับการใช้งาน!'
+                          });
+                        }
+                      }
+                    });
+                  }
+                  else{
+                    var alertPopup = $ionicPopup.alert({
+                      title: 'ไม่สามารถเข้าสู่ระบบได้',
+                      template: 'ต้องทำการอนุญาติให้เข้าถึงไฟล์ได้!'
+                    });
                   }
                 });
               }
               else{
-                var alertPopup = $ionicPopup.alert({
-                  title: 'ไม่สามารถเข้าสู่ระบบได้',
-                  template: 'ต้องทำการอนุญาติให้เข้าถึงไฟล์ได้!'
-                });
+                IonicAlert($ionicPopup,'อุปกรณ์ของคุณไม่ปลอดภัย(Jailbreak/Root)!',function(){});
               }
             });
             return;
