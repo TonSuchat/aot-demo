@@ -779,7 +779,7 @@ function CheckIsUpdateVersion($q,SQLiteService,APIService,$ionicPopup){
   console.log('CheckIsUpdateVersion');
   GetAppVersion($q).then(function(version){
     if(window.localStorage.getItem('AppVer') == null || window.localStorage.getItem('AppVer') != version){
-      IonicAlert($ionicPopup,'รอสักครู่กำลังปรับปรุงระบบ',function(){
+      IonicAlert($ionicPopup,'ยืนยันเพื่อปรับปรุงระบบ',function(){
         APIService.ShowLoading();
         //Drop all tables
         SQLiteService.DropAllTables().then(function(){

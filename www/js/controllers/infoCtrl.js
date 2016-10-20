@@ -269,13 +269,35 @@ angular.module('starter')
         CheckNeedToReload($rootScope,'/leave');
 
         function InitialLeaveSummary(){
-            BindDDLFiscalYear().then(function(){
-                if($scope.ddlFiscalYear.options.length > 0) ProcessLeaveSummary($scope.ddlFiscalYear.options[0].val);    
+            $scope.FiscalYear = GetFiscalYear();
+            //get leave summary info of current year
+            LeaveSummarySQLite.GetLeaveSummaryInfos($scope.FiscalYear).then(function(response){
+                var data = ConvertQueryResultToArray(response);
+                if(data != null && data.length > 0){
+                    //if current fiscal year have data
+                    $scope.leaveSummaryGroups = [];
+                    angular.forEach(data,function(value,key){
+                        $scope.leaveSummaryGroups.push({LeaveCode:value.LeaveCode,name:value.LeaveName + ' (' + value.Used + ' วัน)',Bring:value.Bring,YearRight:value.YearRight,SumRight:value.SumRight,Used:value.Used,Left:value.Left});
+                    });
+                }
+                else{
+                    //if current fiscal year don't have data then use previous year
+                    $scope.FiscalYear--;
+                    LeaveSummarySQLite.GetLeaveSummaryInfos($scope.FiscalYear).then(function(response){
+                        var data = ConvertQueryResultToArray(response);
+                        $scope.leaveSummaryGroups = [];
+                        angular.forEach(data,function(value,key){
+                            $scope.leaveSummaryGroups.push({LeaveCode:value.LeaveCode,name:value.LeaveName + ' (' + value.Used + ' วัน)',Bring:value.Bring,YearRight:value.YearRight,SumRight:value.SumRight,Used:value.Used,Left:value.Left});
+                        });
+                    });
+                }
             });
+            // BindDDLFiscalYear().then(function(){
+            //     if($scope.ddlFiscalYear.options.length > 0) ProcessLeaveSummary($scope.ddlFiscalYear.options[0].val);    
+            // });
         };
 
         function ProcessLeaveSummary(fiscalYear){
-            console.log('ProcessLeaveSummary');
             LeaveSummarySQLite.GetLeaveSummaryInfos(fiscalYear).then(function(response){
                 var data = ConvertQueryResultToArray(response);
                 $scope.leaveSummaryGroups = [];
