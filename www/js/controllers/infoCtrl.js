@@ -277,7 +277,7 @@ angular.module('starter')
                     //if current fiscal year have data
                     $scope.leaveSummaryGroups = [];
                     angular.forEach(data,function(value,key){
-                        $scope.leaveSummaryGroups.push({LeaveCode:value.LeaveCode,name:value.LeaveName + ' (' + value.Used + ' วัน)',Bring:value.Bring,YearRight:value.YearRight,SumRight:value.SumRight,Used:value.Used,Left:value.Left});
+                        $scope.leaveSummaryGroups.push({LeaveCode:value.LeaveCode,name:value.LeaveName,Details:'(ใช้ไป ' + value.Used + ' วัน,คงเหลือ ' + value.Left + ' วัน)',Bring:value.Bring,YearRight:value.YearRight,SumRight:value.SumRight,Used:value.Used,Left:value.Left});
                     });
                 }
                 else{
