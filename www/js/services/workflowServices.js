@@ -1,6 +1,6 @@
 angular.module('starter')
 
-.service('WorkFlowService',function($q,APIService,$ionicPopup,$location){
+.service('WorkFlowService',function($q,APIService,$ionicPopup,$location,$ionicModal){
 
   var service = this;
 
@@ -96,13 +96,17 @@ angular.module('starter')
     scope.popUpDetails.title = 'รับทราบ';
     scope.popUpDetails.subtitle = 'รับทราบรายการนี้ ?';
     scope.popUpDetails.actiontype = 3;
-    service.showPopUp(scope);
+    //service.showPopUp(scope);
+    service.showModal(scope);
   };
 
   this.doAcknowledge = function(scope){
     console.log('doAcknowledge',scope.documentId,scope.action.remark);
     service.ApproveWorkflow(scope.documentId,window.localStorage.getItem("CurrentUserName"),scope.action.remark,3).then(function(response){
-      if(response) $location.path('/app/floatbutton/selfservicelist/' + scope.categoryId);
+      if(response){
+        scope.modalSSAction.remove();
+        $location.path('/app/floatbutton/selfservicelist/' + scope.categoryId);
+      } 
     });
   };
 
@@ -124,13 +128,17 @@ angular.module('starter')
     scope.popUpDetails.subtitle = confirmMessage;
     scope.popUpDetails.actiontype = actionType;
 
-    service.showPopUp(scope);
+    //service.showPopUp(scope);
+    service.showModal(scope);
   };
 
   this.doApproveOrReject = function(isApprove,actionType,scope){
     console.log('doApproveOrReject',scope.documentId,scope.action.remark);
     service.ApproveWorkflow(scope.documentId,window.localStorage.getItem("CurrentUserName"),scope.action.remark,actionType).then(function(response){
-      if(response) $location.path('/app/floatbutton/selfservicelist/' + scope.categoryId);
+      if(response){
+        scope.modalSSAction.remove();
+        $location.path('/app/floatbutton/selfservicelist/' + scope.categoryId);
+      } 
     });
   };
 
@@ -153,6 +161,51 @@ angular.module('starter')
     });
   };
 
-   
+  this.showModal = function(scope){
+    scope.action.remark = '';
+
+    if(scope.modalSSAction == null){
+      // Create the login modal that we will use later
+      $ionicModal.fromTemplateUrl('templates/selfservice/ssaction.html', {
+        scope: scope
+      }).then(function(modal) {
+        scope.modalSSAction = modal;
+        //show
+        scope.modalSSAction.show();
+        //canvas
+        scope.InitialCanvas();
+      });
+    }
+    else scope.modalSSAction.show();
+
+    //close modal action
+    scope.closeAction = function(){
+      scope.modalSSAction.hide();
+    };
+
+    //canvas
+    scope.clearCanvas = function() {
+      scope.signaturePad.clear();
+    };
+    scope.saveCanvas = function() {
+        var sigImg = scope.signaturePad.toDataURL();
+        scope.signature = sigImg;
+        console.log(sigImg);
+    };
+    scope.InitialCanvas = function(){
+      var canvas = document.getElementById('signatureCanvas');
+      if(scope.signaturePad == null) scope.signaturePad = new SignaturePad(canvas);
+      scope.signaturePad.off();
+      scope.signaturePad.on();
+    };
+    //canvas
+
+    scope.submit = function(){
+      if(scope.popUpDetails.actiontype == 2) service.doApproveOrReject(true,2,scope);
+      else if(scope.popUpDetails.actiontype == 5) service.doApproveOrReject(false,5,scope);
+      else if(scope.popUpDetails.actiontype == 3) service.doAcknowledge(scope);
+    };
+
+  };
 
 });

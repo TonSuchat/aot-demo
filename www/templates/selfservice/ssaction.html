@@ -1,0 +1,38 @@
+<ion-modal-view>
+  <ion-header-bar class="bar-calm">
+    <h1 class="title">{{popUpDetails.title}}</h1>
+    <div class="buttons">
+      <button class="button button-clear" ng-click="closeAction()">ปิด</button>
+    </div>
+  </ion-header-bar>
+
+  <ion-content scroll='false'>
+
+    <div class='list'>
+
+      <div class='item item-divider'>
+        ลายเซ็น
+      </div>
+      <div class='item text-center' >
+        <canvas id='signatureCanvas' width='280' style='border: 1px solid black;'></canvas>
+        <button class='button button-small button-block icon ion-trash-a button-assertive' ng-click='clearCanvas()'></button>
+      </div>  
+
+      <div class='item item-divider'>
+        หมายเหตุ
+      </div>
+      <div class='item item-input padding'>
+        <textarea placeholder='หมายเหตุ' rows='5' cols='50' ng-model='action.remark'></textarea>
+      </div>
+
+      <input type='button' class='button button-block button-positive' ng-click='submit()' value='ตกลง' />
+
+    </div>
+
+  </ion-content>
+ 
+</ion-modal-view>
+
+<script type="text/javascript">
+
+</script>
