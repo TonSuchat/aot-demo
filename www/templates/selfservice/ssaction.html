@@ -10,13 +10,16 @@
 
     <div class='list'>
 
-      <div class='item item-divider'>
-        ลายเซ็น
+      <div ng-show='showSignature'>
+        <div class='item item-divider'>
+          ลายเซ็น
+        </div>
+        <div class='item text-center' >
+          <canvas id='signatureCanvas' width='280' style='border: 1px solid black;'></canvas>
+          <button class='button button-small button-block icon ion-trash-a button-assertive' ng-click='clearCanvas()'></button>
+        </div>  
       </div>
-      <div class='item text-center' >
-        <canvas id='signatureCanvas' width='280' style='border: 1px solid black;'></canvas>
-        <button class='button button-small button-block icon ion-trash-a button-assertive' ng-click='clearCanvas()'></button>
-      </div>  
+      
 
       <div class='item item-divider'>
         หมายเหตุ

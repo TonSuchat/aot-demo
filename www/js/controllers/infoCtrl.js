@@ -595,7 +595,7 @@ angular.module('starter')
     .controller('HrCtrl', function($scope, $stateParams, APIService) {
 
     })
-    .controller('TaxCtrl',function($scope,APIService,$cordovaFile,$cordovaFileOpener2,$cordovaNetwork,$ionicPopup){
+    .controller('TaxCtrl',function($scope,APIService,$cordovaFile,$cordovaFileOpener2,$cordovaNetwork,$ionicPopup,$q){
 
         if(!CheckNetwork($cordovaNetwork)) return OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
         else{
@@ -649,7 +649,7 @@ angular.module('starter')
                     var url = APIService.hostname() + '/' + methodName;
                     var data = {Empl_Code:$scope.empCode,TaxYear:taxYear};
                     var fileName = methodName;
-                    DisplayPDF($cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName);    
+                    DisplayPDF($q,$cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName);    
                 });
             };    
         }

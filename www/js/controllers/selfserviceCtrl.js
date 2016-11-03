@@ -4,7 +4,8 @@ var selfServiceCategory = [
 	{id:1,name:'แลก/แทนเวร',href:'#/app/floatbutton/selfservicelist/',requestURL:'#/app/createredeemduty',showRequestButton:true,icon:'ion-arrow-swap',unreadNumber:0},
 	{id:2,name:'ขอทำบัตรพนักงาน',href:'#/app/floatbutton/selfservicelist/',requestURL:'#/app/cardrequest',showRequestButton:true,icon:'ion-card',unreadNumber:0},
 	{id:3,name:'ลงเวลาทำงาน',href:'#/app/floatbutton/selfservicelist/',requestURL:'#/app/createtimework',showRequestButton:true,icon:'ion-clock',unreadNumber:0},
-	{id:4,name:'บันทึกลาหยุดงาน',href:'#/app/floatbutton/selfservicelist/',requestURL:'#/app/createleave',showRequestButton:true,icon:'ion-medkit',unreadNumber:0}
+	{id:4,name:'บันทึกลาหยุดงาน',href:'#/app/floatbutton/selfservicelist/',requestURL:'#/app/createleave',showRequestButton:true,icon:'ion-medkit',unreadNumber:0},
+	{id:5,name:'งานจากระบบอื่น',href:'#/app/floatbutton/selfservicelist/',requestURL:'',showRequestButton:false,icon:'ion-clipboard',unreadNumber:0}
 ];
 
 var listLeave = [
@@ -127,6 +128,15 @@ angular.module('starter')
 			      'menuContent': {
 			        templateUrl: 'templates/selfservice/ssitem_timework.html',
 			        controller:'ItemTimeWorkCtrl'
+			      }
+			    }
+			})
+			.state('app.ssitemothersystem', {
+			    url: '/ssitem_othersystem?documentId&nextLevel',
+			    views: {
+			      'menuContent': {
+			        templateUrl: 'templates/selfservice/ssitem_othersystem.html',
+			        controller:'ItemOtherSystemCtrl'
 			      }
 			    }
 			})
@@ -259,7 +269,7 @@ angular.module('starter')
 			    	$scope.itemDetailURL = '#/app/ssitem_leave';
 			    	break;
 			    default:
-			        $scope.itemDetailURL = '#';
+			        $scope.itemDetailURL = '#/app/ssitem_othersystem';
 			}
 	    };
 
@@ -397,7 +407,9 @@ angular.module('starter')
 									};
 						//var data = {Empl_Code:$scope.Empl_Code,Empl_Code2:$scope.searchEmp.searchTxt,DutyDate:$scope.selectedDate.dutyDate1.toString().replace(new RegExp('/','g'),''),DutyType: $scope.redeemDuty.type,DutyDate2:$scope.selectedDate.dutyDate2.toString().replace(new RegExp('/','g'),''),Remark: "sample string 6"}
 						WorkFlowService.CreateWorkFlow(data).then(function(response){
-							if(response != null) $location.path('/app/floatbutton/selfservicelist/1');
+							if(response != null) {
+								IonicAlert($ionicPopup,'บันทึกข้อมูลเรียบร้อย',function(){$location.path('/app/floatbutton/selfservicelist/1');});
+							}
 						},function(error){console.log(error);IonicAlert($ionicPopup,'ไม่สามารถทำรายการได้/โปรดลองใหม่อีกครั้ง',null);});
 					});
 				}
@@ -525,6 +537,7 @@ angular.module('starter')
 	    	$scope.showBtnApprove = data.Approve;
 	    	$scope.showBtnAcknowledgment = data.Acknowledgment;
 	    	$scope.stateNextLevel = data.StateNextLevel;
+	    	$scope.showSignature = true;
 	    	
 	    	angular.forEach(data.HistoryWorkflow,function(value,key){
 	      //   	$scope.redeemDutyHistories.push({
@@ -728,6 +741,7 @@ angular.module('starter')
 			$scope.showBtnAcknowledgment = data.Acknowledgment;
 			$scope.showBtnApprove = data.Approve;
 			$scope.stateNextLevel = data.StateNextLevel;
+			$scope.showSignature = false;
 
 			$scope.cardRequestDetails.DocumentTitle = data.HistoryWorkflow[0].DocumentTitle;
 			$scope.cardRequestDetails.DocumentDescription = data.HistoryWorkflow[0].DocumentDescription;
@@ -870,7 +884,9 @@ angular.module('starter')
 					}
 				};
 				WorkFlowService.CreateWorkFlow(data).then(function(response){
-					if(response != null) $location.path('/app/floatbutton/selfservicelist/4');
+					if(response != null) {
+						IonicAlert($ionicPopup,'บันทึกข้อมูลเรียบร้อย',function(){$location.path('/app/floatbutton/selfservicelist/4');});
+					} 
 				},function(error){console.log(error);IonicAlert($ionicPopup,'ไม่สามารถทำรายการได้/โปรดลองใหม่อีกครั้ง',null);});
 			});
 		};
@@ -969,6 +985,7 @@ angular.module('starter')
 	    	$scope.showBtnAcknowledgment = data.Acknowledgment;
 			$scope.showBtnApprove = data.Approve;
 			$scope.stateNextLevel = data.StateNextLevel;
+			$scope.showSignature = false;
 
 			$scope.LeaveDetails.DocumentTitle = data.HistoryWorkflow[0].DocumentTitle;
 			$scope.LeaveDetails.DocumentDescription = data.HistoryWorkflow[0].DocumentDescription;
@@ -1070,7 +1087,9 @@ angular.module('starter')
 				};
 			WorkFlowService.CreateWorkFlow(data).then(function(response){
 				//check response from server if have warn from server then show alert('message') before redirect to selfservicelist
-				if(response != null) $location.path('/app/floatbutton/selfservicelist/3');
+				if(response != null) {
+					IonicAlert($ionicPopup,'บันทึกข้อมูลเรียบร้อย',function(){$location.path('/app/floatbutton/selfservicelist/3');});
+				} 
 			},function(error){console.log(error);IonicAlert($ionicPopup,'ไม่สามารถทำรายการได้/โปรดลองใหม่อีกครั้ง',null);});
 		});
 
@@ -1175,6 +1194,7 @@ angular.module('starter')
 			$scope.showBtnAcknowledgment = data.Acknowledgment;
 			$scope.showBtnApprove = data.Approve;
 			$scope.stateNextLevel = data.StateNextLevel;
+			$scope.showSignature = false;
 
 			$scope.TimeWorkDetails.DocumentTitle = data.HistoryWorkflow[0].DocumentTitle;
 			$scope.TimeWorkDetails.DocumentDescription = data.HistoryWorkflow[0].DocumentDescription;
@@ -1191,6 +1211,159 @@ angular.module('starter')
 
 		$scope.confirmApproveOrReject = function(isApprove){
 	    	WorkFlowService.confirmApproveOrReject(isApprove,$scope);
+	    };
+
+	});
+})
+.controller('ItemOtherSystemCtrl',function($scope,$cordovaNetwork,$stateParams,$ionicPopup,$ionicPlatform,WorkFlowService,$filter,$q,$cordovaFile,$cordovaFileOpener2,APIService,$ionicModal){
+	$ionicPlatform.ready(function(){
+
+		$scope.RequestDetails = {};
+		$scope.RequestHistories = [];
+		//actiontype : 2 = approve , 5 = reject , 3 = acknowledge
+		$scope.popUpDetails = {title:'',subtitle:'',actiontype:0};
+		
+		$scope.action = {remark:''};
+
+		//Accordion-Code
+		$scope.initialRequestGroup = function (){
+			$scope.historyGroups = [];
+			$scope.historyGroups[0] = {name: 'ประวัติ',items: []};
+		};
+
+		$scope.initialRequestGroup();
+		
+		$scope.toggleGroup = function(group) {
+	    	if ($scope.isGroupShown(group)) {
+	      		$scope.shownGroup = null;
+	    	} 
+	    	else {
+	      		$scope.shownGroup = group;
+	    	}
+	  	};
+
+	  	$scope.isGroupShown = function(group) {
+	    	return $scope.shownGroup == group;
+	  	};
+	  	//Accordion-Code
+
+		$scope.noInternet = false;
+		//if no internet connection
+		if(!CheckNetwork($cordovaNetwork)){
+		  $scope.noInternet = true;
+		  OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+		}
+		else{
+			$scope.documentId = $stateParams.documentId;
+	    	$scope.nextLevel = '';
+	    	$scope.categoryId = 5;
+	    	$scope.EmplCode = window.localStorage.getItem("CurrentUserName");
+
+			WorkFlowService.ViewReqApprAcknDoc($scope.EmplCode,$scope.documentId,$scope.nextLevel).then(function(response){
+				if(response != null && response.data != null) {
+					//initial leave details
+					InitialRequestDetails(response.data);
+					//initial leave history
+					WorkFlowService.ViewHistoryMyTask($scope.documentId,$scope.nextLevel,$scope.EmplCode).then(function(response){
+						if(response != null && response.data != null){
+							InitialRequestHistory(response.data);
+							//post to mark readed this document
+							WorkFlowService.UpdateReadMytask($scope.EmplCode,$scope.documentId);
+					};
+				});
+				}
+			});
+		}
+
+		$scope.OpenAttachment = function(){
+			if($scope.DocumentObject && $scope.DocumentObject.length > 0){
+				SaveAndOpenPDF($q,$cordovaFile,$cordovaFileOpener2,$scope.DocumentObject,'pdf','OtherSystemAttachment');
+			}
+		};
+
+		$scope.RequestOTP = function(){
+			//generate otp password 4 numbers and send to api
+			$scope.OTP = Math.floor(1000 + Math.random() * 9000);
+			console.log($scope.OTP);
+			APIService.ShowLoading();
+			var url = APIService.hostname() + '/Notification/Noti';
+			var data = {Title:'AOT-Mobile OTP',Data:$scope.OTP,ToEmpID:$scope.EmplCode,NotiType:3,ChannelType:2,NotiPriority:1,MenuPath:'',RegisterID:'',OSType:0};
+			APIService.httpPost(url,data,function(response){
+				APIService.HideLoading();
+				IonicAlert($ionicPopup,'ส่ง SMS เรียบร้อย',null);
+			},function(error){
+				console.log(error);
+				APIService.HideLoading();
+			});
+		};
+
+		$scope.confirmApproveOrReject = function(isApprove){
+			//authen by fa type
+			WorkFlowService.showModalAuthen($scope,{actionType:'approveorreject',val:isApprove},$scope.RequestDetails.FAType);
+	    	//WorkFlowService.confirmApproveOrReject(isApprove,$scope);
+	    };
+
+	    $scope.confirmAcknowledge = function(){
+	    	WorkFlowService.showModalAuthen($scope,{actionType:'acknowledge',val:''},$scope.RequestDetails.FAType);
+	    	// if($scope.RequestDetails.FAType == 0) WorkFlowService.confirmAcknowledge($scope);
+	    	// else{
+	    	// 	//authen by fa type
+	    	// 	$scope.modalDetails.title = ($scope.RequestDetails.FAType == 1) ? 'ยืนยัน PIN-Code' : 'ยืนยัน OTP';
+	    	// 	if($scope.RequestDetails.FAType == 1){
+	    	// 		//check pin is exist
+	     //            APIService.ShowLoading();
+	     //            var url = APIService.hostname() + '/DeviceRegistered/CheckExistPIN';
+	     //            var data = {Empl_Code:window.localStorage.getItem('CurrentUserName')};
+	     //            APIService.httpPost(url,data,function(response){
+	     //                if(response.data){
+	     //                    APIService.HideLoading();
+	     //                    WorkFlowService.showModalAuthen($scope);
+	     //                }
+	     //                else{
+	     //                    APIService.HideLoading();
+	     //                    IonicAlert($ionicPopup,'ต้องตั้งค่า PIN ก่อนใช้งาน',function(){
+	     //                        window.location = '#/app/helppinsetting';
+	     //                    });
+	     //                }
+	     //              },
+	     //                function(error){console.log(error);APIService.HideLoading();});                
+	    	// 	}
+	    	// 	else{
+	    	// 		WorkFlowService.showModalAuthen($scope);
+	    	// 	}
+		    // 	//WorkFlowService.confirmAcknowledge($scope);	
+	    	// }
+	    };
+
+	    function InitialRequestDetails (data) {
+	    	$scope.RequestDetails.Empl_Code = data[0].Empl_Code;
+			$scope.RequestDetails.SourceDocID = data[0].SourceDocID;
+			$scope.RequestDetails.SourceDocDate = data[0].SourceDocDate;
+			$scope.RequestDetails.SourceDocTime = data[0].SourceDocTime;
+			$scope.RequestDetails.SourcetSystemID = data[0].SourcetSystemID;
+			$scope.RequestDetails.Remark = data[0].Remark;
+			$scope.RequestDetails.FAType = data[0].FAType;
+			$scope.showSignature = data[0].Signature;
+			$scope.SignatureObject = (data[0].SignatureObject && data[0].SignatureObject.length > 0) ? 'data:image/png;base64,' +  data[0].SignatureObject: '';
+			$scope.DocumentObject = data[0].DocumentObject;
+	    };
+
+	    function InitialRequestHistory (data) {
+	    	$scope.showBtnAcknowledgment = data.Acknowledgment;
+			$scope.showBtnApprove = data.Approve;
+			$scope.stateNextLevel = data.StateNextLevel;
+			
+			$scope.RequestDetails.DocumentTitle = data.HistoryWorkflow[0].DocumentTitle;
+			$scope.RequestDetails.DocumentDescription = data.HistoryWorkflow[0].DocumentDescription;
+
+			angular.forEach(data.HistoryWorkflow,function(value,key){
+	        	$scope.historyGroups[0].items.push({
+		    		UpdateBy:value.UpdateBy,
+		    		UpdateDate:GetThaiDateTimeByDate($filter,value.UpdateDate),
+		    		ActionTypeName:value.ActionTypeName,
+		    		RouteName:value.RouteName
+		    	});	
+	      	});
 	    };
 
 	});

@@ -569,7 +569,7 @@ angular.module('starter')
 	};
 
 	this.GetDistinctMonthYear = function(){
-		return SQLiteService.Execute("select distinct substr(stampdate,3,6) as monthyear from timeattendance order by substr(stampdate,3,6) desc").then(function(response){return response;},function(error){ return error;});
+		return SQLiteService.Execute("select distinct substr(stampdate,3,6) as monthyear from timeattendance order by substr(stampdate,3,6) desc limit 12").then(function(response){return response;},function(error){ return error;});
 	};
 })
 .service('LeaveSQLite',function(SQLiteService){

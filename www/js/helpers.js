@@ -44,11 +44,11 @@ var _MS_PER_DAY = 1000 * 60 * 60 * 24;
     return today;
 };
 
-function GetFiscalDate(){
+function GetFiscalDate(previousYears){
 	var today = new Date();
 	var day = today.getDate();
 	var month = today.getMonth()+1;
-	var year = today.getFullYear();
+	var year = (previousYears == null) ? today.getFullYear() : (today.getFullYear() - previousYears);
 	if(month > 10) return '0110' + year;
 	else return '0110' + (year - 1);
 };
@@ -292,39 +292,72 @@ function b64toBlob(b64Data, contentType, sliceSize) {
   return blob;
 };
 
-function DisplayPDF($cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName) {
+function DisplayPDF($q,$cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName) {
+  //add $q for used promise in SaveAndOpenPDF()
     APIService.ShowLoading();
     APIService.httpPost(url,data,function(response){
         if(response != null && response.data != null){
-          var extension = response.data[0].ContentType;
-          var base64Str = response.data[0].ContentData;
-          var contentType = GetContentTypeByExtension(extension);
-          fileName = fileName + '.' + extension;
-          var blob = b64toBlob(base64Str, contentType);
-          if(!window.cordova){
-            //pc process
-            var blobURL = URL.createObjectURL(blob);
-            window.open(blobURL,'_blank');
-            APIService.HideLoading();
-          }
-          else{
-            //mobile process
-            var pathFile = '';
-            if (ionic.Platform.isIOS()) pathFile = cordova.file.documentsDirectory
-            else pathFile = cordova.file.externalDataDirectory
-            $cordovaFile.writeFile(pathFile, fileName, blob, true).then(function(success){
-                $cordovaFileOpener2.open(
-                    pathFile + fileName,
-                    contentType
-                  ).then(function() {
-                    APIService.HideLoading();
-                    console.log('file opened successfully');
-                  });
-            }, function(error) {APIService.HideLoading();console.log(error);});
-          }
+          SaveAndOpenPDF($q,$cordovaFile,$cordovaFileOpener2,response.data[0].ContentData,response.data[0].ContentType,fileName).then(function(response){APIService.HideLoading();});
+          // var extension = response.data[0].ContentType;
+          // var base64Str = response.data[0].ContentData;
+          // var contentType = GetContentTypeByExtension(extension);
+          // fileName = fileName + '.' + extension;
+          // var blob = b64toBlob(base64Str, contentType);
+          // if(!window.cordova){
+          //   //pc process
+          //   var blobURL = URL.createObjectURL(blob);
+          //   window.open(blobURL,'_blank');
+          //   APIService.HideLoading();
+          // }
+          // else{
+          //   //mobile process
+          //   var pathFile = '';
+          //   if (ionic.Platform.isIOS()) pathFile = cordova.file.documentsDirectory
+          //   else pathFile = cordova.file.externalDataDirectory
+          //   $cordovaFile.writeFile(pathFile, fileName, blob, true).then(function(success){
+          //       $cordovaFileOpener2.open(
+          //           pathFile + fileName,
+          //           contentType
+          //         ).then(function() {
+          //           APIService.HideLoading();
+          //           console.log('file opened successfully');
+          //         });
+          //   }, function(error) {APIService.HideLoading();console.log(error);});
+          // }
         }
         else APIService.HideLoading();
     },function(error){APIService.HideLoading();console.log(error);alert('ไม่พบข้อมูล');});
+};
+
+function SaveAndOpenPDF ($q,$cordovaFile,$cordovaFileOpener2,contentData,inputcontentType,fileName) {
+  return $q(function(resolve){
+    var extension = inputcontentType;
+    var base64Str = contentData;
+    var contentType = GetContentTypeByExtension(extension);
+    fileName = fileName + '.' + extension;
+    var blob = b64toBlob(base64Str, contentType);
+    if(!window.cordova){
+      //pc process
+      var blobURL = URL.createObjectURL(blob);
+      window.open(blobURL,'_blank');
+      return resolve(true);
+    }
+    else{
+      //mobile process
+      var pathFile = '';
+      if (ionic.Platform.isIOS()) pathFile = cordova.file.documentsDirectory
+      else pathFile = cordova.file.externalDataDirectory
+      $cordovaFile.writeFile(pathFile, fileName, blob, true).then(function(success){
+          $cordovaFileOpener2.open(
+              pathFile + fileName,
+              contentType
+            ).then(function() {
+              console.log('file opened successfully');
+              return resolve(true);
+            });
+      }, function(error) {console.log(error);return resolve(false);});
+    }
+  });
 };
 
 function CreateFileCheckPermission($cordovaFile,$q,APIService) {
@@ -582,58 +615,164 @@ function CheckDeviceIsJailbreakOrRoot($q,$cordovaDevice) {
   });
 };
 
+function CheckUpdateNewestVersion($q,$cordovaDevice,$ionicPopup,APIService,latestVersion) {
+  return $q(function(resolve){
+    if(window.cordova){
+      //check with current version of mobile
+      GetAppVersion($q).then(function(version){
+        if(version != latestVersion){
+           var confirmPopup = $ionicPopup.confirm({
+             title: 'มี Version ใหม่',
+             template: 'ต้องการ Update ให้เป็น version ใหม่?',
+             buttons:[
+              {text:'ยกเลิก'},
+              {
+                text:'ตกลง',
+                type: 'button-positive',
+                onTap:function(){
+                  //update version (get url from api and redirect to each store)
+                  APIService.ShowLoading();
+                  var deviceInfo = $cordovaDevice.getDevice();
+                  var url = APIService.hostname() + '/AOTLiveConfig/AOTLive';
+                  var data = {ConfigKeys:''};
+                  if(deviceInfo.platform == 'Android') data.ConfigKeys = 'PlayStoreURL';
+                  else data.ConfigKeys = 'AppStoreURL';
+                  APIService.httpPost(url,data,function(response){
+                    APIService.HideLoading();
+                    window.open(response.data,'_system','location=no');
+                  },function(error){console.log(error);APIService.HideLoading();});
+                }
+              }
+             ]
+           });
+        }
+      });
+    }
+    else resolve(true);
+  });
+};
+
+// function CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile,$cordovaDevice) {
+//   return $q(function(resolve){
+//     //if not loged in then exit
+//     if(!AuthService.isAuthenticated()) return resolve(true);
+//     //check is jailbreak or root device
+//     CheckDeviceIsJailbreakOrRoot($q,$cordovaDevice).then(function(response){
+//       if(!response){
+//         //check is set keep login
+//         CheckIsKeepLogIn($q).then(function(response){
+//           //if not keep and still loged in
+//           if(!response){
+//             //force logout
+//             console.log('not_keep_login');
+//             AuthService.logout(false);
+//             return resolve(true);
+//           }
+//           else{
+//             //check session is expire?,Yes force logout.
+//             CheckSessionIsExpire(APIService,$q).then(function(response){
+//               if(response){
+//                 //force logout
+//                 IonicAlert($ionicPopup,'คุณไม่ได้ออกจากระบบนานเกินไป กรุณาเข้าสู่ระบบใหม่',function(){
+//                   AuthService.logout(false);
+//                   return resolve(true);  
+//                 });
+//               }
+//             });
+//             //check this device is valid
+//             if(window.localStorage.getItem('GCMToken') == null) return resolve(true);
+//             CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
+//               console.log(response);
+//               if(response != null && response.data != null){
+//                 //check employee version with localstorage
+//                 CheckEmployeeVersion($q,APIService,$cordovaFile,response.data.EmpVer);
+//                 //check device is disable by server
+//                 if(!response.data.RegistAction){
+//                   //if not valid and still logged on then force logout
+//                   IonicAlert($ionicPopup,'อุปกรณ์เครื่องนี้ถูกระงับการใช้งาน',function(){
+//                     AuthService.logout(true);
+//                     return resolve(true);
+//                   });
+//                 }
+//                 else if(response.data.ChangePWD){
+//                   //if other device changed password this device must re login
+//                   IonicAlert($ionicPopup,'มีการเปลี่ยนรหัสผ่านจากอุปกรณ์อื่น ต้องเข้าสู่ระบบใหม่',function(){
+//                     AuthService.logout(false);
+//                     return resolve(true);
+//                   });
+//                 }
+                
+//               }
+//             });
+//           }
+//         });
+//       }
+//       else{
+//         IonicAlert($ionicPopup,'อุปกรณ์ของคุณไม่ปลอดภัย(Jailbreak/Root)!',function(){
+//           AuthService.logout(false);
+//           return resolve(true);  
+//         });
+//       }
+//     });
+    
+//   });
+// };
+
 function CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile,$cordovaDevice) {
   return $q(function(resolve){
-    //if not loged in then exit
-    if(!AuthService.isAuthenticated()) return resolve(true);
     //check is jailbreak or root device
     CheckDeviceIsJailbreakOrRoot($q,$cordovaDevice).then(function(response){
       if(!response){
-        //check is set keep login
-        CheckIsKeepLogIn($q).then(function(response){
-          //if not keep and still loged in
-          if(!response){
-            //force logout
-            console.log('not_keep_login');
-            AuthService.logout(false);
-            return resolve(true);
-          }
-          else{
-            //check session is expire?,Yes force logout.
-            CheckSessionIsExpire(APIService,$q).then(function(response){
-              if(response){
-                //force logout
-                IonicAlert($ionicPopup,'คุณไม่ได้ออกจากระบบนานเกินไป กรุณาเข้าสู่ระบบใหม่',function(){
+        //check this device is valid
+        if(window.localStorage.getItem('GCMToken') == null) return resolve(true);
+        CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
+          console.log(response);
+          if(response != null && response.data != null){
+            // //check the store have newest version?
+            // CheckUpdateNewestVersion($q,$cordovaDevice,$ionicPopup,APIService,response.data.LastestVersion);
+            //check employee version with localstorage
+            CheckEmployeeVersion($q,APIService,$cordovaFile,response.data.EmpVer);
+            //check device is disable by server
+            if(!response.data.RegistAction){
+              //if not valid and still logged on then force logout
+              IonicAlert($ionicPopup,'อุปกรณ์เครื่องนี้ถูกระงับการใช้งาน',function(){
+                AuthService.logout(true);
+                return resolve(true);
+              });
+            }
+            else if(response.data.ChangePWD){
+              //if other device changed password this device must re login
+              IonicAlert($ionicPopup,'มีการเปลี่ยนรหัสผ่านจากอุปกรณ์อื่น ต้องเข้าสู่ระบบใหม่',function(){
+                AuthService.logout(false);
+                return resolve(true);
+              });
+            }
+            else{
+              //if not loged in then exit
+              if(!AuthService.isAuthenticated()) return resolve(true);
+              //check is set keep login
+              CheckIsKeepLogIn($q).then(function(response){
+                //if not keep and still loged in
+                if(!response){
+                  //force logout
+                  console.log('not_keep_login');
                   AuthService.logout(false);
-                  return resolve(true);  
-                });
-              }
-            });
-            //check this device is valid
-            if(window.localStorage.getItem('GCMToken') == null) return resolve(true);
-            CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
-              console.log(response);
-              if(response != null && response.data != null){
-                //check employee version with localstorage
-                CheckEmployeeVersion($q,APIService,$cordovaFile,response.data.EmpVer);
-                //check device is disable by server
-                if(!response.data.RegistAction){
-                  //if not valid and still logged on then force logout
-                  IonicAlert($ionicPopup,'อุปกรณ์เครื่องนี้ถูกระงับการใช้งาน',function(){
-                    AuthService.logout(true);
-                    return resolve(true);
+                  return resolve(true);
+                }
+                else{
+                  //check session is expire?,Yes force logout.
+                  CheckSessionIsExpire(APIService,$q).then(function(response){
+                    if(response){
+                      //force logout
+                      IonicAlert($ionicPopup,'คุณไม่ได้ออกจากระบบนานเกินไป กรุณาเข้าสู่ระบบใหม่',function(){
+                        AuthService.logout(false);
+                        return resolve(true);  
+                      });
+                    }
                   });
                 }
-                else if(response.data.ChangePWD){
-                  //if other device changed password this device must re login
-                  IonicAlert($ionicPopup,'มีการเปลี่ยนรหัสผ่านจากอุปกรณ์อื่น ต้องเข้าสู่ระบบใหม่',function(){
-                    AuthService.logout(false);
-                    return resolve(true);
-                  });
-                }
-                
-              }
-            });
+              });
+            }
           }
         });
       }

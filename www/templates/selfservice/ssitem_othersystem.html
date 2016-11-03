@@ -1,0 +1,104 @@
+<ion-view cache-view="false" view-title="คำขอจากระบบอื่น">
+
+    <ion-content>
+
+      <div class='list'>
+
+        <!-- section-details -->
+        <div class='item item-divider'>
+          <h2><b>รายละเอียดคำขอ</b></h2>
+        </div>
+
+        <div class='item item-text-wrap'>
+          <p>รหัสพนักงานปลายทาง : {{RequestDetails.Empl_Code}}</p>
+          <p>หมายเลขเอกสารของระบบต้นทาง : {{RequestDetails.SourceDocID}}</p>
+          <p>วันที่เอกสารของระบบต้นทาง : {{RequestDetails.SourceDocDate}}</p>
+          <p>เวลาเอกสารของระบบต้นทาง : {{RequestDetails.SourceDocTime}}</p>
+          <p>เลขที่ระบบต้นทาง : {{RequestDetails.SourcetSystemID}}</p>
+          <p>หมายเหตุ : {{RequestDetails.Remark}}</p>
+        </div>
+        <!-- section-details -->
+
+        <div class='item item-divider'>
+          <h2><b>เอกสารแนบ</b></h2>
+        </div>
+
+        <div class='item item-text-wrap'>
+          <button ng-show='DocumentObject.length > 0' ng-click='OpenAttachment()' class='button button-small button-balanced icon-left ion-android-attach'> เรียกดูเอกสารแนบ</button>
+          <p ng-show='DocumentObject.length == 0'>ไม่พบเอกสารแนบ</p>
+        </div>
+
+        <div ng-show='showSignature'>
+          <div class='item item-divider'>
+            <h2><b>ลายเซ็น</b></h2>
+          </div>
+
+          <div class='item item-text-wrap'>
+            <img ng-show='SignatureObject.length > 0' src="{{SignatureObject}}" />
+            <p ng-show='SignatureObject.length == 0'>ไม่พบลายเซ็น</p>
+          </div>  
+        </div>
+        
+        <!-- section-history -->
+        <!-- <div class='item item-divider'>
+          <h2><b>ประวัติ</b></h2>
+        </div>
+
+        <div class='item item-text-wrap' ng-repeat='history in LeaveHistories'>
+          <p>{{history.RouteName}} , {{history.UpdateBy}} , {{history.UpdateDate}}</p>
+        </div> -->
+        <div ng-repeat="group in historyGroups">
+            <ion-item class="item-stable" ng-click="toggleGroup(group)" ng-class="{active: isGroupShown(group)}">
+                <i class="icon" ng-class="isGroupShown(group) ? 'ion-minus' : 'ion-plus'"></i>&nbsp;<b>{{group.name}}</b>
+            </ion-item>
+            <ion-item class="item-accordion item-text-wrap" ng-show="isGroupShown(group)" ng-repeat="item in group.items">
+                <p><b>{{item.RouteName}} :</b> {{item.RouteName}} , {{item.UpdateBy}} , {{item.UpdateDate}}</p>
+          </ion-item>
+        </div>
+        <!-- <div class='item item-text-wrap' >
+          <p>InworkFlow , นาย สนธยา วิไลจิตต์ , 28 ก.ค. 2559 เวลา 15:32</p>
+        </div>    -->
+        <!-- section-history -->
+
+        <!-- section-nextState -->
+        <div class='item item-divider'>
+          <h2><b>สถานะต่อไป</b></h2>
+        </div>
+
+        <div class='item item-text-wrap'>
+          <p>{{stateNextLevel}}</p>
+        </div> 
+        <!-- section-nextState -->
+
+        <div ng-show="RequestDetails.FAType == 2 && stateNextLevel != 'ไม่มีสถานะต่อไป'">
+          <div class='item item-divider'>
+            <h2><b>Request SMS OTP</b></h2>
+          </div>
+
+          <div class='item item-text-wrap'>
+            <button ng-click='RequestOTP()' class='button button-small button-balanced icon-left ion-iphone'> ส่ง SMS</button>
+          </div>
+        </div>
+        
+        <!-- section-button -->
+        <div ng-show='showBtnAcknowledgment' class='row padding'>
+          <div class='col'>
+            <input type='button' ng-disabled='noInternet' ng-click='confirmAcknowledge()' class='button button-block button-balanced' value='รับทราบ' />
+          </div>
+        </div>
+
+        <div ng-show='showBtnApprove' class='row padding'>
+          <div class='col col-50'>
+            <input type='button' ng-disabled='noInternet' ng-click='confirmApproveOrReject(true)' class='button button-block button-positive' value='อนุมัติ' />
+          </div>
+          <div class='col col-50'>
+            <input type='button' ng-disabled='noInternet' ng-click='confirmApproveOrReject(false)' class='button button-block button-assertive' value='ไม่อนุมัติ' />
+          </div>
+        </div>
+        <!-- section-button -->
+
+      </div>
+
+    </ion-content>
+
+</ion-view>

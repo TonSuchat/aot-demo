@@ -1,0 +1,71 @@
+<ion-modal-view>
+  <ion-header-bar class="bar-calm">
+    <h1 class="title">{{modalDetails.title}}</h1>
+    <div class="buttons">
+      <button class="button button-clear" ng-click="closeAction()">ปิด</button>
+    </div>
+  </ion-header-bar>
+
+  <ion-content>
+
+    <div class='list'>
+
+      <!-- PIN-CODE -->
+      <form name="PINForm" ng-show='RequestDetails.FAType == 1' novalidate="" ng-submit="doAuthenPIN(PINForm)">
+
+        <label class="item item-input" ng-class="{ 'has-errors' : PINForm.PINPassword.$invalid, 'no-errors' : PINForm.PINPassword.$valid}">
+          <span class="input-label">PIN-Code</span>
+          <input type="password" name='PINPassword' ng-model="modalDetails.PINValue" ng-minlength='6' ng-maxlength='6' required>
+        </label>
+        <div class="error-container" ng-show="PINForm.PINPassword.$error.minlength || PINForm.PINPassword.$error.maxlength">
+          <div class="error">
+            <i class="ion-information-circled"></i> 
+            ต้องกรอกรหัส PIN 6 หลัก
+          </div>
+        </div>
+        <div class="error-container" ng-show="PINForm.PINPassword.$error.required">
+          <div class="error">
+            <i class="ion-information-circled"></i> 
+            ต้องกรอกข้อมูล
+          </div>
+        </div>
+
+        <input type='submit' ng-disabled='!PINForm.$valid' class='button button-block button-positive' value='ตกลง' />
+
+      </form>
+
+      <!-- SMS-OTP -->
+      <form name="OTPForm" ng-show='RequestDetails.FAType == 2' novalidate="" ng-submit="doAuthenOTP(OTPForm)">
+
+        <label class="item item-input" ng-class="{ 'has-errors' : OTPForm.OTPpassword.$invalid, 'no-errors' : OTPForm.OTPpassword.$valid}">
+          <span class="input-label">OTP-Password</span>
+          <input type="password" name='OTPpassword' ng-model="modalDetails.OTPValue" ng-minlength='4' ng-maxlength='4' required>
+        </label>
+        <div class="error-container" ng-show="OTPForm.OTPpassword.$error.minlength || OTPForm.OTPpassword.$error.maxlength">
+          <div class="error">
+            <i class="ion-information-circled"></i> 
+            ต้องกรอกรหัส 4 หลัก
+          </div>
+        </div>
+        <div class="error-container" ng-show="OTPForm.OTPpassword.$error.required">
+          <div class="error">
+            <i class="ion-information-circled"></i> 
+            ต้องกรอกข้อมูล
+          </div>
+        </div>
+
+        <input type='submit' ng-disabled='!OTPForm.$valid' class='button button-block button-positive' value='ตกลง' />
+
+      </form>
+
+      
+
+    </div>
+
+  </ion-content>
+ 
+</ion-modal-view>
+
+<script type="text/javascript">
+
+</script>
