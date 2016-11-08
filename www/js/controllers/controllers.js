@@ -7,7 +7,7 @@ angular.module('starter')
       });
     })
 
-    .controller('AppCtrl', function($scope, $ionicModal, $timeout, $state, AuthService, $ionicPopup, $location, $ionicHistory, SQLiteService, NotiService, SyncService, $cordovaNetwork, APIService, $rootScope, $ionicPlatform, $q, $cordovaFile, $cordovaDevice) {
+    .controller('AppCtrl', function($scope, $ionicModal, $timeout, $state, AuthService, $ionicPopup, $location, $ionicHistory, SQLiteService, NotiService, SyncService, $cordovaNetwork, APIService, $rootScope, $ionicPlatform, $q, $cordovaFile, $cordovaDevice, $filter) {
 
       // With the new view caching in Ionic, Controllers are only called
       // when they are recreated or on app start, instead of every page change.
@@ -18,8 +18,16 @@ angular.module('starter')
 
       $ionicPlatform.ready(function(){
         APIService.HideLoading();
+
+        //check is server released new version? if have new version then confirm user to update on each store
+        CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
+          if(response != null && response.data != null){
+            //check the store have newest version?
+            CheckUpdateNewestVersion($q,$cordovaDevice,$ionicPopup,APIService,response.data.LastestVersion);
+          }
+        });
         
-        //check is new version? if yes then force logout for update any data or database
+        //check is new version? if yes then popup and alter table
         CheckIsUpdateVersion($q,SQLiteService,APIService,$ionicPopup);
 
         $scope.noInternet = false;
@@ -42,10 +50,10 @@ angular.module('starter')
           $scope.userPicturethumb = AuthService.picThumb();
           $scope.userPosition = AuthService.position();
           //bind menus
-          $scope.InitialMenus($scope.isAuthen);
+          $scope.InitialMenus($scope.isAuthen,data);
         });
 
-        $scope.InitialMenus = function(isAuthen){
+        $scope.InitialMenus = function(isAuthen,loginComplete){
           $scope.menus = [];
           if(isAuthen){
             $scope.menus.push({link:'#/app/selfservice',text:'Self Services',icon:'ion-ios-person'});
@@ -54,6 +62,25 @@ angular.module('starter')
             $scope.menus.push({link:'#/app/qrcode',text:'QR-Code',icon:'ion-qr-scanner'});
             $scope.menus.push({link:'#/app/duty',text:'จัดการเวร',icon:'ion-ios-body-outline'});
             $scope.menus.push({link:'#/app/notihistory',text:'ประวัติแจ้งเตือน',icon:'ion-android-refresh'});
+            if(loginComplete == null){
+              //post to get MenuNotSeen to remove it.
+              APIService.ShowLoading();
+              var url = APIService.hostname() + '/DeviceRegistered/DisplayMenu';
+              var data = {Empl_Code:window.localStorage.getItem('CurrentUserName')};
+              APIService.httpPost(url,data,function(response){
+                if(response != null){
+                  for (var i = 0; i <= response.data.length - 1; i++) {
+                    var currentMenuName = response.data[i].MenuName;
+                    for (var z = 0; i <= $scope.menus.length - 1; z++) {
+                      if(currentMenuName == $scope.menus[z].text){
+                        $scope.menus.splice(z,1);
+                        break;
+                      }
+                    };
+                  };
+                }
+              },function(error){console.log(error);});
+            }
           }
           $scope.menus.push({link:'#/app/home/circular-letter',text:'ข่าวสาร ทอท.',icon:'ion-clipboard'});
           $scope.menus.push({link:'#/app/stock',text:'ราคาหุ้น',icon:'ion-ios-pulse-strong'});
@@ -107,7 +134,7 @@ angular.module('starter')
                           //check employee version with localstorage
                           CheckEmployeeVersion($q,APIService,$cordovaFile,response.data.EmpVer);
                           AuthService.login($scope.loginData.username, $scope.loginData.password).then(function() {
-                            $rootScope.$broadcast('checkAuthen', null);
+                            $rootScope.$broadcast('checkAuthen', true);
                             //update register device -> empid to server
                             if(window.localStorage.getItem('GCMToken') != null && window.localStorage.getItem('GCMToken').length > 0) {
                               if (window.cordova) NotiService.StoreTokenOnServer(window.localStorage.getItem('GCMToken'),currentUserName,true);
@@ -169,7 +196,7 @@ angular.module('starter')
 
     })
 
-    .controller('NewsFeedCtrl', function($scope, $stateParams, SyncService, NewsSQLite, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup, $cordovaFile,$cordovaFileOpener2) {
+    .controller('NewsFeedCtrl', function($scope, $stateParams, SyncService, NewsSQLite, $ionicPlatform, APIService, $rootScope, $cordovaNetwork, $ionicPopup, $cordovaFile,$cordovaFileOpener2,$q) {
 
       $ionicPlatform.ready(function(){
         InitialNewsFeedProcess($scope, $stateParams, SyncService, NewsSQLite, $ionicPlatform, APIService);
@@ -182,7 +209,7 @@ angular.module('starter')
         var url = APIService.hostname() + '/AOTNews/PdfNews';
         var data = {Id:Id};
         var fileName = 'AOTNews';
-        DisplayPDF($cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName);
+        DisplayPDF($q,$cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName);
       };
 
       $scope.Refresh = function(){
@@ -198,7 +225,7 @@ angular.module('starter')
     .controller('NewsCtrl', function($scope, $stateParams) {
       console.log('news click');
     })
-    .controller('CircularLetterCtrl', function($scope, $filter, SyncService, CircularSQLite, APIService, $ionicPlatform, $rootScope, $cordovaNetwork, $ionicPopup, $cordovaFile,$cordovaFileOpener2) {
+    .controller('CircularLetterCtrl', function($scope, $filter, SyncService, CircularSQLite, APIService, $ionicPlatform, $rootScope, $cordovaNetwork, $ionicPopup, $cordovaFile,$cordovaFileOpener2,$q) {
       $ionicPlatform.ready(function(){
 
         InitialCircularProcess($scope, $filter, SyncService, CircularSQLite, APIService);
@@ -234,7 +261,7 @@ angular.module('starter')
           var url = APIService.hostname() + '/CircularLetter/PdfDocCir';
           var data = {Id:Id};
           var fileName = 'circular-letter';
-          DisplayPDF($cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName);
+          DisplayPDF($q,$cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName);
         };
 
         $scope.GetThaiDateByDate = function(inputDate){

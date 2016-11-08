@@ -20,7 +20,7 @@ angular.module('starter')
   this.SyncMedical = function(){
     var myEmpId = window.localStorage.getItem("CurrentUserName"); //'393028';  **Hard-Code**
     var apiDatas = {
-      GetData:{ObjectID:1,SyncMedicalViewModel:{EmpID: myEmpId, FromDate: GetFiscalDate(), ToDate: GetCurrentDate().replace(/\//g,'')}},
+      GetData:{ObjectID:1,SyncMedicalViewModel:{EmpID: myEmpId, FromDate: GetFiscalDate(3), ToDate: GetCurrentDate().replace(/\//g,'')}},
       AddData:{ObjectID:1,ObjectMedicalEntity:{}},
       UpdateData:{ObjectID:1,ObjectMedicalEntity:{}}
     };
@@ -42,7 +42,7 @@ angular.module('starter')
   this.SyncTime = function(){
     var myEmpId = window.localStorage.getItem("CurrentUserName"); // '576222' **Hard-Code**
     var apiDatas = {
-      GetData:{ObjectID:2,SyncTAViewModel:{EmpID: myEmpId, FromDate: GetFiscalDate(), ToDate: GetCurrentDate().replace(/\//g,'')}},
+      GetData:{ObjectID:2,SyncTAViewModel:{EmpID: myEmpId, FromDate: GetFiscalDate(1), ToDate: GetCurrentDate().replace(/\//g,'')}},
       AddData:{ObjectID:2,ObjectTAEntity:{}},
       UpdateData:{ObjectID:2,ObjectTAEntity:{}},
     };

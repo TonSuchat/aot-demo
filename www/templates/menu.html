@@ -55,7 +55,11 @@
           <i class="icon ion-ios-home"></i>&nbsp;&nbsp;หน้าแรก
         </a>
 
-        <a href="#/app/selfservice" ng-show="isAuthen" menu-close class='item'>
+        <a href="{{menu.link}}" ng-repeat='menu in menus' menu-close class='item'>
+          <i class="icon {{menu.icon}}"></i>&nbsp;&nbsp;{{menu.text}}
+        </a>
+
+        <!-- <a href="#/app/selfservice" ng-show="isAuthen" menu-close class='item'>
           <i class="icon ion-ios-person"></i>&nbsp;&nbsp;Self Services
         </a>
 
@@ -97,7 +101,7 @@
 
         <a href="#/app/help" menu-close class='item'>
            <i class='icon ion-help'></i>&nbsp;&nbsp;ช่วยเหลือ
-        </a>
+        </a> -->
 
         <a href="#" ng-hide="isAuthen" ng-click="login()" menu-close class='item'>
            <i class='icon ion-log-in'></i>&nbsp;&nbsp;เข้าสู่ระบบ

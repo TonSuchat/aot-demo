@@ -29,10 +29,10 @@ angular.module('starter')
                 window.localStorage.setItem("AuthServices_fullname", userData.PrefixName + ' ' + userData.Firstname + ' ' + userData.Lastname + nickname); //userData.PrefixName + ' ' + userData.Firstname + ' ' + userData.Lastname;
                 window.localStorage.setItem("AuthServices_picThumb", userData.PictureThumb); //userData.PictureThumb; 
                 window.localStorage.setItem("AuthServices_position", userData.Position); //userData.Position;
-                //connect xmpp server
-                XMPPService.Authentication(window.localStorage.getItem("CurrentUserName"),window.localStorage.getItem("AuthServices_password"));
-                //enable xmpp maintain timer
-                XMPPService.TimerMaintainConnection();
+                // //connect xmpp server
+                // XMPPService.Authentication(window.localStorage.getItem("CurrentUserName"),window.localStorage.getItem("AuthServices_password"));
+                // //enable xmpp maintain timer
+                // XMPPService.TimerMaintainConnection();
                 successAction();
             }
             //normal login
@@ -59,23 +59,23 @@ angular.module('starter')
                                 PMSubscribeSQLite.Add([data]);
                             }
                         });
-                        //check if user existed then connect xmpp server ,else create user and connect xmpp server
-                        XMPPApiService.CheckAndCreateUserIfNotExist({username:window.localStorage.getItem("CurrentUserName"),password:window.localStorage.getItem("AuthServices_password"),name:window.localStorage.getItem('AuthServices_fullname')}).then(function(response){
-                            if(response){
-                                //update openfire password same as AD password
-                                XMPPApiService.ChangePassword(username,window.localStorage.getItem("AuthServices_password")).then(function(response){
-                                  if(response){
-                                    console.log('update-password-openfire');
-                                    //set flag enable sync room
-                                    xmppSyncRooms = true;
-                                    //connect xmpp
-                                    XMPPService.Authentication(window.localStorage.getItem("CurrentUserName"),window.localStorage.getItem("AuthServices_password"));
-                                    //enable xmpp maintain timer
-                                    XMPPService.TimerMaintainConnection();
-                                  }
-                                });
-                            }
-                        });
+                        // //check if user existed then connect xmpp server ,else create user and connect xmpp server
+                        // XMPPApiService.CheckAndCreateUserIfNotExist({username:window.localStorage.getItem("CurrentUserName"),password:window.localStorage.getItem("AuthServices_password"),name:window.localStorage.getItem('AuthServices_fullname')}).then(function(response){
+                        //     if(response){
+                        //         //update openfire password same as AD password
+                        //         XMPPApiService.ChangePassword(username,window.localStorage.getItem("AuthServices_password")).then(function(response){
+                        //           if(response){
+                        //             console.log('update-password-openfire');
+                        //             //set flag enable sync room
+                        //             xmppSyncRooms = true;
+                        //             //connect xmpp
+                        //             XMPPService.Authentication(window.localStorage.getItem("CurrentUserName"),window.localStorage.getItem("AuthServices_password"));
+                        //             //enable xmpp maintain timer
+                        //             XMPPService.TimerMaintainConnection();
+                        //           }
+                        //         });
+                        //     }
+                        // });
                         //load profile setting
                         GetProfileSettings(APIService,$q,window.localStorage.getItem("CurrentUserName")).then(function(response){
                             //set profile setting
