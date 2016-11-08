@@ -116,8 +116,8 @@ angular.module('starter')
 
     function InitialThemeDetails() {
       $scope.Themes = [];
-      $scope.Themes.push({Img:'default_theme',Name:'Default',Description:'Description',IsApply:false,val:'default'});
-      $scope.Themes.push({Img:'default2_theme',Name:'Default2',Description:'Description2',IsApply:false,val:'default2'});
+      $scope.Themes.push({Img:'default2_theme',Name:'Light',Description:'Light Blue Theme',IsApply:false,val:'default'});
+      $scope.Themes.push({Img:'default_theme',Name:'Dark',Description:'Dark Blue Theme',IsApply:false,val:'theme_dark'});
       //set IsApply for selected theme
       SetSelectedTheme();
     };
