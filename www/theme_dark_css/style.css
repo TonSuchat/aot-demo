@@ -1,0 +1,474 @@
+/*.card .item p {*/
+    /*display: block; !* Fallback for non-webkit *!*/
+    /*display: -webkit-box;*/
+    /*max-width: 400px;*/
+    /*height: 55.6px; !* Fallback for non-webkit *!*/
+    /*margin: 0 auto;*/
+    /*font-size:14px;*/
+    /*line-height: 1.4;*/
+    /*-webkit-line-clamp: 3;*/
+    /*-webkit-box-orient: vertical;*/
+    /*overflow: hidden;*/
+    /*text-overflow: ellipsis;*/
+    /*white-space: normal;*/
+/*}*/
+
+body{
+    color: #ffffff;
+}
+.scroll .button{
+    border: outset #ccc 0.5px !important;
+    color: #ffffff;
+}
+.icon .ion-ios-location{
+    border: outset #ccc 0.5px !important;
+}
+
+.header-badge{
+    display:inline-table !important;
+    margin-right:-6px;
+}
+
+.ssmenu-container{
+    position: relative;
+}
+
+.col-33 .badge{
+    float: right;
+    position: absolute;
+    display: block;
+    right: 5px;
+}
+.col-33 .item{
+    padding: 10px 0px 10px 0px;
+}
+
+/*chat-css*/
+
+.date-notice{
+  border:2px solid;
+  width:100px;
+  padding:5px;
+  margin:10px auto 10px auto;
+  border-radius: 5px;
+  color: white;
+  background-color: gray;
+  border-color: #6d6d6d;
+}
+
+.bar.item-input-inset .item-input-wrapper input {
+  width: 100% !important;
+}
+
+.extraBtn{
+  color:white;
+  cursor:pointer;
+  text-decoration: underline;
+}
+
+.extraBtn:first-child{
+  margin-right: 20px;
+}
+
+.message-wrapper {
+  position: relative;
+}
+
+.chat-bubble {
+  border-radius: 5px;
+  display: inline-block;
+  padding: 10px 18px;
+  position: relative;
+  margin: 10px 10px 10px 10px;
+  max-width: 80%;
+}
+
+.chat-bubble:before {
+  content: "\00a0";
+  display: block;
+  height: 16px;
+  width: 9px;
+  position: absolute;
+  /*bottom: -7.5px;*/
+  top: -7.5px;
+}
+
+.chat-bubble.left {
+  background-color: #e6e5eb;
+  float: left;
+  margin-left: 45px;
+}
+
+div.chat-name{
+  /*margin-top: 10px;*/
+}
+
+span.chat-name{
+  margin-left: 45px;
+}
+
+.chat-bubble.left:before {
+  background-color: #e6e5eb;
+  left: 10px;
+  -webkit-transform: rotate(134deg) skew(5deg);
+  /*-webkit-transform: rotate(70deg) skew(5deg);
+  left: 10px;*/
+  
+}
+
+.chat-bubble.right {
+  background-color: #158ffe;
+  color: #fff;
+  float: right;
+  margin-right: 10px;
+  margin-top:10px;
+}
+
+.chat-bubble.right:before {
+  background-color: #158ffe;
+  /*right: 10px;
+  -webkit-transform: rotate(118deg) skew(-5deg);*/
+  right: 11px;
+  -webkit-transform: rotate(234deg) skew(-5deg);
+}
+
+.msg{
+    font-size: 16px;
+    border-bottom:1px dashed;
+    padding-bottom: 5px;
+}
+
+.msg-date{
+    padding-top:5Qpx;
+    font-size: 12px;
+}
+
+.msg-date div{
+    display: inline-block;
+}
+
+img.profile-pic {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  position: absolute;
+  /*bottom: 10px;*/
+}
+
+.cf {
+  clear: both !important;
+}
+
+.img-circle{
+  max-width: 70px;
+  max-height: 70px;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid;
+  border-color: #9A9A9A;
+}
+
+/*herader*/
+/*background-color: #273340 !important;
+border-bottom: 2px solid #4E5E6D !important;*/
+
+/*menu*/
+/*background-color: #354658 !important;
+border-bottom: 2px solid #4E5E6D;
+color: #F0F1F1;*/
+
+/*Side-Menu*/
+/*.header-dark{*/
+  /*background-color: #002E5F !important;*/
+  /*border-bottom: 2px dashed #4E4E4E !important;*/
+/*}*/
+/*.header-dark h1{*/
+  /*color: black;*/
+/*}*/
+/*.dark {*/
+  /*background-color: #CEEEF7 !important;*/
+  /*color: black;*/
+/*}*/
+/*.dark .scroll-content {*/
+  /*background-color: #CEEEF7 !important;*/
+/*}*/
+/*.dark .item {*/
+  /*background-color: #CEEEF7;*/
+  /*border: none;*/
+  /*border-bottom: 2px dashed #0a9dc7;*/
+  /*padding: 20px;*/
+  /*color: black;*/
+  /*max-height: none;*/
+/*}*/
+/*.dark .item:last-child {*/
+  /*border-bottom: 2px dashed #0a9dc7 !important;*/
+/*}*/
+/*.dark h2,*/
+/*.dark h3,*/
+/*.dark p,*/
+/*.dark a {*/
+  /*color: black;*/
+/*}*/
+
+.dark .scroll .list {
+background-color: #002e5f !important;
+    /*background-image: url("../img/MobileBG.jpg");*/
+    color: #cccccc;
+}
+.dark .scroll a{
+color: #ffffff;
+}
+
+.dark .list a:first-child{
+    background-image: url("../img/profileBG.jpg");
+}
+.dark .list a:first-child p{
+    color: #ffffff;
+}
+
+/*rating*/
+ul.rating li {
+  display: inline;
+  border: 0px;
+  background: none;
+  padding: 5px 10px;
+}
+ul.rating li i {
+  font-size: 30px;
+  color:#13C4EF;
+}
+.labelbox {
+    border: 1px solid rgb(215,215,215);
+    border-top-right-radius: 0px;
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+textarea{
+    background-color: #009cde;
+}
+
+/* accordion */
+.list .item.item-accordion {
+  line-height: 38px;
+  padding-top: 0;
+  padding-bottom: 0;
+  transition: 0.09s all linear;
+}
+.list .item.item-accordion.ng-hide {
+  line-height: 0px;
+}
+.list .item.item-accordion.ng-hide-add,
+.list .item.item-accordion.ng-hide-remove {
+  display: block !important;
+}
+/* accordion */
+
+
+/*background*/
+
+.scroll-content{
+    /*background-image: url("../img/MobileBG.jpg");*/
+    background-color: #004A99;
+}
+.scroll .list .item{
+    background: none;
+    /*border-radius: 10px;*/
+
+}
+
+.scroll .list .item >.item{
+    background: none;
+    background-image: url("../img/transparent.png");
+}
+
+/*Customize Card*/
+
+.card{
+    border-radius: 10px;
+    margin: 5px;
+
+    background: none;
+
+    background-image: url("../img/transparent.png");
+    border: outset #777 0.5px;
+
+}
+.card .item{
+    background: none;
+    color: #FFFFFF;
+}
+.card h4{
+    color: #FFFFFF;
+}
+
+
+/*input */
+.input-label{
+    color: #ffffff;
+    border-color: #aaaaaa;
+}
+
+label input[type="text"],input[type="password"]{
+    border-color: #aaaaaa;
+    color: #ffffff;
+}
+input[type="radio"]{
+    background-color: #002e5f;
+    color: #002e5f;
+}
+
+
+/*item*/
+
+.item{
+    background-color: inherit;
+    color: #ffffff;
+    border-color: #aaaaaa;
+}
+
+.item p{
+    color: #cccccc;
+}
+.item h2{
+    color: #ffffff;
+}
+.item-divider h2{
+    color: #cccccc;
+
+}
+.item-divider{
+    background-color: #002e5f !important;
+}
+
+.item .item-stable{
+    color: #ffffff;
+}
+
+.item .item-radio{
+    color: #002e5f;
+    background-color: #62c69e;
+    border-radius: 10px;
+}
+
+
+
+.img-circle{
+    border: 0px;
+}
+
+.bar {
+    background: none;
+}
+.bar.bar-stable{
+    background-color: #62c6e9;
+    background-image: linear-gradient(0deg, #009cde, #009cde 50%, transparent 50%);
+    color: #ffffff;
+}
+.bar.bar-stable .title{
+
+    color: #002e5f;
+}
+
+.monthview-selected{
+    background-color: #9f8d00 !important;
+}
+.monthview-current{
+    background-color: #a1a5a7 !important;
+}
+
+.item-input-wrapper{
+    background: none;
+    background-image: url("../img/transparent.png");
+    border-radius: 20px;
+    color: #ffffff;
+}
+
+.item-select select {
+    background-color: #004A99;
+    color: #ffffff;
+}
+
+
+/*list*/
+
+.list .item-stable{
+    color: #ffffff;
+}
+
+.radio-content{
+padding:0px;
+}
+
+/*form-validation*/
+.error-container {
+    margin: 5px 0;
+}
+
+.error-container:last-child {
+    margin: 5px 0 0;
+}
+
+.error {
+    padding: 10px 16px;
+    font-family: "Arial Black", Gadget, sans-serif;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #555;
+    vertical-align: middle;
+}
+
+.error i {
+    font-size: 24px;
+    color: #B83E2C;
+    vertical-align: middle;
+}
+
+.last-error-container > .error {
+    padding: 10px 16px 0;
+}
+
+.has-errors {
+    border-bottom: 3px solid #B83E2C;
+}
+
+.no-errors {
+    border-bottom: 3px solid green;
+}
+/*form-validation*/
+
+
+/*customize*/
+
+.col{
+    padding:0px;
+    margin: 0px;
+}
+
+.larger{
+    font-size: 50px;
+}
+
+
+
+/*date picker*/
+
+.popup-body{
+    color: #002e5f;
+}
+
+.ionic_datepicker_popup .popup-body .selected_date_full {
+    background-color: #004A99 !important;
+}
+
+.ionic_datepicker_popup .popup-buttons button {
+    background-color: #004A99 !important;
+}
+.ionic_datepicker_popup .popup-body .month_select, .ionic_datepicker_popup .popup-body .year_select{
+    background-color: #004A99 !important;
+    border-radius: 5px;
+}
+.ionic_datepicker_popup .selected_date {
+    background-color: #0BC70B !important;
+}
