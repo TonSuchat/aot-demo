@@ -289,7 +289,7 @@ angular.module('starter')
 
 	    $scope.BindSSList = function(data){
 	    	angular.forEach(data,function(value,key){
-	    		$scope.SSList.push({DocumentId:value.DocumentId,NextLevel:value.NextLevel,DocumentTitle:value.DocumentTitle,Note:value.Note,LastUpdate:GetThaiDateTimeByDate($filter,value.LastUpdate),IsRead:value.IsRead});
+	    		$scope.SSList.push({DocumentId:value.DocumentId,NextLevel:value.NextLevel,DocumentTitle:value.DocumentTitle,Note:value.Note,LastUpdate:GetThaiDateTimeByDate($filter,value.LastUpdate),IsRead:value.IsRead,DocumentStatus:value.DocumentStatus,CreatedDate:GetThaiDateTimeByDate($filter,value.CreatedDate)});
 	    	});
 	  //   	$timeout(function(){
 			//   $scope.screenHeight = (document.getElementById('listTask').offsetHeight) - 80;

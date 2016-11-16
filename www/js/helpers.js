@@ -543,7 +543,7 @@ function CheckDeviceIsValid(APIService,$q,registerId) {
           function(error){console.log(error);APIService.HideLoading();resolve(error);});
       })
     }
-    else resolve({data:true});
+    else resolve({data:{RegistAction:true}});
   });
 };
 
@@ -899,6 +899,22 @@ function CheckEmployeeVersion($q,APIService,$cordovaFile,empVer){
     if(window.cordova){
       //check employee version with localstorage
       if(window.localStorage.getItem('EmpVer') == null || (window.localStorage.getItem('EmpVer') != empVer)){
+        if(window.localStorage.getItem("CurrentUserName") != null){
+          //update employee info
+          var url = APIService.hostname() + '/ContactDirectory/viewContactPaging';
+          var data = {keyword:window.localStorage.getItem("CurrentUserName"),start:1,retrieve:1};
+          APIService.httpPost(url,data,function(response){
+            if(response.data != null && response.data.length > 0){
+              console.log('update employee info');
+              var result = response.data[0];
+              var nickname = (result.Nickname && result.Nickname != null) ? '(' + result.Nickname + ')' : '';
+              window.localStorage.setItem("AuthServices_fullname", result.PrefixName + ' ' + result.Firstname + ' ' + result.Lastname + nickname);
+              window.localStorage.setItem("AuthServices_picThumb", result.PictureThumb);
+              window.localStorage.setItem("AuthServices_position", result.Position);
+            }
+          },function(error){console.log(error);});  
+        }
+        
         //get employee master data and created it as file
         SaveEmployeeMasterData($q,APIService,$cordovaFile).then(function(response){
           if(response){

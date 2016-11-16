@@ -106,6 +106,9 @@ angular.module('starter')
 	this.CreateTimeAttendanceTable = function(){
 		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS timeattendance(clientid integer primary key AUTOINCREMENT, Id int, SequenceID text, EmpID text, StampTime datetime, MachineID text, StampResult boolean, Location text, Airport text, stampdate text, stamptimeonly text, DL boolean,dirty boolean,TS text)");
 	};
+	// this.CreateTimeReportSQLiteTable = function(){
+	// 	$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS timereport(clientid integer primary key AUTOINCREMENT, Id int, SequenceID text, EmpID text, StampTime datetime, MachineID text, StampResult boolean, Location text, Airport text, stampdate text, stamptimeonly text, DL boolean,dirty boolean,TS text)");
+	// };
 	this.CreateLeaveTable = function(){
 		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS leave(clientid integer primary key AUTOINCREMENT, Id int, Empl_Code text, Empl_Name text, Leave_Code text, Leave_Day text, Leave_From text, Leave_To text, Leave_Date text, Updt_Date text, Tran_Seqe text, Leave_Timecode text, DL boolean,dirty boolean,TS text)");
 	};

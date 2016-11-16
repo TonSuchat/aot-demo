@@ -1,10 +1,17 @@
-<ion-modal-view>
-  <ion-header-bar class="bar-calm">
+<!-- <ion-modal-view> -->
+<div class='modal'>
+  <!-- <ion-header-bar class="bar-calm">
     <h1 class="title">{{popUpDetails.title}}</h1>
     <div class="buttons">
       <button class="button button-clear" ng-click="closeAction()">ปิด</button>
     </div>
-  </ion-header-bar>
+  </ion-header-bar> -->
+  <header-bar class='bar bar-header bar-calm'>
+    <h1 class="title">{{popUpDetails.title}}</h1>
+    <div class="buttons">
+      <button class="button button-clear" ng-click="closeAction()">ปิด</button>
+    </div>
+  </header-bar>
 
   <ion-content scroll='false'>
 
@@ -33,8 +40,9 @@
     </div>
 
   </ion-content>
- 
-</ion-modal-view>
+
+ </div>
+<!-- </ion-modal-view> -->
 
 <script type="text/javascript">
 

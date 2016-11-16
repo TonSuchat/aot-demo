@@ -5,6 +5,7 @@ angular.module('starter')
       $ionicPlatform.ready(function(){
         APIService.HideLoading();
       });
+
     })
 
     .controller('AppCtrl', function($scope, $ionicModal, $timeout, $state, AuthService, $ionicPopup, $location, $ionicHistory, SQLiteService, NotiService, SyncService, $cordovaNetwork, APIService, $rootScope, $ionicPlatform, $q, $cordovaFile, $cordovaDevice, $filter) {
@@ -79,7 +80,8 @@ angular.module('starter')
                     };
                   };
                 }
-              },function(error){console.log(error);});
+                APIService.HideLoading();
+              },function(error){console.log(error);APIService.HideLoading();});
             }
           }
           $scope.menus.push({link:'#/app/home/circular-letter',text:'ข่าวสาร ทอท.',icon:'ion-clipboard'});
@@ -130,7 +132,7 @@ angular.module('starter')
                             template: 'โปรดเข้าสู่ระบบอีกครั้ง!'
                           });
                         }
-                        else if(response.data){
+                        else if(response.data.RegistAction){
                           //check employee version with localstorage
                           CheckEmployeeVersion($q,APIService,$cordovaFile,response.data.EmpVer);
                           AuthService.login($scope.loginData.username, $scope.loginData.password).then(function() {

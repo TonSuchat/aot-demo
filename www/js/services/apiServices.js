@@ -4,7 +4,8 @@ angular.module('starter').service('APIService',function($http,$httpParamSerializ
 
 	this.httpPost = function(url,data,success,error){
 		var searchConfig = {};
-        searchConfig.headers = {'Content-Type' : 'application/x-www-form-urlencoded;charset=UTF-8'};
+        var gcmToken = (window.localStorage.getItem('GCMToken') == null ? '' : window.localStorage.getItem('GCMToken'));
+        searchConfig.headers = {'Content-Type' : 'application/x-www-form-urlencoded;charset=UTF-8','RegisterID': gcmToken};
 		$http.post(url,$httpParamSerializerJQLike(data),searchConfig).then(
         function(response){
         	success(response);

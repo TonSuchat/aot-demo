@@ -50,6 +50,17 @@ angular.module('starter')
     return ProcessSyncData(APIService,TimeAttendanceSQLite,$q,apiURLs,apiDatas,null);
   };
 
+  this.SyncTimeReport = function(){
+    var myEmpId = window.localStorage.getItem("CurrentUserName");
+    var apiDatas = {
+      GetData:{ObjectID:12,SyncTAReportViewModel:{EmpID: myEmpId, FromDate: GetFiscalDate(1), ToDate: GetCurrentDate().replace(/\//g,'')}},
+      AddData:{ObjectID:12,ObjectTAReportEntity:{}},
+      UpdateData:{ObjectID:12,ObjectTAReportEntity:{}},
+    };
+    console.log('SYNC-TIMEREPORT');
+    return ProcessSyncData(APIService,TimeReportSQLite,$q,apiURLs,apiDatas,null);
+  };
+
   this.SyncLeave = function(){
     var myEmpId = window.localStorage.getItem("CurrentUserName"); //'565888'; **Hard-Code**
     var apiDatas = {

@@ -1,0 +1,60 @@
+<ion-view view-title="ตรวจสอบข้อมูลแตะบัตร">
+    <ion-content>
+        <ion-refresher pulling-text="โหลดข้อมูลใหม่" on-refresh="Refresh()">
+        </ion-refresher>
+
+        <div class="list">
+          <label class="item item-input item-select">
+            <div class="input-label">
+              เดือน
+            </div>
+            <select ng-change='BindList()' ng-options='option.name for option in ddlMonthsData.options track by option.val' ng-model='ddlMonthsData.selectedOptions'>
+            </select>
+          </label>
+        </div>
+
+        <div class="list">
+            <div class='item item-text-wrap'> 
+                <p><b>วันที่ : </b>08/11/2016</p>
+                <p><b>เวลาเข้างาน : </b>07:32:22</p>
+                <p><b>เครื่องลงเวลาเข้า : </b>TA0607-SBIA AOB7</p>
+                <p><b>เวลาออกงาน : </b>17:00:12</p>
+                <p><b>เครื่องลงเวลาออก : </b>-</p>
+                <p><b>สถานะ : </b>ปกติ</p>
+                <p><b>ออกก่อนเวลา : </b></p>
+                <p><b>ออกหลังเวลา : </b></p>
+                <p><b>ประเภทการทำงาน : </b>งานปกติ</p>
+                <p><b>สถานะการลา : </b>ปกติ</p>
+                <p><b>หมายเหตุ : </b>ลืมแตะบัตรครั้งที่1</p>
+            </div>
+
+            <div class='item item-text-wrap'> 
+                <p><b>วันที่ : </b>08/11/2016</p>
+                <p><b>เวลาเข้างาน : </b>07:32:22</p>
+                <p><b>เครื่องลงเวลาเข้า : </b>TA0607-SBIA AOB7</p>
+                <p><b>เวลาออกงาน : </b>17:00:12</p>
+                <p><b>เครื่องลงเวลาออก : </b>-</p>
+                <p><b>สถานะ : </b>ปกติ</p>
+                <p><b>ออกก่อนเวลา : </b></p>
+                <p><b>ออกหลังเวลา : </b></p>
+                <p><b>ประเภทการทำงาน : </b>งานปกติ</p>
+                <p><b>สถานะการลา : </b>ปกติ</p>
+                <p><b>หมายเหตุ : </b>ลืมแตะบัตรครั้งที่1</p>
+            </div>
+
+            <div class='item item-text-wrap'> 
+                <p><b>วันที่ : </b>08/11/2016</p>
+                <p><b>เวลาเข้างาน : </b>07:32:22</p>
+                <p><b>เครื่องลงเวลาเข้า : </b>TA0607-SBIA AOB7</p>
+                <p><b>เวลาออกงาน : </b>17:00:12</p>
+                <p><b>เครื่องลงเวลาออก : </b>-</p>
+                <p><b>สถานะ : </b>ปกติ</p>
+                <p><b>ออกก่อนเวลา : </b></p>
+                <p><b>ออกหลังเวลา : </b></p>
+                <p><b>ประเภทการทำงาน : </b>งานปกติ</p>
+                <p><b>สถานะการลา : </b>ปกติ</p>
+                <p><b>หมายเหตุ : </b>ลืมแตะบัตรครั้งที่1</p>
+            </div>
+        </div>
+    </ion-content>
+</ion-view>

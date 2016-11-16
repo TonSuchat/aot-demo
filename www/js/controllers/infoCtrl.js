@@ -70,6 +70,15 @@ angular.module('starter')
                     }
                 }
             })
+            .state('app.info.timereport', {
+                url: '/timereport',
+                views: {
+                    'hr': {
+                        templateUrl: 'templates/info/timereport.html',
+                        controller: 'TimeReportCtrl'
+                    }
+                }
+            })
             .state('app.info.royal', {
                 url: '/royal',
                 views: {
@@ -370,13 +379,13 @@ angular.module('starter')
             };
 
             $scope.updateHospitalType = function(item){
-                if(item.selected && ($scope.selectedHospitalTypes.indexOf(item.val) < 0)) $scope.selectedHospitalTypes.push(item.val);
+                if(item.selected && ($scope.selectedHospitalTypes.indexOf(item.name) < 0)) $scope.selectedHospitalTypes.push(item.name);
                 else{
                     if($scope.selectedHospitalTypes.length == 1){
                         item.selected = true;
                         IonicAlert($ionicPopup,'ต้องเลือกอย่างน้อย 1 ประเภท',null)
                     } 
-                    else $scope.selectedHospitalTypes.splice($scope.selectedHospitalTypes.indexOf(item.val), 1);
+                    else $scope.selectedHospitalTypes.splice($scope.selectedHospitalTypes.indexOf(item.name), 1);
                 }
                 //update result
                 $scope.ProcessFilter();
@@ -752,6 +761,27 @@ angular.module('starter')
 
         CheckNeedToReload($rootScope,'/royal');
     })
+    .controller('TimeReportCtrl',function($scope, SyncService, $ionicPlatform, APIService, $cordovaNetwork, $ionicPopup){
+        $ionicPlatform.ready(function(){
+
+            //APIService.ShowLoading();
+
+            //have internet connection
+            if(CheckNetwork($cordovaNetwork)){
+                // SyncService.SyncCheckInfo().then(function(){
+                //     FinalActionInfo($scope,APIService);
+                //     GetAllTimes($scope,TimeAttendanceSQLite);
+                //     InitialTimeInfo($scope,$q,$filter,TimeAttendanceSQLite);
+                // });    
+            }
+            else{
+                // //no internet connection
+                // GetAllTimes($scope,TimeAttendanceSQLite);
+                // InitialTimeInfo($scope,$q,$filter,TimeAttendanceSQLite);  
+            }
+
+        });
+    })
 
 function BindDDLInfoFiscalYear($scope){
     $scope.ddlFiscalYear = {selectedOptions:{},options:[]};
@@ -782,8 +812,8 @@ function InitialFiltersMedical ($scope,MedicalSQLite) {
     $scope.PatientTypes = [{name:'ผู้ป่วยนอก',selected:true,val:'ผู้ป่วยนอก'},{name:'ผู้ป่วยใน',selected:true,val:'ผู้ป่วยใน'},{name:'ทันตกรรม',selected:true,val:'ทันตกรรม'},{name:'ตรวจภายใน',selected:true,val:'ตรวจภายใน'}];
     $scope.selectedPatientTypes = ['ผู้ป่วยนอก','ตรวจภายใน','ทันตกรรม','ผู้ป่วยใน'];
     //checkboxs hospital type
-    $scope.HospitalTypes = [{name:'รัฐบาล',selected:true,val:'รัฐบาล'},{name:'เอกชน',selected:true,val:'เอกชน'},{name:'ศูนย์แพทย์',selected:true,val:'ศูนย์แพทย์'}];
-    $scope.selectedHospitalTypes = ['รัฐบาล','เอกชน','ศูนย์แพทย์'];
+    $scope.HospitalTypes = [{name:'รัฐบาล',selected:true,val:'รัฐบาล'},{name:'เอกชน',selected:true,val:'เอกชน'},{name:'สำนักแพทย์',selected:true,val:'ศูนย์แพทย์'}];
+    $scope.selectedHospitalTypes = ['รัฐบาล','เอกชน','สำนักแพทย์'];
 };
 
 function InitialMedicalInfo($scope,MedicalSQLite,totalNotification){

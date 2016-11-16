@@ -12,10 +12,18 @@
           <h2>หมายเหตุ : {{ssItem.Note}}</h2>
           <p>แก้ไขล่าสุด : {{ssItem.LastUpdate}}</p>
         </a> -->
-        <a ng-href="{{itemDetailURL}}?documentId={{ssItem.DocumentId}}&nextLevel={{ssItem.NextLevel}}" class='item' ng-repeat='ssItem in SSList'>
+
+       <!--  <a ng-href="{{itemDetailURL}}?documentId={{ssItem.DocumentId}}&nextLevel={{ssItem.NextLevel}}" class='item' ng-repeat='ssItem in SSList'>
           <h2>{{ssItem.DocumentTitle}}</h2>
           <h2>หมายเหตุ : {{ssItem.Note}}</h2>
           <p>แก้ไขล่าสุด : {{ssItem.LastUpdate}}</p>
+          <span class='badge badge-assertive' ng-show='ssItem.IsRead == false'><i class='icon ion-android-mail'></i></span>
+        </a> -->
+
+        <a ng-href="{{itemDetailURL}}?documentId={{ssItem.DocumentId}}&nextLevel={{ssItem.NextLevel}}" class='item' 
+          ng-repeat='ssItem in SSList'>
+          <h2><i class='icon ion-android-stopwatch assertive' ng-show='ssItem.NextLevel != 99'></i> เลขที่ : {{ssItem.DocumentId}} สถานะ : {{ssItem.DocumentStatus}}</h2>
+          <p>วันที่บันทึก : {{ssItem.CreatedDate}}</p>
           <span class='badge badge-assertive' ng-show='ssItem.IsRead == false'><i class='icon ion-android-mail'></i></span>
         </a>
 
@@ -31,11 +39,11 @@
       
 
       <style type="text/css">
-        .ssNewItem{
+        .ss-complete{
           background-color: #FA8484  !important;
         }
-        .ssOldItem{
-          background-color: #7ACAF5 !important;
+        .ss-pending{
+          background-color: red  !important;
         }
       </style>
 

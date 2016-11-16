@@ -172,8 +172,11 @@ angular.module('starter')
 
   this.showModal = function(scope){
     scope.action.remark = '';
+    
+    console.log(scope.modalSSAction);
 
     if(scope.modalSSAction == null){
+      console.log('initialModal');
       // Create the login modal that we will use later
       $ionicModal.fromTemplateUrl('templates/selfservice/ssaction.html', {
         scope: scope
@@ -189,8 +192,15 @@ angular.module('starter')
 
     //close modal action
     scope.closeAction = function(){
-      scope.modalSSAction.hide();
+      console.log('close');
+      //scope.modalSSAction.hide();
+      scope.modalSSAction.remove().then(function(){scope.modalSSAction = null});
+      scope.signaturePad = null;
     };
+
+    scope.$on('modal.remove',function(){
+      console.log('on-remove');
+    });
 
     //canvas
     scope.clearCanvas = function() {
@@ -204,6 +214,10 @@ angular.module('starter')
     scope.InitialCanvas = function(){
       var canvas = document.getElementById('signatureCanvas');
       if(scope.signaturePad == null) scope.signaturePad = new SignaturePad(canvas);
+      else{
+        scope.signaturePad.off();
+        scope.signaturePad.on();
+      }
       scope.signaturePad.off();
       scope.signaturePad.on();
     };
@@ -237,7 +251,7 @@ angular.module('starter')
     else InitialModalAuthenProcess(scope,action,faType);
     
     //close modal action
-    scope.closeAction = function(){
+    scope.closeAuthen = function(){
       scope.modalSSAuthen.hide();
     };
 
