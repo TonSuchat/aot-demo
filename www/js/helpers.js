@@ -726,7 +726,6 @@ function CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile,$co
         //check this device is valid
         if(window.localStorage.getItem('GCMToken') == null) return resolve(true);
         CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
-          console.log(response);
           if(response != null && response.data != null){
             // //check the store have newest version?
             // CheckUpdateNewestVersion($q,$cordovaDevice,$ionicPopup,APIService,response.data.LastestVersion);

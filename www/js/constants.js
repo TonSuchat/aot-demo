@@ -5,6 +5,7 @@ var itConnection = false;
 var PCGCMToken = 'fY_RbvgA_1Q:APA91bHTBpqf-F9jxwjg_4kUA66zl5daUsf9bUGKtlssSCy8afpC-j9LlAehc9tTPMpLro9dPVJzmQfehVF6AE0Zx0YZ6XQgRJkdoJ2b-ikcIcA3G95sYZtZ_EZqOSO15-WENx9QoVlw';
 var employeeFileName = 'employees'
 var totalEmployeeFiles = 4;
+var onWeb = false;
 //***config
 
 angular.module('starter')

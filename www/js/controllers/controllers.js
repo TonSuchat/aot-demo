@@ -23,8 +23,8 @@ angular.module('starter')
         //check is server released new version? if have new version then confirm user to update on each store
         CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
           if(response != null && response.data != null){
-            //check the store have newest version?
-            CheckUpdateNewestVersion($q,$cordovaDevice,$ionicPopup,APIService,response.data.LastestVersion);
+            // //check the store have newest version?
+            // CheckUpdateNewestVersion($q,$cordovaDevice,$ionicPopup,APIService,response.data.LastestVersion);
           }
         });
         

@@ -768,6 +768,7 @@ angular.module('starter')
 	$ionicPlatform.ready(function(){
 
 		var defaultDate1,defaultDate2;
+		var datePicker1,datePicker2;
 		$scope.noInternet = false;
 		$scope.leave = {type:1,reason:'',duration:1,contact:'',summary:[]};
 		//if no internet connection
@@ -787,17 +788,7 @@ angular.module('starter')
 		}
 
 		$scope.Empl_Code = window.localStorage.getItem("CurrentUserName");
-		 
-		var datePicker1 = {callback: function (val) { SetSelectedDate(val,true);},
-			inputDate:defaultDate1
-			//from:new Date()
-		};
-
-		var datePicker2 = {callback: function (val) { SetSelectedDate(val,false);},
-			inputDate:defaultDate2
-			//from:new Date()
-		};
-
+		
 		$scope.OpenDatePicker = function(isStartDate){
 			if(isStartDate) ionicDatePicker.openDatePicker(datePicker1);
 			else ionicDatePicker.openDatePicker(datePicker2);
@@ -813,8 +804,18 @@ angular.module('starter')
 		function InitialStartAndEndDate () {
 			defaultDate1 = new Date();
 			defaultDate1.setDate(defaultDate1.getDate() + 1);
+			datePicker1 = {callback: function (val) { SetSelectedDate(val,true);},
+				inputDate:defaultDate1
+				//from:new Date()
+			};
+
 			defaultDate2 = new Date();
 			defaultDate2.setDate(defaultDate2.getDate() + 2);
+			datePicker2 = {callback: function (val) { SetSelectedDate(val,false);},
+				inputDate:defaultDate2
+				//from:new Date()
+			};
+
 			$scope.selectedDate = {startDate:ConvertDateObjToSlashFormat(defaultDate1),endDate:ConvertDateObjToSlashFormat(defaultDate2)};
 		};
 

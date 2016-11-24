@@ -279,6 +279,7 @@ angular.module('starter')
 
         function InitialLeaveSummary(){
             $scope.FiscalYear = GetFiscalYear();
+            $scope.FiscalYearText = (+$scope.FiscalYear + 543);
             //get leave summary info of current year
             LeaveSummarySQLite.GetLeaveSummaryInfos($scope.FiscalYear).then(function(response){
                 var data = ConvertQueryResultToArray(response);
@@ -786,9 +787,9 @@ angular.module('starter')
 function BindDDLInfoFiscalYear($scope){
     $scope.ddlFiscalYear = {selectedOptions:{},options:[]};
     var currentFiscalYear = GetFiscalYear();
-    $scope.ddlFiscalYear.selectedOptions = {name:currentFiscalYear,val:currentFiscalYear};
+    $scope.ddlFiscalYear.selectedOptions = {name:(+currentFiscalYear + 543),val:currentFiscalYear};
     for (var i = 3; i > 0; i--) {
-        $scope.ddlFiscalYear.options.push({name:currentFiscalYear,val:currentFiscalYear});    
+        $scope.ddlFiscalYear.options.push({name:(+currentFiscalYear + 543),val:currentFiscalYear});    
         currentFiscalYear -= 1;
     };
 };
@@ -950,11 +951,11 @@ function BindDDLTaxYears($scope) {
     //result.push({val:currentYear,name:currentYear.toString()});
     for (var i = 1; i <= 3; i++) {
         currentYear--;
-        result.push({val:currentYear,name:currentYear.toString()});
+        result.push({val:currentYear,name:(+currentYear+543)});
     };
     $scope.ddlTaxYear = {
         options:result,
-        selectedOptions: {val: defaultYear, name: defaultYear.toString()}
+        selectedOptions: {val: defaultYear, name: (+defaultYear+543)}
     };
 };
 
