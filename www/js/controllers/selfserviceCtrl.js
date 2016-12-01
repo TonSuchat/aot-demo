@@ -537,7 +537,7 @@ angular.module('starter')
 	    	$scope.showBtnApprove = data.Approve;
 	    	$scope.showBtnAcknowledgment = data.Acknowledgment;
 	    	$scope.stateNextLevel = data.StateNextLevel;
-	    	$scope.showSignature = true;
+	    	$scope.showSignature = false;
 	    	
 	    	angular.forEach(data.HistoryWorkflow,function(value,key){
 	      //   	$scope.redeemDutyHistories.push({

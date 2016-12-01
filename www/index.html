@@ -16,6 +16,20 @@
     <!-- ionic/angularjs js -->
     <script src="lib/ionic/js/ionic.bundle.js"></script>
 
+    <!-- initial firebase for desktop gcm -->
+    <script src="https://www.gstatic.com/firebasejs/3.6.1/firebase.js"></script>
+    <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyA9a8f-lVH5JMIOPN1v0xMXe7xwjp7VqsE",
+        authDomain: "aot-mobile-notification.firebaseapp.com",
+        databaseURL: "https://aot-mobile-notification.firebaseio.com",
+        storageBucket: "aot-mobile-notification.appspot.com",
+        messagingSenderId: "211415803371"
+      };
+      firebase.initializeApp(config);
+    </script>
+
     <!-- other -->
     <script src="lib/others/PushNotification.js"></script>
     <script src="lib/others/angular-mocks.js"></script>
@@ -67,6 +81,8 @@
     <!-- tests -->
     <script src="js/tests/fake_datas.js"></script>  
     <!-- <script src="js/tests/fake_backends.js"></script> -->
+
+
 
   </head>
 

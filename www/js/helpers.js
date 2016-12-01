@@ -532,18 +532,27 @@ function CheckSessionIsExpire(APIService,$q){
 function CheckDeviceIsValid(APIService,$q,registerId) {
   return $q(function(resolve){
     var url = APIService.hostname() + '/DeviceRegistered/ValidateDevice';
-    if(window.cordova){
-      GetAppVersion($q).then(function(version){
-        var data = {RegisterID:registerId,AppVer:version};
-        APIService.ShowLoading();
-        APIService.httpPost(url,data,function(response){
-          APIService.HideLoading();
-          resolve(response);
-        },
-          function(error){console.log(error);APIService.HideLoading();resolve(error);});
-      })
-    }
-    else resolve({data:{RegistAction:true}});
+    // if(window.cordova){
+    //   GetAppVersion($q).then(function(version){
+    //     var data = {RegisterID:registerId,AppVer:version};
+    //     APIService.ShowLoading();
+    //     APIService.httpPost(url,data,function(response){
+    //       APIService.HideLoading();
+    //       resolve(response);
+    //     },
+    //       function(error){console.log(error);APIService.HideLoading();resolve(error);});
+    //   })
+    // }
+    // else resolve({data:{RegistAction:true}});
+    GetAppVersion($q).then(function(version){
+      var data = {RegisterID:registerId,AppVer:version};
+      APIService.ShowLoading();
+      APIService.httpPost(url,data,function(response){
+        APIService.HideLoading();
+        resolve(response);
+      },
+        function(error){console.log(error);APIService.HideLoading();resolve(error);});
+    })
   });
 };
 
@@ -554,7 +563,7 @@ function GetAppVersion($q) {
           return resolve(version);
       });
     }
-    else return resolve('PC');
+    else return resolve(APPVERSION); //resolve('PC');
   });
 };
 

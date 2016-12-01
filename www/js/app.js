@@ -44,7 +44,11 @@
               CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile,$cordovaDevice);
             });
           }
-          else window.localStorage.setItem('GCMToken',PCGCMToken);
+          //else window.localStorage.setItem('GCMToken',PCGCMToken);
+          else{
+            //register gcm for desktop
+            NotiService.DesktopRegister().then(function(){});
+          }
 
           //ionic resume event
           $ionicPlatform.on('resume', function(){

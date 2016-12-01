@@ -117,7 +117,7 @@ angular.module('starter')
         $scope.doLogin = function(form) {
           if(form.$valid) {
             var currentUserName = $scope.loginData.username;
-            var gcmToken = (window.cordova) ? (window.localStorage.getItem('GCMToken') == null ? '' : window.localStorage.getItem('GCMToken')) : PCGCMToken;
+            var gcmToken = window.localStorage.getItem('GCMToken'); //(window.cordova) ? (window.localStorage.getItem('GCMToken') == null ? '' : window.localStorage.getItem('GCMToken')) : PCGCMToken;
             //check device is jailbreak or root
             CheckDeviceIsJailbreakOrRoot($q,$cordovaDevice).then(function(response){
               if(!response){
@@ -139,7 +139,7 @@ angular.module('starter')
                             $rootScope.$broadcast('checkAuthen', true);
                             //update register device -> empid to server
                             if(window.localStorage.getItem('GCMToken') != null && window.localStorage.getItem('GCMToken').length > 0) {
-                              if (window.cordova) NotiService.StoreTokenOnServer(window.localStorage.getItem('GCMToken'),currentUserName,true);
+                              NotiService.StoreTokenOnServer(window.localStorage.getItem('GCMToken'),currentUserName,true);
                             }
                             //bind full menus
                             $scope.InitialMenus(true);
