@@ -172,6 +172,12 @@ function TransformServerTSToTimeStr(ts) {
     else return result = ts.substring(8,10) + ':' + ts.substring(10,12); 
 };
 
+//eg. '075214' -> '07:52:14'
+function TransformPlainTimeToTimeStr (ts) {
+    if(!ts || ts.length == 0) return'';
+    return ts.substring(0,2) + ':' + ts.substring(2,4) + ':' + ts.substring(4,6); 
+};
+
 function GeneratedGUID(){
     function s4() {
         return Math.floor((1 + Math.random()) * 0x10000)

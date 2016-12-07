@@ -90,6 +90,7 @@ angular.module('starter')
 
         $scope.currentUserName = AuthService.username();
         var result = $filter('filter')(sharePersonData, { UserID: $scope.currentPerson.personId });
+        if(result == null || result.length == 0) return;
         var nickname = (result[0].Nickname && result[0].Nickname != null) ? '(' + result[0].Nickname + ')' : '';
         var fullname = result[0].PrefixName + ' ' + result[0].Firstname + ' ' + result[0].Lastname + ' ' + nickname;
         $scope.currentPerson.personDetails = { FullName: fullname, Position: result[0].Position, Department: result[0].Section };

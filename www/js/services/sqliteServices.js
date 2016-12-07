@@ -81,6 +81,7 @@ angular.module('starter')
 		this.CreatePMSeenMessage();
 		this.CreateNotiHistoryTable();
 		this.CreateEmployeeTable();
+		this.CreateTimeReportTable();
 		//this.CreateMobileConfigTable();
 	};
 
@@ -106,9 +107,9 @@ angular.module('starter')
 	this.CreateTimeAttendanceTable = function(){
 		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS timeattendance(clientid integer primary key AUTOINCREMENT, Id int, SequenceID text, EmpID text, StampTime datetime, MachineID text, StampResult boolean, Location text, Airport text, stampdate text, stamptimeonly text, DL boolean,dirty boolean,TS text)");
 	};
-	// this.CreateTimeReportSQLiteTable = function(){
-	// 	$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS timereport(clientid integer primary key AUTOINCREMENT, Id int, SequenceID text, EmpID text, StampTime datetime, MachineID text, StampResult boolean, Location text, Airport text, stampdate text, stamptimeonly text, DL boolean,dirty boolean,TS text)");
-	// };
+	this.CreateTimeReportTable = function(){
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS timereport(clientid integer primary key AUTOINCREMENT, Id int, SeqID text, Date text, TimeIn text, LocIn text, TimeOut text, LocOut text, Status text, EarlyOut boolean, EarlyIn boolean, WorkType text, LeaveStatus text, Remark text, DL boolean,dirty boolean,TS text)");
+	};
 	this.CreateLeaveTable = function(){
 		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS leave(clientid integer primary key AUTOINCREMENT, Id int, Empl_Code text, Empl_Name text, Leave_Code text, Leave_Day text, Leave_From text, Leave_To text, Leave_Date text, Updt_Date text, Tran_Seqe text, Leave_Timecode text, DL boolean,dirty boolean,TS text)");
 	};
@@ -1211,6 +1212,84 @@ angular.module('starter')
 	//***Necessary-Method
 	this.GetEmplooyees = function(){
 		return SQLiteService.Execute("SELECT * FROM employee").then(function(response){return response;},function(error){return error;});
+	};
+})
+.service('TimeReportSQLite',function(SQLiteService){
+	//Id int, SeqID text, Date text, TimeIn text, LocIn text, TimeOut text, LocOut text, Status text, EarlyOut text boolean, EarlyIn boolean, WorkType text, LeaveStatus text, Remark text, DL boolean,dirty boolean,TS text
+	//***Necessary-Method
+	this.GetLatestTS = function(){
+		return SQLiteService.BaseGetLatestTS('timereport').then(function(response){return response;},function(error){return error;});
+	};
+
+	this.CountByServerId = function(serverid){
+		return SQLiteService.CountByServerId(serverid,'timereport').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.CountIsNotDirtyById = function(id){
+		return SQLiteService.CountIsNotDirtyById(id,'timereport').then(function(response){return response;},function(error){return error;});		
+	};
+
+	this.GetDataByTSIsNull = function(){
+		return SQLiteService.GetDataByTSIsNull('timereport');
+	};
+
+	this.GetDataIsDirty = function(){
+		return SQLiteService.GetDataIsDirty("timereport");
+	};
+
+	this.DeleteDataIsFlagDeleted = function(){
+		return SQLiteService.DeleteDataIsFlagDeleted("timereport");
+	};
+
+	this.Update = function(data,isDirty,clientUpdate){
+		var sql;
+		if(clientUpdate)
+			sql = "UPDATE timereport SET Id = ?, SeqID = ?, Date = ?, TimeIn = ?, LocIn = ?, TimeOut = ?, LocOut = ?, Status = ?, EarlyOut = ?, EarlyIn = ?, WorkType = ?, LeaveStatus = ?, Remark = ?, DL = ?, dirty = ?, TS = ? WHERE clientid = " + data.clientid;
+		else
+			sql = "UPDATE timereport SET Id = ?, SeqID = ?, Date = ?, TimeIn = ?, LocIn = ?, TimeOut = ?, LocOut = ?, Status = ?, EarlyOut = ?, EarlyIn = ?, WorkType = ?, LeaveStatus = ?, Remark = ?, DL = ?, dirty = ?, TS = ? WHERE Id = " + data.Id;
+		var param = [data.Id,data.SeqID,data.Date,data.TimeIn,data.LocIn,data.TimeOut,data.LocOut,data.Status,data.EarlyOut,data.EarlyIn,data.WorkType,data.LeaveStatus,data.Remark,data.DL,isDirty,data.TS];
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
+	};
+
+	this.Add = function(data,createFromClient){
+		var sql = "INSERT INTO timereport (Id, SeqID, Date, TimeIn, LocIn, TimeOut, LocOut, Status, EarlyOut, EarlyIn, WorkType, LeaveStatus, Remark, DL, dirty, TS) VALUES ";
+		var param = []; 
+		var rowArgs = [];
+		data.forEach(function(item){
+			rowArgs.push("(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+			param.push(item.Id);
+			param.push(item.SeqID);
+			param.push(item.Date);
+			param.push(item.TimeIn);
+			param.push(item.LocIn);
+			param.push(item.TimeOut);
+			param.push(item.LocOut);
+			param.push(item.Status);
+			param.push(item.EarlyOut);
+			param.push(item.EarlyIn);
+			param.push(item.WorkType);
+			param.push(item.LeaveStatus);
+			param.push(item.Remark);
+			param.push(item.DL);
+			//dirty
+			if(createFromClient) param.push(true);
+			else param.push(false);
+			//TS
+			if(createFromClient) param.push(null);
+			else param.push(item.TS);
+		});
+		sql += rowArgs.join(', ');
+		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){console.log(error); return error;});
+	};
+	//***Necessary-Method
+	this.GetDistinctMonthYear = function(){
+		return SQLiteService.Execute("select distinct substr(Date,3,6) as monthyear from timereport order by substr(Date,3,6) desc limit 12").then(function(response){return response;},function(error){ return error;});
+	};
+	this.GetTimeReports = function(){
+		return SQLiteService.Execute("SELECT * FROM timereport order by substr(Date,3,6) desc").then(function(response){return response;},function(error){ return error;});
+	};
+	this.GetTimeReportsBySelectedMonthYear = function(monthyear){
+		return SQLiteService.Execute("SELECT * FROM timereport WHERE substr(Date,3,6)  = '" + monthyear + "'  ORDER BY CAST(SUBSTR(Date,5,4) AS INT) DESC, CAST(SUBSTR(Date,3,2) AS INT) DESC, CAST(SUBSTR(Date,1,2) AS INT) DESC").then(function(response){return response;},function(error){return error;});
 	};
 })
 

@@ -762,24 +762,73 @@ angular.module('starter')
 
         CheckNeedToReload($rootScope,'/royal');
     })
-    .controller('TimeReportCtrl',function($scope, SyncService, $ionicPlatform, APIService, $cordovaNetwork, $ionicPopup){
+    .controller('TimeReportCtrl',function($scope, SyncService, $ionicPlatform, APIService, $cordovaNetwork, $ionicPopup, TimeReportSQLite, $q, $filter){
         $ionicPlatform.ready(function(){
 
             //APIService.ShowLoading();
 
             //have internet connection
             if(CheckNetwork($cordovaNetwork)){
-                // SyncService.SyncCheckInfo().then(function(){
-                //     FinalActionInfo($scope,APIService);
-                //     GetAllTimes($scope,TimeAttendanceSQLite);
-                //     InitialTimeInfo($scope,$q,$filter,TimeAttendanceSQLite);
-                // });    
+                SyncService.SyncTimeReport().then(function(){
+                    FinalActionInfo($scope,APIService);
+                    InitialTimeReportInfo($scope,$q,$filter,TimeReportSQLite);
+                });    
             }
             else{
-                // //no internet connection
-                // GetAllTimes($scope,TimeAttendanceSQLite);
-                // InitialTimeInfo($scope,$q,$filter,TimeAttendanceSQLite);  
+                //no internet connection
+                InitialTimeReportInfo($scope,$q,$filter,TimeReportSQLite);  
             }
+
+            $scope.BindTimeReportList = function()
+            {   
+                var selectedVal = $scope.ddlMonthsData.selectedOptions.val;
+                if(!selectedVal || selectedVal.length == 0) return APIService.HideLoading();
+                TimeReportSQLite.GetTimeReportsBySelectedMonthYear(selectedVal).then(function(response){
+                    var data = ConvertQueryResultToArray(response);
+                    $scope.timeReports = [];
+                    for (var i = 0; i <= data.length - 1; i++) {
+                        $scope.timeReports.push({
+                            Date:GetThaiDateByDate($filter,data[i].Date),
+                            TimeIn:TransformPlainTimeToTimeStr(data[i].TimeIn),
+                            LocIn:data[i].LocIn,
+                            TimeOut:TransformPlainTimeToTimeStr(data[i].TimeOut),
+                            LocOut:data[i].LocOut,
+                            Status:data[i].Status,
+                            EarlyOut:data[i].EarlyOut,
+                            EarlyIn:data[i].EarlyIn,
+                            WorkType:data[i].WorkType,
+                            LeaveStatus:data[i].LeaveStatus,
+                            Remark:data[i].Remark
+                        });
+                    };
+                    APIService.HideLoading();
+                });
+            }
+
+            function InitialTimeReportInfo()
+            {
+                GetTimeDDLOptionsOnlyHaveData($filter,$q,TimeReportSQLite).then(
+                    function(response){
+                        $scope.ddlMonthsData = response;
+                        $scope.BindTimeReportList();
+                    });
+            }
+
+            $scope.Refresh = function(){
+                //if no internet connection
+                if(!CheckNetwork($cordovaNetwork)){
+                    OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
+                    FinalActionInfo($scope,APIService);
+                }
+                else{
+                    APIService.ShowLoading();
+                    //if disable sync, Get new data when page load.
+                    SyncService.SyncTimeReport().then(function(){
+                        FinalActionInfo($scope,APIService);
+                        InitialTimeReportInfo($scope,$q,$filter,TimeReportSQLite);
+                    });
+                }
+            };
 
         });
     })
@@ -1198,13 +1247,13 @@ function GetTimeDDLOptions($filter){
     return result;
 };
 
-function GetTimeDDLOptionsOnlyHaveData($filter,$q,TimeAttendanceSQLite){
+function GetTimeDDLOptionsOnlyHaveData($filter,$q,sqliteService){
     return $q(function(resolve){
         var currentYear;
         var currentMonth;
         var result = {selectedOptions:{}};
         result.options = [];
-        TimeAttendanceSQLite.GetDistinctMonthYear().then(
+        sqliteService.GetDistinctMonthYear().then(
             function(response){
                 if(response != null){
                     var dbResult = ConvertQueryResultToArray(response);

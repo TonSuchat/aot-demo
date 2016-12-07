@@ -8,52 +8,24 @@
             <div class="input-label">
               เดือน
             </div>
-            <select ng-change='BindList()' ng-options='option.name for option in ddlMonthsData.options track by option.val' ng-model='ddlMonthsData.selectedOptions'>
+            <select ng-change='BindTimeReportList()' ng-options='option.name for option in ddlMonthsData.options track by option.val' ng-model='ddlMonthsData.selectedOptions'>
             </select>
           </label>
         </div>
 
-        <div class="list">
+        <div class="list" ng-repeat='item in timeReports'>
             <div class='item item-text-wrap'> 
-                <p><b>วันที่ : </b>08/11/2016</p>
-                <p><b>เวลาเข้างาน : </b>07:32:22</p>
-                <p><b>เครื่องลงเวลาเข้า : </b>TA0607-SBIA AOB7</p>
-                <p><b>เวลาออกงาน : </b>17:00:12</p>
-                <p><b>เครื่องลงเวลาออก : </b>-</p>
-                <p><b>สถานะ : </b>ปกติ</p>
-                <p><b>ออกก่อนเวลา : </b></p>
-                <p><b>ออกหลังเวลา : </b></p>
-                <p><b>ประเภทการทำงาน : </b>งานปกติ</p>
-                <p><b>สถานะการลา : </b>ปกติ</p>
-                <p><b>หมายเหตุ : </b>ลืมแตะบัตรครั้งที่1</p>
-            </div>
-
-            <div class='item item-text-wrap'> 
-                <p><b>วันที่ : </b>08/11/2016</p>
-                <p><b>เวลาเข้างาน : </b>07:32:22</p>
-                <p><b>เครื่องลงเวลาเข้า : </b>TA0607-SBIA AOB7</p>
-                <p><b>เวลาออกงาน : </b>17:00:12</p>
-                <p><b>เครื่องลงเวลาออก : </b>-</p>
-                <p><b>สถานะ : </b>ปกติ</p>
-                <p><b>ออกก่อนเวลา : </b></p>
-                <p><b>ออกหลังเวลา : </b></p>
-                <p><b>ประเภทการทำงาน : </b>งานปกติ</p>
-                <p><b>สถานะการลา : </b>ปกติ</p>
-                <p><b>หมายเหตุ : </b>ลืมแตะบัตรครั้งที่1</p>
-            </div>
-
-            <div class='item item-text-wrap'> 
-                <p><b>วันที่ : </b>08/11/2016</p>
-                <p><b>เวลาเข้างาน : </b>07:32:22</p>
-                <p><b>เครื่องลงเวลาเข้า : </b>TA0607-SBIA AOB7</p>
-                <p><b>เวลาออกงาน : </b>17:00:12</p>
-                <p><b>เครื่องลงเวลาออก : </b>-</p>
-                <p><b>สถานะ : </b>ปกติ</p>
-                <p><b>ออกก่อนเวลา : </b></p>
-                <p><b>ออกหลังเวลา : </b></p>
-                <p><b>ประเภทการทำงาน : </b>งานปกติ</p>
-                <p><b>สถานะการลา : </b>ปกติ</p>
-                <p><b>หมายเหตุ : </b>ลืมแตะบัตรครั้งที่1</p>
+                <p><b>วันที่ : </b>{{item.Date}}</p>
+                <p><b>เวลาเข้างาน : </b>{{item.TimeIn}}</p>
+                <p><b>เครื่องลงเวลาเข้า : </b>{{item.LocIn}}</p>
+                <p><b>เวลาออกงาน : </b>{{item.TimeOut}}</p>
+                <p><b>เครื่องลงเวลาออก : </b>{{item.LocOut}}</p>
+                <p><b>สถานะ : </b>{{item.Status}}</p>
+                <p><b>ออกก่อนเวลา : </b>{{item.EarlyOut}}</p>
+                <p><b>ออกหลังเวลา : </b>{{item.EarlyIn}}</p>
+                <p><b>ประเภทการทำงาน : </b>{{item.WorkType}}</p>
+                <p><b>สถานะการลา : </b>{{item.LeaveStatus}}</p>
+                <p><b>หมายเหตุ : </b>{{item.Remark}}</p>
             </div>
         </div>
     </ion-content>
