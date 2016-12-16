@@ -17,7 +17,8 @@
                 <div class="item item-divider">
                     วันที่ {{info.taDate}}
                 </div>
-                 <div ng-repeat='details in info.taDetails' class='item'>
+                <div ng-repeat='details in info.taDetails' class='item item-thumbnail-left'>
+                    <img ng-src="data:image/png;base64,{{details.taImage}}">
                     <h2>เวลา {{details.taStampTime}} น.</h2>
                     <p>{{details.taLocation}}</p>
                 </div>

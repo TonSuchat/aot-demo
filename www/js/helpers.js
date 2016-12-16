@@ -783,6 +783,10 @@ function CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile,$co
                         return resolve(true);  
                       });
                     }
+                    else{
+                      //show authen pin
+                      window.location = '#/app/helppinsetting?returnURL=firstpage&hideButton=true&onlyAuthen=true';
+                    }
                   });
                 }
               });
@@ -956,9 +960,29 @@ function CheckIsUpdateVersion($q,SQLiteService,APIService,$ionicPopup){
           SQLiteService.InitailTables();
           window.localStorage.setItem('AppVer',version);
           APIService.HideLoading();
-          window.location.href = '#/app/firstpage';
+          //window.location.href = '#/app/firstpage';
         },function(error){console.log(error);APIService.HideLoading();});  
       })
     }
   });
 };
+
+function CheckPINIsExist($q,APIService)
+{
+  return $q(function(resolve){
+    APIService.ShowLoading();
+    var url = APIService.hostname() + '/DeviceRegistered/CheckExistPIN';
+    var data = {Empl_Code:window.localStorage.getItem('CurrentUserName')};
+    APIService.httpPost(url,data,function(response){
+        if(response.data){
+          APIService.HideLoading();
+          return resolve(true);
+        }
+        else{
+          APIService.HideLoading();
+          return  resolve(false);
+        }
+      },
+        function(error){console.log(error);APIService.HideLoading();return resolve(false);});  
+  });
+}

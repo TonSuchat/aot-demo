@@ -1189,6 +1189,7 @@ angular.module('starter')
 			$scope.TimeWorkDetails.StartDate = GetThaiDateTimeByDate($filter,data[0].FromDate);
 			$scope.TimeWorkDetails.EndDate = GetThaiDateTimeByDate($filter,data[0].ToDate);
 			$scope.TimeWorkDetails.TimeWith = data[0].TimeWith;
+			$scope.TimeWorkDetails.TimeWithImages = ['http://lorempixel.com/400/200','http://lorempixel.com/400/200','http://lorempixel.com/400/200'];
 		};
 
 		$scope.InitialTimeWorkHistory = function(data){
@@ -1205,7 +1206,8 @@ angular.module('starter')
 		    		UpdateBy:value.UpdateBy,
 		    		UpdateDate:GetThaiDateTimeByDate($filter,value.UpdateDate),
 		    		ActionTypeName:value.ActionTypeName,
-		    		RouteName:value.RouteName
+		    		RouteName:value.RouteName,
+		    		Signature:'http://lorempixel.com/400/200'
 		    	});	
 	      	});
 		};

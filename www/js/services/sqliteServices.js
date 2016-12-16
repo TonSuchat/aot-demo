@@ -105,7 +105,7 @@ angular.module('starter')
 		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS royal(clientid integer primary key AUTOINCREMENT, Id int,Empl_Code text, Roya_Code text, Roya_Name int, Roya_Date text, DL boolean,dirty boolean,TS text)");
 	};
 	this.CreateTimeAttendanceTable = function(){
-		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS timeattendance(clientid integer primary key AUTOINCREMENT, Id int, SequenceID text, EmpID text, StampTime datetime, MachineID text, StampResult boolean, Location text, Airport text, stampdate text, stamptimeonly text, DL boolean,dirty boolean,TS text)");
+		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS timeattendance(clientid integer primary key AUTOINCREMENT, Id int, SequenceID text, EmpID text, StampTime datetime, MachineID text, StampResult boolean, Location text, Airport text, stampdate text, stamptimeonly text, Image text, DL boolean,dirty boolean,TS text)");
 	};
 	this.CreateTimeReportTable = function(){
 		$cordovaSQLite.execute(db,"CREATE TABLE IF NOT EXISTS timereport(clientid integer primary key AUTOINCREMENT, Id int, SeqID text, Date text, TimeIn text, LocIn text, TimeOut text, LocOut text, Status text, EarlyOut boolean, EarlyIn boolean, WorkType text, LeaveStatus text, Remark text, DL boolean,dirty boolean,TS text)");
@@ -515,23 +515,23 @@ angular.module('starter')
 		var param;
 		if(clientUpdate)
 		{
-			sql = "UPDATE timeattendance SET Id = ?, SequenceID = ?, EmpID = ?, StampTime = ?, MachineID = ?, StampResult = ?, Location = ?, Airport = ?, stampdate = ?, stamptimeonly = ?, DL = ?, dirty = ?, TS = ? WHERE clientid = " + data.clientid;
-			param = [data.Id,data.SequenceID,data.EmpID,data.StampTime,data.MachineID,data.StampResult,data.Location,data.Airport,null,null,data.DL,isDirty,data.TS];
+			sql = "UPDATE timeattendance SET Id = ?, SequenceID = ?, EmpID = ?, StampTime = ?, MachineID = ?, StampResult = ?, Location = ?, Airport = ?, stampdate = ?, stamptimeonly = ?, Image = ?, DL = ?, dirty = ?, TS = ? WHERE clientid = " + data.clientid;
+			param = [data.Id,data.SequenceID,data.EmpID,data.StampTime,data.MachineID,data.StampResult,data.Location,data.Airport,null,null,data.Image,data.DL,isDirty,data.TS];
 		}			
 		else
 		{
-			sql = "UPDATE timeattendance SET Id = ?, SequenceID = ?, EmpID = ?, StampTime = ?, MachineID = ?, StampResult = ?, Location = ?, Airport = ?, stampdate = ?, stamptimeonly = ?, DL = ?, dirty = ?, TS = ? WHERE Id = " + data.Id;		
-			param = [data.Id,data.SequenceID,data.EmpID,data.StampTime,data.MachineID,data.StampResult,data.Location,data.Airport,TransformDateToddMMyyyyFormat(data.StampTime),GetTimeByStampTime(data.StampTime),data.DL,isDirty,data.TS];
+			sql = "UPDATE timeattendance SET Id = ?, SequenceID = ?, EmpID = ?, StampTime = ?, MachineID = ?, StampResult = ?, Location = ?, Airport = ?, stampdate = ?, stamptimeonly = ?, Image = ?, DL = ?, dirty = ?, TS = ? WHERE Id = " + data.Id;		
+			param = [data.Id,data.SequenceID,data.EmpID,data.StampTime,data.MachineID,data.StampResult,data.Location,data.Airport,TransformDateToddMMyyyyFormat(data.StampTime),GetTimeByStampTime(data.StampTime),data.Image,data.DL,isDirty,data.TS];
 		}
 		return SQLiteService.Execute(sql,param).then(function(response){return response;},function(error){return error;});	
 	};
 
 	this.Add = function(data,createFromClient){
-		var sql = "INSERT INTO timeattendance (Id, SequenceID, EmpID, StampTime, MachineID, StampResult, Location, Airport, stampdate, stamptimeonly, DL, dirty, TS) VALUES ";
+		var sql = "INSERT INTO timeattendance (Id, SequenceID, EmpID, StampTime, MachineID, StampResult, Location, Airport, stampdate, stamptimeonly, Image, DL, dirty, TS) VALUES ";
 		var param = []; 
 		var rowArgs = [];
 		data.forEach(function(item){
-			rowArgs.push("(?,?,?,?,?,?,?,?,?,?,?,?,?)");
+			rowArgs.push("(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 			param.push(item.Id);
 			param.push(item.SequenceID);
 			param.push(item.EmpID);
@@ -546,6 +546,8 @@ angular.module('starter')
 			//stamptimeonly
 			if(createFromClient) param.push(null);
 			else param.push(GetTimeByStampTime(item.StampTime));
+			//image
+			param.push(item.Image);
 			//DL
 			param.push(item.DL);
 			//dirty

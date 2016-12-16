@@ -312,30 +312,52 @@ angular.module('starter')
   });
 })
 
-.controller('HelpPINSettingCtrl',function($scope,APIService,$cordovaNetwork,$ionicPopup,$filter,$ionicPlatform){
+.controller('HelpPINSettingCtrl',function($scope,APIService,$cordovaNetwork,$ionicPopup,$filter,$ionicPlatform,$location,$ionicNavBarDelegate,$ionicSideMenuDelegate){
   $ionicPlatform.ready(function() {
 
     $scope.InitialPIN = function(){
-      APIService.ShowLoading();
+      
       $scope.pin = '';
       $scope.keepPIN = '';
       $scope.headerTxt = 'กรอกรหัสใหม่';
-      //1 = กรอกรหัสเดิม , 2 = กรอกรหัสใหม่ , 3 = ยืนยันรหัสใหม่
-      $scope.state = 2;
-      var url = APIService.hostname() + '/DeviceRegistered/CheckExistPIN';
-      var data = {Empl_Code:$scope.Empl_Code};
-      APIService.httpPost(url,data,function(response){
-        if(response.data){
-          $scope.state = 1;
-          $scope.headerTxt = 'กรอกรหัสเดิม';
-        }
-        else{
-          $scope.state = 2;
-          $scope.headerTxt = 'กรอกรหัสใหม่';
-        }
-        APIService.HideLoading();
-      },
-        function(error){console.log(error);APIService.HideLoading();});
+      $scope.returnURL = $location.search().returnURL;
+      $scope.hideButton = $location.search().hideButton;
+
+      //hide menu,back button by query string
+      if($scope.hideButton != null && $scope.hideButton){
+        $ionicNavBarDelegate.showBackButton(false);
+        $ionicSideMenuDelegate.canDragContent(false);
+      } 
+      else{
+        $ionicNavBarDelegate.showBackButton(true);
+        $ionicSideMenuDelegate.canDragContent(true);
+      } 
+
+      $scope.onlyAuthen = $location.search().onlyAuthen;
+      if($scope.onlyAuthen != null && $scope.onlyAuthen){
+        $scope.state = 1;
+        $scope.headerTxt = 'กรอกรหัส';
+      }
+      else{
+        APIService.ShowLoading();
+        //1 = กรอกรหัสเดิม , 2 = กรอกรหัสใหม่ , 3 = ยืนยันรหัสใหม่
+        $scope.state = 2;
+        var url = APIService.hostname() + '/DeviceRegistered/CheckExistPIN';
+        var data = {Empl_Code:$scope.Empl_Code};
+        APIService.httpPost(url,data,function(response){
+          if(response.data){
+            $scope.state = 1;
+            $scope.headerTxt = 'กรอกรหัสเดิม';
+          }
+          else{
+            $scope.state = 2;
+            $scope.headerTxt = 'กรอกรหัสใหม่';
+          }
+          APIService.HideLoading();
+        },
+          function(error){console.log(error);APIService.HideLoading();});  
+      }
+      
     };
 
     $scope.noInternet = false;
@@ -371,11 +393,16 @@ angular.module('starter')
       APIService.httpPost(url,data,function(response){
         if(response != null && response.data != null){
           if(response.data){
-            $scope.pin = '';
-            $scope.state = 2;
-            $scope.headerTxt = 'กรอกรหัสใหม่';
-            $scope.ResetDot();
-            APIService.HideLoading();
+            if($scope.onlyAuthen != null && $scope.onlyAuthen){
+              window.location = ($scope.returnURL == null) ? '#/app/help' : '#/app/' + $scope.returnURL;
+            }
+            else{
+              $scope.pin = '';
+              $scope.state = 2;
+              $scope.headerTxt = 'กรอกรหัสใหม่';
+              $scope.ResetDot();
+              APIService.HideLoading();  
+            }
           }
           else $scope.Error();
         }
@@ -403,7 +430,7 @@ angular.module('starter')
         var data = {Empl_Code:$scope.Empl_Code,PIN:$scope.pin};
         APIService.httpPost(url,data,function(response){
           APIService.HideLoading();
-          IonicAlert($ionicPopup,'ตั้งค่าเรียบร้อย',function(){window.location = '#/app/help';});
+          IonicAlert($ionicPopup,'ตั้งค่าเรียบร้อย',function(){window.location = ($scope.returnURL == null) ? '#/app/help' : '#/app/' + $scope.returnURL;});
         },
           function(error){console.log(error);$scope.ResetDot();APIService.HideLoading();IonicAlert($ionicPopup,'เกิดข้อผิดพลาด/ลองใหม่อีกครั้ง',null);})
       }

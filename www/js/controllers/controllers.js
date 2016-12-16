@@ -20,6 +20,8 @@ angular.module('starter')
       $ionicPlatform.ready(function(){
         APIService.HideLoading();
 
+        $scope.onWeb = onWeb;
+
         //check is server released new version? if have new version then confirm user to update on each store
         CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
           if(response != null && response.data != null){
@@ -141,9 +143,21 @@ angular.module('starter')
                             if(window.localStorage.getItem('GCMToken') != null && window.localStorage.getItem('GCMToken').length > 0) {
                               NotiService.StoreTokenOnServer(window.localStorage.getItem('GCMToken'),currentUserName,true);
                             }
-                            //bind full menus
-                            $scope.InitialMenus(true);
-                            $scope.closeLogin();
+                            //check pin is exist?
+                            CheckPINIsExist($q,APIService).then(function(response){
+                              if(!response){
+                                //redirect to set pin for the first time
+                                IonicAlert($ionicPopup,'ต้องตั้งค่า PIN ก่อนใช้งาน',function(){
+                                  $scope.closeLogin();
+                                  window.location = '#/app/helppinsetting?returnURL=firstpage&hideButton=true';
+                                });
+                              }
+                              else{
+                                //bind full menus
+                                $scope.InitialMenus(true);
+                                $scope.closeLogin();    
+                              }
+                            })
 
                             //save login date to local storage for check expire to force logout(security process)
                             var currentDate = new Date();

@@ -128,7 +128,7 @@ angular.module('starter')
                         if(window.cordova){
                             username = user;
                             window.localStorage.setItem("CurrentUserName", user);
-                            window.localStorage.setItem("AuthServices_password", pw);
+                            //window.localStorage.setItem("AuthServices_password", pw);
                             window.localStorage.setItem(AUTH_EVENTS.LOCAL_USERNAME_KEY, username);
                             useCredentials(function () { APIService.HideLoading(); resolve('Login success.'); },null);
                         }
@@ -138,7 +138,7 @@ angular.module('starter')
                             if (result._successField) {
                                 username = user;
                                 window.localStorage.setItem("CurrentUserName", user);
-                                window.localStorage.setItem("AuthServices_password", pw);
+                                //window.localStorage.setItem("AuthServices_password", pw);
                                 window.localStorage.setItem(AUTH_EVENTS.LOCAL_USERNAME_KEY, username);
                                 useCredentials(function () { APIService.HideLoading(); resolve('Login success.'); },null);
                             }
@@ -170,7 +170,10 @@ angular.module('starter')
                     function(response){
                         if(response.rows != null && response.rows.length > 0){
                             username = response.rows.item(0).UserID;
-                            useCredentials(function(){resolve();},response.rows.item(0));
+                            useCredentials(function(){
+                                //pin authen
+                                if(!onWeb) window.location = '#/app/helppinsetting?returnURL=firstpage&hideButton=true&onlyAuthen=true'; 
+                            },response.rows.item(0));
                         }
                         resolve();
                     },

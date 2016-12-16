@@ -14,6 +14,20 @@
         </div>
 
         <div class="list" ng-repeat='item in timeReports'>
+          <!--   <div class='item item-thumbnail-left item-text-wrap'> 
+                <img src="http://lorempixel.com/400/200/">
+                <p><b>วันที่ : </b>{{item.Date}}</p>
+                <p><b>เวลาเข้างาน : </b>{{item.TimeIn}}</p>
+                <p><b>เครื่องลงเวลาเข้า : </b>{{item.LocIn}}</p>
+                <p><b>เวลาออกงาน : </b>{{item.TimeOut}}</p>
+                <p><b>เครื่องลงเวลาออก : </b>{{item.LocOut}}</p>
+                <p><b>สถานะ : </b>{{item.Status}}</p>
+                <p><b>ออกก่อนเวลา : </b>{{item.EarlyOut}}</p>
+                <p><b>ออกหลังเวลา : </b>{{item.EarlyIn}}</p>
+                <p><b>ประเภทการทำงาน : </b>{{item.WorkType}}</p>
+                <p><b>สถานะการลา : </b>{{item.LeaveStatus}}</p>
+                <p><b>หมายเหตุ : </b>{{item.Remark}}</p>
+            </div> -->
             <div class='item item-text-wrap'> 
                 <p><b>วันที่ : </b>{{item.Date}}</p>
                 <p><b>เวลาเข้างาน : </b>{{item.TimeIn}}</p>
@@ -26,6 +40,7 @@
                 <p><b>ประเภทการทำงาน : </b>{{item.WorkType}}</p>
                 <p><b>สถานะการลา : </b>{{item.LeaveStatus}}</p>
                 <p><b>หมายเหตุ : </b>{{item.Remark}}</p>
+                <!-- <img ng-src="data:image/jpeg;base64,{{item.TimeImage}}" class='full-image'> -->
             </div>
         </div>
     </ion-content>

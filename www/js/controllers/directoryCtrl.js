@@ -84,6 +84,7 @@ angular.module('starter')
         $scope.currentPerson = {};
         $scope.currentPerson.personId = $stateParams.personId;
         $scope.PMRoomId = $stateParams.pmroomid;
+        $scope.onWeb = onWeb;
 
         //process show/hide button create/invite private message
         CheckForShowPMButton($scope,$stateParams,APIService,XMPPApiService);
@@ -93,7 +94,7 @@ angular.module('starter')
         if(result == null || result.length == 0) return;
         var nickname = (result[0].Nickname && result[0].Nickname != null) ? '(' + result[0].Nickname + ')' : '';
         var fullname = result[0].PrefixName + ' ' + result[0].Firstname + ' ' + result[0].Lastname + ' ' + nickname;
-        $scope.currentPerson.personDetails = { FullName: fullname, Position: result[0].Position, Department: result[0].Section };
+        $scope.currentPerson.personDetails = { FullName: fullname, Position: result[0].Position, Department: result[0].Section, UpdateDate: result[0].changeDate };
         $scope.currentPerson.contacts = ChangePrefixDataToThaiVersion(result[0].ContactList[0], $filter);
 
         //redirect to private message view
