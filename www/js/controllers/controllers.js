@@ -1,8 +1,9 @@
 angular.module('starter')
 
-    .controller('LandingCtrl',function($scope, $ionicPlatform, $http, $q, APIService, $state, AUTH_EVENTS, NotiService, $cordovaNetwork, $ionicPopup,$cordovaFile){
+    .controller('LandingCtrl',function($scope, $ionicPlatform, $http, $q, APIService, $state, AUTH_EVENTS, NotiService, $cordovaNetwork, $ionicPopup, $cordovaFile, $ionicNavBarDelegate){
       
       $ionicPlatform.ready(function(){
+        $ionicNavBarDelegate.showBackButton(true);
         APIService.HideLoading();
       });
 
