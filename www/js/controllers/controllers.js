@@ -1,15 +1,16 @@
 angular.module('starter')
 
-    .controller('LandingCtrl',function($scope, $ionicPlatform, $http, $q, APIService, $state, AUTH_EVENTS, NotiService, $cordovaNetwork, $ionicPopup, $cordovaFile, $ionicNavBarDelegate){
+    .controller('LandingCtrl',function($scope, $ionicPlatform, $http, $q, APIService, $state, AUTH_EVENTS, NotiService, $cordovaNetwork, $ionicPopup, $cordovaFile, $ionicNavBarDelegate, $rootScope, $ionicHistory){
       
       $ionicPlatform.ready(function(){
         $ionicNavBarDelegate.showBackButton(true);
+        RegisterBackButton($ionicPlatform,$rootScope,$ionicHistory);
         APIService.HideLoading();
       });
 
     })
 
-    .controller('AppCtrl', function($scope, $ionicModal, $timeout, $state, AuthService, $ionicPopup, $location, $ionicHistory, SQLiteService, NotiService, SyncService, $cordovaNetwork, APIService, $rootScope, $ionicPlatform, $q, $cordovaFile, $cordovaDevice, $filter) {
+    .controller('AppCtrl', function($scope, $ionicModal, $timeout, $state, AuthService, $ionicPopup, $location, $ionicHistory, SQLiteService, NotiService, SyncService, $cordovaNetwork, APIService, $rootScope, $ionicPlatform, $q, $cordovaFile, $cordovaDevice, $filter, AUTH_EVENTS, $http) {
 
       // With the new view caching in Ionic, Controllers are only called
       // when they are recreated or on app start, instead of every page change.
@@ -19,33 +20,43 @@ angular.module('starter')
       //});
 
       $ionicPlatform.ready(function(){
-        APIService.HideLoading();
 
-        $scope.onWeb = onWeb;
+        //check open application in mobile browser?
+        CheckOpenApplicationOnMobileDevice($q,APIService,$ionicPopup);
 
-        //check is server released new version? if have new version then confirm user to update on each store
-        CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
-          if(response != null && response.data != null){
-            // //check the store have newest version?
-            // CheckUpdateNewestVersion($q,$cordovaDevice,$ionicPopup,APIService,response.data.LastestVersion);
+        APIService.ShowLoading();
+        //Login api
+        LogInAPI(AUTH_EVENTS,APIService,$http,$q,$cordovaNetwork, $ionicPopup).then(function(){
+          APIService.HideLoading();
+          //check is server released new version? if have new version then confirm user to update on each store
+          CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
+            if(response != null && response.data != null){
+              // //check the store have newest version?
+              // CheckUpdateNewestVersion($q,$cordovaDevice,$ionicPopup,APIService,response.data.LastestVersion);
+            }
+          });
+          //check is new version? if yes then popup and alter table
+          CheckIsUpdateVersion($q,SQLiteService,APIService,$ionicPopup);
+          //authen
+          $rootScope.$broadcast('checkAuthen', null);
+          //post to gcm(google cloud messaging) for register device and get token from gcm
+          if (window.cordova){
+            NotiService.Register().then(function(){
+              CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile,$cordovaDevice);
+            });
+          }
+          //else window.localStorage.setItem('GCMToken',PCGCMToken);
+          else{
+            //register gcm for desktop
+            NotiService.DesktopRegister().then(function(){});
           }
         });
-        
-        //check is new version? if yes then popup and alter table
-        CheckIsUpdateVersion($q,SQLiteService,APIService,$ionicPopup);
 
+        $scope.onWeb = onWeb;
         $scope.noInternet = false;
         $scope.PMNumber = 509;
-        $scope.version = '';
+        GetAppVersion($q).then(function(response){$scope.version = response;});
 
-        if (window.cordova){
-          //get version
-          cordova.getAppVersion(function(version) {
-              $scope.version = version;
-          });
-        }
-        else $scope.version = 'PC';
-          
         // Form data for the login modal
         $scope.$on('checkAuthen',function(event,data){
           $scope.loginData = {};
@@ -165,10 +176,13 @@ angular.module('starter')
                             window.localStorage.setItem('lastLogInDate',+currentDate);
 
                           }, function(err) {
-                            var alertPopup = $ionicPopup.alert({
-                              title: err,
-                              template: 'รหัสพนักงาน/รหัสผ่านไม่ถูกต้อง!'
-                            });
+                            console.log(err);
+                            if(err.status == 200){
+                              var alertPopup = $ionicPopup.alert({
+                                title: err.data,
+                                template: 'รหัสพนักงาน/รหัสผ่านไม่ถูกต้อง!'
+                              });
+                            }
                           });
                         }
                         else{
@@ -206,9 +220,7 @@ angular.module('starter')
             });
           }
         };
-
-        $rootScope.$broadcast('checkAuthen', null);
-
+ 
       });
 
     })

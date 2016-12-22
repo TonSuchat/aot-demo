@@ -34,27 +34,9 @@
         //bypass login if still loging in.
         AuthService.bypassLogIn();
 
-        //log in to api and set header authorization
-        APIService.ShowLoading();
-        LogInAPI(AUTH_EVENTS,APIService,$http,$q,$cordovaNetwork, $ionicPopup).then(function(){
-          APIService.HideLoading();
-          //post to gcm(google cloud messaging) for register device and get token from gcm
-          if (window.cordova){
-            NotiService.Register().then(function(){
-              CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile,$cordovaDevice);
-            });
-          }
-          //else window.localStorage.setItem('GCMToken',PCGCMToken);
-          else{
-            //register gcm for desktop
-            NotiService.DesktopRegister().then(function(){});
-          }
-
-          //ionic resume event
-          $ionicPlatform.on('resume', function(){
-            CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile,$cordovaDevice);
-          });
-
+        //ionic resume event
+        $ionicPlatform.on('resume', function(){
+          CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile,$cordovaDevice);
         });
 
         window.onbeforeunload = function (event) {
@@ -104,26 +86,7 @@
       });
     })
     .run(function($rootScope, $ionicPlatform, $ionicHistory){
-      $ionicPlatform.registerBackButtonAction(function(e){
-        if ($rootScope.backButtonPressedOnceToExit) {
-          ionic.Platform.exitApp();
-        }
-        else if ($ionicHistory.backView()) {
-          $ionicHistory.goBack();
-          e.preventDefault();
-        }
-        else {
-          $rootScope.backButtonPressedOnceToExit = true;
-          window.plugins.toast.showShortCenter(
-            "Press back button again to exit",function(a){},function(b){}
-          );
-          setTimeout(function(){
-            $rootScope.backButtonPressedOnceToExit = false;
-          },2000);
-        }
-        e.preventDefault();
-        return false;
-      },101);
+      RegisterBackButton($ionicPlatform,$rootScope,$ionicHistory);
     })
 
     .config(function($stateProvider, $urlRouterProvider, $ionicConfigProvider, $sceDelegateProvider) {

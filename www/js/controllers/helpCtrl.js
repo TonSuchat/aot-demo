@@ -327,6 +327,10 @@ angular.module('starter')
       if($scope.hideButton != null && $scope.hideButton){
         $ionicNavBarDelegate.showBackButton(false);
         $ionicSideMenuDelegate.canDragContent(false);
+        var registerBackButton = $ionicPlatform.registerBackButtonAction(function(e) {
+            e.preventDefault();
+        }, 1000);
+        $scope.$on('$destroy',registerBackButton);
       } 
       else{
         $ionicNavBarDelegate.showBackButton(true);

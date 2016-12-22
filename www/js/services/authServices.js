@@ -144,13 +144,14 @@ angular.module('starter')
                             }
                             else {
                                 APIService.HideLoading();
-                                reject('Login Failed.');
+                                reject({status:200,data:'ข้อมูลไม่ถูกต้อง!'});
                             }    
                         }
                     },
                     function(response){
+                        console.log(response);
                         APIService.HideLoading();
-                        reject('Login Failed.');
+                        reject(response);
                     });
 
                 // if ((user == '484134' && pw == '1') || (user == '484074' && pw == '1')) {
@@ -172,7 +173,8 @@ angular.module('starter')
                             username = response.rows.item(0).UserID;
                             useCredentials(function(){
                                 //pin authen
-                                if(!onWeb) window.location = '#/app/helppinsetting?returnURL=firstpage&hideButton=true&onlyAuthen=true'; 
+                                //if(!onWeb) window.location = '#/app/helppinsetting?returnURL=firstpage&hideButton=true&onlyAuthen=true'; 
+                                window.location = '#/app/helppinsetting?returnURL=firstpage&hideButton=true&onlyAuthen=true'; 
                             },response.rows.item(0));
                         }
                         resolve();

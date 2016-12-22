@@ -1,10 +1,11 @@
-
 <div ng-if='onWeb' class='device-cover'>
-  <div class='device-screen' ng-include src="'templates/menu_template.html'">
+  <div class='device-screen' ng-include src="!content ? 'templates/menu_template.html' : null">
   </div>
 </div>
 
-<div ng-if='!onWeb' ng-include src="'templates/menu_template.html'">
+<div ng-if='!onWeb'>
+  <div ng-include src="!content ? 'templates/menu_template.html' : null">
+  </div>
 </div>
 
 <style type="text/css">

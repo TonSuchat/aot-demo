@@ -318,7 +318,8 @@ angular.module('starter')
 	};
 
 	this.GetMedicals = function(fiscalYear){
-		return SQLiteService.Execute("SELECT * FROM medical where SUBSTR(docdate,5,4) = '" + fiscalYear + "'").then(function(response){return response;},function(error){return error;});
+		//return SQLiteService.Execute("SELECT * FROM medical where SUBSTR(docdate,5,4) = '" + fiscalYear + "'").then(function(response){return response;},function(error){return error;});
+		return SQLiteService.Execute("SELECT * FROM medical where " + GetConditionFiscalYearStr(fiscalYear,'docdate')).then(function(response){return response;},function(error){return error;});
 	};
 
 	this.GetDistinctPaidDate = function(){
@@ -413,7 +414,8 @@ angular.module('starter')
 	};
 
 	this.GetTuitions = function(fiscalYear){
-		return SQLiteService.Execute("SELECT * FROM tuition where SUBSTR(Paid_Date,5,4) = '" + fiscalYear + "'").then(function(response){return response;},function(error){return error;});
+		//return SQLiteService.Execute("SELECT * FROM tuition where SUBSTR(Paid_Date,5,4) = '" + fiscalYear + "'").then(function(response){return response;},function(error){return error;});
+		return SQLiteService.Execute("SELECT * FROM tuition where " + GetConditionFiscalYearStr(fiscalYear,'Paid_Date')).then(function(response){return response;},function(error){return error;});
 	};
 })
 .service('RoyalSQLite', function(SQLiteService){
@@ -1374,3 +1376,7 @@ angular.module('starter')
 	// };
 })
 //***Test-Sync-Code
+
+function GetConditionFiscalYearStr (fiscalYear,fieldName) {
+	return "(SUBSTR(" + fieldName + ",5,4) || '-' || SUBSTR(" + fieldName + ",3,2) || '-' || SUBSTR(" + fieldName + ",1,2)) between '" + (fiscalYear-1) + "-10-01' and '" + fiscalYear + "-09-30'"
+}

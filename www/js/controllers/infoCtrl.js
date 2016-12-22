@@ -340,6 +340,7 @@ angular.module('starter')
             $scope.leaveCode = $stateParams.leavecode;
             $scope.leaveName = $stateParams.leavename;
             $scope.fiscalYear = $stateParams.fiscalyear;
+            $scope.fiscalYearTxt = +$stateParams.fiscalyear > 2500 ? $stateParams.fiscalyear : +$stateParams.fiscalyear + 543;
             $scope.leaveDetails = [];
             LeaveSQLite.GetLeavesByLeaveCode($scope.leaveCode,$scope.fiscalYear).then(function(response){
                 if(response == null) return;

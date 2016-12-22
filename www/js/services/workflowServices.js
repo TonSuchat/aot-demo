@@ -83,10 +83,10 @@ angular.module('starter')
     });
   };
 
-  this.ApproveWorkflow = function(documentId,emplCode,remark,actionType,signature){
+  this.ApproveWorkflow = function(documentId,emplCode,remark,actionType,signatureObject,showSignature){
     return $q(function(resolve){
       var url = APIService.hostname() + '/Workflow/ApproveWorkflow';
-      var data = {DocumentId:documentId,Empl_Code:emplCode,Remark:remark,ActionType:actionType,RegisterID:window.localStorage.getItem("GCMToken"),SignatureObject:signature};
+      var data = {DocumentId:documentId,Empl_Code:emplCode,Remark:remark,ActionType:actionType,RegisterID:window.localStorage.getItem("GCMToken"),SignatureObject:signatureObject,Signature:showSignature};
       APIService.ShowLoading();
       APIService.httpPost(url,data,function(response){APIService.HideLoading();resolve(true)},function(error){APIService.HideLoading();resolve(false);});
     });
@@ -111,7 +111,7 @@ angular.module('starter')
 
   this.doAcknowledge = function(scope){
     console.log('doAcknowledge',scope.documentId,scope.action.remark);
-    service.ApproveWorkflow(scope.documentId,window.localStorage.getItem("CurrentUserName"),scope.action.remark,3,scope.signature).then(function(response){
+    service.ApproveWorkflow(scope.documentId,window.localStorage.getItem("CurrentUserName"),scope.action.remark,3,scope.signatureObject,scope.showSignature).then(function(response){
       if(response){
         scope.modalSSAction.remove();
         $location.path('/app/floatbutton/selfservicelist/' + scope.categoryId);
@@ -143,7 +143,7 @@ angular.module('starter')
 
   this.doApproveOrReject = function(isApprove,actionType,scope){
     console.log('doApproveOrReject',scope.documentId,scope.action.remark);
-    service.ApproveWorkflow(scope.documentId,window.localStorage.getItem("CurrentUserName"),scope.action.remark,actionType,scope.signature).then(function(response){
+    service.ApproveWorkflow(scope.documentId,window.localStorage.getItem("CurrentUserName"),scope.action.remark,actionType,scope.signatureObject,scope.showSignature).then(function(response){
       if(response){
         scope.modalSSAction.remove();
         $location.path('/app/floatbutton/selfservicelist/' + scope.categoryId);
@@ -208,7 +208,7 @@ angular.module('starter')
     };
     scope.saveCanvas = function() {
         var sigImg = scope.signaturePad.toDataURL();
-        scope.signature = sigImg;
+        scope.signatureObject = sigImg;
         console.log(sigImg);
     };
     scope.InitialCanvas = function(){
@@ -225,11 +225,11 @@ angular.module('starter')
 
     scope.submit = function(){
       //check if use signature then get base64 else use empty string
-      if(scope.showSignature == false) scope.signature = '';
+      if(scope.showSignature == false) scope.signatureObject = '';
       else{
         //first check signature is empty?
         if(scope.signaturePad.isEmpty()) return IonicAlert($ionicPopup,'ลายเซ็นห้ามเป็นค่าว่าง',null);
-        else scope.signature = scope.signaturePad.toDataURL().replace('data:image/png;base64,','');
+        else scope.signatureObject = scope.signaturePad.toDataURL().replace('data:image/png;base64,','');
       } 
       if(scope.popUpDetails.actiontype == 2) service.doApproveOrReject(true,2,scope);
       else if(scope.popUpDetails.actiontype == 5) service.doApproveOrReject(false,5,scope);
