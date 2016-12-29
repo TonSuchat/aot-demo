@@ -54,8 +54,8 @@ angular.module('starter').service('APIService',function($http,$httpParamSerializ
 	    //return 'https://10.74.17.239:8443/AOTWebAPI2';
 	    //return 'https://10.74.17.188:8443/AOTWebAPI';
         //return 'http://localhost:51754/api';
-        //return 'https://eservice.airportthai.co.th/AOTWebAPI';
-        return 'https://mobile.airportthai.co.th/API';
+        return 'https://eservice.airportthai.co.th/AOTWebAPI';
+        //return 'https://mobile.airportthai.co.th/API';
 	};
 
 	this.ShowLoading = function () {

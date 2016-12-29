@@ -1,4 +1,4 @@
-<ion-view cache-view="false" view-title="รายละเอียด บันทึกลงเวลา">
+<ion-view cache-view="false" view-title="รายละเอียด บันทึกลงเวลาทำงาน">
 
     <ion-content>
 
@@ -27,11 +27,13 @@
           <p><b><u>รูปลงเวลา</u></b></p>
 
           <div class='row' ng-if='$index % 2 == 0' ng-repeat='img in TimeWorkDetails.TimeWithImages track by $index'>
-            <div class='col col-50'>
-              <img class='full-image' ng-if='($index) < TimeWorkDetails.TimeWithImages.length' ng-src="data:image/png;base64,{{TimeWorkDetails.TimeWithImages[$index]}}" />    
+            <div class='col col-50' ng-if='($index) < TimeWorkDetails.TimeWithImages.length'>
+              <img class='full-image' ng-src="data:image/png;base64,{{TimeWorkDetails.TimeWithImages[$index].PHOTO}}" />    
+              <p>เวลา : {{TimeWorkDetails.TimeWithImages[$index].ACCESS_TIME}} น.</p>
             </div>
-            <div class='col col-50'>
-              <img class='full-image' ng-if='($index + 1) < TimeWorkDetails.TimeWithImages.length' ng-src="data:image/png;base64,{{TimeWorkDetails.TimeWithImages[$index + 1]}}" />    
+            <div class='col col-50' ng-if='($index + 1) < TimeWorkDetails.TimeWithImages.length'>
+              <img class='full-image' ng-src="data:image/png;base64,{{TimeWorkDetails.TimeWithImages[$index + 1].PHOTO}}" />
+              <p>เวลา : {{TimeWorkDetails.TimeWithImages[$index + 1].ACCESS_TIME}} น.</p>
             </div>
           </div>
           

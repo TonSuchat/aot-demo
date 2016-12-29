@@ -27,12 +27,13 @@
     .run(function($cordovaFile,$cordovaFileOpener2,$ionicPlatform, SQLiteService, AuthService, XMPPService, XMPPApiService, $rootScope, AUTH_EVENTS, APIService, $http, $q, $cordovaNetwork, $ionicPopup,$state, NotiService, $cordovaDevice){
       $ionicPlatform.ready(function(){
         
+        //if access with not support browser will redirect to notsupport page
+        if(CheckBrowserIsNotChrome()) window.location = '#/app/notsupport';
+
         //open db
         SQLiteService.OpenDB();
         //initial all tables
         SQLiteService.InitailTables();
-        //bypass login if still loging in.
-        AuthService.bypassLogIn();
 
         //ionic resume event
         $ionicPlatform.on('resume', function(){
@@ -249,6 +250,14 @@
               'menuContent': {
                 templateUrl: 'templates/notification_history.html',
                 controller:'NotiHistoryCtrl'
+              }
+            }
+          })
+          .state('app.notsupport', {
+            url: '/notsupport',
+            views: {
+              'menuContent': {
+                templateUrl: 'templates/notsupport.html'
               }
             }
           })

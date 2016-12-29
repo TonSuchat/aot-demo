@@ -20,7 +20,9 @@ angular.module('starter')
       //});
 
       $ionicPlatform.ready(function(){
-
+        //if access with not support browser will end process
+        if(CheckBrowserIsNotChrome()) return;
+        
         //check open application in mobile browser?
         CheckOpenApplicationOnMobileDevice($q,APIService,$ionicPopup);
 
@@ -50,6 +52,8 @@ angular.module('starter')
             //register gcm for desktop
             NotiService.DesktopRegister().then(function(){});
           }
+          //bypass login if still loging in.
+          AuthService.bypassLogIn();
         });
 
         $scope.onWeb = onWeb;

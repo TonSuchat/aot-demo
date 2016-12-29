@@ -166,6 +166,7 @@ angular.module('starter')
         };
 
         var bypassLogIn = function(){
+
             return $q(function(resolve, reject) {
                 UserProfileSQLite.GetUserProfile().then(
                     function(response){
@@ -173,8 +174,19 @@ angular.module('starter')
                             username = response.rows.item(0).UserID;
                             useCredentials(function(){
                                 //pin authen
-                                //if(!onWeb) window.location = '#/app/helppinsetting?returnURL=firstpage&hideButton=true&onlyAuthen=true'; 
-                                window.location = '#/app/helppinsetting?returnURL=firstpage&hideButton=true&onlyAuthen=true'; 
+                                //check pin is exist?
+                                CheckPINIsExist($q,APIService).then(function(response){
+                                    if(!response){
+                                            //redirect to set pin for the first time
+                                            IonicAlert($ionicPopup,'ต้องตั้งค่า PIN ก่อนใช้งาน',function(){
+                                            window.location = '#/app/helppinsetting?returnURL=firstpage&hideButton=true';
+                                        });
+                                    }
+                                    else{
+                                        //if(!onWeb) window.location = '#/app/helppinsetting?returnURL=firstpage&hideButton=true&onlyAuthen=true'; 
+                                        window.location = '#/app/helppinsetting?returnURL=firstpage&hideButton=true&onlyAuthen=true'; 
+                                    }
+                                })
                             },response.rows.item(0));
                         }
                         resolve();

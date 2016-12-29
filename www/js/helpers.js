@@ -83,6 +83,12 @@ function TransformDateToddMMyyyyFormat(inputDate){
     return inputDate.substring(0,10).replace(/\./g,'');
 };
 
+//get time from format such as '04.02.2016 07:48:48' to '07:48:48'
+function GetTimeFromDatePointFormat(inputDate) {
+  if(!inputDate || inputDate.length == 0) return;
+  return inputDate.substring(11,19);
+};
+
 //change date format from '15062016' to 15/06/2016
 function TransformDateHasSlashFormat (inputDate) {
     if(!inputDate || inputDate.length == 0) return;
@@ -410,23 +416,23 @@ function CreateFile($cordovaFile,$q,fileName,data){
 
 function ReadFile ($cordovaFile,$q,APIService,fileName) {
   return $q(function(resolve){
-    APIService.ShowLoading();
+    // APIService.ShowLoading();
     if(window.cordova){
       var pathFile = '';
       if (ionic.Platform.isIOS()) pathFile = cordova.file.documentsDirectory
       else pathFile = cordova.file.externalDataDirectory
       $cordovaFile.readAsText(pathFile, fileName)
       .then(function (success) {
-        APIService.HideLoading();
+        // APIService.HideLoading();
         return resolve(success);
       }, function (error) {
-        APIService.HideLoading();
+        // APIService.HideLoading();
         return resolve(null);
       });
     }
     else{
       //pc
-      APIService.HideLoading();
+      // APIService.HideLoading();
       return resolve(true);
     }   
   });
@@ -1076,3 +1082,14 @@ function RegisterBackButton($ionicPlatform,$rootScope,$ionicHistory) {
     return false;
   },101);
 };
+
+function CheckBrowserIsNotChrome()
+{
+  //if mobile return false
+  if(window.cordova) return false;
+  //if used chrome return false
+  if(/Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)) return false;
+  //if used safari return false
+  if(/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) return false;
+  return true;
+}

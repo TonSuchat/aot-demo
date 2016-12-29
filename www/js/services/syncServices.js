@@ -135,15 +135,15 @@ angular.module('starter')
     return ProcessSyncData(APIService,EmployeeSQLite,$q,apiURLs,apiDatas,null);
   };
 
-  this.SyncTimeReport = function(){
-    var apiDatas = {
-      GetData:{ObjectID:12,SyncTimeReportViewModel:{}},
-      AddData:{ObjectID:12,SyncTimeReportViewModel:{}},
-      UpdateData:{ObjectID:12,SyncTimeReportViewModel:{}}
-    };
-    console.log('SYNC-TimeReport');
-    return ProcessSyncData(APIService,TimeReportSQLite,$q,apiURLs,apiDatas,null);
-  };
+  // this.SyncTimeReport = function(){
+  //   var apiDatas = {
+  //     GetData:{ObjectID:12,SyncTimeReportViewModel:{}},
+  //     AddData:{ObjectID:12,SyncTimeReportViewModel:{}},
+  //     UpdateData:{ObjectID:12,SyncTimeReportViewModel:{}}
+  //   };
+  //   console.log('SYNC-TimeReport');
+  //   return ProcessSyncData(APIService,TimeReportSQLite,$q,apiURLs,apiDatas,null);
+  // };
 
   // this.SyncPMRoom = function(){
   //   var empcode = '484074'; //window.localStorage.getItem("CurrentUserName") **Hard-Code**

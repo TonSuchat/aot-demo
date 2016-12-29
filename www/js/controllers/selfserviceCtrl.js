@@ -1062,7 +1062,11 @@ angular.module('starter')
 			$scope.TimeWorkDetails.StartDate = GetThaiDateTimeByDate($filter,data[0].FromDate);
 			$scope.TimeWorkDetails.EndDate = GetThaiDateTimeByDate($filter,data[0].ToDate);
 			$scope.TimeWorkDetails.TimeWith = data[0].TimeWith;
-			$scope.TimeWorkDetails.TimeWithImages = data[0].Image; //['http://lorempixel.com/400/200','http://lorempixel.com/400/200','http://lorempixel.com/400/200'];
+			var result = [];
+			for (var i = 0; i <= data[0].Image.length - 1; i++) {
+				result.push({PHOTO:data[0].Image[i].PHOTO,ACCESS_TIME:GetTimeFromDatePointFormat(data[0].Image[i].ACCESS_TIME)});
+			};
+			$scope.TimeWorkDetails.TimeWithImages = result;
 		};
 
 		$scope.InitialTimeWorkHistory = function(data){

@@ -56,7 +56,6 @@ angular.module('starter')
           messaging.getToken()
           .then(function(currentToken) {
             if (currentToken) {
-              console.log('currentToken',currentToken);
               serviceObj.StoreTokenOnServer(currentToken,'',false).then(function(response){resolve(response);});
               // sendTokenToServer(currentToken);
               // updateUIForPushEnabled(currentToken);
@@ -101,9 +100,6 @@ angular.module('starter')
             var deviceInfo = $cordovaDevice.getDevice();
             data = {RegisterID : token, OS : deviceInfo.platform, Model:deviceInfo.model, Serial:deviceInfo.uuid, EmpID: empid, RegistAction:true, DeviceName:''};
           }
-          console.log('isUpdate -> ' + isUpdate);
-          console.log('empid -> ' + empid);
-          console.log(data);
           APIService.httpPost(url,data,function(response){resolve(true)},function(error){console.log(error);resolve(false);});  
         });
     };
