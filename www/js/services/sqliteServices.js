@@ -193,7 +193,7 @@ angular.module('starter')
 		return $q(function(resolve,reject){
 			var totalProcess = 0;
 			for (var i = 0; i <= tableNames.length - 1; i++) {
-				currentTableName = tableNames[i];
+				if(tableNames[i] == 'userprofile') { totalProcess++; continue; }
 				$cordovaSQLite.execute(db, "DROP TABLE " + tableNames[i]).then(
 					function(){
 						totalProcess++;
