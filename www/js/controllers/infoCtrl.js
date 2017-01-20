@@ -656,12 +656,11 @@ angular.module('starter')
             };
 
             $scope.DisplayPDFTax = function (methodName,taxYear) {
-                IonicAlert($ionicPopup,'รหัสผ่านคือ PIN',function(){
-                    var url = APIService.hostname() + '/' + methodName;
-                    var data = {Empl_Code:$scope.empCode,TaxYear:taxYear};
-                    var fileName = methodName;
-                    DisplayPDF($q,$cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName);    
-                });
+                //IonicAlert($ionicPopup,'รหัสผ่านคือ PIN',function(){});
+                var url = APIService.hostname() + '/' + methodName;
+                var data = {Empl_Code:$scope.empCode,TaxYear:taxYear};
+                var fileName = methodName;
+                DisplayPDF($q,$cordovaFile,$cordovaFileOpener2,APIService,url,data,fileName);    
             };    
         }
 

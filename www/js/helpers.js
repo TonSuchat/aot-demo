@@ -344,7 +344,7 @@ function DisplayPDF($q,$cordovaFile,$cordovaFileOpener2,APIService,url,data,file
           // }
         }
         else APIService.HideLoading();
-    },function(error){APIService.HideLoading();console.log(error);alert('ไม่พบข้อมูล');});
+    },function(error){APIService.HideLoading();console.log(error);});
 };
 
 function SaveAndOpenPDF ($q,$cordovaFile,$cordovaFileOpener2,contentData,inputcontentType,fileName) {
@@ -1031,7 +1031,7 @@ function CheckIsUpdateVersion($q,SQLiteService,APIService,$ionicPopup){
 
 function CheckPINIsExist($q,APIService)
 {
-  return $q(function(resolve){
+  return $q(function(resolve,reject){
     APIService.ShowLoading();
     var url = APIService.hostname() + '/DeviceRegistered/CheckExistPIN';
     var data = {Empl_Code:window.localStorage.getItem('CurrentUserName')};
@@ -1045,7 +1045,7 @@ function CheckPINIsExist($q,APIService)
           return  resolve(false);
         }
       },
-        function(error){console.log(error);APIService.HideLoading();return resolve(false);});  
+        function(error){console.log(error);APIService.HideLoading();return reject(error);});  
   });
 }
 

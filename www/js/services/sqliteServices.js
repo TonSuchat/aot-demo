@@ -577,7 +577,7 @@ angular.module('starter')
 	};
 
 	this.GetDistinctMonthYear = function(){
-		return SQLiteService.Execute("select distinct substr(stampdate,3,6) as monthyear from timeattendance order by substr(stampdate,3,6) desc limit 12").then(function(response){return response;},function(error){ return error;});
+		return SQLiteService.Execute("select distinct substr(stampdate,3,6) as monthyear from timeattendance order by substr(stampdate,5,4) desc, substr(stampdate,3,2) desc limit 12").then(function(response){return response;},function(error){ return error;});
 	};
 })
 .service('LeaveSQLite',function(SQLiteService){
@@ -1282,7 +1282,7 @@ angular.module('starter')
 	};
 	//***Necessary-Method
 	this.GetDistinctMonthYear = function(){
-		return SQLiteService.Execute("select distinct substr(WORKDATE,3,6) as monthyear from timereport order by substr(WORKDATE,3,6) desc limit 12").then(function(response){return response;},function(error){ return error;});
+		return SQLiteService.Execute("select distinct substr(WORKDATE,3,6) as monthyear from timereport order by substr(WORKDATE,5,4) desc, substr(WORKDATE,3,2) desc limit 12").then(function(response){return response;},function(error){ return error;});
 	};
 	this.GetTimeReports = function(){
 		return SQLiteService.Execute("SELECT * FROM timereport order by substr(WORKDATE,3,6) desc").then(function(response){return response;},function(error){ return error;});

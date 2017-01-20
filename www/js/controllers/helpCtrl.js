@@ -319,6 +319,7 @@ angular.module('starter')
       
       $scope.pin = '';
       $scope.keepPIN = '';
+      $scope.TitleText = 'ตั้งค่า PIN';
       $scope.headerTxt = 'กรอกรหัสใหม่';
       $scope.returnURL = $location.search().returnURL;
       $scope.hideButton = $location.search().hideButton;
@@ -340,7 +341,8 @@ angular.module('starter')
       $scope.onlyAuthen = $location.search().onlyAuthen;
       if($scope.onlyAuthen != null && $scope.onlyAuthen){
         $scope.state = 1;
-        $scope.headerTxt = 'กรอกรหัส';
+        $scope.headerTxt = 'กรอกรหัส PIN';
+        $scope.TitleText = '';
       }
       else{
         APIService.ShowLoading();

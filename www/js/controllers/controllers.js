@@ -20,7 +20,7 @@ angular.module('starter')
       //});
 
       $ionicPlatform.ready(function(){
-        //if access with not support browser will end process
+        // if access with not support browser will end process
         if(CheckBrowserIsNotChrome()) return;
         
         //check open application in mobile browser?
@@ -78,7 +78,7 @@ angular.module('starter')
             $scope.menus.push({link:'#/app/selfservice',text:'Self Services',icon:'ion-ios-person'});
             $scope.menus.push({link:'#/app/information/finance',text:'ตรวจสอบข้อมูล',icon:'ion-information'});
             $scope.menus.push({link:'#/app/directory?pmroomid=0',text:'สมุดโทรศัพท์',icon:'ion-android-call'});
-            $scope.menus.push({link:'#/app/qrcode',text:'QR-Code',icon:'ion-qr-scanner'});
+            if(!onWeb) $scope.menus.push({link:'#/app/qrcode',text:'QR-Code',icon:'ion-qr-scanner'});
             $scope.menus.push({link:'#/app/duty',text:'จัดการเวร',icon:'ion-ios-body-outline'});
             $scope.menus.push({link:'#/app/notihistory',text:'ประวัติแจ้งเตือน',icon:'ion-android-refresh'});
             if(loginComplete == null){
