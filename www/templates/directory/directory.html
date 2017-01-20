@@ -27,7 +27,7 @@
     </form>
         <ion-list>
             <ion-item ng-repeat="person in directoryList" class="item-thumbnail-left item-text-wrap" href="#/app/directory/{{person.UserID}}?pmroomid={{PMRoomId}}">
-                <img ng-src="http://{{person.PictureThumb}}" alt="">
+                <img ng-src="http://{{person.PictureThumb.replace('10.74.29.166','eservice2.airportthai.co.th')}}" alt="">
                 <h2>{{person.PrefixName + ' ' + person.Firstname + ' ' + person.Lastname}} {{ (person.Nickname != null && person.Nickname) ? '(' + person.Nickname + ')' : ''}}</h2>
                 <h3>{{person.Position}}</h3>
                 <p>{{person.Section}} {{person.Department}}</p>

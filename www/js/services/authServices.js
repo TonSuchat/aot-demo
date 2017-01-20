@@ -27,7 +27,7 @@ angular.module('starter')
                 isAuthenticated = window.localStorage.setItem("AuthServices_isAuthenticated", true); //true;
                 var nickname = (userData.Nickname && userData.Nickname != null) ? '(' + userData.Nickname + ')' : '';
                 window.localStorage.setItem("AuthServices_fullname", userData.PrefixName + ' ' + userData.Firstname + ' ' + userData.Lastname + nickname); //userData.PrefixName + ' ' + userData.Firstname + ' ' + userData.Lastname;
-                window.localStorage.setItem("AuthServices_picThumb", userData.PictureThumb); //userData.PictureThumb; 
+                window.localStorage.setItem("AuthServices_picThumb", userData.PictureThumb.replace('10.74.29.166','eservice2.airportthai.co.th')); //userData.PictureThumb; 
                 window.localStorage.setItem("AuthServices_position", userData.Position); //userData.Position;
                 // //connect xmpp server
                 // XMPPService.Authentication(window.localStorage.getItem("CurrentUserName"),window.localStorage.getItem("AuthServices_password"));
@@ -47,7 +47,7 @@ angular.module('starter')
                         isAuthenticated = window.localStorage.setItem("AuthServices_isAuthenticated", true); //true;
                         var nickname = (result.Nickname && result.Nickname != null) ? '(' + result.Nickname + ')' : '';
                         window.localStorage.setItem("AuthServices_fullname", result.PrefixName + ' ' + result.Firstname + ' ' + result.Lastname + nickname); //result.PrefixName + ' ' + result.Firstname + ' ' + result.Lastname;
-                        window.localStorage.setItem("AuthServices_picThumb", result.PictureThumb); //result.PictureThumb; 
+                        window.localStorage.setItem("AuthServices_picThumb", result.PictureThumb.replace('10.74.29.166','eservice2.airportthai.co.th')); //result.PictureThumb; 
                         window.localStorage.setItem("AuthServices_position", result.Position); //result.Position;
                         //save user data to sqlite db
                         UserProfileSQLite.SaveUserProfile(result);
