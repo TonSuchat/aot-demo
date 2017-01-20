@@ -6,7 +6,7 @@ var PCGCMToken = 'fY_RbvgA_1Q:APA91bHTBpqf-F9jxwjg_4kUA66zl5daUsf9bUGKtlssSCy8af
 var employeeFileName = 'employees'
 var totalEmployeeFiles = 4;
 var onWeb = (window.cordova) ? false : true;
-var APPVERSION = '0.0.19';
+var APPVERSION = '0.0.20';
 //***config
 
 angular.module('starter')
