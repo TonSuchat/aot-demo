@@ -1,6 +1,6 @@
 angular.module('starter')
 
-.service('WorkFlowService',function($q,APIService,$ionicPopup,$location,$ionicModal){
+.service('WorkFlowService',function($q,APIService,$ionicPopup,$location,$ionicModal,$ionicHistory){
 
   var service = this;
 
@@ -114,7 +114,11 @@ angular.module('starter')
     service.ApproveWorkflow(scope.documentId,window.localStorage.getItem("CurrentUserName"),scope.action.remark,3,scope.signatureObject,scope.showSignature).then(function(response){
       if(response){
         scope.modalSSAction.remove();
-        $location.path('/app/floatbutton/selfservicelist/' + scope.categoryId);
+        //prevent back button because back button can't work
+        $ionicHistory.nextViewOptions({
+          disableBack: true
+        });
+        window.location = '#/app/floatbutton/selfservicelist/' + scope.categoryId;
       } 
     });
   };
@@ -146,7 +150,11 @@ angular.module('starter')
     service.ApproveWorkflow(scope.documentId,window.localStorage.getItem("CurrentUserName"),scope.action.remark,actionType,scope.signatureObject,scope.showSignature).then(function(response){
       if(response){
         scope.modalSSAction.remove();
-        $location.path('/app/floatbutton/selfservicelist/' + scope.categoryId);
+        //prevent back button because back button can't work
+        $ionicHistory.nextViewOptions({
+          disableBack: true
+        });
+        window.location = '#/app/floatbutton/selfservicelist/' + scope.categoryId;
       } 
     });
   };

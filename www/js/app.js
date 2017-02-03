@@ -10,6 +10,7 @@
     .run(function($ionicPlatform) {
 
       $ionicPlatform.ready(function() {
+
         // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
         // for form inputs)
         if (window.cordova && window.cordova.plugins.Keyboard) {
@@ -24,9 +25,12 @@
 
       });
     })
-    .run(function($cordovaFile,$cordovaFileOpener2,$ionicPlatform, SQLiteService, AuthService, XMPPService, XMPPApiService, $rootScope, AUTH_EVENTS, APIService, $http, $q, $cordovaNetwork, $ionicPopup,$state, NotiService, $cordovaDevice){
+    .run(function($cordovaFile,$cordovaFileOpener2,$ionicPlatform, SQLiteService, AuthService, XMPPService, XMPPApiService, $rootScope, AUTH_EVENTS, APIService, $http, $q, $cordovaNetwork, $ionicPopup,$state, NotiService, $cordovaDevice, $ionicNavBarDelegate, $ionicHistory){
       $ionicPlatform.ready(function(){
-        
+
+        //set flag for indicate this is the first run event
+        isFirstRun = true;
+
         //if access with not support browser will redirect to notsupport page
         if(CheckBrowserIsNotChrome()) window.location = '#/app/notsupport';
 
@@ -37,6 +41,7 @@
 
         //ionic resume event
         $ionicPlatform.on('resume', function(){
+          isFirstRun = false;
           CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile,$cordovaDevice);
         });
 
@@ -78,16 +83,24 @@
         };
 
         function onOffline() {
-          console.log('onOffline');
-          XMPPService.Disconnect();
-          xmppConnectionIsActive = false;
-          isNetworkDown = true;
+          // console.log('onOffline');
+          // XMPPService.Disconnect();
+          // xmppConnectionIsActive = false;
+          // isNetworkDown = true;
         };
         
       });
     })
     .run(function($rootScope, $ionicPlatform, $ionicHistory){
       RegisterBackButton($ionicPlatform,$rootScope,$ionicHistory);
+    })
+    .run(function($rootScope,$q,APIService){
+      //start timeout if user didn't change view then go to authen pin view
+      //StartUserTimeout($q,APIService);
+      $rootScope.$on("$locationChangeStart", function(event, next, current) { 
+        //reset timeout
+        ResetUserTimeout($q,APIService);
+      });
     })
 
     .config(function($stateProvider, $urlRouterProvider, $ionicConfigProvider, $sceDelegateProvider) {

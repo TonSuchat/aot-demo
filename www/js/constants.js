@@ -6,8 +6,14 @@ var PCGCMToken = 'fY_RbvgA_1Q:APA91bHTBpqf-F9jxwjg_4kUA66zl5daUsf9bUGKtlssSCy8af
 var employeeFileName = 'employees'
 var totalEmployeeFiles = 4;
 var onWeb = (window.cordova) ? false : true;
-var APPVERSION = '0.0.20';
+var APPVERSION = '0.0.21';
 //***config
+
+//***Global Variable
+var isFirstRun = false;
+var notiData = null;
+var userIsAuthen = false;
+//***Global Variable
 
 angular.module('starter')
     .constant('AUTH_EVENTS',{

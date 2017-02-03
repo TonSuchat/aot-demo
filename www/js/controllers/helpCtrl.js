@@ -95,6 +95,22 @@ angular.module('starter')
             }
           },function(error){APIService.HideLoading();console.log(error);IonicAlert($ionicPopup,'ไม่พบ URL/ลองใหม่อีกครั้ง',null);});
       };
+
+      $scope.logout = function () {
+          //if no internet connection
+          if(!CheckNetwork($cordovaNetwork)) return;
+          else{
+            AuthService.logout(false).then(function(response){
+              //set flag to indicate user is logged off
+              userIsAuthen = false;
+              //stop timer
+              ClearUserTimeout();
+              // //reload set default theme
+              //if(response) window.location.reload();
+            });
+          }
+        };
+      
     });
 })
 
@@ -312,16 +328,16 @@ angular.module('starter')
   });
 })
 
-.controller('HelpPINSettingCtrl',function($scope,APIService,$cordovaNetwork,$ionicPopup,$filter,$ionicPlatform,$location,$ionicNavBarDelegate,$ionicSideMenuDelegate){
+.controller('HelpPINSettingCtrl',function($scope,APIService,$cordovaNetwork,$ionicPopup,$filter,$ionicPlatform,$location,$ionicNavBarDelegate,$ionicSideMenuDelegate,$rootScope,$ionicHistory){
   $ionicPlatform.ready(function() {
 
     $scope.InitialPIN = function(){
-      
+
       $scope.pin = '';
       $scope.keepPIN = '';
       $scope.TitleText = 'ตั้งค่า PIN';
       $scope.headerTxt = 'กรอกรหัสใหม่';
-      $scope.returnURL = $location.search().returnURL;
+      $scope.returnURL = ($location.search().returnURL == null ? null : $location.search().returnURL.replace(/\$/g,'/').replace(/\|/g,'='));
       $scope.hideButton = $location.search().hideButton;
 
       //hide menu,back button by query string
@@ -400,7 +416,19 @@ angular.module('starter')
         if(response != null && response.data != null){
           if(response.data){
             if($scope.onlyAuthen != null && $scope.onlyAuthen){
-              window.location = ($scope.returnURL == null) ? '#/app/help' : '#/app/' + $scope.returnURL;
+              //set flag firstrun to false for indicate user already authen pin.
+              isFirstRun = false;
+              //show left button after authen pin
+              $ionicNavBarDelegate.showBackButton(true);
+              RegisterBackButton($ionicPlatform,$rootScope,$ionicHistory);
+              //disable back for can't back to this page again
+              $ionicHistory.nextViewOptions({
+                disableBack: true
+              });
+              //clear global variable notidata
+              notiData = null;
+              APIService.HideLoading();
+              window.location = ($scope.returnURL == null) ? '#/app/help' : '#/app' + $scope.returnURL;
             }
             else{
               $scope.pin = '';
@@ -413,12 +441,12 @@ angular.module('starter')
           else $scope.Error();
         }
         else{
-          $scope.ResetDot();
+          $scope.Error();
           APIService.HideLoading();
           IonicAlert($ionicPopup,'ไม่ได้รับค่าจาก Server',null);
         }
       },
-        function(error){console.log(error);$scope.ResetDot();APIService.HideLoading();IonicAlert($ionicPopup,'เกิดข้อผิดพลาด/ลองใหม่อีกครั้ง',null);})
+        function(error){console.log(error);$scope.Error();APIService.HideLoading();})
     };
 
     $scope.ProcessPINState2 = function(){
@@ -436,15 +464,18 @@ angular.module('starter')
         var data = {Empl_Code:$scope.Empl_Code,PIN:$scope.pin};
         APIService.httpPost(url,data,function(response){
           APIService.HideLoading();
-          IonicAlert($ionicPopup,'ตั้งค่าเรียบร้อย',function(){window.location = ($scope.returnURL == null) ? '#/app/help' : '#/app/' + $scope.returnURL;});
+          IonicAlert($ionicPopup,'ตั้งค่าเรียบร้อย',function(){
+            window.location = ($scope.returnURL == null) ? '#/app/help' : '#/app/' + $scope.returnURL;
+          });
         },
-          function(error){console.log(error);$scope.ResetDot();APIService.HideLoading();IonicAlert($ionicPopup,'เกิดข้อผิดพลาด/ลองใหม่อีกครั้ง',null);})
+          function(error){console.log(error);$scope.Error();APIService.HideLoading();})
       }
       else $scope.Error();
     };
 
     //reset dot elements to default class
     $scope.ResetDot = function(){
+      console.log('ResetDot');
       dots.forEach(function(dot, index) {
         dot.className = 'dot';
       });
@@ -465,7 +496,7 @@ angular.module('starter')
     };
 
     //loop add event click for number buttons
-    if(!$scope.noInternet){
+    //if(!$scope.noInternet){
       numbers.forEach(function(number, index) {
         number.addEventListener('click', function() {
           $scope.errorTxt = '';
@@ -478,8 +509,8 @@ angular.module('starter')
             $scope.ProcessPIN();
           }
         });
-      });  
-    }
+      });
+    //}
 
     $scope.deletePIN = function (){
       if($scope.pin.length > 0) {

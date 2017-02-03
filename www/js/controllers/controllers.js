@@ -3,14 +3,14 @@ angular.module('starter')
     .controller('LandingCtrl',function($scope, $ionicPlatform, $http, $q, APIService, $state, AUTH_EVENTS, NotiService, $cordovaNetwork, $ionicPopup, $cordovaFile, $ionicNavBarDelegate, $rootScope, $ionicHistory){
       
       $ionicPlatform.ready(function(){
-        $ionicNavBarDelegate.showBackButton(true);
-        RegisterBackButton($ionicPlatform,$rootScope,$ionicHistory);
+        // $ionicNavBarDelegate.showBackButton(true);
+        // RegisterBackButton($ionicPlatform,$rootScope,$ionicHistory);
         APIService.HideLoading();
       });
 
     })
 
-    .controller('AppCtrl', function($scope, $ionicModal, $timeout, $state, AuthService, $ionicPopup, $location, $ionicHistory, SQLiteService, NotiService, SyncService, $cordovaNetwork, APIService, $rootScope, $ionicPlatform, $q, $cordovaFile, $cordovaDevice, $filter, AUTH_EVENTS, $http) {
+    .controller('AppCtrl', function($scope, $ionicModal, $timeout, $state, AuthService, $ionicPopup, $location, $ionicHistory, SQLiteService, NotiService, SyncService, $cordovaNetwork, APIService, $rootScope, $ionicPlatform, $q, $cordovaFile, $cordovaDevice, $filter, AUTH_EVENTS, $http, $ionicNavBarDelegate) {
 
       // With the new view caching in Ionic, Controllers are only called
       // when they are recreated or on app start, instead of every page change.
@@ -20,6 +20,7 @@ angular.module('starter')
       //});
 
       $ionicPlatform.ready(function(){
+
         // if access with not support browser will end process
         if(CheckBrowserIsNotChrome()) return;
         
@@ -54,7 +55,7 @@ angular.module('starter')
           }
           //bypass login if still loging in.
           AuthService.bypassLogIn();
-        });
+        },function(error){console.log('LogInAPI-Error',error)});
 
         $scope.onWeb = onWeb;
         $scope.noInternet = false;
@@ -159,6 +160,8 @@ angular.module('starter')
                             if(window.localStorage.getItem('GCMToken') != null && window.localStorage.getItem('GCMToken').length > 0) {
                               NotiService.StoreTokenOnServer(window.localStorage.getItem('GCMToken'),currentUserName,true);
                             }
+                            //bind menus
+                            $scope.InitialMenus(true);
                             //check pin is exist?
                             CheckPINIsExist($q,APIService).then(function(response){
                               if(!response){
@@ -169,8 +172,6 @@ angular.module('starter')
                                 });
                               }
                               else{
-                                //bind full menus
-                                $scope.InitialMenus(true);
                                 $scope.closeLogin();    
                               }
                             })
@@ -214,16 +215,20 @@ angular.module('starter')
           }
         };
 
-        $scope.logout = function () {
-          //if no internet connection
-          if(!CheckNetwork($cordovaNetwork)) return;
-          else{
-            AuthService.logout(false).then(function(response){
-              // //reload set default theme
-              //if(response) window.location.reload();
-            });
-          }
-        };
+        // $scope.logout = function () {
+        //   //if no internet connection
+        //   if(!CheckNetwork($cordovaNetwork)) return;
+        //   else{
+        //     AuthService.logout(false).then(function(response){
+        //       //set flag to indicate user is logged off
+        //       userIsAuthen = false;
+        //       //stop timer
+        //       ClearUserTimeout();
+        //       // //reload set default theme
+        //       //if(response) window.location.reload();
+        //     });
+        //   }
+        // };
  
       });
 

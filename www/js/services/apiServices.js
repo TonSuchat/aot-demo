@@ -21,7 +21,7 @@ angular.module('starter').service('APIService',function($http,$httpParamSerializ
         $timeout(function() {
             isTimeOut = true;
             deferred.resolve(); // this aborts the request!
-        }, 45000);
+        }, 60000);
 	};
 
     this.httpGet = function(url,param,success,error){

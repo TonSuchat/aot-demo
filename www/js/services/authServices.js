@@ -33,6 +33,11 @@ angular.module('starter')
                 // XMPPService.Authentication(window.localStorage.getItem("CurrentUserName"),window.localStorage.getItem("AuthServices_password"));
                 // //enable xmpp maintain timer
                 // XMPPService.TimerMaintainConnection();
+
+                //set globar flag to indicate user is authen
+                userIsAuthen = true;
+                //start timer if user didn't change view then go to authen pin view
+                StartUserTimeout($q,APIService);
                 successAction();
             }
             //normal login
@@ -81,6 +86,10 @@ angular.module('starter')
                             //set profile setting
                             SetProfileSettings($q,response.data.Setting);
                         });
+                        //set globar flag to indicate user is authen
+                        userIsAuthen = true;
+                        //start timer if user didn't change view then go to authen pin view
+                        StartUserTimeout($q,APIService);
                         successAction();
                     },
                     function(error){console.log(error);successAction();});
@@ -173,20 +182,30 @@ angular.module('starter')
                         if(response.rows != null && response.rows.length > 0){
                             username = response.rows.item(0).UserID;
                             useCredentials(function(){
-                                //pin authen
-                                //check pin is exist?
-                                CheckPINIsExist($q,APIService).then(function(response){
-                                    if(!response){
-                                            //redirect to set pin for the first time
-                                            IonicAlert($ionicPopup,'ต้องตั้งค่า PIN ก่อนใช้งาน',function(){
-                                            window.location = '#/app/helppinsetting?returnURL=firstpage&hideButton=true';
-                                        });
+                                //pin authen if this is first run
+                                if(isFirstRun) {
+                                    var returnURL = '$firstpage';
+                                    //check user open app from notification?
+                                    if(notiData != null){
+                                        var menu = (onWeb) ? notiData.menu : notiData.additionalData.menu;
+                                        //get url from notification payload
+                                        returnURL = GetRedirectURL(menu).replace(/\//g,'$').replace(/\=/g,'|'); //if first run user have to authen pin first then redirect to specific url
                                     }
-                                    else{
-                                        //if(!onWeb) window.location = '#/app/helppinsetting?returnURL=firstpage&hideButton=true&onlyAuthen=true'; 
-                                        window.location = '#/app/helppinsetting?returnURL=firstpage&hideButton=true&onlyAuthen=true'; 
-                                    }
-                                })
+                                    ProcessAuthenPIN ($q,APIService,returnURL);
+                                    // //check pin is exist?
+                                    // CheckPINIsExist($q,APIService).then(function(response){
+                                    //     if(!response){
+                                    //             //redirect to set pin for the first time
+                                    //             IonicAlert($ionicPopup,'ต้องตั้งค่า PIN ก่อนใช้งาน',function(){
+                                    //             window.location = '#/app/helppinsetting?returnURL=' + returnURL + '&hideButton=true';
+                                    //         });
+                                    //     }
+                                    //     else{
+                                    //         //if(!onWeb) window.location = '#/app/helppinsetting?returnURL=firstpage&hideButton=true&onlyAuthen=true'; 
+                                    //         window.location = '#/app/helppinsetting?returnURL=' + returnURL + '&hideButton=true&onlyAuthen=true'; 
+                                    //     }
+                                    // })
+                                }
                             },response.rows.item(0));
                         }
                         resolve();

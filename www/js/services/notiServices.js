@@ -105,9 +105,9 @@ angular.module('starter')
     };
 
     $rootScope.$on('$cordovaPushV5:notificationReceived', function(event, notification) {
+      notiData = notification;
       console.log(notification);
       ProcessNotification(notification,$ionicPopup);
-
       // //android part
       // if(isAndroid){
       //     switch(notification.event) {
@@ -188,15 +188,35 @@ angular.module('starter')
       }
       //check if messageType is hyperlink
       if(messageType.type == "1"){
-        IonicConfirm($ionicPopup,'แจ้งเตือน','ต้องการเปิด link : ' + messageType.optData + ' ?',function(){
+        IonicConfirm($ionicPopup,'แจ้งเตือน',data.message,function(){
           window.open(messageType.optData,'_system','location=no');
         });  
+        // IonicConfirm($ionicPopup,'แจ้งเตือน','ต้องการเปิด link : ' + messageType.optData + ' ?',function(){
+        //   window.open(messageType.optData,'_system','location=no');
+        // });  
       }
       else{
         //check if need to confirm and redirect to specific path
         if(alertType == "1"){
           IonicConfirm($ionicPopup,'แจ้งเตือน','ต้องการดูข้อมูล : ' + data.title + ' ?',function(){
-            ProcessRedirect(menu);
+            // if(isFirstRun){
+            //   notiURL = GetRedirectURL(menu).replace(/\//g,'$').replace(/\=/g,'|'); //if first run user have to authen pin first in bypasslogin then redirect to specific url
+            //   CheckPINIsExist($q,APIService).then(function(response){
+            //     if(!response){
+            //       //redirect to set pin for the first time
+            //       IonicAlert($ionicPopup,'ต้องตั้งค่า PIN ก่อนใช้งาน',function(){
+            //         window.location = '#/app/helppinsetting?returnURL=' + notiURL + '&hideButton=true';
+            //       });
+            //     }
+            //     else{
+            //       window.location = '#/app/helppinsetting?returnURL=' + notiURL + '&hideButton=true&onlyAuthen=true';
+            //     }
+            //   })
+            // } 
+            // else ProcessRedirect(menu);
+            
+            //if not first run then redirect without PIN authentication
+            if(!isFirstRun) ProcessRedirect(menu);
           });
         }
         //just show message
@@ -279,41 +299,7 @@ angular.module('starter')
 //   alert('an error occured');
 // };
 
-function ProcessRedirect(url) {
-  if(!url || url.length <= 0) return;
-  //check is selfservice menu, Yes redirect with other logic, No redirect by link
-  if(CheckURLIsSelfService(url)) RedirectSelfServiceMenu(url);
-  else{
-    needReload = true;
-    window.location.href = '#/app' + url;  
-  }
-};
 
-function CheckURLIsSelfService (url) {
-  if(url.toString().indexOf('/ess/') >= 0) return true;
-  else return false;
-};
 
-function RedirectSelfServiceMenu (url) {
-  var urlDetails = url.split('/');
-  if(urlDetails.length > 0){
-    var categoryId = urlDetails[2];
-    var documentId = urlDetails[3];
-    var nextLevel = ''; //urlDetails[4];
-    switch(+categoryId){
-      case 1:
-        window.location.href = '#/app/ssitem_redeemduty?documentId=' + documentId + '&nextLevel=' + nextLevel;
-        break;
-      case 2:
-        window.location.href = '#/app/ssitem_cardrequest?documentId=' + documentId + '&nextLevel=' + nextLevel;
-        break;
-      case 3:
-        window.location.href = '#/app/ssitem_timework?documentId=' + documentId + '&nextLevel=' + nextLevel;
-        break;
-      case 4:
-        window.location.href = '#/app/ssitem_leave?documentId=' + documentId + '&nextLevel=' + nextLevel;
-        break;
-    }
-  }
-};
+
 

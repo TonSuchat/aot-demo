@@ -105,7 +105,7 @@ function ConvertDateObjToSlashFormat (date) {
   if(date == null) return null;
   var day = date.getDate().toString();
   day = (day.length == 1 ? '0' + day : day);
-  var month = (date.getUTCMonth() + 1).toString();
+  var month = (date.getMonth() + 1).toString();
   month = (month.length == 1 ? '0' + month : month);
   var year = date.getFullYear();
   var inputDate = day + month + year;
@@ -145,7 +145,7 @@ function GetCurrentTime(){
 
 function GetCurrentTimeWithoutMillisecond(){
     var currentdate = new Date(); 
-    var datetime = currentdate.getHours() + ":" + currentdate.getMinutes();
+    var datetime = ('0' + currentdate.getHours()).slice(-2)  + ":" + ('0' + currentdate.getMinutes()).slice(-2);
     return datetime;  
 };
 
@@ -480,13 +480,13 @@ function RedirectAndReloadView(url){
 };
 
 function LogInAPI(AUTH_EVENTS,APIService,$http,$q,$cordovaNetwork, $ionicPopup){
-  return $q(function(resolve){
+  return $q(function(resolve,reject){
     //check is changed server
     CheckServerIsChanged($q,APIService.hostname()).then(function(response){
       if(response)
       {
         console.log('changed-server');
-        PostGetToken($q,APIService,AUTH_EVENTS,$http).then(function(response){resolve(response);window.localStorage.setItem('currentServerName',APIService.hostname());})
+        PostGetToken($q,APIService,AUTH_EVENTS,$http).then(function(response){resolve(response);window.localStorage.setItem('currentServerName',APIService.hostname());},function(error){reject(error);})
       } 
       else{
         console.log('same-server');
@@ -497,7 +497,7 @@ function LogInAPI(AUTH_EVENTS,APIService,$http,$q,$cordovaNetwork, $ionicPopup){
           resolve();
         } 
         else{
-          PostGetToken($q,APIService,AUTH_EVENTS,$http).then(function(response){resolve(response);});
+          PostGetToken($q,APIService,AUTH_EVENTS,$http).then(function(response){resolve(response);},function(error){reject(error);});
         }
       }
     });
@@ -515,7 +515,7 @@ function CheckServerIsChanged ($q,currentServerName) {
 };
 
 function PostGetToken ($q,APIService,AUTH_EVENTS,$http) {
-  return $q(function(resolve){
+  return $q(function(resolve,reject){
     console.log('get-token');
     var data = {grant_type:'password',username:'epayment@airportthai.co.th',password:'aotP@ssw0rd'};
     var url = APIService.hostname() + '/Token';
@@ -530,7 +530,7 @@ function PostGetToken ($q,APIService,AUTH_EVENTS,$http) {
         SetAuthorizationHeader($http,token);
         resolve();
       },
-      function(error){console.log(error);resolve(error);});   
+      function(error){console.log(error);reject(error);});   
   });
 };
 
@@ -845,10 +845,10 @@ function CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile,$co
                         return resolve(true);  
                       });
                     }
-                    else{
-                      //show authen pin
-                      window.location = '#/app/helppinsetting?returnURL=firstpage&hideButton=true&onlyAuthen=true';
-                    }
+                    // else{
+                    //   //show authen pin
+                    //   window.location = '#/app/helppinsetting?returnURL=firstpage&hideButton=true&onlyAuthen=true';
+                    // }
                   });
                 }
               });
@@ -1093,3 +1093,98 @@ function CheckBrowserIsNotChrome()
   if(/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) return false;
   return true;
 }
+
+//**************************Notification**************************
+function CheckURLIsSelfService (url) {
+  if(url.toString().indexOf('/ess/') >= 0) return true;
+  else return false;
+};
+
+function ProcessRedirect(url) {
+  if(!url || url.length <= 0) return;
+  //check is selfservice menu, Yes redirect with other logic, No redirect by link
+  if(CheckURLIsSelfService(url)) RedirectSelfServiceMenu(url,false);
+  else{
+    needReload = false;
+    window.location.href = '#/app' + url;  
+  }
+};
+
+function RedirectSelfServiceMenu (url,onlyGetUrl) {
+  var urlDetails = url.split('/');
+  if(urlDetails.length > 0){
+    var categoryId = urlDetails[2];
+    var documentId = urlDetails[3];
+    var nextLevel = ''; //urlDetails[4];
+    switch(+categoryId){
+      case 1:
+        if(onlyGetUrl) return '/ssitem_redeemduty?documentId=' + documentId + '&nextLevel=' + nextLevel;
+        else window.location.href = '#/app/ssitem_redeemduty?documentId=' + documentId + '&nextLevel=' + nextLevel;
+        break;
+      case 2:
+        if(onlyGetUrl) return '/ssitem_cardrequest?documentId=' + documentId + '&nextLevel=' + nextLevel;
+        else window.location.href = '#/app/ssitem_cardrequest?documentId=' + documentId + '&nextLevel=' + nextLevel;
+        break;
+      case 3:
+        if(onlyGetUrl) return '/ssitem_timework?documentId=' + documentId + '&nextLevel=' + nextLevel;
+        else window.location.href = '#/app/ssitem_timework?documentId=' + documentId + '&nextLevel=' + nextLevel;
+        break;
+      case 4:
+        if(onlyGetUrl) return '/ssitem_leave?documentId=' + documentId + '&nextLevel=' + nextLevel;
+        else window.location.href = '#/app/ssitem_leave?documentId=' + documentId + '&nextLevel=' + nextLevel;
+        break;
+    }
+  }
+};
+
+function GetRedirectURL (url) {
+  if(!url || url.length <= 0) return;
+  //check is selfservice menu, Yes redirect with other logic, No redirect by link
+  if(CheckURLIsSelfService(url)) return RedirectSelfServiceMenu(url,true);
+  else{
+    needReload = false;
+    return url;  
+  }
+}
+//**************************Notification**************************
+
+function ProcessAuthenPIN ($q,APIService,returnURL) {
+  //statistic usage user
+  StatisticUserUsage();
+  //check pin is exist?
+  CheckPINIsExist($q,APIService).then(function(response){
+      if(!response){
+        //redirect to set pin for the first time
+        IonicAlert($ionicPopup,'ต้องตั้งค่า PIN ก่อนใช้งาน',function(){
+          window.location = '#/app/helppinsetting?returnURL=' + returnURL + '&hideButton=true';
+        });
+      }
+      else{
+        //if(!onWeb) window.location = '#/app/helppinsetting?returnURL=firstpage&hideButton=true&onlyAuthen=true'; 
+        window.location = '#/app/helppinsetting?returnURL=' + returnURL + '&hideButton=true&onlyAuthen=true'; 
+      }
+  })
+};
+
+var userTimeout;
+function StartUserTimeout ($q,APIService) {
+  if(userIsAuthen) userTimeout = setTimeout(function(){ ProcessAuthenPIN($q,APIService,'$firstpage') }, 86399999);
+}
+
+function ResetUserTimeout ($q,APIService) {
+  if(userIsAuthen){
+    ClearUserTimeout();
+    StartUserTimeout($q,APIService);  
+  }
+}
+
+function ClearUserTimeout () {
+  clearTimeout(userTimeout);
+}
+
+
+function StatisticUserUsage() {
+  ga('send', 'event', 'Authen', 'PIN', 'Authen PIN');
+};
+  
+

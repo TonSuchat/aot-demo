@@ -20,6 +20,10 @@
 
 	        <a href="#" ng-click="OpenHelperLink('licenses')" class='item'>Licenses</a>
 
+	        <a href="#" ng-show="isAuthen" menu-close ng-click="logout()" class='item'>
+	           <i class='icon ion-log-out'></i>&nbsp;&nbsp;ออกจากระบบ
+        	</a>
+
 	    	<div class="item text-center">
   				<p>Version {{appVersion}}</p>
 			</div>
