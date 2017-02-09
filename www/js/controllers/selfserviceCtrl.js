@@ -209,21 +209,6 @@ angular.module('starter')
 		//if no internet connection
 	    if(!CheckNetwork($cordovaNetwork)) OpenIonicAlertPopup($ionicPopup,'ไม่มีสัญญานอินเตอร์เนท','ไม่สามารถใช้งานส่วนนี้ได้เนื่องจากไม่ได้เชื่อมต่ออินเตอร์เนท');
 	    else{
-	    	// //sync emplooyee datas
-	    	// APIService.ShowLoading();
-	    	// SyncService.SyncEmployee().then(function(response){
-	    	// 	APIService.HideLoading();
-      //           //get data from emplooyee and assign to array
-      //           EmployeeSQLite.GetEmplooyees().then(function(response){
-      //           	if(response != null){
-      //           		var result = ConvertQueryResultToArray(response);
-      //           		console.log('result',result);
-      //           		emplooyeeDatas = ConvertQueryResultToArray(response);
-      //           		console.log('emplooyeeDatas',emplooyeeDatas);
-      //           	} 
-      //           },function(error){console.log(error);APIService.HideLoading();});
-      //       },function(error){console.log(error);APIService.HideLoading();});
-
 	    	//get badge number of new item and bind to each category
 	    	WorkFlowService.ViewUnReadMytask(window.localStorage.getItem("CurrentUserName")).then(function(response){
 	    		if(response != null && response.data != null) $scope.BindCategoryUnreadNumber(response.data);
@@ -245,13 +230,6 @@ angular.module('starter')
 	    	$scope.SSList = [];
 	    	$scope.categoryId = $stateParams.CategoryId;
 	    	this.GetItemDetailURL();
-
-	  //   	var result = $filter('filter')(selfServiceCategory, { id: $scope.categoryId });
-	  //   	if(result == null) return;
-
-			// $scope.selectedCategory =  result[0];
-			// $scope.title = $scope.selectedCategory.name;
-			// $scope.selfserviceRequestButton = {show:$scope.selectedCategory.showRequestButton,requestURL:$scope.selectedCategory.requestURL};
 	    };
 
 	    $scope.GetItemDetailURL = function(){
@@ -289,13 +267,8 @@ angular.module('starter')
 
 	    $scope.BindSSList = function(data){
 	    	angular.forEach(data,function(value,key){
-	    		$scope.SSList.push({DocumentId:value.DocumentId,NextLevel:value.NextLevel,DocumentTitle:value.DocumentTitle,Note:value.Note,LastUpdate:GetThaiDateTimeByDate($filter,value.LastUpdate),IsRead:value.IsRead});
+	    		$scope.SSList.push({DocumentId:value.DocumentId,NextLevel:value.NextLevel,DocumentTitle:value.DocumentTitle,Note:value.Note,LastUpdate:GetThaiDateTimeByDate($filter,value.LastUpdate),IsRead:value.IsRead,DocumentStatus:value.DocumentStatus,CreatedDate:GetThaiDateTimeByDate($filter,value.CreatedDate)});
 	    	});
-	  //   	$timeout(function(){
-			//   $scope.screenHeight = (document.getElementById('listTask').offsetHeight) - 80;
-			//   console.log($scope.screenHeight);
-	  //   	  document.getElementById('floating-button').style.bottom = $scope.screenHeight + "px";
-			// });
 	    };
 
 	});
@@ -405,7 +378,6 @@ angular.module('starter')
 									  	Remark: ($scope.redeemDuty.remark && $scope.redeemDuty.remark.length > 0 ? $scope.redeemDuty.remark : '-')
 									  }
 									};
-						//var data = {Empl_Code:$scope.Empl_Code,Empl_Code2:$scope.searchEmp.searchTxt,DutyDate:$scope.selectedDate.dutyDate1.toString().replace(new RegExp('/','g'),''),DutyType: $scope.redeemDuty.type,DutyDate2:$scope.selectedDate.dutyDate2.toString().replace(new RegExp('/','g'),''),Remark: "sample string 6"}
 						WorkFlowService.CreateWorkFlow(data).then(function(response){
 							if(response != null) {
 								IonicAlert($ionicPopup,'บันทึกข้อมูลเรียบร้อย',function(){$location.path('/app/floatbutton/selfservicelist/1');});
@@ -429,33 +401,6 @@ angular.module('starter')
 		};
 
 		$scope.searchEmployee = function(){
-			// return $q(function(resolve){
-			// 	APIService.ShowLoading();
-			// 	var url = APIService.hostname() + '/ContactDirectory/viewContactPaging';
-			// 	var data = {keyword:$scope.searchEmp.searchTxt,start:1,retrieve:1};
-			// 	APIService.httpPost(url,data,
-			// 		function(response){
-			// 			if(response != null && response.data != null){
-			// 				var emp = response.data[0];
-			// 				$scope.searchEmp.result = emp.PrefixName + ' ' + emp.Firstname + ' ' + emp.Lastname;
-			// 				APIService.HideLoading();
-			// 				resolve(true);
-			// 			}
-			// 			else{
-			// 				alert('ไม่พบข้อมูล');
-			// 				$scope.searchEmp.result = '';
-			// 				APIService.HideLoading();
-			// 				resolve(false);
-			// 			}
-			// 		},
-			// 		function(error){
-			// 			$scope.searchEmp.result = '';
-			// 			console.log(error);
-			// 			alert('เกิดข้อผิดพลาดขึ้น ลองอีกครั้ง!');
-			// 			APIService.HideLoading();
-			// 			resolve(false);
-			// 	})
-			// });
 			return $q(function(resolve){
 				APIService.searchEmployee($scope.searchEmp.searchTxt).then(function(response){
 					if(response != null){
@@ -488,9 +433,27 @@ angular.module('starter')
 })
 
 
-.controller('ItemRedeemDutyCtrl',function($scope,$ionicPopup,$cordovaNetwork,$stateParams,WorkFlowService,$ionicPlatform,$location,$filter,$rootScope){
+.controller('ItemRedeemDutyCtrl',function($scope,$ionicPopup,$cordovaNetwork,$stateParams,WorkFlowService,$ionicPlatform,$location,$filter,$rootScope,$ionicModal){
 
 	$ionicPlatform.ready(function(){
+
+		// $scope.modal = null;
+
+		// $ionicModal.fromTemplateUrl('templates/image-modal.html', {
+		// 	scope: $scope,
+		// 	animation: 'slide-in-up'
+		// }).then(function(modal) {
+		// 	$scope.modal = modal;
+		// });
+
+		// $scope.openModal = function(index) {
+		// 	$scope.imageSrc = 'data:image/png;base64,' + $scope.signatureArr[index];
+		//     $scope.modal.show();
+		// };
+
+		// $scope.closeModal = function() {
+		//   	$scope.modal.hide();
+		// };
 
 		//actiontype : 2 = approve , 5 = reject , 3 = acknowledge
 		$scope.popUpDetails = {title:'',subtitle:'',actiontype:0};
@@ -537,24 +500,23 @@ angular.module('starter')
 	    	$scope.showBtnApprove = data.Approve;
 	    	$scope.showBtnAcknowledgment = data.Acknowledgment;
 	    	$scope.stateNextLevel = data.StateNextLevel;
-	    	$scope.showSignature = true;
-	    	
+	    	$scope.showSignature = data.Signature;
+	    	//declare signature array for stored base64str for image popup
+	    	$scope.signatureArr = [];
+	    	var index = 0;
 	    	angular.forEach(data.HistoryWorkflow,function(value,key){
-	      //   	$scope.redeemDutyHistories.push({
-		    	// 	RouteName:value.RouteName,
-		    	// 	UpdateBy:value.UpdateBy,
-		    	// 	UpdateDate:GetThaiDateTimeByDate($filter,value.UpdateDate),
-		    	// 	ActionTypeName:value.ActionTypeName,
-		    	// 	RouteName:value.RouteName
-		    	// });	
 	    		$scope.historyGroups[0].items.push({
 		    		RouteName:value.RouteName,
 		    		UpdateBy:value.UpdateBy,
 		    		UpdateDate:GetThaiDateTimeByDate($filter,value.UpdateDate),
 		    		ActionTypeName:value.ActionTypeName,
 		    		RouteName:value.RouteName,
-		    		Device:value.Device
+		    		Device:value.Device,
+		    		SignatureObject:value.SignatureObject,
+		    		index:index
 		    	});	
+		    	$scope.signatureArr.push(value.SignatureObject);
+		    	index++;
 	      	});
 	    };
 
@@ -582,67 +544,13 @@ angular.module('starter')
 	    }
  
 	    $scope.confirmAcknowledge = function(){
-	    	// $scope.popUpDetails.title = 'รับทราบ';
-	    	// $scope.popUpDetails.subtitle = 'รับทราบรายการนี้ ?';
-	    	// $scope.popUpDetails.actiontype = 3;
-	    	// $scope.showPopUp();
 	    	WorkFlowService.confirmAcknowledge($scope);
 	    };
 
-	    // $scope.doAcknowledge = function(){
-    	// 	WorkFlowService.ApproveWorkflow($scope.documentId,window.localStorage.getItem("CurrentUserName"),$scope.action.remark,3).then(function(response){
-    	// 		if(response) $location.path('/app/selfservicelist/1');
-    	// 	});
-	    // };
-
 	    $scope.confirmApproveOrReject = function(isApprove){
-	    	// var confirmMessage = '';
-	    	// var title = '';
-	    	// var actionType = 0;
-	    	// if(isApprove){
-	    	// 	title = 'อนุมัติ';
-	    	// 	confirmMessage = 'คุณแน่ใจที่จะอนุมัติรายการนี้ ?';
-	    	// 	actionType = 2;
-	    	// }
-	    	// else{
-	    	// 	title = 'ไม่อนุมัติ'
-	    	// 	confirmMessage = 'คุณแน่ใจที่จะไม่อนุมัติรายการนี้ ?';
-	    	// 	actionType = 5;
-	    	// }
-	    	// $scope.popUpDetails.title = title;
-	    	// $scope.popUpDetails.subtitle = confirmMessage;
-	    	// $scope.popUpDetails.actiontype = actionType;
-
-	    	// $scope.showPopUp();
 	    	WorkFlowService.confirmApproveOrReject(isApprove,$scope);
 	    };
 
-	    // $scope.doApproveOrReject = function(isApprove,actionType){
-	    // 	console.log('doApproveOrReject');
-    	// 	WorkFlowService.ApproveWorkflow($scope.documentId,window.localStorage.getItem("CurrentUserName"),$scope.action.remark,actionType).then(function(response){
-    	// 		if(response) $location.path('/app/selfservicelist/1');
-    	// 	});
-	    // };
-
-	    // $scope.showPopUp = function(){
-	    // 	$scope.action.remark = '';
-	    // 	//popup when clicked approve/reject , acknowledge
-		   //  var popUp = $ionicPopup.show({
-		   //  	template: "<textarea placeholder='หมายเหตุ' rows='5' cols='50' ng-model='action.remark'></textarea>",
-		   //  	title:$scope.popUpDetails.title,
-		   //  	subTitle:$scope.popUpDetails.subtitle,
-		   //  	scope:$scope,
-		   //  	buttons:[
-		   //  		{text:'ตกลง',type:'button-positive',onTap:function(e){
-		   //  			if($scope.popUpDetails.actiontype == 2) $scope.doApproveOrReject(true,2);
-		   //  			else if($scope.popUpDetails.actiontype == 5) $scope.doApproveOrReject(false,5);
-		   //  			else if($scope.popUpDetails.actiontype == 3) $scope.doAcknowledge();
-		   //  		}},
-		   //  		{text:'ยกเลิก'}
-		   //  	]
-		   //  });
-	    // };
- 
 	});
 
 })
@@ -658,15 +566,6 @@ angular.module('starter')
 		};
 
 		$scope.cardRequest = function(){
-			// var url = APIService.hostname() + '/EmployeeCardRequest/CardRequest';
-			// var data = {EmplCode:window.localStorage.getItem("CurrentUserName")};
-			// APIService.ShowLoading();
-			// APIService.httpPost(url,data,
-			// 	function(response){
-			// 		if(response.data && response.data.length > 0) OpenIonicAlertPopup($ionicPopup,'ขอทำบัตร','หมายเลขคำขอเลขที่ ' + response.data + ' ได้ถูกจัดส่งให้ผู้ดำเนินการแล้ว กรุณาติดต่อ 1449 คุณจำปูน');
-			// 		APIService.HideLoading();	
-			// 	},
-			// 	function(error){APIService.HideLoading();console.log(error);});
 			var data = {
 				CategoryId:2,
 				RegisterId:window.localStorage.getItem("GCMToken"),
@@ -741,7 +640,7 @@ angular.module('starter')
 			$scope.showBtnAcknowledgment = data.Acknowledgment;
 			$scope.showBtnApprove = data.Approve;
 			$scope.stateNextLevel = data.StateNextLevel;
-			$scope.showSignature = false;
+			$scope.showSignature = data.Signature;
 
 			$scope.cardRequestDetails.DocumentTitle = data.HistoryWorkflow[0].DocumentTitle;
 			$scope.cardRequestDetails.DocumentDescription = data.HistoryWorkflow[0].DocumentDescription;
@@ -751,7 +650,8 @@ angular.module('starter')
 		    		UpdateBy:value.UpdateBy,
 		    		UpdateDate:GetThaiDateTimeByDate($filter,value.UpdateDate),
 		    		ActionTypeName:value.ActionTypeName,
-		    		RouteName:value.RouteName
+		    		RouteName:value.RouteName,
+		    		SignatureObject:value.SignatureObject
 		    	});	
 	      	});
 		};
@@ -768,6 +668,7 @@ angular.module('starter')
 	$ionicPlatform.ready(function(){
 
 		var defaultDate1,defaultDate2;
+		var datePicker1,datePicker2;
 		$scope.noInternet = false;
 		$scope.leave = {type:1,reason:'',duration:1,contact:'',summary:[]};
 		//if no internet connection
@@ -787,17 +688,7 @@ angular.module('starter')
 		}
 
 		$scope.Empl_Code = window.localStorage.getItem("CurrentUserName");
-		 
-		var datePicker1 = {callback: function (val) { SetSelectedDate(val,true);},
-			inputDate:defaultDate1
-			//from:new Date()
-		};
-
-		var datePicker2 = {callback: function (val) { SetSelectedDate(val,false);},
-			inputDate:defaultDate2
-			//from:new Date()
-		};
-
+		
 		$scope.OpenDatePicker = function(isStartDate){
 			if(isStartDate) ionicDatePicker.openDatePicker(datePicker1);
 			else ionicDatePicker.openDatePicker(datePicker2);
@@ -813,8 +704,18 @@ angular.module('starter')
 		function InitialStartAndEndDate () {
 			defaultDate1 = new Date();
 			defaultDate1.setDate(defaultDate1.getDate() + 1);
+			datePicker1 = {callback: function (val) { SetSelectedDate(val,true);},
+				inputDate:defaultDate1
+				//from:new Date()
+			};
+
 			defaultDate2 = new Date();
 			defaultDate2.setDate(defaultDate2.getDate() + 2);
+			datePicker2 = {callback: function (val) { SetSelectedDate(val,false);},
+				inputDate:defaultDate2
+				//from:new Date()
+			};
+
 			$scope.selectedDate = {startDate:ConvertDateObjToSlashFormat(defaultDate1),endDate:ConvertDateObjToSlashFormat(defaultDate2)};
 		};
 
@@ -985,7 +886,7 @@ angular.module('starter')
 	    	$scope.showBtnAcknowledgment = data.Acknowledgment;
 			$scope.showBtnApprove = data.Approve;
 			$scope.stateNextLevel = data.StateNextLevel;
-			$scope.showSignature = false;
+			$scope.showSignature = data.Signature;
 
 			$scope.LeaveDetails.DocumentTitle = data.HistoryWorkflow[0].DocumentTitle;
 			$scope.LeaveDetails.DocumentDescription = data.HistoryWorkflow[0].DocumentDescription;
@@ -995,7 +896,8 @@ angular.module('starter')
 		    		UpdateBy:value.UpdateBy,
 		    		UpdateDate:GetThaiDateTimeByDate($filter,value.UpdateDate),
 		    		ActionTypeName:value.ActionTypeName,
-		    		RouteName:value.RouteName
+		    		RouteName:value.RouteName,
+		    		SignatureObject:value.SignatureObject
 		    	});	
 	      	});
 	    };
@@ -1109,11 +1011,6 @@ angular.module('starter')
 	};
 
 	$scope.CheckIsValid = function(){
-		// if(!$scope.searchEmp.searchTxt || $scope.searchEmp.searchTxt.length <= 0) 
-		// {
-		// 	alert('ต้องกรอกรหัสพนักงานที่บันทึกเวลาด้วย!');
-		// 	return false;
-		// }
 		if($scope.Empl_Code == $scope.searchEmp.searchTxt){
 			IonicAlert($ionicPopup,'ห้ามใส่รหัสพนักงานของตัวเอง!',null);
 			return false;
@@ -1188,13 +1085,18 @@ angular.module('starter')
 			$scope.TimeWorkDetails.StartDate = GetThaiDateTimeByDate($filter,data[0].FromDate);
 			$scope.TimeWorkDetails.EndDate = GetThaiDateTimeByDate($filter,data[0].ToDate);
 			$scope.TimeWorkDetails.TimeWith = data[0].TimeWith;
+			var result = [];
+			for (var i = 0; i <= data[0].Image.length - 1; i++) {
+				result.push({PHOTO:data[0].Image[i].PHOTO,ACCESS_TIME:GetTimeFromDatePointFormat(data[0].Image[i].ACCESS_TIME)});
+			};
+			$scope.TimeWorkDetails.TimeWithImages = result;
 		};
 
 		$scope.InitialTimeWorkHistory = function(data){
 			$scope.showBtnAcknowledgment = data.Acknowledgment;
 			$scope.showBtnApprove = data.Approve;
 			$scope.stateNextLevel = data.StateNextLevel;
-			$scope.showSignature = false;
+			$scope.showSignature = data.Signature;
 
 			$scope.TimeWorkDetails.DocumentTitle = data.HistoryWorkflow[0].DocumentTitle;
 			$scope.TimeWorkDetails.DocumentDescription = data.HistoryWorkflow[0].DocumentDescription;
@@ -1204,7 +1106,8 @@ angular.module('starter')
 		    		UpdateBy:value.UpdateBy,
 		    		UpdateDate:GetThaiDateTimeByDate($filter,value.UpdateDate),
 		    		ActionTypeName:value.ActionTypeName,
-		    		RouteName:value.RouteName
+		    		RouteName:value.RouteName,
+		    		SignatureObject:value.SignatureObject
 		    	});	
 	      	});
 		};
@@ -1305,34 +1208,6 @@ angular.module('starter')
 
 	    $scope.confirmAcknowledge = function(){
 	    	WorkFlowService.showModalAuthen($scope,{actionType:'acknowledge',val:''},$scope.RequestDetails.FAType);
-	    	// if($scope.RequestDetails.FAType == 0) WorkFlowService.confirmAcknowledge($scope);
-	    	// else{
-	    	// 	//authen by fa type
-	    	// 	$scope.modalDetails.title = ($scope.RequestDetails.FAType == 1) ? 'ยืนยัน PIN-Code' : 'ยืนยัน OTP';
-	    	// 	if($scope.RequestDetails.FAType == 1){
-	    	// 		//check pin is exist
-	     //            APIService.ShowLoading();
-	     //            var url = APIService.hostname() + '/DeviceRegistered/CheckExistPIN';
-	     //            var data = {Empl_Code:window.localStorage.getItem('CurrentUserName')};
-	     //            APIService.httpPost(url,data,function(response){
-	     //                if(response.data){
-	     //                    APIService.HideLoading();
-	     //                    WorkFlowService.showModalAuthen($scope);
-	     //                }
-	     //                else{
-	     //                    APIService.HideLoading();
-	     //                    IonicAlert($ionicPopup,'ต้องตั้งค่า PIN ก่อนใช้งาน',function(){
-	     //                        window.location = '#/app/helppinsetting';
-	     //                    });
-	     //                }
-	     //              },
-	     //                function(error){console.log(error);APIService.HideLoading();});                
-	    	// 	}
-	    	// 	else{
-	    	// 		WorkFlowService.showModalAuthen($scope);
-	    	// 	}
-		    // 	//WorkFlowService.confirmAcknowledge($scope);	
-	    	// }
 	    };
 
 	    function InitialRequestDetails (data) {

@@ -10,6 +10,7 @@
     .run(function($ionicPlatform) {
 
       $ionicPlatform.ready(function() {
+
         // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
         // for form inputs)
         if (window.cordova && window.cordova.plugins.Keyboard) {
@@ -24,33 +25,27 @@
 
       });
     })
-    .run(function($cordovaFile,$cordovaFileOpener2,$ionicPlatform, SQLiteService, AuthService, XMPPService, XMPPApiService, $rootScope, AUTH_EVENTS, APIService, $http, $q, $cordovaNetwork, $ionicPopup,$state, NotiService, $cordovaDevice){
+    .run(function($cordovaFile,$cordovaFileOpener2,$ionicPlatform, SQLiteService, AuthService, XMPPService, XMPPApiService, $rootScope, AUTH_EVENTS, APIService, $http, $q, $cordovaNetwork, $ionicPopup,$state, NotiService, $cordovaDevice, $ionicNavBarDelegate, $ionicHistory){
       $ionicPlatform.ready(function(){
-        
+
+        // start tracker(only on mobile device)
+        if(!onWeb) window.ga.startTrackerWithId('UA-91230514-1');
+
+        //set flag for indicate this is the first run event
+        isFirstRun = true;
+
+        //if access with not support browser will redirect to notsupport page
+        if(CheckBrowserIsNotChrome()) window.location = '#/app/notsupport';
+
         //open db
         SQLiteService.OpenDB();
         //initial all tables
         SQLiteService.InitailTables();
-        //bypass login if still loging in.
-        AuthService.bypassLogIn();
 
-        //log in to api and set header authorization
-        APIService.ShowLoading();
-        LogInAPI(AUTH_EVENTS,APIService,$http,$q,$cordovaNetwork, $ionicPopup).then(function(){
-          APIService.HideLoading();
-          //post to gcm(google cloud messaging) for register device and get token from gcm
-          if (window.cordova){
-            NotiService.Register().then(function(){
-              CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile,$cordovaDevice);
-            });
-          }
-          else window.localStorage.setItem('GCMToken',PCGCMToken);
-
-          //ionic resume event
-          $ionicPlatform.on('resume', function(){
-            CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile,$cordovaDevice);
-          });
-
+        //ionic resume event
+        $ionicPlatform.on('resume', function(){
+          isFirstRun = false;
+          CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile,$cordovaDevice);
         });
 
         window.onbeforeunload = function (event) {
@@ -91,35 +86,24 @@
         };
 
         function onOffline() {
-          console.log('onOffline');
-          XMPPService.Disconnect();
-          xmppConnectionIsActive = false;
-          isNetworkDown = true;
+          // console.log('onOffline');
+          // XMPPService.Disconnect();
+          // xmppConnectionIsActive = false;
+          // isNetworkDown = true;
         };
         
       });
     })
     .run(function($rootScope, $ionicPlatform, $ionicHistory){
-      $ionicPlatform.registerBackButtonAction(function(e){
-        if ($rootScope.backButtonPressedOnceToExit) {
-          ionic.Platform.exitApp();
-        }
-        else if ($ionicHistory.backView()) {
-          $ionicHistory.goBack();
-          e.preventDefault();
-        }
-        else {
-          $rootScope.backButtonPressedOnceToExit = true;
-          window.plugins.toast.showShortCenter(
-            "Press back button again to exit",function(a){},function(b){}
-          );
-          setTimeout(function(){
-            $rootScope.backButtonPressedOnceToExit = false;
-          },2000);
-        }
-        e.preventDefault();
-        return false;
-      },101);
+      RegisterBackButton($ionicPlatform,$rootScope,$ionicHistory);
+    })
+    .run(function($rootScope,$q,APIService){
+      //start timeout if user didn't change view then go to authen pin view
+      //StartUserTimeout($q,APIService);
+      $rootScope.$on("$locationChangeStart", function(event, next, current) { 
+        //reset timeout
+        ResetUserTimeout($q,APIService);
+      });
     })
 
     .config(function($stateProvider, $urlRouterProvider, $ionicConfigProvider, $sceDelegateProvider) {
@@ -282,6 +266,14 @@
               'menuContent': {
                 templateUrl: 'templates/notification_history.html',
                 controller:'NotiHistoryCtrl'
+              }
+            }
+          })
+          .state('app.notsupport', {
+            url: '/notsupport',
+            views: {
+              'menuContent': {
+                templateUrl: 'templates/notsupport.html'
               }
             }
           })

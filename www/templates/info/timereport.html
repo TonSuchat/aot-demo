@@ -1,0 +1,42 @@
+<ion-view view-title="สถานะการลงเวลา">
+    <ion-content>
+        <ion-refresher pulling-text="โหลดข้อมูลใหม่" on-refresh="Refresh()">
+        </ion-refresher>
+
+        <div class="list">
+          <label class="item item-input item-select">
+            <div class="input-label">
+              เดือน
+            </div>
+            <select ng-change='BindTimeReportList()' ng-options='option.name for option in ddlMonthsData.options track by option.val' ng-model='ddlMonthsData.selectedOptions'>
+            </select>
+          </label>
+        </div>
+
+        <div class="list" ng-repeat='item in timeReports'>
+            <div class='item item-text-wrap'> 
+                <p><b>วันที่ : </b>{{item.WORKDATE}}</p>
+                <p><b>เวลาเข้า : </b>{{item.STARTTIME}} - {{item.OFFTIME}}</p>
+                <!-- <p><b>เครื่องลงเวลาเข้า : </b>{{item.LocIn}}</p> -->
+                <!-- <p><b>เวลาออกงาน : </b>{{item.OFFTIME}}</p> -->
+                <!-- <p><b>เครื่องลงเวลาออก : </b>{{item.LocOut}}</p> -->
+                <p ng-if='(!item.OUT_EARLY && item.OUT_EARLY.length == 0) && (!item.OUT_LATE && item.OUT_LATE.length == 0)'><b>สถานะ : </b>{{item.NOTE}}</p>
+                <p ng-if='item.OUT_EARLY && item.OUT_EARLY.length > 0'><b>สถานะ : </b>{{item.NOTE}} (ออกก่อนเวลา)</p>
+                <p ng-if='item.OUT_LATE && item.OUT_LATE.length > 0'><b>สถานะ : </b>{{item.NOTE}} (ออกหลังเวลา)</p>
+                <!-- <p><b>ออกก่อนเวลา : </b>{{item.OUT_EARLY}}</p>
+                <p><b>ออกหลังเวลา : </b>{{item.OUT_LATE}}</p> -->
+                <!-- <p><b>ประเภทการทำงาน : </b>{{item.TIMECATEGORY}}</p> -->
+                <!-- <p><b>สถานะการลา : </b>{{item.LeaveStatus}}</p> -->
+                <!-- <p><b>หมายเหตุ : </b>{{item.Remark}}</p> -->
+                <!-- <img ng-src="data:image/jpeg;base64,{{item.TimeImage}}" class='full-image'> -->
+            </div>
+        </div>    
+
+        <div class='card' ng-if='timeReports.length <= 0'>
+            <div class='item item-text-wrap'>
+                ไม่พบข้อมูล
+            </div>
+        </div>
+     
+    </ion-content>
+</ion-view>

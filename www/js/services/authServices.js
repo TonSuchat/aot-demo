@@ -27,19 +27,24 @@ angular.module('starter')
                 isAuthenticated = window.localStorage.setItem("AuthServices_isAuthenticated", true); //true;
                 var nickname = (userData.Nickname && userData.Nickname != null) ? '(' + userData.Nickname + ')' : '';
                 window.localStorage.setItem("AuthServices_fullname", userData.PrefixName + ' ' + userData.Firstname + ' ' + userData.Lastname + nickname); //userData.PrefixName + ' ' + userData.Firstname + ' ' + userData.Lastname;
-                window.localStorage.setItem("AuthServices_picThumb", userData.PictureThumb); //userData.PictureThumb; 
+                window.localStorage.setItem("AuthServices_picThumb", userData.PictureThumb.replace('10.74.29.166','eservice2.airportthai.co.th')); //userData.PictureThumb; 
                 window.localStorage.setItem("AuthServices_position", userData.Position); //userData.Position;
                 // //connect xmpp server
                 // XMPPService.Authentication(window.localStorage.getItem("CurrentUserName"),window.localStorage.getItem("AuthServices_password"));
                 // //enable xmpp maintain timer
                 // XMPPService.TimerMaintainConnection();
+
+                //set globar flag to indicate user is authen
+                userIsAuthen = true;
+                //start timer if user didn't change view then go to authen pin view
+                StartUserTimeout($q,APIService);
                 successAction();
             }
             //normal login
             else{
                 console.log('normal-login');
-                var url = APIService.hostname() + '/ContactDirectory/viewContactPaging';
-                var data = {keyword:username,start:1,retrieve:1};
+                var url = APIService.hostname() + '/ContactDirectory/viewContactField';
+                var data = {keyword:username,SearchField:0};
                 APIService.httpPost(url,data,
                     function(response){
                         if(response.data == null || response.data.length == 0) return;
@@ -47,7 +52,7 @@ angular.module('starter')
                         isAuthenticated = window.localStorage.setItem("AuthServices_isAuthenticated", true); //true;
                         var nickname = (result.Nickname && result.Nickname != null) ? '(' + result.Nickname + ')' : '';
                         window.localStorage.setItem("AuthServices_fullname", result.PrefixName + ' ' + result.Firstname + ' ' + result.Lastname + nickname); //result.PrefixName + ' ' + result.Firstname + ' ' + result.Lastname;
-                        window.localStorage.setItem("AuthServices_picThumb", result.PictureThumb); //result.PictureThumb; 
+                        window.localStorage.setItem("AuthServices_picThumb", result.PictureThumb.replace('10.74.29.166','eservice2.airportthai.co.th')); //result.PictureThumb; 
                         window.localStorage.setItem("AuthServices_position", result.Position); //result.Position;
                         //save user data to sqlite db
                         UserProfileSQLite.SaveUserProfile(result);
@@ -81,6 +86,10 @@ angular.module('starter')
                             //set profile setting
                             SetProfileSettings($q,response.data.Setting);
                         });
+                        //set globar flag to indicate user is authen
+                        userIsAuthen = true;
+                        //start timer if user didn't change view then go to authen pin view
+                        StartUserTimeout($q,APIService);
                         successAction();
                     },
                     function(error){console.log(error);successAction();});
@@ -128,7 +137,7 @@ angular.module('starter')
                         if(window.cordova){
                             username = user;
                             window.localStorage.setItem("CurrentUserName", user);
-                            window.localStorage.setItem("AuthServices_password", pw);
+                            //window.localStorage.setItem("AuthServices_password", pw);
                             window.localStorage.setItem(AUTH_EVENTS.LOCAL_USERNAME_KEY, username);
                             useCredentials(function () { APIService.HideLoading(); resolve('Login success.'); },null);
                         }
@@ -138,19 +147,20 @@ angular.module('starter')
                             if (result._successField) {
                                 username = user;
                                 window.localStorage.setItem("CurrentUserName", user);
-                                window.localStorage.setItem("AuthServices_password", pw);
+                                //window.localStorage.setItem("AuthServices_password", pw);
                                 window.localStorage.setItem(AUTH_EVENTS.LOCAL_USERNAME_KEY, username);
                                 useCredentials(function () { APIService.HideLoading(); resolve('Login success.'); },null);
                             }
                             else {
                                 APIService.HideLoading();
-                                reject('Login Failed.');
+                                reject({status:200,data:'ข้อมูลไม่ถูกต้อง!'});
                             }    
                         }
                     },
                     function(response){
+                        console.log(response);
                         APIService.HideLoading();
-                        reject('Login Failed.');
+                        reject(response);
                     });
 
                 // if ((user == '484134' && pw == '1') || (user == '484074' && pw == '1')) {
@@ -165,12 +175,38 @@ angular.module('starter')
         };
 
         var bypassLogIn = function(){
+
             return $q(function(resolve, reject) {
                 UserProfileSQLite.GetUserProfile().then(
                     function(response){
                         if(response.rows != null && response.rows.length > 0){
                             username = response.rows.item(0).UserID;
-                            useCredentials(function(){resolve();},response.rows.item(0));
+                            useCredentials(function(){
+                                //pin authen if this is first run
+                                if(isFirstRun) {
+                                    var returnURL = '$firstpage';
+                                    //check user open app from notification?
+                                    if(notiData != null){
+                                        var menu = (onWeb) ? notiData.menu : notiData.additionalData.menu;
+                                        //get url from notification payload
+                                        returnURL = GetRedirectURL(menu).replace(/\//g,'$').replace(/\=/g,'|'); //if first run user have to authen pin first then redirect to specific url
+                                    }
+                                    ProcessAuthenPIN ($q,APIService,returnURL);
+                                    // //check pin is exist?
+                                    // CheckPINIsExist($q,APIService).then(function(response){
+                                    //     if(!response){
+                                    //             //redirect to set pin for the first time
+                                    //             IonicAlert($ionicPopup,'ต้องตั้งค่า PIN ก่อนใช้งาน',function(){
+                                    //             window.location = '#/app/helppinsetting?returnURL=' + returnURL + '&hideButton=true';
+                                    //         });
+                                    //     }
+                                    //     else{
+                                    //         //if(!onWeb) window.location = '#/app/helppinsetting?returnURL=firstpage&hideButton=true&onlyAuthen=true'; 
+                                    //         window.location = '#/app/helppinsetting?returnURL=' + returnURL + '&hideButton=true&onlyAuthen=true'; 
+                                    //     }
+                                    // })
+                                }
+                            },response.rows.item(0));
                         }
                         resolve();
                     },
@@ -186,6 +222,7 @@ angular.module('starter')
         // };
 
         var logout = function(isForceLogOut) {
+            console.log('logout');
             return $q(function(resolve){
                 console.log('service logout');
                 if(!CheckNetwork($cordovaNetwork)){
@@ -194,61 +231,94 @@ angular.module('starter')
                 }
                 else{
                     APIService.ShowLoading();
-                    //pc logout
-                    if (!window.cordova){
-                        //delete all datas and all tables
-                        SQLiteService.DeleteAllTables().then(function(){
-                            //set device setting to default value
-                            SetDefaultDeviceSettings($q);
-                            //disconnect xmpp
-                            XMPPService.Disconnect(true);
-                            destroyUserCredentials();
-                            APIService.HideLoading();
-                            $state.go('app.firstpage');
-                            //clear cache
-                            $timeout(function () {
-                                $ionicHistory.clearCache();
-                                $ionicHistory.clearHistory();
-                            },300);
-                            $rootScope.$broadcast('checkAuthen', null);
-                            resolve(true);
-                        });
-                    }
-                    else{
-                        //mobile logout
-                        var url = APIService.hostname() + '/DeviceRegistered/LogOut';
-                        var data = {RegisterID:window.localStorage.getItem('GCMToken'),Force:isForceLogOut};
-                        console.log(data);
-                        //post to api for logout process
-                        APIService.httpPost(url,data,
-                        function(response){
-                          //delete pdf files
-                          RemovePDFFiles($cordovaFile);
-                          //set device setting to default value
-                          SetDefaultDeviceSettings($q);
-                          //delete all datas and all tables
-                          SQLiteService.DeleteAllTables().then(function(){
-                            //disconnect xmpp
-                            XMPPService.Disconnect(true);
-                            destroyUserCredentials();
-                            APIService.HideLoading();
-                            $state.go('app.firstpage');
-                            //clear cache
-                            $timeout(function () {
-                                $ionicHistory.clearCache();
-                                $ionicHistory.clearHistory();
-                            },300);
-                            $rootScope.$broadcast('checkAuthen', null);
-                            resolve(true);
-                          });
-                        },
-                        function(error){
-                          APIService.HideLoading();
-                          console.log(error);
-                          IonicAlert($ionicPopup,'ไม่สามารถออกจากระบบได้/โปรดลองอีกครั้ง',null);
-                          resolve(false);
-                        });
-                    }
+                    //mobile logout
+                    var url = APIService.hostname() + '/DeviceRegistered/LogOut';
+                    var data = {RegisterID:window.localStorage.getItem('GCMToken'),Force:isForceLogOut};
+                    console.log(data);
+                    //post to api for logout process
+                    APIService.httpPost(url,data,
+                    function(response){
+                      //delete pdf files
+                      RemovePDFFiles($cordovaFile);
+                      //set device setting to default value
+                      SetDefaultDeviceSettings($q);
+                      //delete all datas and all tables
+                      SQLiteService.DeleteAllTables().then(function(){
+                        //disconnect xmpp
+                        XMPPService.Disconnect(true);
+                        destroyUserCredentials();
+                        APIService.HideLoading();
+                        $state.go('app.firstpage');
+                        //clear cache
+                        $timeout(function () {
+                            $ionicHistory.clearCache();
+                            $ionicHistory.clearHistory();
+                        },300);
+                        $rootScope.$broadcast('checkAuthen', null);
+                        resolve(true);
+                      });
+                    },
+                    function(error){
+                      APIService.HideLoading();
+                      console.log(error);
+                      IonicAlert($ionicPopup,'ไม่สามารถออกจากระบบได้/โปรดลองอีกครั้ง',null);
+                      resolve(false);
+                    });
+                    // //pc logout
+                    // if (!window.cordova){
+                    //     //delete all datas and all tables
+                    //     SQLiteService.DeleteAllTables().then(function(){
+                    //         //set device setting to default value
+                    //         SetDefaultDeviceSettings($q);
+                    //         //disconnect xmpp
+                    //         XMPPService.Disconnect(true);
+                    //         destroyUserCredentials();
+                    //         APIService.HideLoading();
+                    //         $state.go('app.firstpage');
+                    //         //clear cache
+                    //         $timeout(function () {
+                    //             $ionicHistory.clearCache();
+                    //             $ionicHistory.clearHistory();
+                    //         },300);
+                    //         $rootScope.$broadcast('checkAuthen', null);
+                    //         resolve(true);
+                    //     });
+                    // }
+                    // else{
+                    //     //mobile logout
+                    //     var url = APIService.hostname() + '/DeviceRegistered/LogOut';
+                    //     var data = {RegisterID:window.localStorage.getItem('GCMToken'),Force:isForceLogOut};
+                    //     console.log(data);
+                    //     //post to api for logout process
+                    //     APIService.httpPost(url,data,
+                    //     function(response){
+                    //       //delete pdf files
+                    //       RemovePDFFiles($cordovaFile);
+                    //       //set device setting to default value
+                    //       SetDefaultDeviceSettings($q);
+                    //       //delete all datas and all tables
+                    //       SQLiteService.DeleteAllTables().then(function(){
+                    //         //disconnect xmpp
+                    //         XMPPService.Disconnect(true);
+                    //         destroyUserCredentials();
+                    //         APIService.HideLoading();
+                    //         $state.go('app.firstpage');
+                    //         //clear cache
+                    //         $timeout(function () {
+                    //             $ionicHistory.clearCache();
+                    //             $ionicHistory.clearHistory();
+                    //         },300);
+                    //         $rootScope.$broadcast('checkAuthen', null);
+                    //         resolve(true);
+                    //       });
+                    //     },
+                    //     function(error){
+                    //       APIService.HideLoading();
+                    //       console.log(error);
+                    //       IonicAlert($ionicPopup,'ไม่สามารถออกจากระบบได้/โปรดลองอีกครั้ง',null);
+                    //       resolve(false);
+                    //     });
+                    // }
                 }
             });
         };

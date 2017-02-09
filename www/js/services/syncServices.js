@@ -1,6 +1,6 @@
 angular.module('starter')
 
-.service('SyncService',function($q,APIService,TestSyncSQLite,UserProfileSQLite,MedicalSQLite,TuitionSQLite,RoyalSQLite,TimeAttendanceSQLite,LeaveSQLite,LeaveSummarySQLite,CircularSQLite,NewsSQLite,PMRoomSQLite,PMMsgSQLite,PMSubscribeSQLite,PMUserInRoomSQLite,NotiHistorySQLite,EmployeeSQLite){
+.service('SyncService',function($q,APIService,TestSyncSQLite,UserProfileSQLite,MedicalSQLite,TuitionSQLite,RoyalSQLite,TimeAttendanceSQLite,LeaveSQLite,LeaveSummarySQLite,CircularSQLite,NewsSQLite,PMRoomSQLite,PMMsgSQLite,PMSubscribeSQLite,PMUserInRoomSQLite,NotiHistorySQLite,EmployeeSQLite,TimeReportSQLite){
 
   enableSync = true;
 
@@ -48,6 +48,17 @@ angular.module('starter')
     };
     console.log('SYNC-TIMEATTENDANCE');
     return ProcessSyncData(APIService,TimeAttendanceSQLite,$q,apiURLs,apiDatas,null);
+  };
+
+  this.SyncTimeReport = function(){
+    var myEmpId = window.localStorage.getItem("CurrentUserName");
+    var apiDatas = {
+      GetData:{ObjectID:12,SyncTAReportViewModel:{EmpID: myEmpId, FromDate: GetFiscalDate(1), ToDate: GetCurrentDate().replace(/\//g,'')}},
+      AddData:{ObjectID:12,ObjectTAReportEntity:{}},
+      UpdateData:{ObjectID:12,ObjectTAReportEntity:{}},
+    };
+    console.log('SYNC-TIMEREPORT');
+    return ProcessSyncData(APIService,TimeReportSQLite,$q,apiURLs,apiDatas,null);
   };
 
   this.SyncLeave = function(){
@@ -123,6 +134,16 @@ angular.module('starter')
     console.log('SYNC-Employee');
     return ProcessSyncData(APIService,EmployeeSQLite,$q,apiURLs,apiDatas,null);
   };
+
+  // this.SyncTimeReport = function(){
+  //   var apiDatas = {
+  //     GetData:{ObjectID:12,SyncTimeReportViewModel:{}},
+  //     AddData:{ObjectID:12,SyncTimeReportViewModel:{}},
+  //     UpdateData:{ObjectID:12,SyncTimeReportViewModel:{}}
+  //   };
+  //   console.log('SYNC-TimeReport');
+  //   return ProcessSyncData(APIService,TimeReportSQLite,$q,apiURLs,apiDatas,null);
+  // };
 
   // this.SyncPMRoom = function(){
   //   var empcode = '484074'; //window.localStorage.getItem("CurrentUserName") **Hard-Code**

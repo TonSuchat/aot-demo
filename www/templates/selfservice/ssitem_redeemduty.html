@@ -43,7 +43,18 @@
                 <i class="icon" ng-class="isGroupShown(group) ? 'ion-minus' : 'ion-plus'"></i>&nbsp;<b>{{group.name}}</b>
             </ion-item>
             <ion-item class="item-accordion item-text-wrap" ng-show="isGroupShown(group)" ng-repeat="item in group.items">
-                <p><b>{{item.RouteName}} :</b> {{item.ActionTypeName}} , {{item.UpdateBy}}, {{item.Device}} , {{item.UpdateDate}}</p>
+
+              <div ng-show='item.SignatureObject && item.SignatureObject.length > 0' class='item-thumbnail-left item-text-wrap'>
+                <!-- <img ng-src='data:image/png;base64,{{item.SignatureObject}}' ng-click='openModal({{item.index}})' /> -->
+                <img ng-src='data:image/png;base64,{{item.SignatureObject}}' />
+                <h2>{{item.RouteName}}</h2>
+                <p>{{item.RouteName}} , {{item.UpdateBy}} , {{item.UpdateDate}}</p> 
+              </div>
+
+              <div ng-show='!item.SignatureObject || item.SignatureObject.length == 0' class='item-text-wrap'>
+                <p><b>{{item.RouteName}} :</b> {{item.RouteName}} , {{item.UpdateBy}} , {{item.UpdateDate}}</p> 
+              </div>
+                <!-- <p><b>{{item.RouteName}} :</b> {{item.ActionTypeName}} , {{item.UpdateBy}}, {{item.Device}} , {{item.UpdateDate}}</p> -->
           </ion-item>
         </div>
         
@@ -80,6 +91,8 @@
           </div>
         </div>
         <!-- section-button -->
+
+        <!-- <input type='button' value='aaaa' ng-click='openModal()' /> -->
 
       </div>
 

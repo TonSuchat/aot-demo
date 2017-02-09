@@ -1,13 +1,16 @@
 angular.module('starter')
 
-    .controller('LandingCtrl',function($scope, $ionicPlatform, $http, $q, APIService, $state, AUTH_EVENTS, NotiService, $cordovaNetwork, $ionicPopup,$cordovaFile){
+    .controller('LandingCtrl',function($scope, $ionicPlatform, $http, $q, APIService, $state, AUTH_EVENTS, NotiService, $cordovaNetwork, $ionicPopup, $cordovaFile, $ionicNavBarDelegate, $rootScope, $ionicHistory){
       
       $ionicPlatform.ready(function(){
+        // $ionicNavBarDelegate.showBackButton(true);
+        // RegisterBackButton($ionicPlatform,$rootScope,$ionicHistory);
         APIService.HideLoading();
       });
+
     })
 
-    .controller('AppCtrl', function($scope, $ionicModal, $timeout, $state, AuthService, $ionicPopup, $location, $ionicHistory, SQLiteService, NotiService, SyncService, $cordovaNetwork, APIService, $rootScope, $ionicPlatform, $q, $cordovaFile, $cordovaDevice, $filter) {
+    .controller('AppCtrl', function($scope, $ionicModal, $timeout, $state, AuthService, $ionicPopup, $location, $ionicHistory, SQLiteService, NotiService, SyncService, $cordovaNetwork, APIService, $rootScope, $ionicPlatform, $q, $cordovaFile, $cordovaDevice, $filter, AUTH_EVENTS, $http, $ionicNavBarDelegate) {
 
       // With the new view caching in Ionic, Controllers are only called
       // when they are recreated or on app start, instead of every page change.
@@ -17,31 +20,48 @@ angular.module('starter')
       //});
 
       $ionicPlatform.ready(function(){
-        APIService.HideLoading();
 
-        //check is server released new version? if have new version then confirm user to update on each store
-        CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
-          if(response != null && response.data != null){
-            //check the store have newest version?
-            CheckUpdateNewestVersion($q,$cordovaDevice,$ionicPopup,APIService,response.data.LastestVersion);
-          }
-        });
+        // if access with not support browser will end process
+        if(CheckBrowserIsNotChrome()) return;
         
-        //check is new version? if yes then popup and alter table
-        CheckIsUpdateVersion($q,SQLiteService,APIService,$ionicPopup);
+        //check open application in mobile browser?
+        CheckOpenApplicationOnMobileDevice($q,APIService,$ionicPopup);
 
+        APIService.ShowLoading();
+        //Login api
+        LogInAPI(AUTH_EVENTS,APIService,$http,$q,$cordovaNetwork, $ionicPopup).then(function(){
+          APIService.HideLoading();
+          //check is server released new version? if have new version then confirm user to update on each store
+          CheckDeviceIsValid(APIService,$q,window.localStorage.getItem('GCMToken')).then(function(response){
+            if(response != null && response.data != null){
+              // //check the store have newest version?
+              // CheckUpdateNewestVersion($q,$cordovaDevice,$ionicPopup,APIService,response.data.LastestVersion);
+            }
+          });
+          //check is new version? if yes then popup and alter table
+          CheckIsUpdateVersion($q,SQLiteService,APIService,$ionicPopup);
+          //authen
+          $rootScope.$broadcast('checkAuthen', null);
+          //post to gcm(google cloud messaging) for register device and get token from gcm
+          if (window.cordova){
+            NotiService.Register().then(function(){
+              CheckForceLogOut($ionicPopup,APIService,AuthService,$q,$cordovaFile,$cordovaDevice);
+            });
+          }
+          //else window.localStorage.setItem('GCMToken',PCGCMToken);
+          else{
+            //register gcm for desktop
+            NotiService.DesktopRegister().then(function(){});
+          }
+          //bypass login if still loging in.
+          AuthService.bypassLogIn();
+        },function(error){console.log('LogInAPI-Error',error)});
+
+        $scope.onWeb = onWeb;
         $scope.noInternet = false;
         $scope.PMNumber = 509;
-        $scope.version = '';
+        GetAppVersion($q).then(function(response){$scope.version = response;});
 
-        if (window.cordova){
-          //get version
-          cordova.getAppVersion(function(version) {
-              $scope.version = version;
-          });
-        }
-        else $scope.version = 'PC';
-          
         // Form data for the login modal
         $scope.$on('checkAuthen',function(event,data){
           $scope.loginData = {};
@@ -59,7 +79,7 @@ angular.module('starter')
             $scope.menus.push({link:'#/app/selfservice',text:'Self Services',icon:'ion-ios-person'});
             $scope.menus.push({link:'#/app/information/finance',text:'ตรวจสอบข้อมูล',icon:'ion-information'});
             $scope.menus.push({link:'#/app/directory?pmroomid=0',text:'สมุดโทรศัพท์',icon:'ion-android-call'});
-            $scope.menus.push({link:'#/app/qrcode',text:'QR-Code',icon:'ion-qr-scanner'});
+            if(!onWeb) $scope.menus.push({link:'#/app/qrcode',text:'QR-Code',icon:'ion-qr-scanner'});
             $scope.menus.push({link:'#/app/duty',text:'จัดการเวร',icon:'ion-ios-body-outline'});
             $scope.menus.push({link:'#/app/notihistory',text:'ประวัติแจ้งเตือน',icon:'ion-android-refresh'});
             if(loginComplete == null){
@@ -79,7 +99,8 @@ angular.module('starter')
                     };
                   };
                 }
-              },function(error){console.log(error);});
+                APIService.HideLoading();
+              },function(error){console.log(error);APIService.HideLoading();});
             }
           }
           $scope.menus.push({link:'#/app/home/circular-letter',text:'ข่าวสาร ทอท.',icon:'ion-clipboard'});
@@ -115,7 +136,7 @@ angular.module('starter')
         $scope.doLogin = function(form) {
           if(form.$valid) {
             var currentUserName = $scope.loginData.username;
-            var gcmToken = (window.cordova) ? (window.localStorage.getItem('GCMToken') == null ? '' : window.localStorage.getItem('GCMToken')) : PCGCMToken;
+            var gcmToken = window.localStorage.getItem('GCMToken'); //(window.cordova) ? (window.localStorage.getItem('GCMToken') == null ? '' : window.localStorage.getItem('GCMToken')) : PCGCMToken;
             //check device is jailbreak or root
             CheckDeviceIsJailbreakOrRoot($q,$cordovaDevice).then(function(response){
               if(!response){
@@ -130,28 +151,43 @@ angular.module('starter')
                             template: 'โปรดเข้าสู่ระบบอีกครั้ง!'
                           });
                         }
-                        else if(response.data){
+                        else if(response.data.RegistAction){
                           //check employee version with localstorage
                           CheckEmployeeVersion($q,APIService,$cordovaFile,response.data.EmpVer);
                           AuthService.login($scope.loginData.username, $scope.loginData.password).then(function() {
                             $rootScope.$broadcast('checkAuthen', true);
                             //update register device -> empid to server
                             if(window.localStorage.getItem('GCMToken') != null && window.localStorage.getItem('GCMToken').length > 0) {
-                              if (window.cordova) NotiService.StoreTokenOnServer(window.localStorage.getItem('GCMToken'),currentUserName,true);
+                              NotiService.StoreTokenOnServer(window.localStorage.getItem('GCMToken'),currentUserName,true);
                             }
-                            //bind full menus
+                            //bind menus
                             $scope.InitialMenus(true);
-                            $scope.closeLogin();
+                            //check pin is exist?
+                            CheckPINIsExist($q,APIService).then(function(response){
+                              if(!response){
+                                //redirect to set pin for the first time
+                                IonicAlert($ionicPopup,'ต้องตั้งค่า PIN ก่อนใช้งาน',function(){
+                                  $scope.closeLogin();
+                                  window.location = '#/app/helppinsetting?returnURL=firstpage&hideButton=true';
+                                });
+                              }
+                              else{
+                                $scope.closeLogin();    
+                              }
+                            })
 
                             //save login date to local storage for check expire to force logout(security process)
                             var currentDate = new Date();
                             window.localStorage.setItem('lastLogInDate',+currentDate);
 
                           }, function(err) {
-                            var alertPopup = $ionicPopup.alert({
-                              title: err,
-                              template: 'รหัสพนักงาน/รหัสผ่านไม่ถูกต้อง!'
-                            });
+                            console.log(err);
+                            if(err.status == 200){
+                              var alertPopup = $ionicPopup.alert({
+                                title: err.data,
+                                template: 'รหัสพนักงาน/รหัสผ่านไม่ถูกต้อง!'
+                              });
+                            }
                           });
                         }
                         else{
@@ -179,19 +215,21 @@ angular.module('starter')
           }
         };
 
-        $scope.logout = function () {
-          //if no internet connection
-          if(!CheckNetwork($cordovaNetwork)) return;
-          else{
-            AuthService.logout(false).then(function(response){
-              // //reload set default theme
-              //if(response) window.location.reload();
-            });
-          }
-        };
-
-        $rootScope.$broadcast('checkAuthen', null);
-
+        // $scope.logout = function () {
+        //   //if no internet connection
+        //   if(!CheckNetwork($cordovaNetwork)) return;
+        //   else{
+        //     AuthService.logout(false).then(function(response){
+        //       //set flag to indicate user is logged off
+        //       userIsAuthen = false;
+        //       //stop timer
+        //       ClearUserTimeout();
+        //       // //reload set default theme
+        //       //if(response) window.location.reload();
+        //     });
+        //   }
+        // };
+ 
       });
 
     })

@@ -3,7 +3,7 @@
 
     <ion-content>
     <form ng-submit="searchEnter()">
-        <div class="bar bar-header item-input-inset">
+        <div class="bar bar-header item-input-inset directory-search">
             <label class="item-input-wrapper">
                 <i class="icon ion-ios-search placeholder-icon"></i>
                     <input type="search" placeholder="ค้นหาเบอร์โทรศัพท์" ng-model="searchData.keyword">
@@ -13,7 +13,7 @@
         </div>
         <div class='row'>
             <div class='col'>
-                <h4 style='color:white;'>ต้องพิมพ์อย่างน้อย 2 ตัวอักษร</h4>
+                <h4 class="directory-help">สามารถค้นหาข้อมูลพนักงานได้จากชื่อจริง นามสกุล ชื่อเล่น ตำแหน่ง สังกัด (งาน ส่วน ฝ่าย) และหมายเลขโทรศัพท์ ได้</h4>
             </div>
         </div>
         <div class='row'>
@@ -27,7 +27,7 @@
     </form>
         <ion-list>
             <ion-item ng-repeat="person in directoryList" class="item-thumbnail-left item-text-wrap" href="#/app/directory/{{person.UserID}}?pmroomid={{PMRoomId}}">
-                <img ng-src="http://{{person.PictureThumb}}" alt="">
+                <img ng-src="http://{{person.PictureThumb.replace('10.74.29.166','eservice2.airportthai.co.th')}}" alt="">
                 <h2>{{person.PrefixName + ' ' + person.Firstname + ' ' + person.Lastname}} {{ (person.Nickname != null && person.Nickname) ? '(' + person.Nickname + ')' : ''}}</h2>
                 <h3>{{person.Position}}</h3>
                 <p>{{person.Section}} {{person.Department}}</p>

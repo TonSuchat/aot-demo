@@ -1,158 +1,36 @@
-<ion-side-menus enable-menu-with-back-views="false">
+<div ng-if='onWeb' class='device-cover'>
+  <div class='device-screen' ng-include src="!content ? 'templates/menu_template.html' : null">
+  </div>
+</div>
 
-  <ion-side-menu-content>
-    <!-- <ion-nav-bar class="bar-positive" align-title='center'> -->
-    <ion-nav-bar class='bar-calm' align-title='center'>
-      <!-- <ion-nav-back-button>
-      </ion-nav-back-button> -->
+<div ng-if='!onWeb'>
+  <div ng-include src="!content ? 'templates/menu_template.html' : null">
+  </div>
+</div>
 
-      <!-- <ion-nav-back-button class="button-clear">
-        <i class="ion-arrow-left-c"></i> กลับ
-      </ion-nav-back-button> -->
-
-      <ion-nav-back-button>
-      </ion-nav-back-button>
-
-
-
-      <ion-nav-buttons side="left">
-        <button class="button button-icon button-clear ion-navicon" menu-toggle="left">
-        </button>
-      </ion-nav-buttons>
-
-      <ion-nav-buttons side="right">
-        <!-- <span ng-hide='PMNumber == 0' class="badge badge-assertive header-badge">{{PMNumber}}</span> -->
-        <a href='#/app/pmsrooms' ng-disabled='true' ng-show="isAuthen" class="button button-icon button-clear ion-chatbubble-working">
-        </a>
-      </ion-nav-buttons>
-
-    </ion-nav-bar>
-    <ion-nav-view name="menuContent"></ion-nav-view>
-  </ion-side-menu-content>
-
-
-  
-
-  <ion-side-menu side="left">
-    <ion-header-bar align-title='center' class="bar-calm">
-      <h1 class="title">เมนู</h1>
-    </ion-header-bar>
-    <ion-content class='dark'>
-  
-      <ul class='list'>
-
-        <a href='#/app/profile' ng-show="isAuthen" class='item' menu-close>
-          <div class='text-left'>
-            <img src="{{'http://' + userPicturethumb}}" class='img-circle' alt="Profile Picture" />
-          </div>
-          <div class='item-text-wrap text-left'>
-            <h2>{{fullname}}</h2>
-            <p>{{userPosition}}</p>
-          </div>
-        </a>
-
-        <a href="#/app/firstpage" menu-close class='item'>
-          <i class="icon ion-ios-home"></i>&nbsp;&nbsp;หน้าแรก
-        </a>
-
-        <a href="{{menu.link}}" ng-repeat='menu in menus' menu-close class='item'>
-          <i class="icon {{menu.icon}}"></i>&nbsp;&nbsp;{{menu.text}}
-        </a>
-
-        <!-- <a href="#/app/selfservice" ng-show="isAuthen" menu-close class='item'>
-          <i class="icon ion-ios-person"></i>&nbsp;&nbsp;Self Services
-        </a>
-
-        <a href="#/app/home/circular-letter" menu-close class='item'>
-          <i class="icon ion-clipboard"></i>&nbsp;&nbsp;ข่าวสาร ทอท.
-        </a>
-
-        <a href="#/app/information/finance" ng-show="isAuthen" menu-close class='item'>
-          <i class="icon ion-information"></i>&nbsp;&nbsp;ตรวจสอบข้อมูล
-        </a>
-
-        <a href="#/app/directory?pmroomid=0" ng-show="isAuthen" menu-close class='item'>
-           <i class="icon ion-android-call"></i>&nbsp;&nbsp;สมุดโทรศัพท์
-        </a>
-
-        <a href="#/app/stock" menu-close class='item'>
-           <i class='icon ion-ios-pulse-strong'></i>&nbsp;&nbsp;ราคาหุ้น
-        </a>
-
-        <a href="#/app/qrcode" ng-show="isAuthen" menu-close class='item'>
-           <i class='icon ion-qr-scanner'></i>&nbsp;&nbsp;QR-Code
-        </a>
-
-        <a href="#/app/duty" ng-show="isAuthen" menu-close class='item'>
-           <i class='icon ion-ios-body-outline'></i>&nbsp;&nbsp;จัดการเวร 
-        </a>
-
-        <a href="#/app/notihistory" ng-show="isAuthen" menu-close class='item'>
-           <i class='icon ion-android-refresh'></i>&nbsp;&nbsp;ประวัติแจ้งเตือน 
-        </a>
-
-        <a href="#/app/aotlive" menu-close class='item'>
-           <i class='icon ion-social-youtube'></i>&nbsp;&nbsp;AOT-Live 
-        </a>
-
-        <a href="#/app/feedback" ng-show="isAuthen" menu-close class='item'>
-           <i class='icon ion-paper-airplane'></i>&nbsp;&nbsp;เสนอความคิดเห็น
-        </a>
-
-        <a href="#/app/help" menu-close class='item'>
-           <i class='icon ion-help'></i>&nbsp;&nbsp;ช่วยเหลือ
-        </a> -->
-
-        <a href="#" ng-hide="isAuthen" ng-click="login()" menu-close class='item'>
-           <i class='icon ion-log-in'></i>&nbsp;&nbsp;เข้าสู่ระบบ
-        </a>
-
-        <a href="#" ng-show="isAuthen" menu-close ng-click="logout()" class='item'>
-           <i class='icon ion-log-out'></i>&nbsp;&nbsp;ออกจากระบบ
-        </a>
-
-        <a href='#' class='item text-center'>version {{version}}</a>
-
-      </ul>
-
-    <!--   <ion-list>
-        <ion-item class="item-stable item-avatar-newline item-text-wrap text-center" ng-show="isAuthen" menu-close href="#/app/profile">
-          <img src="{{'http://' + userPicturethumb}}" class='img-center' alt="Profile Picture" />
-          <h2>{{fullname}}</h2>
-          <p>{{userPosition}}</p>
-        </ion-item>
-        <ion-item class="item-icon-left" menu-close href="#/app/home/news-feed">
-          <i class="icon ion-clipboard"></i> ข่าวสาร ทอท.
-        </ion-item>
-        <ion-item class="item-icon-left" ng-show="isAuthen" menu-close href="#/app/information/finance">
-          <i class="icon ion-information"></i>
-          ตรวจสอบข้อมูล
-        </ion-item>
-        <ion-item class="item-icon-left" ng-show="isAuthen" menu-close href="#/app/directory">
-          <i class="icon ion-android-call"></i>
-          สมุดโทรศัพท์
-        </ion-item>
-        <ion-item class='item-icon-left' menu-close href='#/app/stock'>
-          <i class='icon ion-ios-pulse-strong'></i>
-          ราคาหุ้น
-        </ion-item>
-        <ion-item class='item-icon-left' menu-close href='#/app/qrcode'>
-          <i class='icon ion-qr-scanner'></i>
-          สแกน QR-Code
-        </ion-item>
-        <ion-item class="item-icon-left" ng-hide="isAuthen" menu-close ng-click="login()">
-          <i class='icon ion-log-in'></i> 
-          เข้าสู่ระบบ
-        </ion-item>
-        <ion-item class="item-icon-left" ng-show="isAuthen" menu-close ng-click="logout()">
-           <i class='icon ion-log-out'></i> 
-           ออกจากระบบ
-        </ion-item>
-        <ion-item menu-close href="#/app/testsync">
-          TestSync
-        </ion-item>
-      </ion-list> -->
-
-    </ion-content>
-  </ion-side-menu>
-</ion-side-menus>
+<style type="text/css">
+  .device-cover{
+    margin-top: 50px;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    z-index: 1;
+    width: 600px;
+    height: 810px;
+    background: url("img/ipad.png") no-repeat right top
+  }
+  .device-screen{
+    position: absolute;
+    z-index: 0;
+    left: 63px;
+    top:72px;
+    width: 478px;
+    height: 670px;
+    background-color: white;
+    transition:opacity .2s ease-in-out;
+  }
+  .content-wraper{
+    overflow: hidden !important;
+    height: 100%;
+  }
+</style>
