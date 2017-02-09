@@ -479,7 +479,7 @@ function RedirectAndReloadView(url){
     window.location.reload();
 };
 
-function LogInAPI(AUTH_EVENTS,APIService,$http,$q,$cordovaNetwork, $ionicPopup){
+function LogInAPI(AUTH_EVENTS,APIService,$http,$q,$cordovaNetwork,$ionicPopup){
   return $q(function(resolve,reject){
     //check is changed server
     CheckServerIsChanged($q,APIService.hostname()).then(function(response){
@@ -494,7 +494,15 @@ function LogInAPI(AUTH_EVENTS,APIService,$http,$q,$cordovaNetwork, $ionicPopup){
         if(window.localStorage.getItem('yourTokenKey') != null && window.localStorage.getItem('yourTokenKey').length > 0){
           console.log('have-token');
           SetAuthorizationHeader($http,window.localStorage.getItem('yourTokenKey'));
-          resolve();
+          //check token is expired
+          CheckTokenIsExpired(APIService,$q).then(function(response){
+            if(response){
+              resolve();
+            }
+            else{
+              PostGetToken($q,APIService,AUTH_EVENTS,$http).then(function(response){resolve(response);},function(error){reject(error);});    
+            }
+          })
         } 
         else{
           PostGetToken($q,APIService,AUTH_EVENTS,$http).then(function(response){resolve(response);},function(error){reject(error);});
@@ -511,6 +519,24 @@ function CheckServerIsChanged ($q,currentServerName) {
       if(window.localStorage.getItem('currentServerName') == currentServerName) return resolve(false);
       else return resolve(true);
     }
+  });
+};
+
+function CheckTokenIsExpired (APIService,$q) {
+  return $q(function(resolve){
+    console.log('check-token');
+    var url = APIService.hostname() + '/DeviceRegistered/CheckDeviceTokenIsValid';
+    APIService.httpPost(url,null,
+      function(response){
+        console.log('valid-token');
+        resolve(true);
+      },
+      function(error){console.log(error);
+        if(error.status == 401) {
+          console.log('token-expired-or-invalid');
+          resolve(false);
+        }
+      });     
   });
 };
 
@@ -1056,7 +1082,7 @@ window.mobileAndTabletcheck = function() {
 };
 
 function ShowErrorByStatus(response,$ionicPopup){
-  if(response.status == 200) return;
+  if(response.status == 200 || response.status == 401) return;
   OpenIonicAlertPopup($ionicPopup,'เกิดข้อผิดพลาด!',(response.data != null && response.data && response.data.length > 0) ? response.data : 'เกิดข้อผิดพลาดกับ server/โปรดลองอีกครั้ง'); 
 };
 
@@ -1149,8 +1175,8 @@ function GetRedirectURL (url) {
 //**************************Notification**************************
 
 function ProcessAuthenPIN ($q,APIService,returnURL) {
-  //statistic usage user
-  StatisticUserUsage();
+  //statistic usage user(only on mobile device)
+  if(!onWeb) StatisticUserUsage();
   //check pin is exist?
   CheckPINIsExist($q,APIService).then(function(response){
       if(!response){
@@ -1184,7 +1210,9 @@ function ClearUserTimeout () {
 
 
 function StatisticUserUsage() {
-  ga('send', 'event', 'Authen', 'PIN', 'Authen PIN');
+  //ga('send', 'event', 'Authen', 'PIN', 'Authen PIN');
+  window.ga.trackEvent('Authen', 'Authen-PIN');
+  console.log('track-authen-pin');
 };
   
 

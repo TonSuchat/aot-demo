@@ -43,8 +43,8 @@ angular.module('starter')
             //normal login
             else{
                 console.log('normal-login');
-                var url = APIService.hostname() + '/ContactDirectory/viewContactPaging';
-                var data = {keyword:username,start:1,retrieve:1};
+                var url = APIService.hostname() + '/ContactDirectory/viewContactField';
+                var data = {keyword:username,SearchField:0};
                 APIService.httpPost(url,data,
                     function(response){
                         if(response.data == null || response.data.length == 0) return;

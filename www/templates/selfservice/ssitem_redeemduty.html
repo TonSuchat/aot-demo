@@ -45,6 +45,7 @@
             <ion-item class="item-accordion item-text-wrap" ng-show="isGroupShown(group)" ng-repeat="item in group.items">
 
               <div ng-show='item.SignatureObject && item.SignatureObject.length > 0' class='item-thumbnail-left item-text-wrap'>
+                <!-- <img ng-src='data:image/png;base64,{{item.SignatureObject}}' ng-click='openModal({{item.index}})' /> -->
                 <img ng-src='data:image/png;base64,{{item.SignatureObject}}' />
                 <h2>{{item.RouteName}}</h2>
                 <p>{{item.RouteName}} , {{item.UpdateBy}} , {{item.UpdateDate}}</p> 
@@ -90,6 +91,8 @@
           </div>
         </div>
         <!-- section-button -->
+
+        <input type='button' value='aaaa' ng-click='openModal()' />
 
       </div>
 

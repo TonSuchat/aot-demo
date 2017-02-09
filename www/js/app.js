@@ -28,6 +28,9 @@
     .run(function($cordovaFile,$cordovaFileOpener2,$ionicPlatform, SQLiteService, AuthService, XMPPService, XMPPApiService, $rootScope, AUTH_EVENTS, APIService, $http, $q, $cordovaNetwork, $ionicPopup,$state, NotiService, $cordovaDevice, $ionicNavBarDelegate, $ionicHistory){
       $ionicPlatform.ready(function(){
 
+        // start tracker(only on mobile device)
+        if(!onWeb) window.ga.startTrackerWithId('UA-91230514-1');
+
         //set flag for indicate this is the first run event
         isFirstRun = true;
 

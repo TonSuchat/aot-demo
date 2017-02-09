@@ -433,9 +433,27 @@ angular.module('starter')
 })
 
 
-.controller('ItemRedeemDutyCtrl',function($scope,$ionicPopup,$cordovaNetwork,$stateParams,WorkFlowService,$ionicPlatform,$location,$filter,$rootScope){
+.controller('ItemRedeemDutyCtrl',function($scope,$ionicPopup,$cordovaNetwork,$stateParams,WorkFlowService,$ionicPlatform,$location,$filter,$rootScope,$ionicModal){
 
 	$ionicPlatform.ready(function(){
+
+		// $scope.modal = null;
+
+		// $ionicModal.fromTemplateUrl('templates/image-modal.html', {
+		// 	scope: $scope,
+		// 	animation: 'slide-in-up'
+		// }).then(function(modal) {
+		// 	$scope.modal = modal;
+		// });
+
+		// $scope.openModal = function(index) {
+		// 	$scope.imageSrc = 'data:image/png;base64,' + $scope.signatureArr[index];
+		//     $scope.modal.show();
+		// };
+
+		// $scope.closeModal = function() {
+		//   	$scope.modal.hide();
+		// };
 
 		//actiontype : 2 = approve , 5 = reject , 3 = acknowledge
 		$scope.popUpDetails = {title:'',subtitle:'',actiontype:0};
@@ -483,7 +501,9 @@ angular.module('starter')
 	    	$scope.showBtnAcknowledgment = data.Acknowledgment;
 	    	$scope.stateNextLevel = data.StateNextLevel;
 	    	$scope.showSignature = data.Signature;
-
+	    	//declare signature array for stored base64str for image popup
+	    	$scope.signatureArr = [];
+	    	var index = 0;
 	    	angular.forEach(data.HistoryWorkflow,function(value,key){
 	    		$scope.historyGroups[0].items.push({
 		    		RouteName:value.RouteName,
@@ -492,8 +512,11 @@ angular.module('starter')
 		    		ActionTypeName:value.ActionTypeName,
 		    		RouteName:value.RouteName,
 		    		Device:value.Device,
-		    		SignatureObject:value.SignatureObject
+		    		SignatureObject:value.SignatureObject,
+		    		index:index
 		    	});	
+		    	$scope.signatureArr.push(value.SignatureObject);
+		    	index++;
 	      	});
 	    };
 
